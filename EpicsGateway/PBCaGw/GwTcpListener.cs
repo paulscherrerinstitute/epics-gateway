@@ -115,7 +115,10 @@ namespace PBCaGw
                     packet.Destination = clientEndPoint;
                     packet.Command = 0;
                     packet.DataType = 1;
-                    packet.DataCount = 11;
+                    //CA_V411(MINOR)
+                    //packet.DataCount = 11;
+                    //CA_V413 Allow zero length in requests
+                    packet.DataCount = 13;
                     packet.Parameter1 = 0;
                     packet.Parameter2 = 0;
                     packet.PayloadSize = 0;
