@@ -22,12 +22,12 @@ namespace PBCaGw.Handlers
             DataPacket newPacket = null;
 
             // Packet data count == 0 is now acceptable
-            /*if (packet.DataCount == 0)
+            if (packet.DataCount == 0)
             {
                 if (Log.WillDisplay(TraceEventType.Error))
                     Log.TraceEvent(TraceEventType.Error, chain.ChainId, "Event add with datacount == 0!");
                 packet.DataCount = 1;
-            }*/
+            }
             lock (lockObject)
             {
                 Record record = InfoService.ChannelCid[packet.Parameter1];

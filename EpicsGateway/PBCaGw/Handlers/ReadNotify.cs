@@ -19,26 +19,34 @@ namespace PBCaGw.Handlers
         // It's a workaround not a real solution
         static void IoidCleanupKey(uint key)
         {
-            CidGenerator.ReleaseCid(key);
-            Record record = InfoService.IOID[key];
-
-            if (record == null || record.Destination == null)
-                return;
-
-            // It's the initial answer as get of "cached" monitor.
-            if (!(record.IOID.HasValue && record.IOID.Value == 0))
+            try
             {
-                WorkerChain chain = TcpManager.GetClientChain(record.Destination);
-                if (chain == null)
+                CidGenerator.ReleaseCid(key);
+                Record record = InfoService.IOID[key];
+
+                if (record == null || record.Destination == null)
                     return;
-                /*if (Log.WillDisplay(TraceEventType.Error))
-                    Log.TraceEvent(TraceEventType.Error, chain.ChainId, "IOID operation timeout. Dropping client, with the hope to recover the situation.");
-                chain.Dispose();*/
 
-                if (Log.WillDisplay(TraceEventType.Error))
-                    Log.TraceEvent(TraceEventType.Error, chain.ChainId, "IOID operation timeout. Disposing client channel.");
+                // It's the initial answer as get of "cached" monitor.
+                if (!(record.IOID.HasValue && record.IOID.Value == 0))
+                {
+                    WorkerChain chain = TcpManager.GetClientChain(record.Destination);
+                    if (chain == null)
+                        return;
+                    if (InfoService.ChannelEndPoint.SearchKeyForGWCID(record.SID.Value) == null)
+                        return;
+                    /*if (Log.WillDisplay(TraceEventType.Error))
+                        Log.TraceEvent(TraceEventType.Error, chain.ChainId, "IOID operation timeout. Dropping client, with the hope to recover the situation.");
+                    chain.Dispose();*/
 
-                chain.DisposeChannel(InfoService.ChannelEndPoint.SearchKeyForGWCID(record.SID.Value), record.SID.Value);
+                    if (Log.WillDisplay(TraceEventType.Error))
+                        Log.TraceEvent(TraceEventType.Error, chain.ChainId, "IOID operation timeout. Disposing client channel.");
+
+                    chain.DisposeChannel(InfoService.ChannelEndPoint.SearchKeyForGWCID(record.SID.Value), record.SID.Value);
+                }
+            }
+            catch
+            {
             }
         }
 
