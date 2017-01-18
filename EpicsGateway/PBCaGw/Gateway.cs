@@ -93,6 +93,8 @@ namespace PBCaGw
         static DateTime now;
         public static DateTime Now { get { return now; } }
 
+        public static DateTime WaitTill { get; set; } = DateTime.Now.AddSeconds(10);
+
         private DiagnosticServer diagnostic;
 
         internal object searchLock = new object();

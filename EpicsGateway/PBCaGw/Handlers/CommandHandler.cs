@@ -45,6 +45,8 @@ namespace PBCaGw.Handlers
         /// <returns></returns>
         public static void ExecuteRequestHandler(UInt16 command, DataPacket packet, PBCaGw.Workers.WorkerChain chain, DataPacketDelegate send)
         {
+            if (Gateway.WaitTill > DateTime.Now)
+                return;
             if (!(command >= handlers.Length || handlers[command] == null))
                 handlers[command].DoRequest(packet, chain, send);
         }
@@ -59,6 +61,8 @@ namespace PBCaGw.Handlers
         /// <returns></returns>
         public static void ExecuteResponseHandler(UInt16 command, DataPacket packet, PBCaGw.Workers.WorkerChain chain, DataPacketDelegate send)
         {
+            if (Gateway.WaitTill > DateTime.Now)
+                return;
             if (!(command >= handlers.Length || handlers[command] == null))
                 handlers[command].DoResponse(packet, chain, send);
         }
