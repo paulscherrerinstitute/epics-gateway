@@ -44,6 +44,10 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ChannelAccess, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ChannelAccess.1.0.0-ci-20170216-145922\lib\net45\ChannelAccess.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -64,10 +68,7 @@
     <Compile Include="SearchStat.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Epics Library\ChannelAccess\ChannelAccess\ChannelAccess.csproj">
-      <Project>{cc7e581b-0a2d-4b9c-91e9-59f1015aca67}</Project>
-      <Name>ChannelAccess</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

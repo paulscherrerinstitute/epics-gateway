@@ -39,6 +39,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ChannelAccess, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ChannelAccess.1.0.0-ci-20170216-145922\lib\net45\ChannelAccess.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <Choose>
@@ -59,14 +63,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Epics Library\ChannelAccess\ChannelAccess\ChannelAccess.csproj">
-      <Project>{cc7e581b-0a2d-4b9c-91e9-59f1015aca67}</Project>
-      <Name>ChannelAccess</Name>
-    </ProjectReference>
     <ProjectReference Include="..\PBCaGw\PBCaGw.csproj">
       <Project>{de294e77-141d-43cf-84ec-41c1fa731820}</Project>
       <Name>PBCaGw</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

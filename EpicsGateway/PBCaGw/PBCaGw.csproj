@@ -44,6 +44,10 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ChannelAccess, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ChannelAccess.1.0.0-ci-20170216-143942\lib\net45\ChannelAccess.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -129,10 +133,6 @@
     <Compile Include="Workers\WorkerChain.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Epics Library\ChannelAccess\ChannelAccess\ChannelAccess.csproj">
-      <Project>{cc7e581b-0a2d-4b9c-91e9-59f1015aca67}</Project>
-      <Name>ChannelAccess</Name>
-    </ProjectReference>
     <ProjectReference Include="..\GatewayDebugData\GatewayDebugData.csproj">
       <Project>{37612E86-33F4-45B8-BB15-01969E4622CE}</Project>
       <Name>GatewayDebugData</Name>
@@ -142,6 +142,7 @@
     <None Include="Configurations\Configuration.cd" />
     <None Include="DataPacket.cd" />
     <None Include="Handlers\CommandHandler.cd" />
+    <None Include="packages.config" />
     <None Include="Services\InfoService.cd" />
     <None Include="Services\TraceListeners.cd" />
     <None Include="Workers\Workers.cd" />
