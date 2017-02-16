@@ -26,8 +26,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayWatchdog", "GatewayW
 EndProject
 Project("{F088123C-0E9E-452A-89E6-6BA2F21D5CAC}") = "Model", "Model\Model.modelproj", "{AB77ED87-E410-469A-ABF4-94A7306D2A00}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GWTests", "GWTests\GWTests.csproj", "{5F79A0C0-9A2A-419F-95FD-0C1490E4110A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -161,27 +159,12 @@ Global
 		{AB77ED87-E410-469A-ABF4-94A7306D2A00}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{AB77ED87-E410-469A-ABF4-94A7306D2A00}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{AB77ED87-E410-469A-ABF4-94A7306D2A00}.Release|x86.ActiveCfg = Release|Any CPU
-		{5F79A0C0-9A2A-419F-95FD-0C1490E4110A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5F79A0C0-9A2A-419F-95FD-0C1490E4110A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5F79A0C0-9A2A-419F-95FD-0C1490E4110A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{5F79A0C0-9A2A-419F-95FD-0C1490E4110A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{5F79A0C0-9A2A-419F-95FD-0C1490E4110A}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{5F79A0C0-9A2A-419F-95FD-0C1490E4110A}.Deploy|Any CPU.ActiveCfg = Debug|Any CPU
-		{5F79A0C0-9A2A-419F-95FD-0C1490E4110A}.Deploy|Any CPU.Build.0 = Debug|Any CPU
-		{5F79A0C0-9A2A-419F-95FD-0C1490E4110A}.Deploy|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{5F79A0C0-9A2A-419F-95FD-0C1490E4110A}.Deploy|Mixed Platforms.Build.0 = Debug|Any CPU
-		{5F79A0C0-9A2A-419F-95FD-0C1490E4110A}.Deploy|x86.ActiveCfg = Debug|Any CPU
-		{5F79A0C0-9A2A-419F-95FD-0C1490E4110A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5F79A0C0-9A2A-419F-95FD-0C1490E4110A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5F79A0C0-9A2A-419F-95FD-0C1490E4110A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{5F79A0C0-9A2A-419F-95FD-0C1490E4110A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{5F79A0C0-9A2A-419F-95FD-0C1490E4110A}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 10
+		SccNumberOfProjects = 9
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.psi.ch/tfs/defaultcollection
 		SccLocalPath0 = .
@@ -200,18 +183,15 @@ Global
 		SccProjectUniqueName5 = GwService\\GwService.csproj
 		SccProjectName5 = GwService
 		SccLocalPath5 = GwService
-		SccProjectUniqueName6 = GWTests\\GWTests.csproj
-		SccProjectName6 = GWTests
-		SccLocalPath6 = GWTests
-		SccProjectUniqueName7 = Model\\Model.modelproj
-		SccProjectName7 = Model
-		SccLocalPath7 = Model
-		SccProjectUniqueName8 = PBCaGw\\PBCaGw.csproj
-		SccProjectName8 = PBCaGw
-		SccLocalPath8 = PBCaGw
-		SccProjectUniqueName9 = PBGWConsole\\PBGWConsole.csproj
-		SccProjectName9 = PBGWConsole
-		SccLocalPath9 = PBGWConsole
+		SccProjectUniqueName6 = Model\\Model.modelproj
+		SccProjectName6 = Model
+		SccLocalPath6 = Model
+		SccProjectUniqueName7 = PBCaGw\\PBCaGw.csproj
+		SccProjectName7 = PBCaGw
+		SccLocalPath7 = PBCaGw
+		SccProjectUniqueName8 = PBGWConsole\\PBGWConsole.csproj
+		SccProjectName8 = PBGWConsole
+		SccLocalPath8 = PBGWConsole
 	EndGlobalSection
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
