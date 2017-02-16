@@ -382,7 +382,8 @@ namespace PBCaGw
                     }
                 }
             }
-            TenSecJobs += StoreKnownChannels;
+            if(Gateway.RestoreCache)
+                TenSecJobs += StoreKnownChannels;
             TenSecJobs += UpdateSearchList;
             //TenSecJobs += new EventHandler(MemoryClean);
         }
