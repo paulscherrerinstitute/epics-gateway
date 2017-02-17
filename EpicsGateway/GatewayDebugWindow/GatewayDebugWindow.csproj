@@ -47,7 +47,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ChannelAccess, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ChannelAccess.1.0.0-ci-20170216-145922\lib\net45\ChannelAccess.dll</HintPath>
+      <HintPath>..\packages\ChannelAccess.2017.2.17.1\lib\net45\ChannelAccess.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
