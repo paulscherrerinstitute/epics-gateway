@@ -142,7 +142,6 @@
     <None Include="Configurations\Configuration.cd" />
     <None Include="DataPacket.cd" />
     <None Include="Handlers\CommandHandler.cd" />
-    <None Include="nuget.config" />
     <None Include="packages.config" />
     <None Include="Services\InfoService.cd" />
     <None Include="Services\TraceListeners.cd" />
