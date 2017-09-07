@@ -58,6 +58,7 @@
     <Compile Include="Services\ServerConnection.cs" />
     <Compile Include="Splitter.cs" />
     <Compile Include="TcpConnection.cs" />
+    <Compile Include="TcpClientListener.cs" />
     <Compile Include="TcpReceiver.cs" />
     <Compile Include="UdpReceiver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

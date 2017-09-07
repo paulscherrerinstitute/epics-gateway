@@ -19,7 +19,7 @@ namespace GatewayLogic.Commands
             }
 
             var searchInfo = SearchInformation.Get(channelName);
-            var channelInfo = ChannelInformation.Get(channelName, searchInfo);
+            var channelInfo = ChannelInformation.Get(channelName, searchInfo);            
 
             if (channelInfo.TcpConnection == null)
             {

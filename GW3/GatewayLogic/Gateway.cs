@@ -13,6 +13,8 @@ namespace GatewayLogic
 
         internal UdpReceiver udpSideA;
         internal UdpReceiver udpSideB;
+        internal TcpClientListener tcpSideA;
+        internal TcpClientListener tcpSideB;
 
         public Configuration.Configuration Configuration { get; set; } = new GatewayLogic.Configuration.Configuration();
 
@@ -23,6 +25,9 @@ namespace GatewayLogic
 
         public void Start()
         {
+            tcpSideA = new TcpClientListener(this, this.Configuration.SideAEndPoint);
+            tcpSideB = new TcpClientListener(this, this.Configuration.SideBEndPoint);
+
             udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
             udpSideB = new UdpResponseReceiver(this, this.Configuration.SideBEndPoint);
         }

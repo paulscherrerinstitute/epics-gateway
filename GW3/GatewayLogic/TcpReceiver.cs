@@ -23,9 +23,11 @@ namespace GatewayLogic
         //AutoResetEvent dataSent = new AutoResetEvent(true);
         private Splitter splitter;
 
-        public TcpReceiver(Gateway gateway) : base(gateway)
+        public TcpReceiver(Gateway gateway, IPEndPoint endPoint, Socket socket) : base(gateway)
         {
             splitter = new Splitter();
+            RemoteEndPoint = endPoint;
+            this.Socket = socket;
         }
 
         public IPEndPoint RemoteEndPoint
