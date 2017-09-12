@@ -79,6 +79,7 @@ namespace GatewayLogic
             {
                 stream.Write(packet.Data, packet.Offset, packet.BufferSize);
                 isDirty = true;
+                stream.Flush();
             }
         }
 

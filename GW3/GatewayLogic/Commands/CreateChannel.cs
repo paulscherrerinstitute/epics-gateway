@@ -84,21 +84,22 @@ namespace GatewayLogic.Commands
                 locker.Release();
                 foreach (var client in channelInfo.GetClients())
                 {
+                    var destConn = ClientConnection.Get(client.Client);
+
                     DataPacket resPacket = DataPacket.Create(0);
                     resPacket.Command = 22;
                     resPacket.DataType = 0;
                     resPacket.DataCount = 0;
                     resPacket.Parameter1 = client.Id;
                     resPacket.Parameter2 = (uint)(SecurityAccess.ALL);
-                    resPacket.Destination = packet.Sender;
-                    connection.Send(packet);
+                    resPacket.Destination = client.Client;
+                    destConn.Send(packet);
 
                     resPacket = (DataPacket)packet.Clone();
                     resPacket.Command = 18;
                     resPacket.Destination = client.Client;
                     resPacket.Parameter1 = client.Id;
                     resPacket.Parameter2 = channelInfo.GatewayId;
-                    var destConn = ClientConnection.Get(client.Client);
                     destConn.Send(packet);
                 }
             }
