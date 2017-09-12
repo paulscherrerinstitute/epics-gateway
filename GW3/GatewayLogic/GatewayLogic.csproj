@@ -44,8 +44,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\AccessRights.cs" />
     <Compile Include="Commands\CommandHandler.cs" />
     <Compile Include="Commands\CreateChannel.cs" />
+    <Compile Include="Commands\EventAdd.cs" />
     <Compile Include="Commands\Search.cs" />
     <Compile Include="Commands\Version.cs" />
     <Compile Include="Configuration\Configuration.cs" />
@@ -56,6 +58,7 @@
     <Compile Include="Services\ChannelInformation.cs" />
     <Compile Include="Services\ClientConnection.cs" />
     <Compile Include="Services\ClientId.cs" />
+    <Compile Include="Services\MonitorInformation.cs" />
     <Compile Include="Services\SearchInformation.cs" />
     <Compile Include="Services\ServerConnection.cs" />
     <Compile Include="Splitter.cs" />

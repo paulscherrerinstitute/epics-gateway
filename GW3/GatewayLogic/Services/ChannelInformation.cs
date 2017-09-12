@@ -11,11 +11,12 @@ namespace GatewayLogic.Services
         readonly static object dictionaryLock = new object();
         readonly static Dictionary<string, ChannelInformation> dictionary = new Dictionary<string, ChannelInformation>();
 
-        public object LockObject { get; private set; } = new object();
+        public object LockObject { get; } = new object();
 
         public SearchInformation SearchInformation { get; set; }
+        public string ChannelName { get; }
         public TcpServerConnection TcpConnection { get; internal set; }
-        public uint GatewayId { get; private set; }
+        public uint GatewayId { get; }
         public uint? ServerId { get; set; }
         public bool ConnectionIsBuilding { get; internal set; }
 
@@ -24,7 +25,7 @@ namespace GatewayLogic.Services
 
         public List<ClientId> clients = new List<ClientId>();
 
-        private ChannelInformation(SearchInformation search)
+        private ChannelInformation(string channelName, SearchInformation search)
         {
             lock (counterLock)
             {
@@ -32,6 +33,7 @@ namespace GatewayLogic.Services
             }
 
             SearchInformation = search;
+            ChannelName = channelName;
         }
 
         internal void AddClient(ClientId clientId)
@@ -67,7 +69,7 @@ namespace GatewayLogic.Services
             {
                 if (!dictionary.ContainsKey(channelName))
                 {
-                    var result = new ChannelInformation(search);
+                    var result = new ChannelInformation(channelName, search);
                     dictionary.Add(channelName, result);
                 }
                 return dictionary[channelName];

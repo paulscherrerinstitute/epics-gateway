@@ -19,7 +19,7 @@ namespace GatewayLogic.Services
         static SemaphoreSlim connectionLock = new SemaphoreSlim(1);
         readonly static Dictionary<IPEndPoint, TcpServerConnection> connections = new Dictionary<IPEndPoint, TcpServerConnection>();
 
-        public static void CreateConnection(IPEndPoint endPoint, TcpConnectionReady connectionReady)
+        public static void CreateConnection(Gateway gateway, IPEndPoint endPoint, TcpConnectionReady connectionReady)
         {
             connectionLock.Wait();
             if (connections.ContainsKey(endPoint))
@@ -32,7 +32,7 @@ namespace GatewayLogic.Services
                 });
                 return;
             }
-            var conn = new TcpServerConnection(endPoint);
+            var conn = new TcpServerConnection(gateway, endPoint);
             connections.Add(endPoint, conn);
             connectionLock.Release();
 

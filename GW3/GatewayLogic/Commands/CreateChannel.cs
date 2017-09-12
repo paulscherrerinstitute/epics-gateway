@@ -21,6 +21,7 @@ namespace GatewayLogic.Commands
                 Console.WriteLine("Channel is not known");
                 return;
             }
+            Console.WriteLine("Create channel for " + channelName);
 
             locker.Wait();
             var searchInfo = SearchInformation.Get(channelName);
@@ -56,7 +57,7 @@ namespace GatewayLogic.Commands
                         channelInfo.ConnectionIsBuilding = true;
                         if (channelInfo.TcpConnection == null)
                         {
-                            ServerConnection.CreateConnection(searchInfo.Server, (tcpConnection) =>
+                            ServerConnection.CreateConnection(connection.Gateway, searchInfo.Server, (tcpConnection) =>
                             {
                                 channelInfo.TcpConnection = tcpConnection;
                                 var newPacket = (DataPacket)packet.Clone();
@@ -77,15 +78,25 @@ namespace GatewayLogic.Commands
         {
             locker.Wait();
             var channelInfo = ChannelInformation.Get(packet.Parameter1);
+            Console.WriteLine("Answer for create channel " + channelInfo.ChannelName);
             lock (channelInfo.LockObject)
             {
                 locker.Release();
                 foreach (var client in channelInfo.GetClients())
                 {
-                    var resPacket = (DataPacket)packet.Clone();
+                    DataPacket resPacket = DataPacket.Create(0);
+                    resPacket.Command = 22;
+                    resPacket.DataType = 0;
+                    resPacket.DataCount = 0;
+                    resPacket.Parameter1 = client.Id;
+                    resPacket.Parameter2 = (uint)(SecurityAccess.ALL);
+                    resPacket.Destination = packet.Sender;
+                    connection.Send(packet);
+
+                    resPacket = (DataPacket)packet.Clone();
                     resPacket.Command = 18;
                     resPacket.Destination = client.Client;
-                    resPacket.Parameter1 = packet.Parameter1;
+                    resPacket.Parameter1 = client.Id;
                     resPacket.Parameter2 = channelInfo.GatewayId;
                     var destConn = ClientConnection.Get(client.Client);
                     destConn.Send(packet);

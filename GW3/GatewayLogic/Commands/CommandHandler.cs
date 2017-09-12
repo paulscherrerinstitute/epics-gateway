@@ -16,7 +16,7 @@ namespace GatewayLogic.Commands
         static CommandHandler()
         {
             handlers[0] = new Version();
-            //handlers[1] = new EventAdd();
+            handlers[1] = new EventAdd();
             //handlers[2] = new EventCancel();
             //handlers[4] = new Write();
             handlers[6] = new Search();
@@ -28,7 +28,7 @@ namespace GatewayLogic.Commands
             //handlers[19] = new WriteNotify();
             //handlers[20] = new ClientName();
             //handlers[21] = new HostName();
-            //handlers[22] = new AccessRights();
+            handlers[22] = new AccessRights();
             //handlers[23] = new Echo();
             //handlers[27] = new ChannelDisconnect();
         }
