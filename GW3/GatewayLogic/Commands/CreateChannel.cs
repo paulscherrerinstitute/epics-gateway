@@ -93,14 +93,14 @@ namespace GatewayLogic.Commands
                     resPacket.Parameter1 = client.Id;
                     resPacket.Parameter2 = (uint)(SecurityAccess.ALL);
                     resPacket.Destination = client.Client;
-                    destConn.Send(packet);
+                    destConn.Send(resPacket);
 
                     resPacket = (DataPacket)packet.Clone();
                     resPacket.Command = 18;
                     resPacket.Destination = client.Client;
                     resPacket.Parameter1 = client.Id;
                     resPacket.Parameter2 = channelInfo.GatewayId;
-                    destConn.Send(packet);
+                    destConn.Send(resPacket);
                 }
             }
         }
