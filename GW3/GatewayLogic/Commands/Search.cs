@@ -41,7 +41,7 @@ namespace GatewayLogic.Commands
                 return;
             }
 
-            record.AddClient(new ClientId { Client = packet.Sender, ClientId = packet.Parameter1 });
+            record.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter1 });
             // ReSharper disable PossibleInvalidOperationException
             uint gwcid = record.GatewayId;
             // ReSharper restore PossibleInvalidOperationException
@@ -89,7 +89,7 @@ namespace GatewayLogic.Commands
                 else
                     newPacket.DataType = (UInt16)connection.Gateway.Configuration.SideAEndPoint.Port;
                 newPacket.Parameter1 = 0xffffffff;
-                newPacket.Parameter2 = c.ClientId;
+                newPacket.Parameter2 = c.Id;
                 newPacket.Destination = c.Client;
                 newPacket.SetUInt16(16, Gateway.CA_PROTO_VERSION);
                 connection.Send(newPacket);

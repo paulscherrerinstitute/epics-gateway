@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GatewayLogic.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -107,7 +108,8 @@ namespace GatewayLogic
                         Log.TraceEvent(System.Diagnostics.TraceEventType.Start, chain.ChainId, "New client connection: " + clientEndPoint);
                     TcpManager.RegisterClient(clientEndPoint, chain);*/
                     //TcpReceiver receiver = (TcpReceiver)chain[0];
-                    var receiver = new TcpReceiver(gateway, ipSource, client);
+                    var receiver = new TcpClientConnection(gateway, ipSource, client);
+                    ClientConnection.Add(receiver);
 
                     // Send version
                     DataPacket packet = DataPacket.Create(16);
@@ -122,7 +124,7 @@ namespace GatewayLogic
                     packet.Parameter1 = 0;
                     packet.Parameter2 = 0;
                     packet.PayloadSize = 0;
-                    client.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
+                    receiver.Send(packet);
                 }
                 catch (Exception ex)
                 {

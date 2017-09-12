@@ -12,7 +12,7 @@ namespace GatewayLogic
     /// <summary>
     /// Receives data from the TCP connection
     /// </summary>
-    class TcpReceiver : GatewayConnection, IDisposable
+    class TcpClientConnection : GatewayConnection, IDisposable
     {
         readonly byte[] buffer = new byte[Gateway.BUFFER_SIZE];
         bool disposed = false;
@@ -23,7 +23,7 @@ namespace GatewayLogic
         //AutoResetEvent dataSent = new AutoResetEvent(true);
         private Splitter splitter;
 
-        public TcpReceiver(Gateway gateway, IPEndPoint endPoint, Socket socket) : base(gateway)
+        public TcpClientConnection(Gateway gateway, IPEndPoint endPoint, Socket socket) : base(gateway)
         {
             splitter = new Splitter();
             RemoteEndPoint = endPoint;

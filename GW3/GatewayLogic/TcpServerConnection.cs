@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic
 {
-    class TcpConnection
+    class TcpServerConnection
     {
         Socket socket;
         object lockObject = new object();
         bool isConnected = false;
         List<Action> toCallWhenReady = new List<Action>();
 
-        public TcpConnection(IPEndPoint destination)
+        public TcpServerConnection(IPEndPoint destination)
         {
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);

@@ -11,9 +11,13 @@ namespace GatewayLogic.Services
         readonly static object dictionaryLock = new object();
         readonly static Dictionary<string, ChannelInformation> dictionary = new Dictionary<string, ChannelInformation>();
 
+        public object LockObject { get; private set; } = new object();
+
         public SearchInformation SearchInformation { get; set; }
-        public TcpConnection TcpConnection { get; internal set; }
+        public TcpServerConnection TcpConnection { get; internal set; }
         public uint GatewayId { get; private set; }
+        public uint? ServerId { get; set; }
+        public bool ConnectionIsBuilding { get; internal set; }
 
         static private uint nextId = 1;
         static object counterLock = new object();
@@ -34,7 +38,7 @@ namespace GatewayLogic.Services
         {
             lock (clients)
             {
-                if (!clients.Any(row => row.Client == clientId.Client && row.ClientId == row.ClientId))
+                if (!clients.Any(row => row.Client == clientId.Client && row.Id == row.Id))
                     clients.Add(clientId);
             }
         }
@@ -46,6 +50,14 @@ namespace GatewayLogic.Services
                 var result = clients.ToList();
                 clients.Clear();
                 return result;
+            }
+        }
+
+        public static ChannelInformation Get(uint id)
+        {
+            lock (dictionaryLock)
+            {
+                return dictionary.Values.FirstOrDefault(row => row.GatewayId == id);
             }
         }
 

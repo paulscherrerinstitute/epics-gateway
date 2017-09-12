@@ -9,7 +9,7 @@ namespace GatewayLogic.Services
 {
     class ClientId
     {
-        public uint ClientId { get; internal set; }
+        public uint Id { get; internal set; }
         public IPEndPoint Client { get; internal set; }
     }
 }

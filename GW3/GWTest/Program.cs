@@ -15,6 +15,14 @@ namespace GWTest
     {
         static void Main(string[] args)
         {
+
+            var gateway = new Gateway();
+            //gateway.Configuration.SideA = "129.129.130.45:5054";
+            gateway.Configuration.SideA = "129.129.130.45:5432";
+            gateway.Configuration.RemoteSideB = "129.129.130.45:5056";
+            gateway.Configuration.SideB = "129.129.130.45:5055";
+            gateway.Start();
+
             // Serverside
             var server = new CAServer(IPAddress.Parse("129.129.130.45"), 5056, 5056);
             var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
@@ -24,16 +32,10 @@ namespace GWTest
                 serverChannel.Value = DateTime.Now.ToLongTimeString();
             };
 
-            var gateway = new Gateway();
-            gateway.Configuration.SideA = "129.129.130.45:5054";
-            gateway.Configuration.RemoteSideB = "129.129.130.45:5056";
-            gateway.Configuration.SideB = "129.129.130.45:5055";
-            gateway.Start();
-
             // Client
             Thread.Sleep(1000);
             var client = new CAClient();
-            client.Configuration.SearchAddress = "129.129.130.45:5054";
+            client.Configuration.SearchAddress = "129.129.130.45:5432";
             var clientChannel = client.CreateChannel<string>("TEST-DATE");
             clientChannel.MonitorChanged += (sender, newValue)=>
             {

@@ -10,14 +10,14 @@ namespace GatewayLogic.Services
 {
     class ServerConnection
     {
-        public delegate void TcpConnectionReady(TcpConnection connection);
+        public delegate void TcpConnectionReady(TcpServerConnection connection);
 
         private ServerConnection()
         {
         }
 
         static SemaphoreSlim connectionLock = new SemaphoreSlim(1);
-        readonly static Dictionary<IPEndPoint, TcpConnection> connections = new Dictionary<IPEndPoint, TcpConnection>();
+        readonly static Dictionary<IPEndPoint, TcpServerConnection> connections = new Dictionary<IPEndPoint, TcpServerConnection>();
 
         public static void CreateConnection(IPEndPoint endPoint, TcpConnectionReady connectionReady)
         {
@@ -32,7 +32,7 @@ namespace GatewayLogic.Services
                 });
                 return;
             }
-            var conn = new TcpConnection(endPoint);
+            var conn = new TcpServerConnection(endPoint);
             connections.Add(endPoint, conn);
             connectionLock.Release();
 

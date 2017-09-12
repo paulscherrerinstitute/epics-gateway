@@ -31,7 +31,7 @@ namespace GatewayLogic.Services
         {
             lock (clients)
             {
-                if (!clients.Any(row => row.Client == clientId.Client && row.ClientId == row.ClientId))
+                if (!clients.Any(row => row.Client == clientId.Client && row.Id == row.Id))
                     clients.Add(clientId);
             }
         }
