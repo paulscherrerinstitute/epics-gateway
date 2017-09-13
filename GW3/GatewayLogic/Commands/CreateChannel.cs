@@ -81,6 +81,7 @@ namespace GatewayLogic.Commands
             Console.WriteLine("Answer for create channel " + channelInfo.ChannelName);
             lock (channelInfo.LockObject)
             {
+                channelInfo.ServerId = packet.Parameter2;
                 locker.Release();
                 foreach (var client in channelInfo.GetClients())
                 {
