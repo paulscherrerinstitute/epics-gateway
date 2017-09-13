@@ -83,8 +83,9 @@ namespace GatewayLogic
                 {
                     return;
                 }*/
-                catch
+                catch(Exception ex2)
                 {
+                    Console.WriteLine("Exception: " + ex2);
                     if (!disposed)
                         Rebuild();
                 }
@@ -156,7 +157,7 @@ namespace GatewayLogic
             {
                 //if (Log.WillDisplay(System.Diagnostics.TraceEventType.Critical))
                 //    Log.TraceEvent(System.Diagnostics.TraceEventType.Critical, -1, "Error: " + ex.Message);
-
+                Console.WriteLine("Exception: " + ex);
                 if (!disposed)
                     Rebuild();
             }

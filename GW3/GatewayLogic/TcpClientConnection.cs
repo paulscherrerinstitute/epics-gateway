@@ -66,6 +66,7 @@ namespace GatewayLogic
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine("Exception: " + ex);
                 }
             }
         }
@@ -106,6 +107,7 @@ namespace GatewayLogic
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine("Exception: " + ex);
                 }
                 isDirty = false;
             }
@@ -151,6 +153,7 @@ namespace GatewayLogic
             {
                 /*if (Log.WillDisplay(System.Diagnostics.TraceEventType.Error))
                     Log.TraceEvent(System.Diagnostics.TraceEventType.Error, Chain.ChainId, ex.Message);*/
+                Console.WriteLine("Exception: " + ex);
                 Dispose();
                 return;
             }
@@ -178,6 +181,7 @@ namespace GatewayLogic
             }
             catch (Exception ex)
             {
+                Console.WriteLine("Exception: " + ex);
                 Dispose();
             }
 
@@ -194,6 +198,7 @@ namespace GatewayLogic
             }
             catch (Exception ex)
             {
+                Console.WriteLine("Exception: " + ex);
                 Dispose();
             }
         }
@@ -209,8 +214,9 @@ namespace GatewayLogic
             {
                 endPoint = (IPEndPoint)socket.RemoteEndPoint;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine("Exception: " + ex);
             }
 
             try

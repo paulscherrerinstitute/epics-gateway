@@ -51,9 +51,7 @@ namespace GatewayLogic.Services
         {
             lock (clients)
             {
-                var result = clients.ToList();
-                clients.Clear();
-                return result;
+                return clients.ToList();
             }
         }
         public static MonitorInformation Get(ChannelInformation channelInformation, ushort dataType, uint dataCount)

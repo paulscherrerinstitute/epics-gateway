@@ -47,6 +47,7 @@ namespace GatewayLogic
             }
             catch (Exception ex)
             {
+                Console.WriteLine("Exception: " + ex);
             }
 
             lock (lockObject)
@@ -87,6 +88,7 @@ namespace GatewayLogic
             }
             catch (Exception ex)
             {
+                Console.WriteLine("Exception: " + ex);
             }
         }
 
