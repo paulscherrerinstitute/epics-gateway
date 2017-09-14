@@ -59,6 +59,7 @@
     <Compile Include="Services\ChannelInformation.cs" />
     <Compile Include="Services\ClientConnection.cs" />
     <Compile Include="Services\ClientId.cs" />
+    <Compile Include="Services\Log.cs" />
     <Compile Include="Services\MonitorInformation.cs" />
     <Compile Include="Services\ReadNotifyInformation.cs" />
     <Compile Include="Services\SearchInformation.cs" />

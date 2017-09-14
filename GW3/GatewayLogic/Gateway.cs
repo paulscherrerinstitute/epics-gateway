@@ -25,6 +25,7 @@ namespace GatewayLogic
         internal SearchInformation SearchInformation { get; private set; } = new SearchInformation();
         internal ClientConnection ClientConnection { get; private set; } = new ClientConnection();
         internal ServerConnection ServerConnection { get; private set; } = new ServerConnection();
+        internal Log Log { get; private set; } = new Log();
 
         public Gateway()
         {

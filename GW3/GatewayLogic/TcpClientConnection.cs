@@ -22,12 +22,14 @@ namespace GatewayLogic
         bool isDirty = false;
         //AutoResetEvent dataSent = new AutoResetEvent(true);
         private Splitter splitter;
+        public Gateway Gateway { get; private set; }
 
         public TcpClientConnection(Gateway gateway, IPEndPoint endPoint, Socket socket) : base(gateway)
         {
             splitter = new Splitter();
             RemoteEndPoint = endPoint;
             this.Socket = socket;
+            Gateway = gateway;
         }
 
         public IPEndPoint RemoteEndPoint
@@ -66,7 +68,7 @@ namespace GatewayLogic
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Exception: " + ex);
+                    Gateway.Log.Write("Exception: " + ex);
                 }
             }
         }
@@ -87,7 +89,7 @@ namespace GatewayLogic
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception: " + ex);
+                Gateway.Log.Write("Exception: " + ex);
             }
         }
 
@@ -114,7 +116,7 @@ namespace GatewayLogic
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Exception: " + ex);
+                    Gateway.Log.Write("Exception: " + ex);
                 }
                 isDirty = false;
             }
@@ -160,11 +162,11 @@ namespace GatewayLogic
             {
                 /*if (Log.WillDisplay(System.Diagnostics.TraceEventType.Error))
                     Log.TraceEvent(System.Diagnostics.TraceEventType.Error, Chain.ChainId, ex.Message);*/
-                Console.WriteLine("Exception: " + ex);
+                Gateway.Log.Write("Exception: " + ex);
                 Dispose();
                 return;
             }
-            //Console.WriteLine("Client received " + n + " bytes from " + this.RemoteEndPoint);
+            //Log.Write("Client received " + n + " bytes from " + this.RemoteEndPoint);
 
             // Time to quit!
             if (n == 0)
@@ -191,7 +193,7 @@ namespace GatewayLogic
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception: " + ex);
+                Gateway.Log.Write("Exception: " + ex);
                 Dispose();
             }
 
@@ -203,17 +205,17 @@ namespace GatewayLogic
                     {
                         foreach (var p in splitter.Split(mainPacket))
                         {
-                            //Console.WriteLine("=> Packet size " + p.MessageSize + " (command " + p.Command + ")");
-                            //Console.WriteLine("Packet number " + (pi++) + " command " + p.Command);
+                            //Log.Write("=> Packet size " + p.MessageSize + " (command " + p.Command + ")");
+                            //Log.Write("Packet number " + (pi++) + " command " + p.Command);
                             p.Sender = (IPEndPoint)socket.RemoteEndPoint;
                             Commands.CommandHandler.ExecuteRequestHandler(p.Command, this, p);
                         }
-                        //Console.WriteLine(" ==> End of packet");
+                        //Log.Write(" ==> End of packet");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Exception: " + ex);
+                    Gateway.Log.Write("Exception: " + ex);
                     Dispose();
                 }
             }
@@ -225,6 +227,8 @@ namespace GatewayLogic
                 return;
             disposed = true;
 
+            this.Gateway.ClientConnection.Remove(this);
+
             IPEndPoint endPoint = null;
             try
             {
@@ -232,7 +236,7 @@ namespace GatewayLogic
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception: " + ex);
+                Gateway.Log.Write("Exception: " + ex);
             }
 
             try

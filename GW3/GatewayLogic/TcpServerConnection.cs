@@ -11,6 +11,7 @@ namespace GatewayLogic
     class TcpServerConnection : GatewayConnection
     {
         public IPEndPoint Destination { get; }
+        public Gateway Gateway { get; private set; }
 
         Socket socket;
         object lockObject = new object();
@@ -25,6 +26,7 @@ namespace GatewayLogic
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
             IAsyncResult result = socket.BeginConnect(destination, ConnectionBuilt, null);
+            Gateway = gateway;
         }
 
         private void ConnectionBuilt(IAsyncResult ar)
@@ -47,7 +49,7 @@ namespace GatewayLogic
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception: " + ex);
+                Gateway.Log.Write("Exception: " + ex);
             }
 
             lock (lockObject)
@@ -71,11 +73,11 @@ namespace GatewayLogic
             }
             catch (ObjectDisposedException ex)
             {
-                Console.WriteLine(ex);
+                Gateway.Log.Write(ex.ToString());
                 // Stop receiving
                 return;
             }
-            //Console.WriteLine("Server received " + size + " bytes from " + this.Destination);
+            //Log.Write("Server received " + size + " bytes from " + this.Destination);
 
             var mainPacket = DataPacket.Create(buffer, size, false);
 
@@ -85,17 +87,17 @@ namespace GatewayLogic
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception: " + ex);
+                Gateway.Log.Write("Exception: " + ex);
             }
 
             lock (splitter)
             {
                 foreach (var p in splitter.Split(mainPacket))
                 {
-                    //Console.WriteLine("+> Packet size " + p.MessageSize + " (command " + p.Command + ")");
+                    //Log.Write("+> Packet size " + p.MessageSize + " (command " + p.Command + ")");
                     p.Sender = Destination;
                     Commands.CommandHandler.ExecuteResponseHandler(p.Command, this, p);
-                    //Console.WriteLine(" ++> End of packet");
+                    //Log.Write(" ++> End of packet");
                 }
             }
 
@@ -112,6 +114,7 @@ namespace GatewayLogic
         public override void Dispose()
         {
             socket.Dispose();
+            Gateway.ServerConnection.Remove(this);
         }
     }
 }

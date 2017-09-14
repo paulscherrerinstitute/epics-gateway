@@ -40,5 +40,13 @@ namespace GatewayLogic.Services
                 dictionary.Clear();
             }
         }
+
+        internal void Remove(TcpClientConnection tcpClientConnection)
+        {
+            lock (lockDictionary)
+            {
+                dictionary.Remove(tcpClientConnection.RemoteEndPoint);
+            }
+        }
     }
 }

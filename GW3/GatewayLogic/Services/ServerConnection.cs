@@ -48,5 +48,12 @@ namespace GatewayLogic.Services
             connections.Clear();
             connectionLock.Release();
         }
+
+        internal void Remove(TcpServerConnection tcpServerConnection)
+        {
+            connectionLock.Wait();
+            connections.Remove(tcpServerConnection.Destination);
+            connectionLock.Release();
+        }
     }
 }

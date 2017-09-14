@@ -18,11 +18,11 @@ namespace GatewayLogic
         bool disposed = false;
         readonly IPEndPoint ipSource;
         //readonly ChainSide side = ChainSide.SIDE_A;
-        readonly Gateway gateway;
+        readonly Gateway Gateway;
 
         public TcpClientListener(Gateway gateway, IPEndPoint ipSource)
         {
-            this.gateway = gateway;
+            this.Gateway = gateway;
             this.ipSource = ipSource;
 
             Rebuild();
@@ -89,7 +89,7 @@ namespace GatewayLogic
                 }
                 catch(Exception ex2)
                 {
-                    Console.WriteLine("Exception: " + ex2);
+                    Gateway.Log.Write("Exception: " + ex2);
                     if (!disposed)
                         Rebuild();
                 }
@@ -113,8 +113,8 @@ namespace GatewayLogic
                         Log.TraceEvent(System.Diagnostics.TraceEventType.Start, chain.ChainId, "New client connection: " + clientEndPoint);
                     TcpManager.RegisterClient(clientEndPoint, chain);*/
                     //TcpReceiver receiver = (TcpReceiver)chain[0];
-                    var receiver = new TcpClientConnection(gateway, ipSource, client);
-                    gateway.ClientConnection.Add(receiver);
+                    var receiver = new TcpClientConnection(Gateway, ipSource, client);
+                    Gateway.ClientConnection.Add(receiver);
 
                     // Send version
                     DataPacket packet = DataPacket.Create(16);
@@ -161,7 +161,7 @@ namespace GatewayLogic
             {
                 //if (Log.WillDisplay(System.Diagnostics.TraceEventType.Critical))
                 //    Log.TraceEvent(System.Diagnostics.TraceEventType.Critical, -1, "Error: " + ex.Message);
-                Console.WriteLine("Exception: " + ex);
+                Gateway.Log.Write("Exception: " + ex);
                 if (!disposed)
                     Rebuild();
             }

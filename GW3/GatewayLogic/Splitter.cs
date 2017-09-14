@@ -19,7 +19,7 @@ namespace GatewayLogic
                 // We had an incomplete packet, let's try to add the missing piece now
                 if (dataMissing != 0)
                 {
-                    //Console.WriteLine("Data missing...");
+                    //Log.Write("Data missing...");
                     // The new packet is smaller than the missing piece
                     // Therefore send the whole as "BODY" and quit the splitter
                     if (packet.BufferSize < dataMissing)
@@ -44,7 +44,7 @@ namespace GatewayLogic
                 // We had some left over, join with the current packet
                 if (remainingPacket != null)
                 {
-                    //Console.WriteLine("Joining left over...");
+                    //Log.Write("Joining left over...");
                     if (currentPos != 0)
                     {
                         // With the new block we have more than enough
@@ -89,7 +89,7 @@ namespace GatewayLogic
                 // We don't even have a complete header, stop
                 if (!packet.HasCompleteHeader)
                 {
-                    //Console.WriteLine("Incomplete packet...");
+                    //Log.Write("Incomplete packet...");
                     //remainingPacket = packet;
                     remainingPacket = DataPacket.Create(packet, (uint)packet.BufferSize, false);
                     yield break;
@@ -97,7 +97,7 @@ namespace GatewayLogic
                 // Full packet, send it.
                 if (packet.MessageSize == packet.BufferSize)
                 {
-                    //Console.WriteLine("Complete packet...");
+                    //Log.Write("Complete packet...");
                     packet.Kind = DataPacketKind.COMPLETE;
                     yield return packet;
                     /*DataPacket p = DataPacket.Create(packet, (uint)packet.BufferSize);
@@ -108,7 +108,7 @@ namespace GatewayLogic
                 // More than one message in the packet, split and continue
                 if (packet.MessageSize < packet.BufferSize)
                 {
-                    //Console.WriteLine("Splitting...");
+                    //Log.Write("Splitting...");
                     DataPacket p = DataPacket.Create(packet, packet.MessageSize, false);
                     p.Kind = DataPacketKind.COMPLETE;
                     yield return p;
@@ -122,7 +122,7 @@ namespace GatewayLogic
                 // Cannot be the case on UDP!
                 else
                 {
-                    //Console.WriteLine("Missing some...");
+                    //Log.Write("Missing some...");
 
                     //remainingPacket = (DataPacket)packet.Clone();
                     if (packet.HasCompleteHeader)

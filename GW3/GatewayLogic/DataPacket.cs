@@ -359,16 +359,16 @@ namespace GatewayLogic
             }
         }*/
 
-        public static void ShowPools()
+        /*public static void ShowPools()
         {
             lock (storedPackets)
             {
                 foreach (var i in storedPackets.OrderBy(row => row.Key))
                 {
-                    Console.WriteLine("" + i.Key + ": " + i.Value.Count);
+                    Log.Write("" + i.Key + ": " + i.Value.Count);
                 }
             }
-        }
+        }*/
 
         public static DataPacket Create(byte[] buff)
         {
