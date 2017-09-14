@@ -89,7 +89,7 @@ namespace GatewayLogic
                 }
                 catch(Exception ex2)
                 {
-                    Gateway.Log.Write("Exception: " + ex2);
+                    Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex2);
                     if (!disposed)
                         Rebuild();
                 }
@@ -161,7 +161,7 @@ namespace GatewayLogic
             {
                 //if (Log.WillDisplay(System.Diagnostics.TraceEventType.Critical))
                 //    Log.TraceEvent(System.Diagnostics.TraceEventType.Critical, -1, "Error: " + ex.Message);
-                Gateway.Log.Write("Exception: " + ex);
+                Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
                 if (!disposed)
                     Rebuild();
             }

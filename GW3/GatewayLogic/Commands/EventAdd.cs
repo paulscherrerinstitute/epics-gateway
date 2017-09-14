@@ -14,10 +14,10 @@ namespace GatewayLogic.Commands
             var channel = connection.Gateway.ChannelInformation.Get(packet.Parameter1);
             if (channel == null)
             {
-                connection.Gateway.Log.Write("Event add on wrong channel.");
+                connection.Gateway.Log.Write(Services.LogLevel.Error, "Event add on wrong channel.");
                 return;
             }
-            connection.Gateway.Log.Write("Event add on " + channel.ChannelName);
+            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event add on " + channel.ChannelName);
 
             var monitor = connection.Gateway.MonitorInformation.Get(channel, packet.DataType, packet.DataCount);
             monitor.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter2 });
@@ -32,7 +32,7 @@ namespace GatewayLogic.Commands
         {
             var monitor = connection.Gateway.MonitorInformation.GetByGatewayId(packet.Parameter2);
 
-            connection.Gateway.Log.Write("Event add response on " + monitor.ChannelInformation.ChannelName);
+            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event add response on " + monitor.ChannelInformation.ChannelName);
             foreach (var client in monitor.GetClients())
             {
                 var newPacket = (DataPacket)packet.Clone();

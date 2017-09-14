@@ -6,15 +6,27 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic.Services
 {
-    class Log
+    internal enum LogLevel : int
+    {
+        Detail = 0,
+        Command,
+        Connection,
+        Error
+    }
+
+    internal class Log
     {
 
-        public void Write(string message,
+        public void Write(LogLevel level, string message,
             [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
             [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
             [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
         {
-            Console.WriteLine(sourceFilePath.Split(new char[] { '\\' }).Last().Split(new char[] { '.' }).First() + "." + memberName + ":" + sourceLineNumber + "\t" + message);
+            Console.Write(DateTime.Now.ToString("HH:mm:ss"));
+            Console.Write(" - ");
+            Console.Write(sourceFilePath.Split(new char[] { '\\' }).Last().Split(new char[] { '.' }).First() + "." + memberName + ":" + sourceLineNumber);
+            Console.Write("\t");
+            Console.WriteLine(message);
         }
     }
 }

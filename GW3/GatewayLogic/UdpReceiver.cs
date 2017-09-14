@@ -69,7 +69,7 @@ namespace GatewayLogic
                 return;
             }
 
-            Gateway.Log.Write("Receiving: " + epSender.ToString());
+            Gateway.Log.Write(Services.LogLevel.Detail, "Receiving: " + epSender.ToString());
             foreach (var p in splitter.Split(DataPacket.Create(buff, size, false)))
             {
                 p.Sender = (IPEndPoint)epSender;

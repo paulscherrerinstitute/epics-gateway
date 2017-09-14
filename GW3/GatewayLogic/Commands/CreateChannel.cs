@@ -18,10 +18,10 @@ namespace GatewayLogic.Commands
             if (!connection.Gateway.ChannelInformation.HasChannelInformation(channelName) && !connection.Gateway.SearchInformation.HasChannelServerInformation(channelName))
             {
 
-                connection.Gateway.Log.Write("Channel is not known");
+                connection.Gateway.Log.Write(Services.LogLevel.Error, "Channel is not known");
                 return;
             }
-            connection.Gateway.Log.Write("Create channel for " + channelName + "  from " + ((TcpClientConnection)connection).RemoteEndPoint + " CID " + packet.Parameter1);
+            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel for " + channelName + "  from " + ((TcpClientConnection)connection).RemoteEndPoint + " CID " + packet.Parameter1);
             locker.Wait();
             var searchInfo = connection.Gateway.SearchInformation.Get(channelName);
             var channelInfo = connection.Gateway.ChannelInformation.Get(channelName, searchInfo);
@@ -32,7 +32,7 @@ namespace GatewayLogic.Commands
                 // We have all the info, we shall answer
                 if (channelInfo.ServerId.HasValue)
                 {
-                    connection.Gateway.Log.Write("Create channel info is known.");
+                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel info is known.");
                     DataPacket resPacket = DataPacket.Create(0);
                     resPacket.Command = 22;
                     resPacket.DataType = 0;
@@ -51,12 +51,12 @@ namespace GatewayLogic.Commands
                 }
                 else
                 {
-                    connection.Gateway.Log.Write("Create channel info must be found.");
+                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel info must be found.");
 
                     channelInfo.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter1 });
                     if (!channelInfo.ConnectionIsBuilding)
                     {
-                        connection.Gateway.Log.Write("Connection must be made");
+                        connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection must be made");
                         channelInfo.ConnectionIsBuilding = true;
                         if (channelInfo.TcpConnection == null)
                         {
@@ -81,14 +81,14 @@ namespace GatewayLogic.Commands
         {
             locker.Wait();
             var channelInfo = connection.Gateway.ChannelInformation.Get(packet.Parameter1);
-            connection.Gateway.Log.Write("Answer for create channel " + channelInfo.ChannelName);
+            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Answer for create channel " + channelInfo.ChannelName);
             lock (channelInfo.LockObject)
             {
                 channelInfo.ServerId = packet.Parameter2;
                 locker.Release();
                 foreach (var client in channelInfo.GetClients())
                 {
-                    connection.Gateway.Log.Write("Sending answer to " + client.Client);
+                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Sending answer to " + client.Client);
                     var destConn = connection.Gateway.ClientConnection.Get(client.Client);
 
                     DataPacket resPacket = DataPacket.Create(0);

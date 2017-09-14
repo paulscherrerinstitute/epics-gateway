@@ -20,7 +20,7 @@ namespace GatewayLogic.Commands
             }
 
             string channelName = packet.GetDataAsString();
-            connection.Gateway.Log.Write("Search for: " + channelName);
+            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search for: " + channelName);
 
             var record = connection.Gateway.SearchInformation.Get(channelName);
             // Connection known, we answer we knows it
@@ -73,11 +73,11 @@ namespace GatewayLogic.Commands
 
             if (search == null)
             {
-                connection.Gateway.Log.Write("Search answer for nothing...");
+                connection.Gateway.Log.Write(Services.LogLevel.Error, "Search answer for nothing...");
                 return;
             }
 
-            connection.Gateway.Log.Write("Search answer for " + search.Channel + " from " + packet.Sender);
+            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search answer for " + search.Channel + " from " + packet.Sender);
             search.Server = packet.Sender;
 
             foreach (var c in search.GetClients())

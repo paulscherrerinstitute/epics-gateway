@@ -49,7 +49,7 @@ namespace GatewayLogic
             }
             catch (Exception ex)
             {
-                Gateway.Log.Write("Exception: " + ex);
+                Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
             }
 
             lock (lockObject)
@@ -73,7 +73,7 @@ namespace GatewayLogic
             }
             catch (ObjectDisposedException ex)
             {
-                Gateway.Log.Write(ex.ToString());
+                Gateway.Log.Write(Services.LogLevel.Error, ex.ToString());
                 // Stop receiving
                 return;
             }
@@ -87,7 +87,7 @@ namespace GatewayLogic
             }
             catch (Exception ex)
             {
-                Gateway.Log.Write("Exception: " + ex);
+                Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
             }
 
             lock (splitter)
