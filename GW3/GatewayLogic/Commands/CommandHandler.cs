@@ -43,6 +43,7 @@ namespace GatewayLogic.Commands
         /// <returns></returns>
         public static void ExecuteRequestHandler(UInt16 command, GatewayConnection connection, DataPacket packet)
         {
+            //Console.WriteLine("Request "+command);
             if (!(command >= handlers.Length || handlers[command] == null))
                 handlers[command].DoRequest(connection, packet);
         }
@@ -57,6 +58,7 @@ namespace GatewayLogic.Commands
         /// <returns></returns>
         public static void ExecuteResponseHandler(UInt16 command, GatewayConnection connection, DataPacket packet)
         {
+            //Console.WriteLine("Answer " + command);
             if (!(command >= handlers.Length || handlers[command] == null))
                 handlers[command].DoResponse(connection, packet);
         }

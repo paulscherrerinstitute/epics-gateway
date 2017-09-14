@@ -27,6 +27,7 @@ namespace GWTest
             var server = new CAServer(IPAddress.Parse("129.129.130.45"), 5056, 5056);
             var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
             serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+            serverChannel.Value = DateTime.Now.ToLongTimeString();
             serverChannel.PrepareRecord += (sender, e) =>
             {
                 serverChannel.Value = DateTime.Now.ToLongTimeString();
@@ -42,8 +43,12 @@ namespace GWTest
                 Console.WriteLine(newValue);
             };
 
-            Thread.Sleep(2000);
+            //Thread.Sleep(1000);
             server.Start();
+
+
+            //Thread.Sleep(2000);
+            //Console.WriteLine(clientChannel.Get());
 
             Console.ReadKey();
         }

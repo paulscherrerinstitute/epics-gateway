@@ -85,7 +85,7 @@ namespace GatewayLogic
                     stream.Flush();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine("Exception: " + ex);
             }
@@ -164,6 +164,7 @@ namespace GatewayLogic
                 Dispose();
                 return;
             }
+            //Console.WriteLine("Client received " + n + " bytes from " + this.RemoteEndPoint);
 
             // Time to quit!
             if (n == 0)
@@ -173,6 +174,8 @@ namespace GatewayLogic
                 Dispose();
                 return;
             }
+
+            var mainPacket = DataPacket.Create(buffer, n);
 
             try
             {
@@ -192,21 +195,27 @@ namespace GatewayLogic
                 Dispose();
             }
 
-            try
+            lock (splitter)
             {
-                if (n > 0)
+                try
                 {
-                    foreach (var p in splitter.Split(DataPacket.Create(buffer, n)))
+                    if (n > 0)
                     {
-                        p.Sender = (IPEndPoint)socket.RemoteEndPoint;
-                        Commands.CommandHandler.ExecuteRequestHandler(p.Command, this, p);
+                        foreach (var p in splitter.Split(mainPacket))
+                        {
+                            //Console.WriteLine("=> Packet size " + p.MessageSize + " (command " + p.Command + ")");
+                            //Console.WriteLine("Packet number " + (pi++) + " command " + p.Command);
+                            p.Sender = (IPEndPoint)socket.RemoteEndPoint;
+                            Commands.CommandHandler.ExecuteRequestHandler(p.Command, this, p);
+                        }
+                        //Console.WriteLine(" ==> End of packet");
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Exception: " + ex);
-                Dispose();
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Exception: " + ex);
+                    Dispose();
+                }
             }
         }
 

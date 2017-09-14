@@ -75,12 +75,9 @@ namespace GatewayLogic
                 // Stop receiving
                 return;
             }
+            //Console.WriteLine("Server received " + size + " bytes from " + this.Destination);
 
-            foreach (var p in splitter.Split(DataPacket.Create(buffer, size, false)))
-            {
-                p.Sender = Destination;
-                Commands.CommandHandler.ExecuteResponseHandler(p.Command, this, p);
-            }
+            var mainPacket = DataPacket.Create(buffer, size, false);
 
             try
             {
@@ -90,6 +87,18 @@ namespace GatewayLogic
             {
                 Console.WriteLine("Exception: " + ex);
             }
+
+            lock (splitter)
+            {
+                foreach (var p in splitter.Split(mainPacket))
+                {
+                    //Console.WriteLine("+> Packet size " + p.MessageSize + " (command " + p.Command + ")");
+                    p.Sender = Destination;
+                    Commands.CommandHandler.ExecuteResponseHandler(p.Command, this, p);
+                    //Console.WriteLine(" ++> End of packet");
+                }
+            }
+
         }
 
         public override void Send(DataPacket packet)

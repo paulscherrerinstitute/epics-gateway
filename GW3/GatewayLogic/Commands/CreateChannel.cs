@@ -21,8 +21,7 @@ namespace GatewayLogic.Commands
                 Console.WriteLine("Channel is not known");
                 return;
             }
-            Console.WriteLine("Create channel for " + channelName);
-
+            Console.WriteLine("Create channel for " + channelName + "  from " + ((TcpClientConnection)connection).RemoteEndPoint + " CID " + packet.Parameter1);
             locker.Wait();
             var searchInfo = SearchInformation.Get(channelName);
             var channelInfo = ChannelInformation.Get(channelName, searchInfo);
@@ -33,6 +32,7 @@ namespace GatewayLogic.Commands
                 // We have all the info, we shall answer
                 if (channelInfo.ServerId.HasValue)
                 {
+                    Console.WriteLine("Create channel info is known.");
                     DataPacket resPacket = DataPacket.Create(0);
                     resPacket.Command = 22;
                     resPacket.DataType = 0;
@@ -51,9 +51,12 @@ namespace GatewayLogic.Commands
                 }
                 else
                 {
+                    Console.WriteLine("Create channel info must be found.");
+
                     channelInfo.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter1 });
                     if (!channelInfo.ConnectionIsBuilding)
                     {
+                        Console.WriteLine("Connection must be made");
                         channelInfo.ConnectionIsBuilding = true;
                         if (channelInfo.TcpConnection == null)
                         {
@@ -85,6 +88,7 @@ namespace GatewayLogic.Commands
                 locker.Release();
                 foreach (var client in channelInfo.GetClients())
                 {
+                    Console.WriteLine("Sending answer to " + client.Client);
                     var destConn = ClientConnection.Get(client.Client);
 
                     DataPacket resPacket = DataPacket.Create(0);

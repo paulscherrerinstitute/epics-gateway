@@ -310,11 +310,11 @@ namespace GatewayLogic
             }
             else
             {
-                DataPacket p = DataPacket.Create(BufferSize - (int)size);
+                DataPacket p = DataPacket.CreatePacketSize(BufferSize - (int)size);
+                Buffer.BlockCopy(this.Data, (int)size, p.Data, 0, this.BufferSize - (int)size);
                 p.Sender = this.Sender;
                 p.Destination = this.Destination;
                 p.Kind = this.Kind;
-                Buffer.BlockCopy(this.Data, (int)size, p.Data, 0, this.BufferSize - (int)size);
                 return p;
             }
         }
@@ -390,6 +390,14 @@ namespace GatewayLogic
             return p;
         }
 
+        public static DataPacket CreatePacketSize(int size)
+        {
+            var p = new DataPacket();
+            p.Data = new byte[size];
+            p.bufferSize = size;
+            return p;
+        }
+
         public int Offset { get; private set; }
 
         int bufferSize = 0;
@@ -419,7 +427,8 @@ namespace GatewayLogic
             }
             else
             {
-                DataPacket p = Create(size);
+                DataPacket p = new DataPacket();
+                p.Data = new byte[size];
                 Buffer.BlockCopy(buff, 0, p.Data, 0, size);
                 return p;
             }
@@ -459,7 +468,7 @@ namespace GatewayLogic
             }
             else
             {
-                DataPacket p = Create((int)size);
+                DataPacket p = CreatePacketSize((int)size);
                 p.Kind = packet.Kind;
                 p.Sender = packet.Sender;
                 p.Destination = packet.Destination;
@@ -478,7 +487,7 @@ namespace GatewayLogic
         /// <param name="newPacket"></param>
         public static DataPacket Create(DataPacket remaining, DataPacket newPacket)
         {
-            DataPacket p = Create(remaining.BufferSize + newPacket.BufferSize);
+            DataPacket p = CreatePacketSize(remaining.BufferSize + newPacket.BufferSize);
             p.Sender = remaining.Sender;
             p.Destination = remaining.Destination;
             p.Kind = remaining.Kind;
