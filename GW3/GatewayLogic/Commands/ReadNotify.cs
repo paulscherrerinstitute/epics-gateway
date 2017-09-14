@@ -11,7 +11,7 @@ namespace GatewayLogic.Commands
     {
         public override void DoRequest(GatewayConnection connection, DataPacket packet)
         {
-            var channel = ChannelInformation.Get(packet.Parameter1);
+            var channel = connection.Gateway.ChannelInformation.Get(packet.Parameter1);
             if (channel == null)
             {
                 Console.WriteLine("Read notify on wrong channel.");

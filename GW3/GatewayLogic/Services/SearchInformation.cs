@@ -77,5 +77,13 @@ namespace GatewayLogic.Services
                 return result;
             }
         }
+
+        internal static void Clear()
+        {
+            lock (dictionaryLock)
+            {
+                dictionary.Clear();
+            }
+        }
     }
 }

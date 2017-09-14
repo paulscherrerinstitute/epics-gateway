@@ -41,5 +41,12 @@ namespace GatewayLogic.Services
                 connectionReady(conn);
             });            
         }
+
+        internal static void Clear()
+        {
+            connectionLock.Wait();
+            connections.Clear();
+            connectionLock.Release();
+        }
     }
 }

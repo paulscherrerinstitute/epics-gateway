@@ -15,7 +15,13 @@ namespace GWTest
     {
         static void Main(string[] args)
         {
+            Test();
+            Test();
+            Console.ReadKey();
+        }
 
+        static void Test()
+        { 
             var gateway = new Gateway();
             //gateway.Configuration.SideA = "129.129.130.45:5054";
             gateway.Configuration.SideA = "129.129.130.45:5432";
@@ -28,20 +34,20 @@ namespace GWTest
             var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
             serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
             serverChannel.Value = DateTime.Now.ToLongTimeString();
-            serverChannel.PrepareRecord += (sender, e) =>
+            /*serverChannel.PrepareRecord += (sender, e) =>
             {
                 serverChannel.Value = DateTime.Now.ToLongTimeString();
-            };
+            };*/
 
             // Client
 
             var client = new CAClient();
             client.Configuration.SearchAddress = "129.129.130.45:5432";
             var clientChannel = client.CreateChannel<string>("TEST-DATE");
-            clientChannel.MonitorChanged += (sender, newValue)=>
+            /*clientChannel.MonitorChanged += (sender, newValue)=>
             {
                 Console.WriteLine(newValue);
-            };
+            };*/
 
             //Thread.Sleep(1000);
             server.Start();
@@ -54,7 +60,6 @@ namespace GWTest
             server.Dispose();
             client.Dispose();
 
-            Console.ReadKey();
         }
     }
 }

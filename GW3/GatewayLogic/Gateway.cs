@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GatewayLogic.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,8 @@ namespace GatewayLogic
     {
         public const int BUFFER_SIZE = 8192 * 30;
         public const UInt16 CA_PROTO_VERSION = 11;
+
+        internal ChannelInformation ChannelInformation { get; private set; } = new ChannelInformation();
 
         internal UdpReceiver udpSideA;
         internal UdpReceiver udpSideB;
@@ -39,6 +42,13 @@ namespace GatewayLogic
 
             udpSideA.Dispose();
             udpSideB.Dispose();
+
+            this.ChannelInformation.Clear();
+            Services.ClientConnection.Clear();
+            Services.MonitorInformation.Clear();
+            Services.ReadNotifyInformation.Clear();
+            Services.SearchInformation.Clear();
+            Services.ServerConnection.Clear();
         }
     }
 }

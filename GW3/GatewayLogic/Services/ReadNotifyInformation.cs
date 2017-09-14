@@ -11,7 +11,7 @@ namespace GatewayLogic.Services
         readonly static object dictionaryLock = new object();
         readonly static List<ReadNotifyInformation> reads = new List<ReadNotifyInformation>();
 
-        public ChannelInformation ChannelInformation { get; }
+        public ChannelInformation.ChannelInformationDetails ChannelInformation { get; }
         public uint GatewayId { get; }
         public uint ClientId { get; private set; }
         public TcpClientConnection Client { get; private set; }
@@ -19,7 +19,7 @@ namespace GatewayLogic.Services
         static private uint nextId = 1;
         static object counterLock = new object();
 
-        private ReadNotifyInformation(ChannelInformation channelInformation, uint clientId, TcpClientConnection client)
+        private ReadNotifyInformation(ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
         {
             lock (counterLock)
             {
@@ -31,7 +31,7 @@ namespace GatewayLogic.Services
             Client = client;
         }
 
-        public static ReadNotifyInformation Get(ChannelInformation channelInformation, uint clientId, TcpClientConnection client)
+        public static ReadNotifyInformation Get(ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
         {
             lock (dictionaryLock)
             {
@@ -48,6 +48,14 @@ namespace GatewayLogic.Services
                 var result = reads.FirstOrDefault(row => row.GatewayId == id);
                 reads.Remove(result);
                 return result;
+            }
+        }
+
+        internal static void Clear()
+        {
+            lock (dictionaryLock)
+            {
+                reads.Clear();
             }
         }
     }
