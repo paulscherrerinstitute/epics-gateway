@@ -33,7 +33,7 @@ namespace GWTest
             };
 
             // Client
-            Thread.Sleep(1000);
+
             var client = new CAClient();
             client.Configuration.SearchAddress = "129.129.130.45:5432";
             var clientChannel = client.CreateChannel<string>("TEST-DATE");
@@ -41,6 +41,9 @@ namespace GWTest
             {
                 Console.WriteLine(newValue);
             };
+
+            Thread.Sleep(2000);
+            server.Start();
 
             Console.ReadKey();
         }

@@ -11,13 +11,8 @@ namespace GatewayLogic.Services
         readonly static object dictionaryLock = new object();
         readonly static List<MonitorInformation> monitors = new List<MonitorInformation>();
 
-        public object LockObject { get; } = new object();
-
         public ChannelInformation ChannelInformation { get; }
-        public TcpServerConnection TcpConnection { get; internal set; }
         public uint GatewayId { get; }
-        public uint? ServerId { get; set; }
-        public bool ConnectionIsBuilding { get; internal set; }
         public ushort DataType { get; private set; }
         public uint DataCount { get; private set; }
 
@@ -26,7 +21,7 @@ namespace GatewayLogic.Services
 
         public List<ClientId> clients = new List<ClientId>();
 
-        private MonitorInformation(ChannelInformation channelInformation,ushort dataType,uint dataCount)
+        private MonitorInformation(ChannelInformation channelInformation, ushort dataType, uint dataCount)
         {
             lock (counterLock)
             {
@@ -58,7 +53,11 @@ namespace GatewayLogic.Services
         {
             lock (dictionaryLock)
             {
-                var monitor = monitors.FirstOrDefault(row => row.ChannelInformation == channelInformation && row.DataType == dataType && row.DataCount == dataCount);
+                MonitorInformation monitor = null;
+                if (dataCount != 0)
+                    monitor = monitors.FirstOrDefault(row => row.ChannelInformation == channelInformation
+                        && row.DataType == dataType
+                        && row.DataCount == dataCount);
                 if (monitor == null)
                 {
                     monitor = new MonitorInformation(channelInformation, dataType, dataCount);

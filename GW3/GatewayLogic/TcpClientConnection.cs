@@ -76,11 +76,18 @@ namespace GatewayLogic
 
         public override void Send(DataPacket packet)
         {
-            lock (stream)
+            try
             {
-                stream.Write(packet.Data, packet.Offset, packet.BufferSize);
-                isDirty = true;
-                stream.Flush();
+                lock (stream)
+                {
+                    stream.Write(packet.Data, packet.Offset, packet.BufferSize);
+                    isDirty = true;
+                    stream.Flush();
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Exception: " + ex);
             }
         }
 
