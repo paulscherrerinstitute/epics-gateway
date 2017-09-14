@@ -60,7 +60,7 @@ namespace GatewayLogic.Commands
                         channelInfo.ConnectionIsBuilding = true;
                         if (channelInfo.TcpConnection == null)
                         {
-                            ServerConnection.CreateConnection(connection.Gateway, searchInfo.Server, (tcpConnection) =>
+                            connection.Gateway.ServerConnection.CreateConnection(connection.Gateway, searchInfo.Server, (tcpConnection) =>
                             {
                                 channelInfo.TcpConnection = tcpConnection;
                                 var newPacket = (DataPacket)packet.Clone();
@@ -89,7 +89,7 @@ namespace GatewayLogic.Commands
                 foreach (var client in channelInfo.GetClients())
                 {
                     Console.WriteLine("Sending answer to " + client.Client);
-                    var destConn = ClientConnection.Get(client.Client);
+                    var destConn = connection.Gateway.ClientConnection.Get(client.Client);
 
                     DataPacket resPacket = DataPacket.Create(0);
                     resPacket.Command = 22;

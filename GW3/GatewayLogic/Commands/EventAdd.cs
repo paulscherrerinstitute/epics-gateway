@@ -36,7 +36,7 @@ namespace GatewayLogic.Commands
             foreach (var client in monitor.GetClients())
             {
                 var newPacket = (DataPacket)packet.Clone();
-                var conn = ClientConnection.Get(client.Client);
+                var conn = connection.Gateway.ClientConnection.Get(client.Client);
                 newPacket.Destination = conn.RemoteEndPoint;
                 newPacket.Parameter2 = client.Id;
                 conn.Send(newPacket);

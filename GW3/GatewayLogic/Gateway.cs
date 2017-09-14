@@ -23,6 +23,8 @@ namespace GatewayLogic
         internal MonitorInformation MonitorInformation { get; private set; } = new MonitorInformation();
         internal ReadNotifyInformation ReadNotifyInformation { get; private set; } = new ReadNotifyInformation();
         internal SearchInformation SearchInformation { get; private set; } = new SearchInformation();
+        internal ClientConnection ClientConnection { get; private set; } = new ClientConnection();
+        internal ServerConnection ServerConnection { get; private set; } = new ServerConnection();
 
         public Gateway()
         {
@@ -47,11 +49,11 @@ namespace GatewayLogic
             udpSideB.Dispose();
 
             this.ChannelInformation.Clear();
-            Services.ClientConnection.Clear();
+            this.ClientConnection.Clear();
             this.MonitorInformation.Clear();
             this.ReadNotifyInformation.Clear();
             this.SearchInformation.Clear();
-            Services.ServerConnection.Clear();
+            this.ServerConnection.Clear();
         }
     }
 }

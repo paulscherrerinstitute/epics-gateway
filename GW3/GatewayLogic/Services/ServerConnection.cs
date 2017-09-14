@@ -12,14 +12,14 @@ namespace GatewayLogic.Services
     {
         public delegate void TcpConnectionReady(TcpServerConnection connection);
 
-        private ServerConnection()
+        internal ServerConnection()
         {
         }
 
-        static SemaphoreSlim connectionLock = new SemaphoreSlim(1);
-        readonly static Dictionary<IPEndPoint, TcpServerConnection> connections = new Dictionary<IPEndPoint, TcpServerConnection>();
+        SemaphoreSlim connectionLock = new SemaphoreSlim(1);
+        readonly Dictionary<IPEndPoint, TcpServerConnection> connections = new Dictionary<IPEndPoint, TcpServerConnection>();
 
-        public static void CreateConnection(Gateway gateway, IPEndPoint endPoint, TcpConnectionReady connectionReady)
+        public void CreateConnection(Gateway gateway, IPEndPoint endPoint, TcpConnectionReady connectionReady)
         {
             connectionLock.Wait();
             if (connections.ContainsKey(endPoint))
@@ -39,10 +39,10 @@ namespace GatewayLogic.Services
             conn.WhenConnected(() =>
             {
                 connectionReady(conn);
-            });            
+            });
         }
 
-        internal static void Clear()
+        internal void Clear()
         {
             connectionLock.Wait();
             connections.Clear();

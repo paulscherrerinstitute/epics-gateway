@@ -114,7 +114,7 @@ namespace GatewayLogic
                     TcpManager.RegisterClient(clientEndPoint, chain);*/
                     //TcpReceiver receiver = (TcpReceiver)chain[0];
                     var receiver = new TcpClientConnection(gateway, ipSource, client);
-                    ClientConnection.Add(receiver);
+                    gateway.ClientConnection.Add(receiver);
 
                     // Send version
                     DataPacket packet = DataPacket.Create(16);

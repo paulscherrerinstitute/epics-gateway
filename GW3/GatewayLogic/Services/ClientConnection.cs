@@ -9,15 +9,15 @@ namespace GatewayLogic.Services
 {
     class ClientConnection
     {
-        private ClientConnection()
+        internal ClientConnection()
         {
 
         }
 
-        readonly static object lockDictionary = new object();
-        readonly static Dictionary<IPEndPoint, TcpClientConnection> dictionary = new Dictionary<IPEndPoint, TcpClientConnection>();
+        readonly object lockDictionary = new object();
+        readonly Dictionary<IPEndPoint, TcpClientConnection> dictionary = new Dictionary<IPEndPoint, TcpClientConnection>();
 
-        public static void Add(TcpClientConnection connection)
+        public void Add(TcpClientConnection connection)
         {
             lock (lockDictionary)
             {
@@ -25,7 +25,7 @@ namespace GatewayLogic.Services
             }
         }
 
-        public static TcpClientConnection Get(IPEndPoint client)
+        public TcpClientConnection Get(IPEndPoint client)
         {
             lock (lockDictionary)
             {
@@ -33,7 +33,7 @@ namespace GatewayLogic.Services
             }
         }
 
-        internal static void Clear()
+        internal void Clear()
         {
             lock (lockDictionary)
             {
