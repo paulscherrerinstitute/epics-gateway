@@ -108,5 +108,10 @@ namespace GatewayLogic
                 socket.Send(packet.Data, packet.BufferSize, SocketFlags.None);
             }
         }
+
+        public override void Dispose()
+        {
+            socket.Dispose();
+        }
     }
 }

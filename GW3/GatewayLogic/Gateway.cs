@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic
 {
-    public class Gateway
+    public class Gateway : IDisposable
     {
         public const int BUFFER_SIZE = 8192 * 30;
         public const UInt16 CA_PROTO_VERSION = 11;
@@ -30,6 +30,15 @@ namespace GatewayLogic
 
             udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
             udpSideB = new UdpResponseReceiver(this, this.Configuration.SideBEndPoint);
+        }
+
+        public void Dispose()
+        {
+            tcpSideA.Dispose();
+            tcpSideB.Dispose();
+
+            udpSideA.Dispose();
+            udpSideB.Dispose();
         }
     }
 }

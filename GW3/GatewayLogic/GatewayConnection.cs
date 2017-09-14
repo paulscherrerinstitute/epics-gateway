@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic
 {
-    abstract class GatewayConnection
+    abstract class GatewayConnection : IDisposable
     {
         public IList<IPEndPoint> Destinations { get; set; }
         public Gateway Gateway { get; }
@@ -17,5 +17,7 @@ namespace GatewayLogic
         }
 
         abstract public void Send(DataPacket packet);
+
+        public abstract void Dispose();
     }
 }

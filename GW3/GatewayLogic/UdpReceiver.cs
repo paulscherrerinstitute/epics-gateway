@@ -38,6 +38,11 @@ namespace GatewayLogic
             receiver.BeginReceiveFrom(buff, 0, buff.Length, SocketFlags.None, ref tempRemoteEp, GotUdpMessage, tempRemoteEp);
         }
 
+        public override void Dispose()
+        {
+            receiver.Dispose();
+        }
+
         public override void Send(DataPacket packet)
         {
             if (this == Gateway.udpSideA)
@@ -58,7 +63,6 @@ namespace GatewayLogic
             }
             catch (ObjectDisposedException ex)
             {
-                Console.WriteLine(ex);
                 // Stop receiving
                 return;
             }
@@ -80,7 +84,6 @@ namespace GatewayLogic
             }
             catch (ObjectDisposedException ex)
             {
-                Console.WriteLine(ex);
                 // Stop receiving
                 return;
             }

@@ -48,7 +48,11 @@ namespace GWTest
 
 
             //Thread.Sleep(2000);
-            //Console.WriteLine(clientChannel.Get());
+            Console.WriteLine(clientChannel.Get());
+
+            gateway.Dispose();
+            server.Dispose();
+            client.Dispose();
 
             Console.ReadKey();
         }

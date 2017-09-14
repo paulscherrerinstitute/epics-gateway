@@ -83,6 +83,10 @@ namespace GatewayLogic
                 {
                     return;
                 }*/
+                catch(ObjectDisposedException ex1)
+                {
+                    return;
+                }
                 catch(Exception ex2)
                 {
                     Console.WriteLine("Exception: " + ex2);

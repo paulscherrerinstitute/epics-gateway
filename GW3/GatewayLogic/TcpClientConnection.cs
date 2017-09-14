@@ -12,7 +12,7 @@ namespace GatewayLogic
     /// <summary>
     /// Receives data from the TCP connection
     /// </summary>
-    class TcpClientConnection : GatewayConnection, IDisposable
+    class TcpClientConnection : GatewayConnection
     {
         readonly byte[] buffer = new byte[Gateway.BUFFER_SIZE];
         bool disposed = false;
@@ -219,7 +219,7 @@ namespace GatewayLogic
             }
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             if (disposed)
                 return;
