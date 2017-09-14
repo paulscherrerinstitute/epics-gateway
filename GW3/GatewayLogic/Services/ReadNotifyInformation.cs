@@ -8,40 +8,40 @@ namespace GatewayLogic.Services
 {
     class ReadNotifyInformation
     {
-        readonly static object dictionaryLock = new object();
-        readonly static List<ReadNotifyInformation> reads = new List<ReadNotifyInformation>();
+        readonly object dictionaryLock = new object();
+        readonly List<ReadNotifyInformationDetail> reads = new List<ReadNotifyInformationDetail>();
 
-        public ChannelInformation.ChannelInformationDetails ChannelInformation { get; }
-        public uint GatewayId { get; }
-        public uint ClientId { get; private set; }
-        public TcpClientConnection Client { get; private set; }
+        private uint nextId = 1;
+        object counterLock = new object();
 
-        static private uint nextId = 1;
-        static object counterLock = new object();
-
-        private ReadNotifyInformation(ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
+        public class ReadNotifyInformationDetail
         {
-            lock (counterLock)
-            {
-                GatewayId = nextId++;
-            }
+            public ChannelInformation.ChannelInformationDetails ChannelInformation { get; }
+            public uint GatewayId { get; }
+            public uint ClientId { get; private set; }
+            public TcpClientConnection Client { get; private set; }
 
-            ChannelInformation = channelInformation;
-            ClientId = clientId;
-            Client = client;
+
+            public ReadNotifyInformationDetail(uint id, ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
+            {
+                GatewayId = id;
+                ChannelInformation = channelInformation;
+                ClientId = clientId;
+                Client = client;
+            }
         }
 
-        public static ReadNotifyInformation Get(ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
+        public ReadNotifyInformationDetail Get(ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
         {
             lock (dictionaryLock)
             {
-                var result = new ReadNotifyInformation(channelInformation, clientId, client);
+                var result = new ReadNotifyInformationDetail(nextId++, channelInformation, clientId, client);
                 reads.Add(result);
                 return result;
             }
         }
 
-        public static ReadNotifyInformation GetByGatewayId(uint id)
+        public ReadNotifyInformationDetail GetByGatewayId(uint id)
         {
             lock (dictionaryLock)
             {
@@ -51,7 +51,7 @@ namespace GatewayLogic.Services
             }
         }
 
-        internal static void Clear()
+        internal void Clear()
         {
             lock (dictionaryLock)
             {

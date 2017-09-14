@@ -12,14 +12,17 @@ namespace GatewayLogic
         public const int BUFFER_SIZE = 8192 * 30;
         public const UInt16 CA_PROTO_VERSION = 11;
 
-        internal ChannelInformation ChannelInformation { get; private set; } = new ChannelInformation();
+        public Configuration.Configuration Configuration { get; private set; } = new GatewayLogic.Configuration.Configuration();
 
         internal UdpReceiver udpSideA;
         internal UdpReceiver udpSideB;
         internal TcpClientListener tcpSideA;
         internal TcpClientListener tcpSideB;
 
-        public Configuration.Configuration Configuration { get; set; } = new GatewayLogic.Configuration.Configuration();
+        internal ChannelInformation ChannelInformation { get; private set; } = new ChannelInformation();
+        internal MonitorInformation MonitorInformation { get; private set; } = new MonitorInformation();
+        internal ReadNotifyInformation ReadNotifyInformation { get; private set; } = new ReadNotifyInformation();
+        internal SearchInformation SearchInformation { get; private set; } = new SearchInformation();
 
         public Gateway()
         {
@@ -45,9 +48,9 @@ namespace GatewayLogic
 
             this.ChannelInformation.Clear();
             Services.ClientConnection.Clear();
-            Services.MonitorInformation.Clear();
-            Services.ReadNotifyInformation.Clear();
-            Services.SearchInformation.Clear();
+            this.MonitorInformation.Clear();
+            this.ReadNotifyInformation.Clear();
+            this.SearchInformation.Clear();
             Services.ServerConnection.Clear();
         }
     }

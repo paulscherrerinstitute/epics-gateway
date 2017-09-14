@@ -15,7 +15,7 @@ namespace GatewayLogic.Commands
         public override void DoRequest(GatewayConnection connection, DataPacket packet)
         {
             string channelName = packet.GetDataAsString();
-            if (!connection.Gateway.ChannelInformation.HasChannelInformation(channelName) && !SearchInformation.HasChannelServerInformation(channelName))
+            if (!connection.Gateway.ChannelInformation.HasChannelInformation(channelName) && !connection.Gateway.SearchInformation.HasChannelServerInformation(channelName))
             {
 
                 Console.WriteLine("Channel is not known");
@@ -23,7 +23,7 @@ namespace GatewayLogic.Commands
             }
             Console.WriteLine("Create channel for " + channelName + "  from " + ((TcpClientConnection)connection).RemoteEndPoint + " CID " + packet.Parameter1);
             locker.Wait();
-            var searchInfo = SearchInformation.Get(channelName);
+            var searchInfo = connection.Gateway.SearchInformation.Get(channelName);
             var channelInfo = connection.Gateway.ChannelInformation.Get(channelName, searchInfo);
 
             lock (channelInfo.LockObject)

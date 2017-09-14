@@ -22,7 +22,7 @@ namespace GatewayLogic.Commands
             string channelName = packet.GetDataAsString();
             Console.WriteLine("Search for: " + channelName);
 
-            var record = SearchInformation.Get(channelName);
+            var record = connection.Gateway.SearchInformation.Get(channelName);
             // Connection known, we answer we knows it
             if(record.Server != null)
             {
@@ -69,7 +69,7 @@ namespace GatewayLogic.Commands
 
         public override void DoResponse(GatewayConnection connection, DataPacket packet)
         {
-            var search = SearchInformation.Get(packet.Parameter2);
+            var search = connection.Gateway.SearchInformation.Get(packet.Parameter2);
 
             if (search == null)
             {

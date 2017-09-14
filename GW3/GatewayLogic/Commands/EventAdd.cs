@@ -19,7 +19,7 @@ namespace GatewayLogic.Commands
             }
             Console.WriteLine("Event add on " + channel.ChannelName);
 
-            var monitor = MonitorInformation.Get(channel, packet.DataType, packet.DataCount);
+            var monitor = connection.Gateway.MonitorInformation.Get(channel, packet.DataType, packet.DataCount);
             monitor.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter2 });
             var newPacket = (DataPacket)packet.Clone();
             newPacket.Parameter1 = channel.ServerId.Value;
@@ -30,7 +30,7 @@ namespace GatewayLogic.Commands
 
         public override void DoResponse(GatewayConnection connection, DataPacket packet)
         {
-            var monitor = MonitorInformation.GetByGatewayId(packet.Parameter2);
+            var monitor = connection.Gateway.MonitorInformation.GetByGatewayId(packet.Parameter2);
 
             Console.WriteLine("Event add response on " + monitor.ChannelInformation.ChannelName);
             foreach (var client in monitor.GetClients())

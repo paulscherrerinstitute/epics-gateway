@@ -9,50 +9,51 @@ namespace GatewayLogic.Services
 {
     class SearchInformation
     {
-        public uint GatewayId { get; private set; }
-        public List<ClientId> clients = new List<ClientId>();
-        public string Channel { get; internal set; }
-        public IPEndPoint Server { get; internal set; }
+        private uint nextId = 1;
+        object counterLock = new object();
+        object dictionaryLock = new object();
+        Dictionary<string, SearchInformationDetail> dictionary = new Dictionary<string, SearchInformationDetail>();
 
-        static private uint nextId = 1;
-        static object counterLock = new object();
-        static object dictionaryLock = new object();
-        static Dictionary<string, SearchInformation> dictionary = new Dictionary<string, SearchInformation>();
-
-        private SearchInformation()
+        public class SearchInformationDetail
         {
-            lock (counterLock)
+            public uint GatewayId { get; private set; }
+            public List<ClientId> clients = new List<ClientId>();
+            public string Channel { get; internal set; }
+            public IPEndPoint Server { get; internal set; }
+
+
+            public SearchInformationDetail(uint id)
             {
-                GatewayId = nextId++;
+                GatewayId = id;
+            }
+
+            internal void AddClient(ClientId clientId)
+            {
+                lock (clients)
+                {
+                    if (!clients.Any(row => row.Client == clientId.Client && row.Id == row.Id))
+                        clients.Add(clientId);
+                }
+            }
+
+            internal IEnumerable<ClientId> GetClients()
+            {
+                lock (clients)
+                {
+                    var result = clients.ToList();
+                    clients.Clear();
+                    return result;
+                }
             }
         }
 
-        internal void AddClient(ClientId clientId)
-        {
-            lock (clients)
-            {
-                if (!clients.Any(row => row.Client == clientId.Client && row.Id == row.Id))
-                    clients.Add(clientId);
-            }
-        }
-
-        internal IEnumerable<ClientId> GetClients()
-        {
-            lock (clients)
-            {
-                var result = clients.ToList();
-                clients.Clear();
-                return result;
-            }
-        }
-
-        internal static SearchInformation Get(string channelName)
+        internal SearchInformationDetail Get(string channelName)
         {
             lock (dictionaryLock)
             {
                 if (!dictionary.ContainsKey(channelName))
                 {
-                    var result = new SearchInformation();
+                    var result = new SearchInformationDetail(nextId++);
                     result.Channel = channelName;
                     dictionary.Add(channelName, result);
                 }
@@ -61,7 +62,7 @@ namespace GatewayLogic.Services
             }
         }
 
-        internal static bool HasChannelServerInformation(string channelName)
+        internal bool HasChannelServerInformation(string channelName)
         {
             lock (dictionaryLock)
             {
@@ -69,7 +70,7 @@ namespace GatewayLogic.Services
             }
         }
 
-        internal static SearchInformation Get(uint gatewayId)
+        internal SearchInformationDetail Get(uint gatewayId)
         {
             lock (dictionaryLock)
             {
@@ -78,7 +79,7 @@ namespace GatewayLogic.Services
             }
         }
 
-        internal static void Clear()
+        internal void Clear()
         {
             lock (dictionaryLock)
             {

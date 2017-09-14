@@ -18,7 +18,7 @@ namespace GatewayLogic.Services
         {
             public object LockObject { get; } = new object();
 
-            public SearchInformation SearchInformation { get; set; }
+            public SearchInformation.SearchInformationDetail SearchInformation { get; set; }
             public string ChannelName { get; }
             public TcpServerConnection TcpConnection { get; internal set; }
             public uint GatewayId { get; }
@@ -27,7 +27,7 @@ namespace GatewayLogic.Services
 
             public List<ClientId> clients = new List<ClientId>();
 
-            public ChannelInformationDetails(uint id, string channelName, SearchInformation search)
+            public ChannelInformationDetails(uint id, string channelName, SearchInformation.SearchInformationDetail search)
             {
                 GatewayId = id;
                 SearchInformation = search;
@@ -62,7 +62,7 @@ namespace GatewayLogic.Services
             }
         }
 
-        public ChannelInformationDetails Get(string channelName, SearchInformation search)
+        public ChannelInformationDetails Get(string channelName, SearchInformation.SearchInformationDetail search)
         {
             lock (dictionaryLock)
             {
