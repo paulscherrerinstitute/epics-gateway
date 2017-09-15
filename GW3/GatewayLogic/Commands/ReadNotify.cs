@@ -1,4 +1,5 @@
-﻿using GatewayLogic.Services;
+﻿using GatewayLogic.Connections;
+using GatewayLogic.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace GatewayLogic.Commands
             connection.Gateway.Log.Write(Services.LogLevel.Detail, "Read notify on " + channel.ChannelName);
             var read = connection.Gateway.ReadNotifyInformation.Get(channel, packet.Parameter2, (TcpClientConnection)connection);
             packet.Parameter2 = read.GatewayId;
-            packet.Destination = channel.TcpConnection.Destination;
+            packet.Destination = channel.TcpConnection.RemoteEndPoint;
             channel.TcpConnection.Send(packet);
         }
 

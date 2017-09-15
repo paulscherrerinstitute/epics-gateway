@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GatewayLogic
+namespace GatewayLogic.Connections
 {
     /// <summary>
     /// Receives data from the TCP connection
@@ -22,21 +22,17 @@ namespace GatewayLogic
         bool isDirty = false;
         //AutoResetEvent dataSent = new AutoResetEvent(true);
         private Splitter splitter;
-        public Gateway Gateway { get; private set; }
+        public Gateway Gateway { get; }
+        public IPEndPoint RemoteEndPoint { get; private set; }
+        public bool IsDirty { get { return isDirty; } }
 
         public TcpClientConnection(Gateway gateway, IPEndPoint endPoint, Socket socket) : base(gateway)
         {
             splitter = new Splitter();
-            RemoteEndPoint = endPoint;
             this.Socket = socket;
             Gateway = gateway;
         }
 
-        public IPEndPoint RemoteEndPoint
-        {
-            get;
-            private set;
-        }
 
         Socket socket;
         /// <summary>
@@ -53,11 +49,8 @@ namespace GatewayLogic
             {
                 socket = value;
                 socket.SendTimeout = 30000;
-                /*socket.SendTimeout = 500;
-                socket.Blocking = false;*/
 
                 RemoteEndPoint = (IPEndPoint)socket.RemoteEndPoint;
-
                 netStream = new NetworkStream(socket);
                 netStream.WriteTimeout = 100;
                 stream = new BufferedStream(netStream);
@@ -72,9 +65,6 @@ namespace GatewayLogic
                 }
             }
         }
-
-        public bool IsDirty { get { return isDirty; } }
-
 
         public override void Send(DataPacket packet)
         {
@@ -92,19 +82,6 @@ namespace GatewayLogic
                 Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
             }
         }
-
-        /*void Sent(IAsyncResult obj)
-        {
-            try
-            {
-                socket.EndSend(obj);
-                dataSent.Set();
-            }
-            catch
-            {
-                Dispose();
-            }
-        }*/
 
         public void Flush()
         {
@@ -197,27 +174,24 @@ namespace GatewayLogic
                 Dispose();
             }
 
-            lock (splitter)
+            try
             {
-                try
+                if (n > 0)
                 {
-                    if (n > 0)
+                    foreach (var p in splitter.Split(mainPacket))
                     {
-                        foreach (var p in splitter.Split(mainPacket))
-                        {
-                            //Log.Write("=> Packet size " + p.MessageSize + " (command " + p.Command + ")");
-                            //Log.Write("Packet number " + (pi++) + " command " + p.Command);
-                            p.Sender = (IPEndPoint)socket.RemoteEndPoint;
-                            Commands.CommandHandler.ExecuteRequestHandler(p.Command, this, p);
-                        }
-                        //Log.Write(" ==> End of packet");
+                        //Log.Write("=> Packet size " + p.MessageSize + " (command " + p.Command + ")");
+                        //Log.Write("Packet number " + (pi++) + " command " + p.Command);
+                        p.Sender = (IPEndPoint)socket.RemoteEndPoint;
+                        Commands.CommandHandler.ExecuteRequestHandler(p.Command, this, p);
                     }
+                    //Log.Write(" ==> End of packet");
                 }
-                catch (Exception ex)
-                {
-                    Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
-                    Dispose();
-                }
+            }
+            catch (Exception ex)
+            {
+                Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
+                Dispose();
             }
         }
 

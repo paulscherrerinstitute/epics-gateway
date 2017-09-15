@@ -5,9 +5,9 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GatewayLogic.Services
+namespace GatewayLogic.Connections
 {
-    class ClientConnection
+    class ClientConnection :IDisposable
     {
         internal ClientConnection()
         {
@@ -33,7 +33,7 @@ namespace GatewayLogic.Services
             }
         }
 
-        internal void Clear()
+        public void Dispose()
         {
             lock (lockDictionary)
             {

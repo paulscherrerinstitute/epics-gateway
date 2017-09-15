@@ -1,4 +1,5 @@
-﻿using GatewayLogic.Services;
+﻿using GatewayLogic.Connections;
+using GatewayLogic.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,12 +50,13 @@ namespace GatewayLogic
             udpSideA.Dispose();
             udpSideB.Dispose();
 
-            this.ChannelInformation.Clear();
-            this.ClientConnection.Clear();
-            this.MonitorInformation.Clear();
-            this.ReadNotifyInformation.Clear();
-            this.SearchInformation.Clear();
-            this.ServerConnection.Clear();
+            this.ChannelInformation.Dispose();
+            this.MonitorInformation.Dispose();
+            this.ReadNotifyInformation.Dispose();
+            this.SearchInformation.Dispose();
+
+            this.ClientConnection.Dispose();
+            this.ServerConnection.Dispose();
         }
     }
 }

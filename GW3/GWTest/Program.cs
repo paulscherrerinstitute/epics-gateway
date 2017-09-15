@@ -16,7 +16,7 @@ namespace GWTest
         static void Main(string[] args)
         {
             Test();
-            Test();
+            //Test();
             Console.ReadKey();
         }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GatewayLogic.Connections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic.Services
 {
-    class ReadNotifyInformation
+    class ReadNotifyInformation : IDisposable
     {
         readonly object dictionaryLock = new object();
         readonly List<ReadNotifyInformationDetail> reads = new List<ReadNotifyInformationDetail>();
@@ -18,8 +19,8 @@ namespace GatewayLogic.Services
         {
             public ChannelInformation.ChannelInformationDetails ChannelInformation { get; }
             public uint GatewayId { get; }
-            public uint ClientId { get; private set; }
-            public TcpClientConnection Client { get; private set; }
+            public uint ClientId { get; }
+            public TcpClientConnection Client { get; }
 
 
             public ReadNotifyInformationDetail(uint id, ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
@@ -51,7 +52,7 @@ namespace GatewayLogic.Services
             }
         }
 
-        internal void Clear()
+        public void Dispose()
         {
             lock (dictionaryLock)
             {

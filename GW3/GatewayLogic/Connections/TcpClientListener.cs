@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GatewayLogic
+namespace GatewayLogic.Connections
 {
     /// <summary>
     /// Monitor a TCP port and creates a new worker chain for each incoming connection.

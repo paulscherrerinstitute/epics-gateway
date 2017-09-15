@@ -24,7 +24,7 @@ namespace GatewayLogic.Commands
             var newPacket = (DataPacket)packet.Clone();
             newPacket.Parameter1 = channel.ServerId.Value;
             newPacket.Parameter2 = monitor.GatewayId;
-            newPacket.Destination = channel.TcpConnection.Destination;
+            newPacket.Destination = channel.TcpConnection.RemoteEndPoint;
             channel.TcpConnection.Send(newPacket);
         }
 

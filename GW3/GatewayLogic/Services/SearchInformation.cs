@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic.Services
 {
-    class SearchInformation
+    class SearchInformation : IDisposable
     {
         private uint nextId = 1;
         object counterLock = new object();
@@ -16,7 +16,7 @@ namespace GatewayLogic.Services
 
         public class SearchInformationDetail
         {
-            public uint GatewayId { get; private set; }
+            public uint GatewayId { get; }
             public List<ClientId> clients = new List<ClientId>();
             public string Channel { get; internal set; }
             public IPEndPoint Server { get; internal set; }
@@ -79,7 +79,7 @@ namespace GatewayLogic.Services
             }
         }
 
-        internal void Clear()
+        public void Dispose()
         {
             lock (dictionaryLock)
             {

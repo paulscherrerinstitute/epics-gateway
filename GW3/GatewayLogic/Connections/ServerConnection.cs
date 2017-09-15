@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GatewayLogic.Services
+namespace GatewayLogic.Connections
 {
-    class ServerConnection
+    class ServerConnection : IDisposable
     {
         public delegate void TcpConnectionReady(TcpServerConnection connection);
 
@@ -42,7 +42,7 @@ namespace GatewayLogic.Services
             });
         }
 
-        internal void Clear()
+        public void Dispose()
         {
             connectionLock.Wait();
             connections.Clear();
@@ -52,7 +52,7 @@ namespace GatewayLogic.Services
         internal void Remove(TcpServerConnection tcpServerConnection)
         {
             connectionLock.Wait();
-            connections.Remove(tcpServerConnection.Destination);
+            connections.Remove(tcpServerConnection.RemoteEndPoint);
             connectionLock.Release();
         }
     }

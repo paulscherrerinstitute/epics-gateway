@@ -335,41 +335,6 @@ namespace GatewayLogic
             return p;
         }
 
-        static readonly Dictionary<int, Stack<DataPacket>> storedPackets = new Dictionary<int, Stack<DataPacket>>();
-
-        /*public void Dispose()
-        {
-            if (this.Data.Length < 200)
-            {
-                this.Chain = null;
-                this.Sender = null;
-                this.Destination = null;
-                this.command = null;
-                this.extendedMessage = null;
-                this.payloadSize = null;
-                this.NeedToFlush = false;
-
-                lock (storedPackets)
-                {
-                    if (!storedPackets.ContainsKey(this.Data.Length))
-                        storedPackets.Add(this.Data.Length, new Stack<DataPacket>());
-                    DiagnosticServer.NbPooledPacket++;
-                    storedPackets[this.Data.Length].Push(this);
-                }
-            }
-        }*/
-
-        /*public static void ShowPools()
-        {
-            lock (storedPackets)
-            {
-                foreach (var i in storedPackets.OrderBy(row => row.Key))
-                {
-                    Log.Write("" + i.Key + ": " + i.Value.Count);
-                }
-            }
-        }*/
-
         public static DataPacket Create(byte[] buff)
         {
             DataPacket p = DataPacket.Create(buff.Length);
@@ -433,20 +398,6 @@ namespace GatewayLogic
                 return p;
             }
         }
-
-        /*/// <summary>
-        /// Creates a new message based on the byte buffer however use only the first "size" byte for it.
-        /// </summary>
-        /// <param name="buff"></param>
-        /// <param name="size"></param>
-        /// <param name="chain"> </param>
-        public static DataPacket Create(byte[] buff, int size, WorkerChain chain)
-        {
-            DataPacket p = Create(size);
-            p.Chain = chain;
-            Buffer.BlockCopy(buff, 0, p.Data, 0, size);
-            return p;
-        }*/
 
         /// <summary>
         /// Creates a new message based on an existing packed and use the "size" to extract only the first part.

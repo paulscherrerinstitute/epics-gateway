@@ -6,11 +6,11 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GatewayLogic
+namespace GatewayLogic.Connections
 {
     class TcpServerConnection : GatewayConnection
     {
-        public IPEndPoint Destination { get; }
+        public IPEndPoint RemoteEndPoint { get; }
         public Gateway Gateway { get; private set; }
 
         Socket socket;
@@ -22,7 +22,7 @@ namespace GatewayLogic
 
         public TcpServerConnection(Gateway gateway, IPEndPoint destination) : base(gateway)
         {
-            Destination = destination;
+            RemoteEndPoint = destination;
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
             IAsyncResult result = socket.BeginConnect(destination, ConnectionBuilt, null);
@@ -90,17 +90,13 @@ namespace GatewayLogic
                 Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
             }
 
-            lock (splitter)
+            foreach (var p in splitter.Split(mainPacket))
             {
-                foreach (var p in splitter.Split(mainPacket))
-                {
-                    //Log.Write("+> Packet size " + p.MessageSize + " (command " + p.Command + ")");
-                    p.Sender = Destination;
-                    Commands.CommandHandler.ExecuteResponseHandler(p.Command, this, p);
-                    //Log.Write(" ++> End of packet");
-                }
+                //Log.Write("+> Packet size " + p.MessageSize + " (command " + p.Command + ")");
+                p.Sender = RemoteEndPoint;
+                Commands.CommandHandler.ExecuteResponseHandler(p.Command, this, p);
+                //Log.Write(" ++> End of packet");
             }
-
         }
 
         public override void Send(DataPacket packet)

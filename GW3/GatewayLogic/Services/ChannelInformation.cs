@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GatewayLogic.Connections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic.Services
 {
-    class ChannelInformation
+    class ChannelInformation : IDisposable
     {
         readonly object dictionaryLock = new object();
         readonly Dictionary<string, ChannelInformationDetails> dictionary = new Dictionary<string, ChannelInformationDetails>();
@@ -18,7 +19,7 @@ namespace GatewayLogic.Services
         {
             public object LockObject { get; } = new object();
 
-            public SearchInformation.SearchInformationDetail SearchInformation { get; set; }
+            public SearchInformation.SearchInformationDetail SearchInformation { get; }
             public string ChannelName { get; }
             public TcpServerConnection TcpConnection { get; internal set; }
             public uint GatewayId { get; }
@@ -83,7 +84,7 @@ namespace GatewayLogic.Services
             }
         }
 
-        internal void Clear()
+        public void Dispose()
         {
             lock (dictionaryLock)
             {

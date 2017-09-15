@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic.Services
 {
-    class MonitorInformation
+    class MonitorInformation : IDisposable
     {
         readonly object dictionaryLock = new object();
         readonly List<MonitorInformationDetail> monitors = new List<MonitorInformationDetail>();
@@ -18,8 +18,8 @@ namespace GatewayLogic.Services
         {
             public ChannelInformation.ChannelInformationDetails ChannelInformation { get; }
             public uint GatewayId { get; }
-            public ushort DataType { get; private set; }
-            public uint DataCount { get; private set; }
+            public ushort DataType { get; }
+            public uint DataCount { get; }
 
 
             public List<ClientId> clients = new List<ClientId>();
@@ -75,7 +75,7 @@ namespace GatewayLogic.Services
             }
         }
 
-        internal void Clear()
+        public void Dispose()
         {
             lock (dictionaryLock)
             {

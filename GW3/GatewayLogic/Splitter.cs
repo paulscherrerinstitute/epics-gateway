@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GatewayLogic
@@ -11,9 +12,11 @@ namespace GatewayLogic
         DataPacket remainingPacket = null;
         uint dataMissing = 0;
         int currentPos = 0;
+        SemaphoreSlim lockSplitter = new SemaphoreSlim(1);
 
         public IEnumerable<DataPacket> Split(DataPacket packet)
         {
+            lockSplitter.Wait();
             while (packet.BufferSize != 0)
             {
                 // We had an incomplete packet, let's try to add the missing piece now
@@ -28,6 +31,7 @@ namespace GatewayLogic
                         packet.Kind = DataPacketKind.BODY;
 
                         yield return packet;
+                        lockSplitter.Release();
                         yield break;
                     }
                     // The new packet is bigger or equal than the missing piece
@@ -62,6 +66,7 @@ namespace GatewayLogic
                             if (s == packet.BufferSize)
                             {
                                 //packet.Dispose();
+                                lockSplitter.Release();
                                 yield break;
                             }
 
@@ -76,6 +81,7 @@ namespace GatewayLogic
                         {
                             Buffer.BlockCopy(packet.Data, 0, remainingPacket.Data, currentPos, packet.BufferSize);
                             currentPos += packet.BufferSize;
+                            lockSplitter.Release();
                             yield break;
                         }
                     }
@@ -92,6 +98,7 @@ namespace GatewayLogic
                     //Log.Write("Incomplete packet...");
                     //remainingPacket = packet;
                     remainingPacket = DataPacket.Create(packet, (uint)packet.BufferSize, false);
+                    lockSplitter.Release();
                     yield break;
                 }
                 // Full packet, send it.
@@ -102,6 +109,7 @@ namespace GatewayLogic
                     yield return packet;
                     /*DataPacket p = DataPacket.Create(packet, (uint)packet.BufferSize);
                     this.SendData(p);*/
+                    lockSplitter.Release();
                     yield break;
                 }
 
@@ -113,7 +121,10 @@ namespace GatewayLogic
                     p.Kind = DataPacketKind.COMPLETE;
                     yield return p;
                     if (packet.Offset >= packet.BufferSize)
+                    {
+                        lockSplitter.Release();
                         yield break;
+                    }
                     DataPacket newPacket = packet.SkipSize(packet.MessageSize, false);
                     //packet.Dispose();
                     packet = newPacket;
@@ -134,9 +145,11 @@ namespace GatewayLogic
                     {
                         remainingPacket = (DataPacket)packet.Clone();
                     }
+                    lockSplitter.Release();
                     yield break;
                 }
             }
+            lockSplitter.Release();
         }
 
         public void Reset()

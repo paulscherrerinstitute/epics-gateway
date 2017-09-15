@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GatewayLogic
+namespace GatewayLogic.Connections
 {
     class UdpReceiver : GatewayConnection
     {
