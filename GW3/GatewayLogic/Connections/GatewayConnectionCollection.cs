@@ -49,7 +49,7 @@ namespace GatewayLogic.Connections
             dictionary.Clear();
             lockDictionary.Release();
 
-            lockDictionary.Dispose();
+            //lockDictionary.Dispose();
         }
 
         internal void Remove(TType tcpClientConnection)

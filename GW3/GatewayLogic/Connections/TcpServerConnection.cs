@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GatewayLogic.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -18,6 +19,8 @@ namespace GatewayLogic.Connections
         List<Action> toCallWhenReady = new List<Action>();
         readonly byte[] buffer = new byte[Gateway.BUFFER_SIZE];
         Splitter splitter = new Splitter();
+
+        readonly List<ChannelInformation.ChannelInformationDetails> channels = new List<ChannelInformation.ChannelInformationDetails>();
 
         public TcpServerConnection(Gateway gateway, IPEndPoint destination) : base(gateway)
         {
@@ -85,9 +88,14 @@ namespace GatewayLogic.Connections
             {
                 socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
             }
+            catch (SocketException ex1)
+            {
+                this.Dispose();
+            }
             catch (Exception ex)
             {
                 Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
+                this.Dispose();
             }
 
             foreach (var p in splitter.Split(mainPacket))
@@ -99,11 +107,26 @@ namespace GatewayLogic.Connections
             }
         }
 
+        public void LinkChannel(ChannelInformation.ChannelInformationDetails channel)
+        {
+            lock (channels)
+            {
+                channels.Add(channel);
+            }
+        }
+
         public override void Send(DataPacket packet)
         {
             lock (lockObject)
             {
-                socket.Send(packet.Data, packet.BufferSize, SocketFlags.None);
+                try
+                {
+                    socket.Send(packet.Data, packet.BufferSize, SocketFlags.None);
+                }
+                catch (Exception ex)
+                {
+                    this.Dispose();
+                }
             }
         }
 
@@ -111,6 +134,25 @@ namespace GatewayLogic.Connections
         {
             socket.Dispose();
             Gateway.ServerConnection.Remove(this);
+
+            lock (channels)
+            {
+                var newPacket = DataPacket.Create(0);
+                newPacket.Command = 27;
+                foreach (var channel in channels)
+                    Gateway.ChannelInformation.Remove(channel);
+
+                foreach (var channel in channels)
+                {
+                    Gateway.Log.Write(LogLevel.Detail, "Disposing channel " + channel.ChannelName);
+                    foreach (var client in channel.GetClientConnections())
+                    {
+                        newPacket.Parameter1 = client.Id;
+                        newPacket.Destination = client.Connection.RemoteEndPoint;
+                        client.Connection.Send(newPacket);
+                    }
+                }
+            }
         }
     }
 }

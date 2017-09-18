@@ -16,12 +16,60 @@ namespace GWTest
         static void Main(string[] args)
         {
             Test();
-            //Test();
+            Test();
+            //S1();
             Console.ReadKey();
         }
 
+        static void S1()
+        {
+            var gateway = new Gateway();
+            gateway.Configuration.SideA = "127.0.0.1:5432";
+            gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+            gateway.Configuration.SideB = "127.0.0.1:5055";
+            gateway.Start();
+
+            // Serverside
+            var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056);
+            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+            serverChannel.Value = "Works fine!";
+
+            // Client
+
+            var client = new CAClient();
+            client.Configuration.WaitTimeout = 200;
+            client.Configuration.SearchAddress = "127.0.0.1:5432";
+            var clientChannel = client.CreateChannel<string>("TEST-DATE");
+            server.Start();
+
+            Console.WriteLine(clientChannel.Get());
+
+            //Assert.AreEqual("Works fine!", clientChannel.Get());
+
+            var autoReset = new AutoResetEvent(false);
+            clientChannel.StatusChanged += (sender, newStatus) =>
+            {
+                Console.WriteLine("=== " + newStatus);
+                if (newStatus == EpicsSharp.ChannelAccess.Constants.ChannelStatus.DISCONNECTED)
+                    autoReset.Set();
+            };
+            server.Dispose();
+            try
+            {
+                clientChannel.Get();
+            }
+            catch
+            {
+            }
+            autoReset.WaitOne();
+
+            gateway.Dispose();
+            client.Dispose();
+        }
+
         static void Test()
-        { 
+        {
             var gateway = new Gateway();
             //gateway.Configuration.SideA = "129.129.130.45:5054";
             gateway.Configuration.SideA = "129.129.130.45:5432";
@@ -56,10 +104,9 @@ namespace GWTest
             //Thread.Sleep(2000);
             Console.WriteLine(clientChannel.Get());
 
-            /*gateway.Dispose();
+            gateway.Dispose();
             server.Dispose();
-            client.Dispose();*/
-
+            client.Dispose();
         }
     }
 }

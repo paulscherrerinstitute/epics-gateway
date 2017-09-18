@@ -26,7 +26,7 @@ namespace GatewayLogic.Commands
             locker.Wait();
             var searchInfo = connection.Gateway.SearchInformation.Get(channelName);
             var channelInfo = connection.Gateway.ChannelInformation.Get(channelName, searchInfo);
-            channelInfo.RegisterClient((TcpClientConnection)connection);
+            channelInfo.RegisterClient(packet.Parameter1, (TcpClientConnection)connection);
 
             lock (channelInfo.LockObject)
             {
@@ -65,6 +65,7 @@ namespace GatewayLogic.Commands
                             connection.Gateway.ServerConnection.CreateConnection(connection.Gateway, searchInfo.Server, (tcpConnection) =>
                             {
                                 channelInfo.TcpConnection = tcpConnection;
+                                tcpConnection.LinkChannel(channelInfo);
                                 var newPacket = (DataPacket)packet.Clone();
                                 newPacket.Parameter1 = channelInfo.GatewayId;
                                 newPacket.Parameter2 = Gateway.CA_PROTO_VERSION;
