@@ -12,7 +12,7 @@ namespace GatewayLogic.Connections
     /// <summary>
     /// Receives data from the TCP connection
     /// </summary>
-    class TcpClientConnection : GatewayConnection
+    class TcpClientConnection : GatewayTcpConnection
     {
         readonly byte[] buffer = new byte[Gateway.BUFFER_SIZE];
         bool disposed = false;
@@ -23,7 +23,6 @@ namespace GatewayLogic.Connections
         //AutoResetEvent dataSent = new AutoResetEvent(true);
         private Splitter splitter;
         public Gateway Gateway { get; }
-        public IPEndPoint RemoteEndPoint { get; private set; }
         public bool IsDirty { get { return isDirty; } }
 
         public TcpClientConnection(Gateway gateway, IPEndPoint endPoint, Socket socket) : base(gateway)
@@ -153,7 +152,7 @@ namespace GatewayLogic.Connections
                 Dispose();
                 return;
             }
-
+            this.LastMessage = DateTime.Now;
             var mainPacket = DataPacket.Create(buffer, n);
 
             try
@@ -201,7 +200,7 @@ namespace GatewayLogic.Connections
                 return;
             disposed = true;
 
-            this.Gateway.ClientConnection.Remove(this);
+            this.Gateway.DropClient(this);
 
             IPEndPoint endPoint = null;
             try

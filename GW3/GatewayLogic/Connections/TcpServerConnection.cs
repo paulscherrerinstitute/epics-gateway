@@ -8,9 +8,8 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic.Connections
 {
-    class TcpServerConnection : GatewayConnection
+    class TcpServerConnection : GatewayTcpConnection
     {
-        public IPEndPoint RemoteEndPoint { get; }
         public Gateway Gateway { get; private set; }
 
         Socket socket;
@@ -79,6 +78,7 @@ namespace GatewayLogic.Connections
             }
             //Log.Write("Server received " + size + " bytes from " + this.Destination);
 
+            this.LastMessage = DateTime.Now;
             var mainPacket = DataPacket.Create(buffer, size, false);
 
             try

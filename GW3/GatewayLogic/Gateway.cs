@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GatewayLogic
@@ -24,13 +25,48 @@ namespace GatewayLogic
         internal MonitorInformation MonitorInformation { get; private set; } = new MonitorInformation();
         internal ReadNotifyInformation ReadNotifyInformation { get; private set; } = new ReadNotifyInformation();
         internal SearchInformation SearchInformation { get; private set; } = new SearchInformation();
-        internal ClientConnection ClientConnection { get; private set; } = new ClientConnection();
-        internal ServerConnection ServerConnection { get; private set; } = new ServerConnection();
+        internal ClientConnection ClientConnection { get;}
+        internal ServerConnection ServerConnection { get;}
         internal Log Log { get; private set; } = new Log();
+
+        internal event EventHandler OneSecUpdate;
+        internal event EventHandler TenSecUpdate;
+
+        bool isDiposed = false;
+
+        Thread updaterThread;
 
         public Gateway()
         {
+            ClientConnection = new ClientConnection(this);
+            ServerConnection = new ServerConnection(this);
 
+            updaterThread = new Thread(Updater);
+            updaterThread.IsBackground = true;
+            updaterThread.Start();
+        }
+
+        void Updater()
+        {
+            int count = 0;
+            while (!isDiposed)
+            {
+                Thread.Sleep(1000);
+                try
+                {
+                    OneSecUpdate?.Invoke(this, null);
+                    if (count >= 9)
+                    {
+                        count = 0;
+                        TenSecUpdate?.Invoke(this, null);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Log.Write(LogLevel.Error, ex.ToString());
+                }
+                count++;
+            }
         }
 
         public void Start()
@@ -50,13 +86,19 @@ namespace GatewayLogic
             udpSideA.Dispose();
             udpSideB.Dispose();
 
-            this.ChannelInformation.Dispose();
-            this.MonitorInformation.Dispose();
-            this.ReadNotifyInformation.Dispose();
-            this.SearchInformation.Dispose();
+            ChannelInformation.Dispose();
+            MonitorInformation.Dispose();
+            ReadNotifyInformation.Dispose();
+            SearchInformation.Dispose();
 
-            this.ClientConnection.Dispose();
-            this.ServerConnection.Dispose();
+            ClientConnection.Dispose();
+            ServerConnection.Dispose();
+        }
+
+        internal void DropClient(TcpClientConnection tcpClientConnection)
+        {
+            ClientConnection.Remove(tcpClientConnection);
+            ChannelInformation.DisconnectClient(tcpClientConnection);
         }
     }
 }

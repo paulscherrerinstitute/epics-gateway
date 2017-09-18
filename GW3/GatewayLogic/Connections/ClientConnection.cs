@@ -7,46 +7,25 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic.Connections
 {
-    class ClientConnection :IDisposable
+    class ClientConnection : GatewayConnectionCollection<TcpClientConnection>, IDisposable
     {
-        internal ClientConnection()
+        internal ClientConnection(Gateway gateway) : base(gateway)
         {
-
         }
 
-        readonly object lockDictionary = new object();
-        readonly Dictionary<IPEndPoint, TcpClientConnection> dictionary = new Dictionary<IPEndPoint, TcpClientConnection>();
-
-        public void Add(TcpClientConnection connection)
+        public void Add(TcpClientConnection client)
         {
-            lock (lockDictionary)
-            {
-                dictionary.Add(connection.RemoteEndPoint, connection);
-            }
+            lockDictionary.Wait();
+            dictionary.Add(client.RemoteEndPoint, client);
+            lockDictionary.Release();
         }
 
         public TcpClientConnection Get(IPEndPoint client)
         {
-            lock (lockDictionary)
-            {
-                return dictionary[client];
-            }
-        }
-
-        public void Dispose()
-        {
-            lock (lockDictionary)
-            {
-                dictionary.Clear();
-            }
-        }
-
-        internal void Remove(TcpClientConnection tcpClientConnection)
-        {
-            lock (lockDictionary)
-            {
-                dictionary.Remove(tcpClientConnection.RemoteEndPoint);
-            }
+            lockDictionary.Wait();
+            var result = dictionary[client];
+            lockDictionary.Release();
+            return result;
         }
     }
 }

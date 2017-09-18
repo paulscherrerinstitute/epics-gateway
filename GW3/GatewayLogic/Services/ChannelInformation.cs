@@ -27,12 +27,21 @@ namespace GatewayLogic.Services
             public bool ConnectionIsBuilding { get; internal set; }
 
             public List<ClientId> clients = new List<ClientId>();
+            public List<TcpClientConnection> connectedClients = new List<TcpClientConnection>();
 
             public ChannelInformationDetails(uint id, string channelName, SearchInformation.SearchInformationDetail search)
             {
                 GatewayId = id;
                 SearchInformation = search;
                 ChannelName = channelName;
+            }
+
+            internal void RegisterClient(TcpClientConnection connection)
+            {
+                lock (clients)
+                {
+                    connectedClients.Add(connection);
+                }
             }
 
             internal void AddClient(ClientId clientId)
@@ -51,6 +60,14 @@ namespace GatewayLogic.Services
                     var result = clients.ToList();
                     clients.Clear();
                     return result;
+                }
+            }
+
+            internal void DisconnectClient(TcpClientConnection connection)
+            {
+                lock (clients)
+                {
+                    connectedClients.Remove(connection);
                 }
             }
         }
@@ -81,6 +98,15 @@ namespace GatewayLogic.Services
             lock (dictionaryLock)
             {
                 return dictionary.ContainsKey(channelName);
+            }
+        }
+
+        internal void DisconnectClient(TcpClientConnection connection)
+        {
+            lock (dictionaryLock)
+            {
+                foreach (var i in dictionary.Values)
+                    i.DisconnectClient(connection);
             }
         }
 

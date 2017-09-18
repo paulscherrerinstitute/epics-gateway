@@ -56,9 +56,9 @@ namespace GWTest
             //Thread.Sleep(2000);
             Console.WriteLine(clientChannel.Get());
 
-            gateway.Dispose();
+            /*gateway.Dispose();
             server.Dispose();
-            client.Dispose();
+            client.Dispose();*/
 
         }
     }

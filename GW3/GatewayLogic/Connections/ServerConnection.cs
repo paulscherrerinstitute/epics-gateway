@@ -8,24 +8,21 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic.Connections
 {
-    class ServerConnection : IDisposable
+    class ServerConnection : GatewayConnectionCollection<TcpServerConnection>, IDisposable
     {
         public delegate void TcpConnectionReady(TcpServerConnection connection);
 
-        internal ServerConnection()
+        internal ServerConnection(Gateway gateway) : base(gateway)
         {
         }
 
-        SemaphoreSlim connectionLock = new SemaphoreSlim(1);
-        readonly Dictionary<IPEndPoint, TcpServerConnection> connections = new Dictionary<IPEndPoint, TcpServerConnection>();
-
         public void CreateConnection(Gateway gateway, IPEndPoint endPoint, TcpConnectionReady connectionReady)
         {
-            connectionLock.Wait();
-            if (connections.ContainsKey(endPoint))
+            lockDictionary.Wait();
+            if (dictionary.ContainsKey(endPoint))
             {
-                var result = connections[endPoint];
-                connectionLock.Release();
+                var result = dictionary[endPoint];
+                lockDictionary.Release();
                 result.WhenConnected(() =>
                 {
                     connectionReady(result);
@@ -33,27 +30,13 @@ namespace GatewayLogic.Connections
                 return;
             }
             var conn = new TcpServerConnection(gateway, endPoint);
-            connections.Add(endPoint, conn);
-            connectionLock.Release();
+            dictionary.Add(endPoint, conn);
+            lockDictionary.Release();
 
             conn.WhenConnected(() =>
             {
                 connectionReady(conn);
             });
-        }
-
-        public void Dispose()
-        {
-            connectionLock.Wait();
-            connections.Clear();
-            connectionLock.Release();
-        }
-
-        internal void Remove(TcpServerConnection tcpServerConnection)
-        {
-            connectionLock.Wait();
-            connections.Remove(tcpServerConnection.RemoteEndPoint);
-            connectionLock.Release();
         }
     }
 }

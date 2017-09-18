@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GatewayLogic.Connections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,7 +30,7 @@ namespace GatewayLogic.Commands
             //handlers[20] = new ClientName();
             //handlers[21] = new HostName();
             handlers[22] = new AccessRights();
-            //handlers[23] = new Echo();
+            handlers[23] = new Echo();
             //handlers[27] = new ChannelDisconnect();
         }
 

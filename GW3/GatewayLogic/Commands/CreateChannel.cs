@@ -26,6 +26,7 @@ namespace GatewayLogic.Commands
             locker.Wait();
             var searchInfo = connection.Gateway.SearchInformation.Get(channelName);
             var channelInfo = connection.Gateway.ChannelInformation.Get(channelName, searchInfo);
+            channelInfo.RegisterClient((TcpClientConnection)connection);
 
             lock (channelInfo.LockObject)
             {
