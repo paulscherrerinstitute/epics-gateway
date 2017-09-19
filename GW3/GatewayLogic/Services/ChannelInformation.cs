@@ -28,8 +28,10 @@ namespace GatewayLogic.Services
                       foreach (var channel in dictionary.Values)
                       {
                           if (channel.ShouldDrop)
+                          {
                               toDrop.Add(channel.ChannelName);
-                          channel.Drop(gateway);
+                              channel.Drop(gateway);
+                          }
                       }
                       toDrop.ForEach(row => dictionary.Remove(row));
                   }
@@ -204,11 +206,32 @@ namespace GatewayLogic.Services
                 foreach (var channel in dictionary.Values)
                 {
                     if (channel.NBConnected == 0)
+                    {
                         toDrop.Add(channel.ChannelName);
-                    channel.Drop(Gateway);
+                        channel.Drop(Gateway);
+                    }
                 }
                 toDrop.ForEach(row => dictionary.Remove(row));
             }
+        }
+
+        internal void ServerDrop(uint gatewayId)
+        {
+            lock (dictionaryLock)
+            {
+                var channel = dictionary.Values.FirstOrDefault(row => row.GatewayId == gatewayId);
+                if (channel == null)
+                    return;
+                var newPacket = DataPacket.Create(0);
+                newPacket.Command = 27;
+                foreach (var client in channel.GetClientConnections())
+                {
+                    newPacket.Parameter1 = client.Id;
+                    client.Connection.Send(newPacket);
+                }
+                dictionary.Remove(channel.ChannelName);
+            }
+            Gateway.MonitorInformation.Drop(gatewayId, false);
         }
     }
 }

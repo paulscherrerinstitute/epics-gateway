@@ -94,12 +94,13 @@ namespace GatewayLogic.Services
             }
         }
 
-        internal void Drop(uint channelId)
+        internal void Drop(uint channelId, bool sendToServer = true)
         {
             lock (dictionaryLock)
             {
                 var toDrop = monitors.Where(row => row.ChannelInformation.GatewayId == channelId).ToList();
-                toDrop.ForEach(row => row.Drop());
+                if(sendToServer)
+                    toDrop.ForEach(row => row.Drop());
                 monitors.RemoveAll(row => row.ChannelInformation.GatewayId == channelId);
             }
         }

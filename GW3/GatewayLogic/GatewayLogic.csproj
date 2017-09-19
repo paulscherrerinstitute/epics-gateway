@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\AccessRights.cs" />
+    <Compile Include="Commands\ChannelDisconnect.cs" />
     <Compile Include="Commands\CommandHandler.cs" />
     <Compile Include="Commands\CreateChannel.cs" />
     <Compile Include="Commands\Echo.cs" />
