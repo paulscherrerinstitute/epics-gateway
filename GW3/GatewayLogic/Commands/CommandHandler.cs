@@ -18,11 +18,11 @@ namespace GatewayLogic.Commands
         {
             handlers[0] = new Version();
             handlers[1] = new EventAdd();
-            //handlers[2] = new EventCancel();
+            handlers[2] = new EventCancel();
             //handlers[4] = new Write();
             handlers[6] = new Search();
             //handlers[11] = new ProtoError();
-            //handlers[12] = new ClearChannel();
+            handlers[12] = new ClearChannel();
             //handlers[13] = new Beacon();
             handlers[15] = new ReadNotify();
             handlers[18] = new CreateChannel();

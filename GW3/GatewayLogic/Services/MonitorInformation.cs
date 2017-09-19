@@ -17,6 +17,8 @@ namespace GatewayLogic.Services
         public class MonitorInformationDetail
         {
             public ChannelInformation.ChannelInformationDetails ChannelInformation { get; }
+
+
             public uint GatewayId { get; }
             public ushort DataType { get; }
             public uint DataCount { get; }
@@ -38,6 +40,23 @@ namespace GatewayLogic.Services
                 {
                     if (!clients.Any(row => row.Client == clientId.Client && row.Id == row.Id))
                         clients.Add(clientId);
+                }
+            }
+
+            internal void RemoveClient(Gateway gateway, uint clientId)
+            {
+                lock (gateway.MonitorInformation.dictionaryLock)
+                {
+                    lock (clients)
+                    {
+                        clients.RemoveAll(row => row.Id == clientId);
+                        // No more clients, we should cancel the monitor
+                        if (clients.Count == 0)
+                        {
+                            this.Drop();
+                            gateway.MonitorInformation.monitors.Remove(this);
+                        }
+                    }
                 }
             }
 
@@ -99,7 +118,7 @@ namespace GatewayLogic.Services
             lock (dictionaryLock)
             {
                 var toDrop = monitors.Where(row => row.ChannelInformation.GatewayId == channelId).ToList();
-                if(sendToServer)
+                if (sendToServer)
                     toDrop.ForEach(row => row.Drop());
                 monitors.RemoveAll(row => row.ChannelInformation.GatewayId == channelId);
             }
