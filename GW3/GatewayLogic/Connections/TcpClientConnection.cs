@@ -22,14 +22,12 @@ namespace GatewayLogic.Connections
         bool isDirty = false;
         //AutoResetEvent dataSent = new AutoResetEvent(true);
         private Splitter splitter;
-        public Gateway Gateway { get; }
         public bool IsDirty { get { return isDirty; } }
 
         public TcpClientConnection(Gateway gateway, IPEndPoint endPoint, Socket socket) : base(gateway)
         {
             splitter = new Splitter();
             this.Socket = socket;
-            Gateway = gateway;
         }
 
 

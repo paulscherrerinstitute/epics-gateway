@@ -15,6 +15,27 @@ namespace GatewayLogic.Services
         private uint nextId = 1;
         object counterLock = new object();
 
+        public Gateway Gateway { get; }
+
+        public ChannelInformation(Gateway gateway)
+        {
+            Gateway = Gateway;
+            gateway.TenSecUpdate += (sender, evt) =>
+              {
+                  lock (dictionaryLock)
+                  {
+                      var toDrop = new List<string>();
+                      foreach (var channel in dictionary.Values)
+                      {
+                          if (channel.ShouldDrop)
+                              toDrop.Add(channel.ChannelName);
+                          channel.Drop(gateway);
+                      }
+                      toDrop.ForEach(row => dictionary.Remove(row));
+                  }
+              };
+        }
+
         public class ChannelInformationDetails
         {
             public object LockObject { get; } = new object();
@@ -29,6 +50,8 @@ namespace GatewayLogic.Services
             public List<ClientId> clients = new List<ClientId>();
             public List<Client> connectedClients = new List<Client>();
 
+            public DateTime LastUse { get; internal set; } = DateTime.Now;
+
             public ChannelInformationDetails(uint id, string channelName, SearchInformation.SearchInformationDetail search)
             {
                 GatewayId = id;
@@ -40,6 +63,7 @@ namespace GatewayLogic.Services
             {
                 lock (clients)
                 {
+                    this.LastUse = DateTime.Now;
                     connectedClients.Add(new Client { Id = clientId, Connection = connection });
                 }
             }
@@ -75,7 +99,45 @@ namespace GatewayLogic.Services
             {
                 lock (clients)
                 {
-                    connectedClients.Remove(connectedClients.FirstOrDefault(row => row.Connection == connection));
+                    connectedClients.RemoveAll(row => row.Connection == connection);
+                    this.LastUse = DateTime.Now;
+                }
+            }
+
+            internal void Drop(Gateway gateway)
+            {
+                if (ServerId.HasValue)
+                {
+                    gateway.MonitorInformation.Drop(GatewayId);
+
+                    // Send clear channel
+                    var newPacket = DataPacket.Create(0);
+                    newPacket.Command = 12;
+                    newPacket.Parameter1 = GatewayId;
+                    newPacket.Parameter2 = ServerId.Value;
+                    TcpConnection.Send(newPacket);
+                }
+            }
+
+            public bool ShouldDrop
+            {
+                get
+                {
+                    lock (clients)
+                    {
+                        return (connectedClients.Count == 0 && (DateTime.Now - this.LastUse).TotalMinutes > 30);
+                    }
+                }
+            }
+
+            public int NBConnected
+            {
+                get
+                {
+                    lock (clients)
+                    {
+                        return connectedClients.Count;
+                    }
                 }
             }
         }
@@ -131,6 +193,21 @@ namespace GatewayLogic.Services
             lock (dictionaryLock)
             {
                 dictionary.Remove(channel.ChannelName);
+            }
+        }
+
+        internal void ForceDropUnused()
+        {
+            lock (dictionaryLock)
+            {
+                var toDrop = new List<string>();
+                foreach (var channel in dictionary.Values)
+                {
+                    if (channel.NBConnected == 0)
+                        toDrop.Add(channel.ChannelName);
+                    channel.Drop(Gateway);
+                }
+                toDrop.ForEach(row => dictionary.Remove(row));
             }
         }
     }

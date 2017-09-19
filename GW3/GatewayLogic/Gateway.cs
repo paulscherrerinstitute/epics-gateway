@@ -21,12 +21,12 @@ namespace GatewayLogic
         internal TcpClientListener tcpSideA;
         internal TcpClientListener tcpSideB;
 
-        internal ChannelInformation ChannelInformation { get; private set; } = new ChannelInformation();
+        internal ChannelInformation ChannelInformation { get; }
         internal MonitorInformation MonitorInformation { get; private set; } = new MonitorInformation();
         internal ReadNotifyInformation ReadNotifyInformation { get; private set; } = new ReadNotifyInformation();
         internal SearchInformation SearchInformation { get; private set; } = new SearchInformation();
-        internal ClientConnection ClientConnection { get;}
-        internal ServerConnection ServerConnection { get;}
+        internal ClientConnection ClientConnection { get; }
+        internal ServerConnection ServerConnection { get; }
         internal Log Log { get; private set; } = new Log();
 
         internal event EventHandler OneSecUpdate;
@@ -38,6 +38,8 @@ namespace GatewayLogic
 
         public Gateway()
         {
+            ChannelInformation = new ChannelInformation(this);
+
             ClientConnection = new ClientConnection(this);
             ServerConnection = new ServerConnection(this);
 
@@ -61,7 +63,7 @@ namespace GatewayLogic
                         TenSecUpdate?.Invoke(this, null);
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Log.Write(LogLevel.Error, ex.ToString());
                 }
@@ -76,6 +78,11 @@ namespace GatewayLogic
 
             udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
             udpSideB = new UdpResponseReceiver(this, this.Configuration.SideBEndPoint);
+        }
+
+        public void Cleanup()
+        {
+            ChannelInformation.ForceDropUnused();
         }
 
         public void Dispose()

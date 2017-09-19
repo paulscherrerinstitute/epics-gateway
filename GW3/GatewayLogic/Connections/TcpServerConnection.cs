@@ -40,20 +40,21 @@ namespace GatewayLogic.Connections
                 foreach (var action in toCallWhenReady)
                     action();
                 toCallWhenReady.Clear();
+
+                try
+                {
+                    socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
+                }
+                catch (Exception ex)
+                {
+                    //Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
+                    Dispose();
+                }
             }
         }
 
         internal void WhenConnected(Action whenDone)
         {
-            try
-            {
-                socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
-            }
-            catch (Exception ex)
-            {
-                Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
-            }
-
             lock (lockObject)
             {
                 if (isConnected)

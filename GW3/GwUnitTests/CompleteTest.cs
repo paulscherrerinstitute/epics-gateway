@@ -82,7 +82,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(1000)]
+        [Timeout(2000)]
         public void DisconnectServer()
         {
             var gateway = new Gateway();
@@ -129,7 +129,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(30000)]
+        [Timeout(1000)]
         public void ReconnectServer()
         {
             var gateway = new Gateway();

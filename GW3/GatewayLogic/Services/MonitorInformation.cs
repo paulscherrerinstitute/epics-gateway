@@ -48,6 +48,17 @@ namespace GatewayLogic.Services
                     return clients.ToList();
                 }
             }
+
+            internal void Drop()
+            {
+                var newPacket = DataPacket.Create(0);
+                newPacket.Command = 2;
+                newPacket.DataType = DataType;
+                newPacket.DataCount = DataCount;
+                newPacket.Parameter1 = ChannelInformation.ServerId.Value;
+                newPacket.Parameter2 = GatewayId;
+                this.ChannelInformation.TcpConnection.Send(newPacket);
+            }
         }
         public MonitorInformationDetail Get(ChannelInformation.ChannelInformationDetails channelInformation, ushort dataType, uint dataCount)
         {
@@ -80,6 +91,16 @@ namespace GatewayLogic.Services
             lock (dictionaryLock)
             {
                 monitors.Clear();
+            }
+        }
+
+        internal void Drop(uint channelId)
+        {
+            lock (dictionaryLock)
+            {
+                var toDrop = monitors.Where(row => row.ChannelInformation.GatewayId == channelId).ToList();
+                toDrop.ForEach(row => row.Drop());
+                monitors.RemoveAll(row => row.ChannelInformation.GatewayId == channelId);
             }
         }
     }
