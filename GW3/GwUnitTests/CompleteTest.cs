@@ -195,5 +195,47 @@ namespace GwUnitTests
             gateway.Dispose();
             client.Dispose();
         }
+
+        [TestMethod]
+        [Timeout(2000)]
+        public void CancelMonitorAndRebuild()
+        {
+            var gateway = new Gateway();
+            gateway.Configuration.SideA = "127.0.0.1:5432";
+            gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+            gateway.Configuration.SideB = "127.0.0.1:5055";
+            gateway.Start();
+
+            // Serverside
+            var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056);
+            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+            serverChannel.Value = "Works fine!";
+
+            // Client
+
+            var client = new CAClient();
+            client.Configuration.WaitTimeout = 200;
+            client.Configuration.SearchAddress = "127.0.0.1:5432";
+            var clientChannel = client.CreateChannel<string>("TEST-DATE");
+            server.Start();
+
+            var autoReset = new AutoResetEvent(false);
+            ChannelValueDelegate<string> monitorFunction = (sender, newValue) =>
+            {
+                Console.WriteLine("==> " + newValue);
+                autoReset.Set();
+            };
+
+            clientChannel.MonitorChanged += monitorFunction;
+            autoReset.WaitOne();
+            clientChannel.MonitorChanged -= monitorFunction;
+            clientChannel.MonitorChanged += monitorFunction;
+            autoReset.WaitOne();
+
+            server.Dispose();
+            gateway.Dispose();
+            client.Dispose();
+        }
     }
 }
