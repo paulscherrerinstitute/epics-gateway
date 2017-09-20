@@ -56,6 +56,7 @@
     <Compile Include="Commands\ReadNotify.cs" />
     <Compile Include="Commands\Search.cs" />
     <Compile Include="Commands\Version.cs" />
+    <Compile Include="Commands\Write.cs" />
     <Compile Include="Commands\WriteNotify.cs" />
     <Compile Include="Configuration\Configuration.cs" />
     <Compile Include="Connections\GatewayConnectionCollection.cs" />

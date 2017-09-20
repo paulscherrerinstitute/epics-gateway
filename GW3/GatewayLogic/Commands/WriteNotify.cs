@@ -14,6 +14,7 @@ namespace GatewayLogic.Commands
             }
             connection.Gateway.Log.Write(Services.LogLevel.Detail, "Write notify on " + channel.ChannelName);
             var write = connection.Gateway.WriteNotifyInformation.Get(channel, packet.Parameter2, (TcpClientConnection)connection);
+            packet.Parameter1 = channel.ServerId.Value;
             packet.Parameter2 = write.GatewayId;
             packet.Destination = channel.TcpConnection.RemoteEndPoint;
             channel.TcpConnection.Send(packet);
