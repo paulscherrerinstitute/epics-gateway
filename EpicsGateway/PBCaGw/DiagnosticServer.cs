@@ -72,7 +72,14 @@ namespace PBCaGw
             channelMem.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC5;
             channelMem.EngineeringUnits = "Mb";
             channelMem.PrepareRecord += new EventHandler(channelMEM_PrepareRecord);
-            ramCounter = new PerformanceCounter("Memory", "Available MBytes");
+            try
+            {
+                ramCounter = new PerformanceCounter("Memory", "Available MBytes");
+            }
+            catch
+            {
+                //ramCounter = new PerformanceCounter("Arbeitsspeicher", "Verfügbare MB");
+            }
             // NB Client connections
             channelNbClientConn = diagServer.CreateRecord<CAIntRecord>(gateway.Configuration.GatewayName + ":NBCLIENTS");
             channelNbClientConn.CanBeRemotlySet = false;
@@ -263,12 +270,24 @@ namespace PBCaGw
 
         void channelMEM_PrepareRecord(object sender, EventArgs e)
         {
-            channelMem.Value = ramCounter.NextValue();
+            try
+            {
+                channelMem.Value = ramCounter.NextValue();
+            }
+            catch
+            {
+            }
         }
 
         void channelCPU_PrepareRecord(object sender, EventArgs e)
         {
-            channelCpu.Value = cpuCounter.NextValue();
+            try
+            {
+                channelCpu.Value = cpuCounter.NextValue();
+            }
+            catch
+            {
+            }
         }
         // ReSharper restore InconsistentNaming
 
