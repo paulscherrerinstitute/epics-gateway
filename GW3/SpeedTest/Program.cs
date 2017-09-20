@@ -55,10 +55,10 @@ namespace SpeedTest
                          });
                         sw.Stop();
                         Console.WriteLine("Time: " + sw.Elapsed.ToString());
-                        Console.ReadKey();
                     }
                 }
             }
+            Console.ReadKey();
         }
     }
 }
