@@ -142,6 +142,9 @@ namespace GatewayLogic.Services
                     }
                 }
             }
+
+            public uint DataCount { get; set; }
+            public ushort DataType { get; set; }
         }
 
         public ChannelInformationDetails Get(uint id)

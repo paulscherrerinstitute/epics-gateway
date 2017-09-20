@@ -48,7 +48,6 @@ namespace GwUnitTests
 
                             autoReset.WaitOne();
                             Assert.AreEqual("Works fine!", valueFound);
-
                         }
                     }
                 }
@@ -261,37 +260,123 @@ namespace GwUnitTests
         [Timeout(2000)]
         public void DoubleMonitor()
         {
-            var gateway = new Gateway();
-            gateway.Configuration.SideA = "127.0.0.1:5432";
-            gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
-            gateway.Configuration.SideB = "127.0.0.1:5055";
-            gateway.Start();
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Start();
 
-            // Serverside
-            var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056);
-            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
-            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
-            serverChannel.Value = "Works fine!";
-            server.Start();
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                    serverChannel.Value = "Works fine!";
+                    server.Start();
 
-            // Client
+                    // Client
 
-            var clientA = new CAClient();
-            clientA.Configuration.WaitTimeout = 200;
-            clientA.Configuration.SearchAddress = "127.0.0.1:5432";
-            var clientChannelA = clientA.CreateChannel<string>("TEST-DATE");
+                    using (var clientA = new CAClient())
+                    {
+                        using (var clientB = new CAClient())
+                        {
+                            clientA.Configuration.WaitTimeout = 200;
+                            clientA.Configuration.SearchAddress = "127.0.0.1:5432";
+                            var clientChannelA = clientA.CreateChannel<string>("TEST-DATE");
 
-            var clientB = new CAClient();
-            clientB.Configuration.WaitTimeout = 200;
-            clientB.Configuration.SearchAddress = "127.0.0.1:5432";
-            var clientChannelB = clientB.CreateChannel<string>("TEST-DATE");
+                            clientB.Configuration.WaitTimeout = 200;
+                            clientB.Configuration.SearchAddress = "127.0.0.1:5432";
+                            var clientChannelB = clientB.CreateChannel<string>("TEST-DATE");
 
-            var autoResetA = new AutoResetEvent(false);
-            var autoResetB = new AutoResetEvent(false);
+                            using (var autoResetA = new AutoResetEvent(false))
+                            {
+                                using (var autoResetB = new AutoResetEvent(false))
+                                {
+                                    Console.WriteLine("Add first monitor");
+                                    clientChannelA.MonitorChanged += (chan, newValue) =>
+                                      {
+                                          Console.WriteLine("== A > " + newValue);
+                                          autoResetA.Set();
+                                      };
 
-            server.Dispose();
-            gateway.Dispose();
-            clientA.Dispose();
+                                    Console.WriteLine("Add second monitor");
+                                    clientChannelB.MonitorChanged += (chan, newValue) =>
+                                    {
+                                        Console.WriteLine("== B > " + newValue);
+                                        autoResetB.Set();
+                                    };
+
+                                    autoResetA.WaitOne();
+
+                                    autoResetB.WaitOne();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        [Timeout(2000)]
+        public void DoubleDifferedMonitor()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Start();
+
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                    serverChannel.Value = "Works fine!";
+                    server.Start();
+
+                    // Client
+
+                    using (var clientA = new CAClient())
+                    {
+                        using (var clientB = new CAClient())
+                        {
+                            clientA.Configuration.WaitTimeout = 200;
+                            clientA.Configuration.SearchAddress = "127.0.0.1:5432";
+                            var clientChannelA = clientA.CreateChannel<string>("TEST-DATE");
+
+                            clientB.Configuration.WaitTimeout = 200;
+                            clientB.Configuration.SearchAddress = "127.0.0.1:5432";
+                            var clientChannelB = clientB.CreateChannel<string>("TEST-DATE");
+
+                            using (var autoResetA = new AutoResetEvent(false))
+                            {
+                                using (var autoResetB = new AutoResetEvent(false))
+                                {
+                                    Console.WriteLine("Add first monitor");
+                                    clientChannelA.MonitorChanged += (chan, newValue) =>
+                                    {
+                                        Console.WriteLine("== A > " + newValue);
+                                        autoResetA.Set();
+                                    };
+
+                                    autoResetA.WaitOne();
+
+                                    Console.WriteLine("Add second monitor");
+                                    clientChannelB.MonitorChanged += (chan, newValue) =>
+                                    {
+                                        Console.WriteLine("== B > " + newValue);
+                                        autoResetB.Set();
+                                    };
+
+
+                                    autoResetB.WaitOne();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

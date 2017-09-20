@@ -177,7 +177,7 @@ namespace GatewayLogic.Connections
                 {
                     foreach (var p in splitter.Split(mainPacket))
                     {
-                        //Log.Write("=> Packet size " + p.MessageSize + " (command " + p.Command + ")");
+                        //Console.WriteLine("=> Packet size " + p.MessageSize + " (command " + p.Command + ")");
                         //Log.Write("Packet number " + (pi++) + " command " + p.Command);
                         p.Sender = (IPEndPoint)socket.RemoteEndPoint;
                         Commands.CommandHandler.ExecuteRequestHandler(p.Command, this, p);

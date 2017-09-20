@@ -42,14 +42,16 @@ namespace GatewayLogic.Commands
                     resPacket.Parameter1 = packet.Parameter1;
                     resPacket.Parameter2 = (uint)(SecurityAccess.ALL);
                     resPacket.Destination = packet.Sender;
-                    connection.Send(packet);
+                    connection.Send(resPacket);
 
                     resPacket = (DataPacket)packet.Clone();
                     resPacket.Command = 18;
                     resPacket.Destination = packet.Sender;
+                    resPacket.DataType = channelInfo.DataType;
+                    resPacket.DataCount = channelInfo.DataCount;
                     resPacket.Parameter1 = packet.Parameter1;
                     resPacket.Parameter2 = channelInfo.GatewayId;
-                    connection.Send(packet);
+                    connection.Send(resPacket);
                 }
                 else
                 {
@@ -87,6 +89,9 @@ namespace GatewayLogic.Commands
             connection.Gateway.Log.Write(Services.LogLevel.Detail, "Answer for create channel " + channelInfo.ChannelName);
             lock (channelInfo.LockObject)
             {
+                channelInfo.DataCount = packet.DataCount;
+                channelInfo.DataType = packet.DataType;
+
                 channelInfo.ServerId = packet.Parameter2;
                 locker.Release();
                 foreach (var client in channelInfo.GetClients())

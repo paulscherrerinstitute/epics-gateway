@@ -28,9 +28,26 @@ namespace GatewayLogic.Commands
         public override void DoResponse(GatewayConnection connection, DataPacket packet)
         {
             var read = connection.Gateway.ReadNotifyInformation.GetByGatewayId(packet.Parameter2);
-            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Read notify response on " + read.ChannelInformation.ChannelName);
-            packet.Parameter2 = read.ClientId;
-            read.Client.Send(packet);
+
+            if (read.IsEventAdd)
+            {
+                var client = read.Monitor.GetClients().FirstOrDefault(row => row.Id == read.EventClientId);
+
+                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Read notify response for event add on " + read.ChannelInformation.ChannelName);
+                packet.Command = 1;
+                packet.Parameter1 = 1;
+                packet.Parameter2 = read.ClientId;
+                read.Client.Send(packet);
+
+                if(client.WaitingReadyNotify)
+                    client.WaitingReadyNotify = false;
+            }
+            else
+            {
+                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Read notify response on " + read.ChannelInformation.ChannelName);
+                packet.Parameter2 = read.ClientId;
+                read.Client.Send(packet);
+            }
         }
     }
 }

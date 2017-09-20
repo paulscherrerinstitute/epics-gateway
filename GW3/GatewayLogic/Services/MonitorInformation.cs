@@ -22,7 +22,8 @@ namespace GatewayLogic.Services
             public uint GatewayId { get; }
             public ushort DataType { get; }
             public uint DataCount { get; }
-
+            public bool FirstTime { get; set; } = true;
+            public bool HasReceivedFirstResult { get; set; } = false;
 
             public List<ClientId> clients = new List<ClientId>();
 

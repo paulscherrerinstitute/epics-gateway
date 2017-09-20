@@ -11,5 +11,6 @@ namespace GatewayLogic.Services
     {
         public uint Id { get; set; }
         public IPEndPoint Client { get; set; }
+        public bool WaitingReadyNotify { get; set; } = false;
     }
 }

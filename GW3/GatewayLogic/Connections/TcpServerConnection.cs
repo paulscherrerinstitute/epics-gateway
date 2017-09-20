@@ -101,10 +101,10 @@ namespace GatewayLogic.Connections
 
             foreach (var p in splitter.Split(mainPacket))
             {
-                //Log.Write("+> Packet size " + p.MessageSize + " (command " + p.Command + ")");
+                //Console.WriteLine("+> Packet size " + p.MessageSize + " (command " + p.Command + ")");
                 p.Sender = RemoteEndPoint;
                 Commands.CommandHandler.ExecuteResponseHandler(p.Command, this, p);
-                //Log.Write(" ++> End of packet");
+                //Console.WriteLine(" ++> End of packet");
             }
         }
 
@@ -123,6 +123,7 @@ namespace GatewayLogic.Connections
                 try
                 {
                     socket.Send(packet.Data, packet.BufferSize, SocketFlags.None);
+                    //Console.WriteLine("Sending data to server: " + packet.Command);
                 }
                 catch (Exception ex)
                 {

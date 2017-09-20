@@ -21,7 +21,9 @@ namespace GatewayLogic.Services
             public uint GatewayId { get; }
             public uint ClientId { get; }
             public TcpClientConnection Client { get; }
-
+            public bool IsEventAdd { get; set; } = false;
+            public uint EventClientId { get; internal set; }
+            public MonitorInformation.MonitorInformationDetail Monitor { get; set; }
 
             public ReadNotifyInformationDetail(uint id, ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
             {
