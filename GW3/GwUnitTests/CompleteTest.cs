@@ -15,190 +15,251 @@ namespace GwUnitTests
         [Timeout(1000)]
         public void CheckMonitor()
         {
-            var gateway = new Gateway();
-            gateway.Configuration.SideA = "127.0.0.1:5432";
-            gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
-            gateway.Configuration.SideB = "127.0.0.1:5055";
-            gateway.Start();
-
-            var autoReset = new AutoResetEvent(false);
-            // Serverside
-            var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056);
-            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
-            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
-            serverChannel.Value = "Works fine!";
-            string valueFound = null;
-
-            // Client
-
-            var client = new CAClient();
-            client.Configuration.SearchAddress = "127.0.0.1:5432";
-            var clientChannel = client.CreateChannel<string>("TEST-DATE");
-            clientChannel.MonitorChanged += (sender, newValue) =>
+            using (var gateway = new Gateway())
             {
-                valueFound = newValue;
-                autoReset.Set();
-            };
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Start();
 
-            server.Start();
+                using (var autoReset = new AutoResetEvent(false))
+                {
+                    // Serverside
+                    using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                    {
+                        var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                        serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                        serverChannel.Value = "Works fine!";
+                        string valueFound = null;
 
-            autoReset.WaitOne();
-            Assert.AreEqual("Works fine!", valueFound);
+                        // Client
 
-            gateway.Dispose();
-            server.Dispose();
-            client.Dispose();
-            autoReset.Dispose();
+                        using (var client = new CAClient())
+                        {
+                            client.Configuration.SearchAddress = "127.0.0.1:5432";
+                            var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                            clientChannel.MonitorChanged += (sender, newValue) =>
+                            {
+                                valueFound = newValue;
+                                autoReset.Set();
+                            };
+
+                            server.Start();
+
+                            autoReset.WaitOne();
+                            Assert.AreEqual("Works fine!", valueFound);
+
+                        }
+                    }
+                }
+            }
         }
 
         [TestMethod]
         [Timeout(1000)]
         public void CheckGet()
         {
-            var gateway = new Gateway();
-            gateway.Configuration.SideA = "127.0.0.1:5432";
-            gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
-            gateway.Configuration.SideB = "127.0.0.1:5055";
-            gateway.Start();
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Start();
 
-            // Serverside
-            var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056);
-            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
-            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
-            serverChannel.Value = "Works fine!";
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                    serverChannel.Value = "Works fine!";
 
-            // Client
+                    // Client
 
-            var client = new CAClient();
-            client.Configuration.SearchAddress = "127.0.0.1:5432";
-            var clientChannel = client.CreateChannel<string>("TEST-DATE");
-            server.Start();
+                    using (var client = new CAClient())
+                    {
+                        client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                        server.Start();
 
-            Assert.AreEqual("Works fine!", clientChannel.Get());
-
-            gateway.Dispose();
-            server.Dispose();
-            client.Dispose();
+                        Assert.AreEqual("Works fine!", clientChannel.Get());
+                    }
+                }
+            }
         }
 
         [TestMethod]
         [Timeout(2000)]
         public void DisconnectServer()
         {
-            var gateway = new Gateway();
-            gateway.Configuration.SideA = "127.0.0.1:5432";
-            gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
-            gateway.Configuration.SideB = "127.0.0.1:5055";
-            gateway.Start();
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Start();
 
-            // Serverside
-            var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056);
-            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
-            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
-            serverChannel.Value = "Works fine!";
-
-            // Client
-
-            var client = new CAClient();
-            client.Configuration.WaitTimeout = 200;
-            client.Configuration.SearchAddress = "127.0.0.1:5432";
-            var clientChannel = client.CreateChannel<string>("TEST-DATE");
-            server.Start();
-
-            Assert.AreEqual("Works fine!", clientChannel.Get());
-
-            var autoReset = new AutoResetEvent(false);
-            clientChannel.StatusChanged += (sender, newStatus) =>
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
                 {
-                    if (newStatus == EpicsSharp.ChannelAccess.Constants.ChannelStatus.DISCONNECTED)
-                        autoReset.Set();
-                };
-            server.Dispose();
-            // Need to do something with the channel to trigger the server and see the disconnection
-            try
-            {
-                clientChannel.Get();
-            }
-            catch
-            {
-            }
-            autoReset.WaitOne();
+                    var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                    serverChannel.Value = "Works fine!";
 
-            gateway.Dispose();
-            client.Dispose();
+                    // Client
+
+                    using (var client = new CAClient())
+                    {
+                        client.Configuration.WaitTimeout = 200;
+                        client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                        server.Start();
+
+                        Assert.AreEqual("Works fine!", clientChannel.Get());
+
+                        using (var autoReset = new AutoResetEvent(false))
+                        {
+                            clientChannel.StatusChanged += (sender, newStatus) =>
+                                {
+                                    if (newStatus == EpicsSharp.ChannelAccess.Constants.ChannelStatus.DISCONNECTED)
+                                        autoReset.Set();
+                                };
+                            server.Dispose();
+                            // Need to do something with the channel to trigger the server and see the disconnection
+                            try
+                            {
+                                clientChannel.Get();
+                            }
+                            catch
+                            {
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         [TestMethod]
         [Timeout(1000)]
         public void ReconnectServer()
         {
-            var gateway = new Gateway();
-            gateway.Configuration.SideA = "127.0.0.1:5432";
-            gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
-            gateway.Configuration.SideB = "127.0.0.1:5055";
-            gateway.Start();
-
-            // Serverside
-            var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056);
-            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
-            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
-            serverChannel.Value = "Works fine!";
-
-            // Client
-
-            var client = new CAClient();
-            client.Configuration.WaitTimeout = 200;
-            client.Configuration.SearchAddress = "127.0.0.1:5432";
-            var clientChannel = client.CreateChannel<string>("TEST-DATE");
-            clientChannel.MonitorChanged += (channel, newValue) =>
-              {
-              };
-            server.Start();
-
-            Assert.AreEqual("Works fine!", clientChannel.Get());
-
-            var autoReset = new AutoResetEvent(false);
-            ChannelStatusDelegate disconnectFunction = (sender, newStatus) =>
-             {
-                 if (newStatus == EpicsSharp.ChannelAccess.Constants.ChannelStatus.DISCONNECTED)
-                     autoReset.Set();
-             };
-            clientChannel.StatusChanged += disconnectFunction;
-            server.Dispose();
-            // Need to do something with the channel to trigger the server and see the disconnection
-            try
+            using (var gateway = new Gateway())
             {
-                clientChannel.Get();
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Start();
+
+                // Serverside
+                var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056);
+                var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                serverChannel.Value = "Works fine!";
+
+                // Client
+
+                using (var client = new CAClient())
+                {
+                    client.Configuration.WaitTimeout = 200;
+                    client.Configuration.SearchAddress = "127.0.0.1:5432";
+                    var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                    clientChannel.MonitorChanged += (channel, newValue) =>
+                      {
+                      };
+                    server.Start();
+
+                    Assert.AreEqual("Works fine!", clientChannel.Get());
+
+                    using (var autoReset = new AutoResetEvent(false))
+                    {
+                        ChannelStatusDelegate disconnectFunction = (sender, newStatus) =>
+                         {
+                             if (newStatus == EpicsSharp.ChannelAccess.Constants.ChannelStatus.DISCONNECTED)
+                                 autoReset.Set();
+                         };
+                        clientChannel.StatusChanged += disconnectFunction;
+                        server.Dispose();
+                        // Need to do something with the channel to trigger the server and see the disconnection
+                        try
+                        {
+                            clientChannel.Get();
+                        }
+                        catch
+                        {
+                        }
+                        autoReset.WaitOne();
+
+                        clientChannel.StatusChanged -= disconnectFunction;
+                        ChannelStatusDelegate connectFunction = (sender, newStatus) =>
+                        {
+                            if (newStatus == EpicsSharp.ChannelAccess.Constants.ChannelStatus.CONNECTED)
+                                autoReset.Set();
+                        };
+                        clientChannel.StatusChanged += connectFunction;
+
+                        server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056);
+                        serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                        serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                        serverChannel.Value = "Works fine!";
+                        server.Start();
+
+                        autoReset.WaitOne();
+
+                        server.Dispose();
+                    }
+                }
             }
-            catch
-            {
-            }
-            autoReset.WaitOne();
-
-            clientChannel.StatusChanged -= disconnectFunction;
-            ChannelStatusDelegate connectFunction = (sender, newStatus) =>
-            {
-                if (newStatus == EpicsSharp.ChannelAccess.Constants.ChannelStatus.CONNECTED)
-                    autoReset.Set();
-            };
-            clientChannel.StatusChanged += connectFunction;
-
-            server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056);
-            serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
-            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
-            serverChannel.Value = "Works fine!";
-            server.Start();
-
-            autoReset.WaitOne();
-
-            server.Dispose();
-            gateway.Dispose();
-            client.Dispose();
         }
 
         [TestMethod]
         [Timeout(2000)]
         public void CancelMonitorAndRebuild()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Start();
+
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                    serverChannel.Value = "Works fine!";
+
+                    // Client
+
+                    using (var client = new CAClient())
+                    {
+                        client.Configuration.WaitTimeout = 200;
+                        client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                        server.Start();
+
+                        using (var autoReset = new AutoResetEvent(false))
+                        {
+                            ChannelValueDelegate<string> monitorFunction = (sender, newValue) =>
+                            {
+                                Console.WriteLine("==> " + newValue);
+                                autoReset.Set();
+                            };
+
+                            clientChannel.MonitorChanged += monitorFunction;
+                            autoReset.WaitOne();
+                            clientChannel.MonitorChanged -= monitorFunction;
+                            clientChannel.MonitorChanged += monitorFunction;
+                            autoReset.WaitOne();
+                        }
+
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        [Timeout(2000)]
+        public void DoubleMonitor()
         {
             var gateway = new Gateway();
             gateway.Configuration.SideA = "127.0.0.1:5432";
@@ -211,31 +272,26 @@ namespace GwUnitTests
             var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
             serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
             serverChannel.Value = "Works fine!";
+            server.Start();
 
             // Client
 
-            var client = new CAClient();
-            client.Configuration.WaitTimeout = 200;
-            client.Configuration.SearchAddress = "127.0.0.1:5432";
-            var clientChannel = client.CreateChannel<string>("TEST-DATE");
-            server.Start();
+            var clientA = new CAClient();
+            clientA.Configuration.WaitTimeout = 200;
+            clientA.Configuration.SearchAddress = "127.0.0.1:5432";
+            var clientChannelA = clientA.CreateChannel<string>("TEST-DATE");
 
-            var autoReset = new AutoResetEvent(false);
-            ChannelValueDelegate<string> monitorFunction = (sender, newValue) =>
-            {
-                Console.WriteLine("==> " + newValue);
-                autoReset.Set();
-            };
+            var clientB = new CAClient();
+            clientB.Configuration.WaitTimeout = 200;
+            clientB.Configuration.SearchAddress = "127.0.0.1:5432";
+            var clientChannelB = clientB.CreateChannel<string>("TEST-DATE");
 
-            clientChannel.MonitorChanged += monitorFunction;
-            autoReset.WaitOne();
-            clientChannel.MonitorChanged -= monitorFunction;
-            clientChannel.MonitorChanged += monitorFunction;
-            autoReset.WaitOne();
+            var autoResetA = new AutoResetEvent(false);
+            var autoResetB = new AutoResetEvent(false);
 
             server.Dispose();
             gateway.Dispose();
-            client.Dispose();
+            clientA.Dispose();
         }
     }
 }
