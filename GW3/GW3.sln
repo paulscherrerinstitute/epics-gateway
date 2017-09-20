@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChannelAccess", "..\..\Epic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GwUnitTests", "GwUnitTests\GwUnitTests.csproj", "{A2D9A7B6-00D7-4AD5-A755-91D3941DED70}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedTest", "SpeedTest\SpeedTest.csproj", "{D63E9444-0762-48E7-B40E-7D957EF98186}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{A2D9A7B6-00D7-4AD5-A755-91D3941DED70}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2D9A7B6-00D7-4AD5-A755-91D3941DED70}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2D9A7B6-00D7-4AD5-A755-91D3941DED70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D63E9444-0762-48E7-B40E-7D957EF98186}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D63E9444-0762-48E7-B40E-7D957EF98186}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D63E9444-0762-48E7-B40E-7D957EF98186}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D63E9444-0762-48E7-B40E-7D957EF98186}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -47,7 +53,7 @@ Global
 		SolutionGuid = {68B36B5E-C4FC-4605-A5E1-8A59433EA06F}
 	EndGlobalSection
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 6
+		SccNumberOfProjects = 7
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = http://tfs.psi.ch:8080/tfs/defaultcollection
 		SccLocalPath0 = .
@@ -66,5 +72,8 @@ Global
 		SccProjectUniqueName5 = GwUnitTests\\GwUnitTests.csproj
 		SccProjectName5 = GwUnitTests
 		SccLocalPath5 = GwUnitTests
+		SccProjectUniqueName6 = SpeedTest\\SpeedTest.csproj
+		SccProjectName6 = SpeedTest
+		SccLocalPath6 = SpeedTest
 	EndGlobalSection
 EndGlobal

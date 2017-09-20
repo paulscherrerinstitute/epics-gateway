@@ -28,7 +28,7 @@ namespace GatewayLogic
         internal SearchInformation SearchInformation { get; private set; } = new SearchInformation();
         internal ClientConnection ClientConnection { get; }
         internal ServerConnection ServerConnection { get; }
-        internal Log Log { get; private set; } = new Log();
+        public Log Log { get; } = new Log();
 
         internal event EventHandler OneSecUpdate;
         internal event EventHandler TenSecUpdate;

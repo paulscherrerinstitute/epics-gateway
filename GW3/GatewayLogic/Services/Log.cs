@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic.Services
 {
-    internal enum LogLevel : int
+    public enum LogLevel : int
     {
         Detail = 0,
         Command,
@@ -14,13 +14,13 @@ namespace GatewayLogic.Services
         Error
     }
 
-    internal class Log
+    public class Log
     {
         public delegate void LogHandler(string source, string message);
         public delegate bool LogFilter(LogLevel level);
 
         public event LogHandler Handler = Log.DefaultHandler;
-        public event LogFilter Filter = Log.ShowAll;
+        public LogFilter Filter = Log.ShowAll;
 
         private static bool ShowAll(LogLevel level)
         {
@@ -41,6 +41,8 @@ namespace GatewayLogic.Services
             [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
             [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
         {
+            if (this.Filter != null && !this.Filter(level))
+                return;
             Handler?.Invoke(sourceFilePath.Split(new char[] { '\\' }).Last().Split(new char[] { '.' }).First() + "." + memberName + ":" + sourceLineNumber, message);
         }
     }
