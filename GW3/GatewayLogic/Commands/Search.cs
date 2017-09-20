@@ -26,7 +26,7 @@ namespace GatewayLogic.Commands
             var record = connection.Gateway.SearchInformation.Get(channelName);
 
             // Connection known, we answer we knows it
-            if(record.Server != null)
+            if (record.Server != null)
             {
                 connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search cached for: " + channelName);
                 var newPacket = (DataPacket)packet.Clone();
@@ -50,7 +50,7 @@ namespace GatewayLogic.Commands
             }
 
             connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search sent for: " + channelName);
-            record.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter1 });
+            record.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter1, When = DateTime.Now });
             // ReSharper disable PossibleInvalidOperationException
             uint gwcid = record.GatewayId;
             // ReSharper restore PossibleInvalidOperationException

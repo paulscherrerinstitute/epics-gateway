@@ -23,6 +23,8 @@ namespace GatewayLogic.Commands
         public override void DoResponse(GatewayConnection connection, DataPacket packet)
         {
             var write = connection.Gateway.WriteNotifyInformation.GetByGatewayId(packet.Parameter2);
+            if (write == null)
+                return;
             connection.Gateway.Log.Write(Services.LogLevel.Detail, "Write notify response on " + write.ChannelInformation.ChannelName);
             packet.Parameter2 = write.ClientId;
             write.Client.Send(packet);

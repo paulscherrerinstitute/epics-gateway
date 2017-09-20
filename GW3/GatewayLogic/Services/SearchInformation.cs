@@ -31,6 +31,7 @@ namespace GatewayLogic.Services
             {
                 lock (clients)
                 {
+                    clients.RemoveAll(row => (DateTime.Now - row.When).TotalSeconds > 1);
                     if (!clients.Any(row => row.Client == clientId.Client && row.Id == row.Id))
                         clients.Add(clientId);
                 }
@@ -40,6 +41,8 @@ namespace GatewayLogic.Services
             {
                 lock (clients)
                 {
+                    clients.RemoveAll(row => (DateTime.Now - row.When).TotalSeconds > 1);
+
                     var result = clients.ToList();
                     clients.Clear();
                     return result;
