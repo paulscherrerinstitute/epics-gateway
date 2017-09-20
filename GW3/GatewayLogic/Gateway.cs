@@ -24,6 +24,7 @@ namespace GatewayLogic
         internal ChannelInformation ChannelInformation { get; }
         internal MonitorInformation MonitorInformation { get; private set; } = new MonitorInformation();
         internal ReadNotifyInformation ReadNotifyInformation { get; private set; } = new ReadNotifyInformation();
+        internal WriteNotifyInformation WriteNotifyInformation { get; private set; } = new WriteNotifyInformation();
         internal SearchInformation SearchInformation { get; private set; } = new SearchInformation();
         internal ClientConnection ClientConnection { get; }
         internal ServerConnection ServerConnection { get; }

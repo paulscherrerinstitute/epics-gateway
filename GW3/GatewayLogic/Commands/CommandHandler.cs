@@ -26,7 +26,7 @@ namespace GatewayLogic.Commands
             //handlers[13] = new Beacon();
             handlers[15] = new ReadNotify();
             handlers[18] = new CreateChannel();
-            //handlers[19] = new WriteNotify();
+            handlers[19] = new WriteNotify();
             //handlers[20] = new ClientName();
             //handlers[21] = new HostName();
             handlers[22] = new AccessRights();

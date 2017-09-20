@@ -48,6 +48,7 @@ namespace GatewayLogic.Commands
                 packet.Parameter2 = read.ClientId;
                 read.Client.Send(packet);
             }
+            connection.Gateway.ReadNotifyInformation.Remove(read);
         }
     }
 }

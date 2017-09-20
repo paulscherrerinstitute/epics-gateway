@@ -7,25 +7,22 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic.Services
 {
-    class ReadNotifyInformation : IDisposable
+    class WriteNotifyInformation : IDisposable
     {
         readonly object dictionaryLock = new object();
-        readonly List<ReadNotifyInformationDetail> reads = new List<ReadNotifyInformationDetail>();
+        readonly List<WriteNotifyInformationDetail> writes = new List<WriteNotifyInformationDetail>();
 
         private uint nextId = 1;
         object counterLock = new object();
 
-        public class ReadNotifyInformationDetail
+        public class WriteNotifyInformationDetail
         {
             public ChannelInformation.ChannelInformationDetails ChannelInformation { get; }
             public uint GatewayId { get; }
             public uint ClientId { get; }
             public TcpClientConnection Client { get; }
-            public bool IsEventAdd { get; set; } = false;
-            public uint EventClientId { get; internal set; }
-            public MonitorInformation.MonitorInformationDetail Monitor { get; set; }
 
-            public ReadNotifyInformationDetail(uint id, ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
+            public WriteNotifyInformationDetail(uint id, ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
             {
                 GatewayId = id;
                 ChannelInformation = channelInformation;
@@ -34,22 +31,22 @@ namespace GatewayLogic.Services
             }
         }
 
-        public ReadNotifyInformationDetail Get(ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
+        public WriteNotifyInformationDetail Get(ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
         {
             lock (dictionaryLock)
             {
-                var result = new ReadNotifyInformationDetail(nextId++, channelInformation, clientId, client);
-                reads.Add(result);
+                var result = new WriteNotifyInformationDetail(nextId++, channelInformation, clientId, client);
+                writes.Add(result);
                 return result;
             }
         }
 
-        public ReadNotifyInformationDetail GetByGatewayId(uint id)
+        public WriteNotifyInformationDetail GetByGatewayId(uint id)
         {
             lock (dictionaryLock)
             {
-                var result = reads.FirstOrDefault(row => row.GatewayId == id);
-                reads.Remove(result);
+                var result = writes.FirstOrDefault(row => row.GatewayId == id);
+                writes.Remove(result);
                 return result;
             }
         }
@@ -58,16 +55,17 @@ namespace GatewayLogic.Services
         {
             lock (dictionaryLock)
             {
-                reads.Clear();
+                writes.Clear();
             }
         }
 
-        internal void Remove(ReadNotifyInformationDetail read)
+        internal void Remove(WriteNotifyInformationDetail write)
         {
             lock (dictionaryLock)
             {
-                reads.Remove(read);
+                writes.Remove(write);
             }
         }
+
     }
 }
