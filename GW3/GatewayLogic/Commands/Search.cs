@@ -27,6 +27,7 @@ namespace GatewayLogic.Commands
             // Connection known, we answer we knows it
             if(record.Server != null)
             {
+                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search cached for: " + channelName);
                 var newPacket = (DataPacket)packet.Clone();
 
                 if (connection == connection.Gateway.udpSideA)
@@ -42,6 +43,7 @@ namespace GatewayLogic.Commands
                 return;
             }
 
+            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search sent for: " + channelName);
             record.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter1 });
             // ReSharper disable PossibleInvalidOperationException
             uint gwcid = record.GatewayId;

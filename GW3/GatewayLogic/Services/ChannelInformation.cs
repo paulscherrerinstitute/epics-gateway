@@ -193,11 +193,12 @@ namespace GatewayLogic.Services
             }
         }
 
-        internal void Remove(ChannelInformationDetails channel)
+        internal void Remove(Gateway gateway, ChannelInformationDetails channel)
         {
             lock (dictionaryLock)
             {
                 dictionary.Remove(channel.ChannelName);
+                gateway.SearchInformation.Remove(channel.ChannelName);
             }
         }
 

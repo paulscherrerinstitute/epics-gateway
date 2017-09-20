@@ -142,7 +142,7 @@ namespace GatewayLogic.Connections
                 var newPacket = DataPacket.Create(0);
                 newPacket.Command = 27;
                 foreach (var channel in channels)
-                    Gateway.ChannelInformation.Remove(channel);
+                    Gateway.ChannelInformation.Remove(Gateway, channel);
 
                 foreach (var channel in channels)
                 {

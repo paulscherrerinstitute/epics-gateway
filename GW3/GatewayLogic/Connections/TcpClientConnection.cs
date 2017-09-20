@@ -182,7 +182,7 @@ namespace GatewayLogic.Connections
                         p.Sender = (IPEndPoint)socket.RemoteEndPoint;
                         Commands.CommandHandler.ExecuteRequestHandler(p.Command, this, p);
                     }
-                    //Log.Write(" ==> End of packet");
+                    //Console.WriteLine(" ==> End of packet");
                 }
             }
             catch (Exception ex)

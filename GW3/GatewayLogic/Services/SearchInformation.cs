@@ -86,5 +86,14 @@ namespace GatewayLogic.Services
                 dictionary.Clear();
             }
         }
+
+        public void Remove(string channelName)
+        {
+            lock (dictionaryLock)
+            {
+                if (dictionary.ContainsKey(channelName))
+                    dictionary.Remove(channelName);
+            }
+        }
     }
 }

@@ -412,5 +412,60 @@ namespace GwUnitTests
                 }
             }
         }
+
+        [TestMethod]
+        [Timeout(3000)]
+        public void ChangeServer()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056;127.0.0.1:5057";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Start();
+
+                // Client
+                using (var client = new CAClient())
+                {
+                    client.Configuration.SearchAddress = "127.0.0.1:5432";
+                    var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                    client.Configuration.WaitTimeout = 200;
+
+                    // Serverside
+                    using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                    {
+                        var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                        serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                        serverChannel.Value = "Works fine!";
+                        server.Start();
+
+                        Assert.AreEqual("Works fine!", clientChannel.Get());
+                    }
+
+                    // Allows the gateway to drops the connection
+                    try
+                    {
+                        clientChannel.Get();
+                    }
+                    catch
+                    {
+                    }
+
+                    Console.WriteLine("--- Closing first one ----");
+                    Console.WriteLine("" + clientChannel.Status);
+
+                    // Serverside
+                    using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5057, 5057))
+                    {
+                        var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                        serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                        serverChannel.Value = "Works fine2!";
+                        server.Start();
+
+                        Assert.AreEqual("Works fine2!", clientChannel.Get());
+                    }
+                }
+            }
+        }
     }
 }
