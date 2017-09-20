@@ -20,7 +20,7 @@ namespace GatewayLogic.Services
             public List<ClientId> clients = new List<ClientId>();
             public string Channel { get; internal set; }
             public IPEndPoint Server { get; internal set; }
-
+            public DateTime LastSearch { get; internal set; }
 
             public SearchInformationDetail(uint id)
             {

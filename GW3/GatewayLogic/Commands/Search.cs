@@ -24,6 +24,7 @@ namespace GatewayLogic.Commands
             connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search for: " + channelName);
 
             var record = connection.Gateway.SearchInformation.Get(channelName);
+
             // Connection known, we answer we knows it
             if(record.Server != null)
             {
@@ -40,6 +41,11 @@ namespace GatewayLogic.Commands
                 newPacket.SetUInt16(16, Gateway.CA_PROTO_VERSION);
                 connection.Send(newPacket);
 
+                return;
+            }
+            if ((DateTime.Now - record.LastSearch).TotalSeconds < 0.5)
+            {
+                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search is too new, we drop it");
                 return;
             }
 
@@ -59,6 +65,7 @@ namespace GatewayLogic.Commands
                 newPacket.ReverseAnswer = true;*/
             //connection.Send(newPacket);
 
+            record.LastSearch = DateTime.Now;
             // Send to all the destinations
             foreach (IPEndPoint dest in connection.Destinations)
             {

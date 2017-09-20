@@ -138,7 +138,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(1000)]
+        [Timeout(2000)]
         public void ReconnectServer()
         {
             using (var gateway = new Gateway())
@@ -148,11 +148,6 @@ namespace GwUnitTests
                 gateway.Configuration.SideB = "127.0.0.1:5055";
                 gateway.Start();
 
-                // Serverside
-                var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056);
-                var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
-                serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
-                serverChannel.Value = "Works fine!";
 
                 // Client
 
@@ -164,19 +159,29 @@ namespace GwUnitTests
                     clientChannel.MonitorChanged += (channel, newValue) =>
                       {
                       };
-                    server.Start();
-
-                    Assert.AreEqual("Works fine!", clientChannel.Get());
 
                     using (var autoReset = new AutoResetEvent(false))
                     {
+
                         ChannelStatusDelegate disconnectFunction = (sender, newStatus) =>
-                         {
-                             if (newStatus == EpicsSharp.ChannelAccess.Constants.ChannelStatus.DISCONNECTED)
-                                 autoReset.Set();
-                         };
+                    {
+                        if (newStatus == EpicsSharp.ChannelAccess.Constants.ChannelStatus.DISCONNECTED)
+                            autoReset.Set();
+                    };
                         clientChannel.StatusChanged += disconnectFunction;
-                        server.Dispose();
+
+
+                        // Serverside
+                        using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                        {
+                            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                            serverChannel.Value = "Works fine!";
+                            server.Start();
+
+                            Assert.AreEqual("Works fine!", clientChannel.Get());
+                        }
+
                         // Need to do something with the channel to trigger the server and see the disconnection
                         try
                         {
@@ -193,17 +198,18 @@ namespace GwUnitTests
                             if (newStatus == EpicsSharp.ChannelAccess.Constants.ChannelStatus.CONNECTED)
                                 autoReset.Set();
                         };
+
                         clientChannel.StatusChanged += connectFunction;
+                        // Serverside
+                        using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                        {
+                            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                            serverChannel.Value = "Works fine!";
+                            server.Start();
+                            autoReset.WaitOne();
 
-                        server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056);
-                        serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
-                        serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
-                        serverChannel.Value = "Works fine!";
-                        server.Start();
-
-                        autoReset.WaitOne();
-
-                        server.Dispose();
+                        }
                     }
                 }
             }
