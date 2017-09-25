@@ -98,6 +98,8 @@ namespace GatewayLogic.Commands
                 {
                     connection.Gateway.Log.Write(Services.LogLevel.Detail, "Sending answer to " + client.Client);
                     var destConn = connection.Gateway.ClientConnection.Get(client.Client);
+                    if (destConn == null)
+                        continue;
 
                     DataPacket resPacket = DataPacket.Create(0);
                     resPacket.Command = 22;

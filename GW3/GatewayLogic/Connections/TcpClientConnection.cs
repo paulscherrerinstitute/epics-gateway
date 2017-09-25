@@ -48,9 +48,9 @@ namespace GatewayLogic.Connections
                 socket.SendTimeout = 30000;
 
                 RemoteEndPoint = (IPEndPoint)socket.RemoteEndPoint;
-                netStream = new NetworkStream(socket);
-                netStream.WriteTimeout = 100;
-                stream = new BufferedStream(netStream);
+                //netStream = new NetworkStream(socket);
+                //netStream.WriteTimeout = 100;
+                //stream = new BufferedStream(netStream);
 
                 try
                 {
@@ -67,16 +67,18 @@ namespace GatewayLogic.Connections
         {
             try
             {
-                lock (stream)
+                socket.Send(packet.Data, packet.BufferSize, SocketFlags.None);
+                /*lock (stream)
                 {
                     stream.Write(packet.Data, packet.Offset, packet.BufferSize);
                     isDirty = true;
                     stream.Flush();
-                }
+                }*/
             }
             catch (Exception ex)
             {
                 Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
+                Dispose();
             }
         }
 
@@ -179,6 +181,8 @@ namespace GatewayLogic.Connections
                     {
                         //Console.WriteLine("=> Packet size " + p.MessageSize + " (command " + p.Command + ")");
                         //Log.Write("Packet number " + (pi++) + " command " + p.Command);
+                        if (!socket.Connected)
+                            break;
                         p.Sender = (IPEndPoint)socket.RemoteEndPoint;
                         Commands.CommandHandler.ExecuteRequestHandler(p.Command, this, p);
                     }
@@ -190,6 +194,8 @@ namespace GatewayLogic.Connections
                 Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
                 Dispose();
             }
+            if (!socket.Connected)
+                Dispose();
         }
 
         public override void Dispose()
@@ -218,13 +224,13 @@ namespace GatewayLogic.Connections
             {
             }
 
-            try
+            /*try
             {
                 netStream.Dispose();
             }
             catch
             {
-            }
+            }*/
 
 
             try

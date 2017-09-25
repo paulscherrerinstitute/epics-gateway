@@ -23,6 +23,8 @@ namespace GatewayLogic.Connections
         public TcpClientConnection Get(IPEndPoint client)
         {
             lockDictionary.Wait();
+            if (!dictionary.ContainsKey(client))
+                return null;
             var result = dictionary[client];
             lockDictionary.Release();
             return result;

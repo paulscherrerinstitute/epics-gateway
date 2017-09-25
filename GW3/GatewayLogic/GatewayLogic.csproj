@@ -53,6 +53,7 @@
     <Compile Include="Commands\Echo.cs" />
     <Compile Include="Commands\EventAdd.cs" />
     <Compile Include="Commands\EventCancel.cs" />
+    <Compile Include="Commands\ProtoError.cs" />
     <Compile Include="Commands\ReadNotify.cs" />
     <Compile Include="Commands\Search.cs" />
     <Compile Include="Commands\Version.cs" />
