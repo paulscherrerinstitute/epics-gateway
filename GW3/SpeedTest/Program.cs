@@ -20,8 +20,7 @@ namespace SpeedTest
             using (var gateway = new Gateway())
             {
                 gateway.Configuration.SideA = "127.0.0.1:5432";
-                for (var i = 0; i < 100; i++)
-                    gateway.Configuration.RemoteSideB = "127.0.0.1:" + (5056 + i);
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
                 gateway.Log.Filter = (level) => { return level >= GatewayLogic.Services.LogLevel.Error; };
                 gateway.Start();
@@ -42,16 +41,22 @@ namespace SpeedTest
                     var sw = new Stopwatch();
                     sw.Start();
                     // Client
-                    Enumerable.Range(0, 3000).AsParallel().ForAll(i =>
-                        {
-                            using (var client = new CAClient())
-                            {
-                                client.Configuration.SearchAddress = "127.0.0.1:5432";
-                                client.Configuration.WaitTimeout = 10000;
-                                var clientChannel = client.CreateChannel<string>("SPEED-TEST-" + i);
-                                clientChannel.Get();
-                            }
-                        });
+                    //Enumerable.Range(0, 3000).AsParallel().ForAll(i =>
+                    Parallel.ForEach<int, CAClient>(Enumerable.Range(0, 3000), () =>
+                     {
+                         var client = new CAClient(); client.Configuration.SearchAddress = "127.0.0.1:5432";
+                         client.Configuration.WaitTimeout = 10000;
+                         return client;
+                     },
+                     (i, loop, client) =>
+                         {
+                             using (var clientChannel = client.CreateChannel<string>("SPEED-TEST-" + i))
+                             {
+                                 clientChannel.Get();
+                             }
+                             return client;
+                         },
+                     (client) => { client.Dispose(); });
                     sw.Stop();
                     Console.WriteLine("Time: " + sw.Elapsed.ToString());
                 }

@@ -24,7 +24,10 @@ namespace GatewayLogic.Connections
         {
             lockDictionary.Wait();
             if (!dictionary.ContainsKey(client))
+            {
+                lockDictionary.Release();
                 return null;
+            }
             var result = dictionary[client];
             lockDictionary.Release();
             return result;

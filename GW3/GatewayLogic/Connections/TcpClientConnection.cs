@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GatewayLogic.Services;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,6 +29,7 @@ namespace GatewayLogic.Connections
         {
             splitter = new Splitter();
             this.Socket = socket;
+            gateway.Log.Write(LogLevel.Connection, "Start TCP client connection on " + endPoint);
         }
 
 

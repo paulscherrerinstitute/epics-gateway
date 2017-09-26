@@ -27,6 +27,8 @@ namespace GatewayLogic.Connections
 
             Rebuild();
 
+            gateway.Log.Write(LogLevel.Connection, "TCP Listener on " + ipSource);
+
             /*if (Log.WillDisplay(System.Diagnostics.TraceEventType.Start))
                 Log.TraceEvent(System.Diagnostics.TraceEventType.Start, -1, "TCP Listener " + side.ToString() + " on " + ipSource);*/
         }
