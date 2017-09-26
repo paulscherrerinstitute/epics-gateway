@@ -26,7 +26,8 @@ namespace GatewayLogic.Commands
                 connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event add on " + channel.ChannelName);
 
                 // A monitor on datacount 0 will always be a new monitor
-                var monitor = connection.Gateway.MonitorInformation.Get(channel, packet.DataType, packet.DataCount);
+                var monitorMask = packet.GetUInt16(12 + (int)packet.HeaderSize);
+                var monitor = connection.Gateway.MonitorInformation.Get(channel, packet.DataType, packet.DataCount, monitorMask);
                 // A fresh new monitor
                 if (monitor.FirstTime == true)
                 {

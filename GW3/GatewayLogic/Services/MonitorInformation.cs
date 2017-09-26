@@ -24,15 +24,17 @@ namespace GatewayLogic.Services
             public uint DataCount { get; }
             public bool FirstTime { get; set; } = true;
             public bool HasReceivedFirstResult { get; set; } = false;
+            public ushort MonitorMask { get; internal set; }
 
             public List<ClientId> clients = new List<ClientId>();
 
-            public MonitorInformationDetail(uint id, ChannelInformation.ChannelInformationDetails channelInformation, ushort dataType, uint dataCount)
+            public MonitorInformationDetail(uint id, ChannelInformation.ChannelInformationDetails channelInformation, ushort dataType, uint dataCount, UInt16 monitorMask)
             {
                 GatewayId = id;
                 ChannelInformation = channelInformation;
                 DataCount = dataCount;
                 DataType = dataType;
+                MonitorMask = monitorMask;
             }
 
             internal void AddClient(ClientId clientId)
@@ -80,7 +82,7 @@ namespace GatewayLogic.Services
                 this.ChannelInformation.TcpConnection.Send(newPacket);
             }
         }
-        public MonitorInformationDetail Get(ChannelInformation.ChannelInformationDetails channelInformation, ushort dataType, uint dataCount)
+        public MonitorInformationDetail Get(ChannelInformation.ChannelInformationDetails channelInformation, ushort dataType, uint dataCount, UInt16 monitorMask)
         {
             lock (dictionaryLock)
             {
@@ -88,10 +90,11 @@ namespace GatewayLogic.Services
                 if (dataCount != 0)
                     monitor = monitors.FirstOrDefault(row => row.ChannelInformation == channelInformation
                         && row.DataType == dataType
-                        && row.DataCount == dataCount);
+                        && row.DataCount == dataCount
+                        && row.MonitorMask == monitorMask);
                 if (monitor == null)
                 {
-                    monitor = new MonitorInformationDetail(nextId++, channelInformation, dataType, dataCount);
+                    monitor = new MonitorInformationDetail(nextId++, channelInformation, dataType, dataCount, monitorMask);
                     monitors.Add(monitor);
                 }
                 return monitor;
