@@ -24,7 +24,7 @@ namespace GatewayLogic.Services
             public bool IsEventAdd { get; set; } = false;
             public uint EventClientId { get; internal set; }
             public MonitorInformation.MonitorInformationDetail Monitor { get; set; }
-            public DateTime When { get; } = DateTime.Now;
+            public DateTime When { get; } = DateTime.UtcNow;
 
             public ReadNotifyInformationDetail(uint id, ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
             {
@@ -49,7 +49,7 @@ namespace GatewayLogic.Services
         {
             lock (dictionaryLock)
             {
-                reads.RemoveAll(row => (DateTime.Now - row.When).TotalSeconds > 10);
+                reads.RemoveAll(row => (DateTime.UtcNow - row.When).TotalSeconds > 10);
 
                 var result = reads.FirstOrDefault(row => row.GatewayId == id);
                 reads.Remove(result);

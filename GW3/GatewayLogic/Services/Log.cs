@@ -29,7 +29,7 @@ namespace GatewayLogic.Services
 
         private static void DefaultHandler(string source, string message)
         {
-            Console.Write(DateTime.Now.ToString("HH:mm:ss"));
+            Console.Write(DateTime.UtcNow.ToString("HH:mm:ss"));
             Console.Write(" - ");
             Console.Write(source);
             Console.Write("\t");

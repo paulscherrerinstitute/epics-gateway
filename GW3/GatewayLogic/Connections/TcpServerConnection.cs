@@ -82,8 +82,16 @@ namespace GatewayLogic.Connections
             }
             //Log.Write("Server received " + size + " bytes from " + this.Destination);
 
-            this.LastMessage = DateTime.Now;
+            this.LastMessage = DateTime.UtcNow;
             var mainPacket = DataPacket.Create(buffer, size, false);
+
+            foreach (var p in splitter.Split(mainPacket))
+            {
+                //Console.WriteLine("+> Packet size " + p.MessageSize + " (command " + p.Command + ")");
+                p.Sender = RemoteEndPoint;
+                Commands.CommandHandler.ExecuteResponseHandler(p.Command, this, p);
+                //Console.WriteLine(" ++> End of packet");
+            }
 
             try
             {
@@ -97,14 +105,6 @@ namespace GatewayLogic.Connections
             {
                 Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
                 this.Dispose();
-            }
-
-            foreach (var p in splitter.Split(mainPacket))
-            {
-                //Console.WriteLine("+> Packet size " + p.MessageSize + " (command " + p.Command + ")");
-                p.Sender = RemoteEndPoint;
-                Commands.CommandHandler.ExecuteResponseHandler(p.Command, this, p);
-                //Console.WriteLine(" ++> End of packet");
             }
         }
 

@@ -52,7 +52,7 @@ namespace GatewayLogic.Services
             public List<ClientId> clients = new List<ClientId>();
             public List<Client> connectedClients = new List<Client>();
 
-            public DateTime LastUse { get; internal set; } = DateTime.Now;
+            public DateTime LastUse { get; internal set; } = DateTime.UtcNow;
 
             public ChannelInformationDetails(uint id, string channelName, SearchInformation.SearchInformationDetail search)
             {
@@ -65,7 +65,7 @@ namespace GatewayLogic.Services
             {
                 lock (clients)
                 {
-                    this.LastUse = DateTime.Now;
+                    this.LastUse = DateTime.UtcNow;
                     connectedClients.Add(new Client { Id = clientId, Connection = connection });
                 }
             }
@@ -102,7 +102,7 @@ namespace GatewayLogic.Services
                 lock (clients)
                 {
                     connectedClients.RemoveAll(row => row.Connection == connection);
-                    this.LastUse = DateTime.Now;
+                    this.LastUse = DateTime.UtcNow;
                 }
             }
 
@@ -127,7 +127,7 @@ namespace GatewayLogic.Services
                 {
                     lock (clients)
                     {
-                        return (connectedClients.Count == 0 && (DateTime.Now - this.LastUse).TotalMinutes > 30);
+                        return (connectedClients.Count == 0 && (DateTime.UtcNow - this.LastUse).TotalMinutes > 30);
                     }
                 }
             }

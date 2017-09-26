@@ -43,14 +43,14 @@ namespace GatewayLogic.Commands
 
                 return;
             }
-            /*if ((DateTime.Now - record.LastSearch).TotalSeconds < 0.5)
+            /*if ((DateTime.UtcNow - record.LastSearch).TotalSeconds < 0.5)
             {
                 connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search is too new, we drop it");
                 return;
             }*/
 
             connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search sent for: " + channelName);
-            record.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter1, When = DateTime.Now });
+            record.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter1, When = DateTime.UtcNow });
             // ReSharper disable PossibleInvalidOperationException
             uint gwcid = record.GatewayId;
             // ReSharper restore PossibleInvalidOperationException
@@ -65,7 +65,7 @@ namespace GatewayLogic.Commands
                 newPacket.ReverseAnswer = true;*/
             //connection.Send(newPacket);
 
-            record.LastSearch = DateTime.Now;
+            record.LastSearch = DateTime.UtcNow;
             // Send to all the destinations
             foreach (IPEndPoint dest in connection.Destinations)
             {

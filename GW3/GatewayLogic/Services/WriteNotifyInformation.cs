@@ -21,7 +21,7 @@ namespace GatewayLogic.Services
             public uint GatewayId { get; }
             public uint ClientId { get; }
             public TcpClientConnection Client { get; }
-            public DateTime When { get; } = DateTime.Now;
+            public DateTime When { get; } = DateTime.UtcNow;
 
             public WriteNotifyInformationDetail(uint id, ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
             {
@@ -46,7 +46,7 @@ namespace GatewayLogic.Services
         {
             lock (dictionaryLock)
             {
-                writes.RemoveAll(row => (DateTime.Now - row.When).TotalSeconds > 10);
+                writes.RemoveAll(row => (DateTime.UtcNow - row.When).TotalSeconds > 10);
 
                 var result = writes.FirstOrDefault(row => row.GatewayId == id);
                 writes.Remove(result);

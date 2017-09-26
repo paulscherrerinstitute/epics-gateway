@@ -154,26 +154,8 @@ namespace GatewayLogic.Connections
                 Dispose();
                 return;
             }
-            this.LastMessage = DateTime.Now;
+            this.LastMessage = DateTime.UtcNow;
             var mainPacket = DataPacket.Create(buffer, n);
-
-            try
-            {
-                Socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
-            }
-            catch (SocketException)
-            {
-                Dispose();
-            }
-            catch (ObjectDisposedException)
-            {
-                Dispose();
-            }
-            catch (Exception ex)
-            {
-                Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
-                Dispose();
-            }
 
             try
             {
@@ -196,6 +178,25 @@ namespace GatewayLogic.Connections
                 Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
                 Dispose();
             }
+
+            try
+            {
+                Socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
+            }
+            catch (SocketException)
+            {
+                Dispose();
+            }
+            catch (ObjectDisposedException)
+            {
+                Dispose();
+            }
+            catch (Exception ex)
+            {
+                Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
+                Dispose();
+            }
+
             if (!socket.Connected)
                 Dispose();
         }

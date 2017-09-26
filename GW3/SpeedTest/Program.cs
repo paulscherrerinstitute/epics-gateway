@@ -15,6 +15,8 @@ namespace SpeedTest
 {
     class Program
     {
+        delegate CAClient CATest(int i, ParallelLoopState loop, CAClient client);
+
         static void Main(string[] args)
         {
             using (var gateway = new Gateway())
@@ -38,30 +40,51 @@ namespace SpeedTest
                     server.Start();
                     Console.WriteLine("Channels created, now starting clients and searching.");
 
+                    CATest testToRun = MonitorTest;
+
                     var sw = new Stopwatch();
                     sw.Start();
                     // Client
                     //Enumerable.Range(0, 3000).AsParallel().ForAll(i =>
                     Parallel.ForEach<int, CAClient>(Enumerable.Range(0, 3000), () =>
-                     {
-                         var client = new CAClient(); client.Configuration.SearchAddress = "127.0.0.1:5432";
-                         client.Configuration.WaitTimeout = 10000;
-                         return client;
-                     },
-                     (i, loop, client) =>
-                         {
-                             using (var clientChannel = client.CreateChannel<string>("SPEED-TEST-" + i))
-                             {
-                                 clientChannel.Get();
-                             }
-                             return client;
-                         },
+                    {
+                        var client = new CAClient(); client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        client.Configuration.WaitTimeout = 10000;
+                        return client;
+                    },
+                    (i, loop, client) => testToRun(i, loop, client)
+                     ,
                      (client) => { client.Dispose(); });
                     sw.Stop();
                     Console.WriteLine("Time: " + sw.Elapsed.ToString());
                 }
             }
             Console.ReadKey();
+        }
+
+        static CAClient MonitorTest(int i, ParallelLoopState loop, CAClient client)
+        {
+            using (var clientChannel = client.CreateChannel<string>("SPEED-TEST-" + i))
+            {
+                using (AutoResetEvent autoEvt = new AutoResetEvent(false))
+                {
+                    clientChannel.MonitorChanged += (sender, val) =>
+                      {
+                          autoEvt.Set();
+                      };
+                    autoEvt.WaitOne(10000);
+                }
+            }
+            return client;
+        }
+
+        static CAClient GetTest(int i, ParallelLoopState loop, CAClient client)
+        {
+            using (var clientChannel = client.CreateChannel<string>("SPEED-TEST-" + i))
+            {
+                clientChannel.Get();
+            }
+            return client;
         }
     }
 }
