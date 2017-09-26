@@ -23,12 +23,12 @@ namespace GatewayLogic.Commands
             handlers[6] = new Search();
             handlers[11] = new ProtoError();
             handlers[12] = new ClearChannel();
-            //handlers[13] = new Beacon();
+            handlers[13] = new Beacon();
             handlers[15] = new ReadNotify();
             handlers[18] = new CreateChannel();
             handlers[19] = new WriteNotify();
-            //handlers[20] = new ClientName();
-            //handlers[21] = new HostName();
+            handlers[20] = new ClientName();
+            handlers[21] = new HostName();
             handlers[22] = new AccessRights();
             handlers[23] = new Echo();
             handlers[27] = new ChannelDisconnect();
@@ -47,6 +47,8 @@ namespace GatewayLogic.Commands
             //Log.Write("Request "+command);
             if (!(command >= handlers.Length || handlers[command] == null))
                 handlers[command].DoRequest(connection, packet);
+            else
+                connection.Gateway.Log.Write(Services.LogLevel.Error, "Command not supported " + command);
         }
 
         /// <summary>
@@ -62,6 +64,8 @@ namespace GatewayLogic.Commands
             //Log.Write("Answer " + command);
             if (!(command >= handlers.Length || handlers[command] == null))
                 handlers[command].DoResponse(connection, packet);
+            else
+                connection.Gateway.Log.Write(Services.LogLevel.Error, "Command not supported " + command);
         }
 
 
