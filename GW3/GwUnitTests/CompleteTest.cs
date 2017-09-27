@@ -476,7 +476,7 @@ namespace GwUnitTests
 
 
         [TestMethod]
-        [Timeout(1000)]
+        [Timeout(5000)]
         public void CheckGetNotRead()
         {
             using (var gateway = new Gateway())
