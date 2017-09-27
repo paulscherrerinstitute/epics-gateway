@@ -519,7 +519,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(1000)]
+        [Timeout(5000)]
         public void CheckChannelReadonly()
         {
             using (var gateway = new Gateway())
