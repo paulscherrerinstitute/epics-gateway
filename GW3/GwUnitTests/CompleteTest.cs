@@ -420,7 +420,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(3000)]
+        [Timeout(10000)]
         public void ChangeServer()
         {
             using (var gateway = new Gateway())
