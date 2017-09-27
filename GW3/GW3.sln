@@ -1,15 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.10
+VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GWConsole", "GWConsole\GWConsole.csproj", "{9417ADE6-2AD0-4802-8813-F6E86285B578}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayLogic", "GatewayLogic\GatewayLogic.csproj", "{0DCCC8C2-9FF8-42F6-AEA5-5D59337D7D79}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GWTest", "GWTest\GWTest.csproj", "{40ADE3B0-4887-4439-922D-32229B673730}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChannelAccess", "..\..\Epics Library\ChannelAccess\ChannelAccess\ChannelAccess.csproj", "{CC7E581B-0A2D-4B9C-91E9-59F1015ACA67}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GwUnitTests", "GwUnitTests\GwUnitTests.csproj", "{A2D9A7B6-00D7-4AD5-A755-91D3941DED70}"
 EndProject
@@ -33,10 +31,6 @@ Global
 		{40ADE3B0-4887-4439-922D-32229B673730}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{40ADE3B0-4887-4439-922D-32229B673730}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{40ADE3B0-4887-4439-922D-32229B673730}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CC7E581B-0A2D-4B9C-91E9-59F1015ACA67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CC7E581B-0A2D-4B9C-91E9-59F1015ACA67}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CC7E581B-0A2D-4B9C-91E9-59F1015ACA67}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CC7E581B-0A2D-4B9C-91E9-59F1015ACA67}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A2D9A7B6-00D7-4AD5-A755-91D3941DED70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A2D9A7B6-00D7-4AD5-A755-91D3941DED70}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2D9A7B6-00D7-4AD5-A755-91D3941DED70}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -53,27 +47,24 @@ Global
 		SolutionGuid = {68B36B5E-C4FC-4605-A5E1-8A59433EA06F}
 	EndGlobalSection
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 7
+		SccNumberOfProjects = 6
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = http://tfs.psi.ch:8080/tfs/defaultcollection
 		SccLocalPath0 = .
-		SccProjectUniqueName1 = ..\\..\\Epics\u0020Library\\ChannelAccess\\ChannelAccess\\ChannelAccess.csproj
-		SccProjectName1 = ../../Epics\u0020Library/ChannelAccess/ChannelAccess
-		SccLocalPath1 = ..\\..\\Epics\u0020Library\\ChannelAccess\\ChannelAccess
-		SccProjectUniqueName2 = GatewayLogic\\GatewayLogic.csproj
-		SccProjectName2 = GatewayLogic
-		SccLocalPath2 = GatewayLogic
-		SccProjectUniqueName3 = GWConsole\\GWConsole.csproj
-		SccProjectName3 = GWConsole
-		SccLocalPath3 = GWConsole
-		SccProjectUniqueName4 = GWTest\\GWTest.csproj
-		SccProjectName4 = GWTest
-		SccLocalPath4 = GWTest
-		SccProjectUniqueName5 = GwUnitTests\\GwUnitTests.csproj
-		SccProjectName5 = GwUnitTests
-		SccLocalPath5 = GwUnitTests
-		SccProjectUniqueName6 = SpeedTest\\SpeedTest.csproj
-		SccProjectName6 = SpeedTest
-		SccLocalPath6 = SpeedTest
+		SccProjectUniqueName1 = GatewayLogic\\GatewayLogic.csproj
+		SccProjectName1 = GatewayLogic
+		SccLocalPath1 = GatewayLogic
+		SccProjectUniqueName2 = GWConsole\\GWConsole.csproj
+		SccProjectName2 = GWConsole
+		SccLocalPath2 = GWConsole
+		SccProjectUniqueName3 = GWTest\\GWTest.csproj
+		SccProjectName3 = GWTest
+		SccLocalPath3 = GWTest
+		SccProjectUniqueName4 = GwUnitTests\\GwUnitTests.csproj
+		SccProjectName4 = GwUnitTests
+		SccLocalPath4 = GwUnitTests
+		SccProjectUniqueName5 = SpeedTest\\SpeedTest.csproj
+		SccProjectName5 = SpeedTest
+		SccLocalPath5 = SpeedTest
 	EndGlobalSection
 EndGlobal
