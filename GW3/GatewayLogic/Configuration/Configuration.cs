@@ -4,12 +4,32 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace GatewayLogic.Configuration
 {
+    [Serializable]
+    [XmlRoot("Config", IsNullable = false)]
     public class Configuration
     {
-        IPEndPoint sideA;
+        public Configuration()
+        {
+            Security = new Security();
+        }
+
+        [XmlElement("Security")]
+        public Security Security { get; set; }
+
+        //public List<IPEndPoint> RemoteSideB { get { return ParseListAddress(RemoteAddressSideB); } }
+
+        [XmlElement("Type")]
+        public ConfigurationType ConfigurationType { get; set; }
+        [XmlElement("Name")]
+        public string GatewayName { get; set; }
+
+
+        private IPEndPoint sideA;
+        [XmlElement("LocalAddressSideA")]
         public string SideA
         {
             get
@@ -30,10 +50,15 @@ namespace GatewayLogic.Configuration
                 sideA = new IPEndPoint(IPAddress.Parse(ip), port);
             }
         }
+
+        [XmlIgnore]
         public IPEndPoint SideAEndPoint => sideA;
 
+        [XmlIgnore]
         internal List<IPEndPoint> remoteBEndPoints;
         private string remoteSideB;
+
+        [XmlElement("RemoteAddressSideB")]
         public string RemoteSideB
         {
             get
@@ -48,8 +73,11 @@ namespace GatewayLogic.Configuration
             }
         }
 
+        [XmlIgnore]
         internal List<IPEndPoint> remoteAEndPoints;
         private string remoteSideA;
+
+        [XmlElement("RemoteAddressSideA")]
         public string RemoteSideA
         {
             get
@@ -94,7 +122,9 @@ namespace GatewayLogic.Configuration
             }
         }
 
-        IPEndPoint sideB;
+        private IPEndPoint sideB;
+
+        [XmlElement("LocalAddressSideB")]
         public string SideB
         {
             get
@@ -116,6 +146,7 @@ namespace GatewayLogic.Configuration
             }
         }
 
+        [XmlIgnore]
         public IPEndPoint SideBEndPoint => sideB;
     }
 }

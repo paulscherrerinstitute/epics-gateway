@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace GatewayLogic
 {
@@ -69,6 +70,52 @@ namespace GatewayLogic
                     Log.Write(LogLevel.Error, ex.ToString());
                 }
                 count++;
+            }
+        }
+
+        public void LoadConfig()
+        {
+            bool freshConfig = false;
+            try
+            {
+                if (System.Configuration.ConfigurationManager.AppSettings["configURL"] == null || System.Configuration.ConfigurationManager.AppSettings["gatewayName"] == null)
+                    throw new Exception("Direct config");
+                using (var client = new System.Net.WebClient())
+                {
+                    string config = client.DownloadString(System.Configuration.ConfigurationManager.AppSettings["configURL"] + System.Configuration.ConfigurationManager.AppSettings["gatewayName"]);
+                    Log.Write(LogLevel.Detail, "Loading configuration from");
+                    Log.Write(LogLevel.Detail, System.Configuration.ConfigurationManager.AppSettings["configURL"] + System.Configuration.ConfigurationManager.AppSettings["gatewayName"]);
+                    using (var txtReader = new System.IO.StringReader(config))
+                    {
+                        var serializer = new System.Xml.Serialization.XmlSerializer(typeof(Configuration.Configuration));
+                        Configuration = (Configuration.Configuration)serializer.Deserialize(txtReader);
+                        txtReader.Close();
+                    }
+                }
+                freshConfig = true;
+            }
+            catch
+            {
+                Log.Write(LogLevel.Detail, , "Loading configuration from gateway.xml");
+                using (var txtReader = new System.IO.StreamReader("gateway.xml"))
+                {
+                    var serializer = new System.Xml.Serialization.XmlSerializer(typeof(Configuration.Configuration));
+                    Configuration = (Configuration.Configuration)serializer.Deserialize(txtReader);
+                    txtReader.Close();
+                }
+            }
+
+            if (freshConfig)
+                SaveConfig();
+        }
+
+        public void SaveConfig()
+        {
+            using (var txtWriter = new System.IO.StreamWriter("gateway.xml"))
+            {
+                var serializer = new XmlSerializer(typeof(Configuration.Configuration));
+                serializer.Serialize(txtWriter, Configuration);
+                txtWriter.Close();
             }
         }
 
