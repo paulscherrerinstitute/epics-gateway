@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace GWTest
 {
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     class Program
     {
         static void Main(string[] args)

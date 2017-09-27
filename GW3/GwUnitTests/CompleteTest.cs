@@ -5,10 +5,12 @@ using EpicsSharp.ChannelAccess.Server;
 using System.Net;
 using EpicsSharp.ChannelAccess.Client;
 using System.Threading;
+using System.Diagnostics.CodeAnalysis;
 
 namespace GwUnitTests
 {
     [TestClass]
+    [ExcludeFromCodeCoverage]
     public class CompleteTest
     {
         [TestMethod]
@@ -324,7 +326,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(2000)]
+        [Timeout(10000)]
         public void DoubleDifferedMonitor()
         {
             using (var gateway = new Gateway())

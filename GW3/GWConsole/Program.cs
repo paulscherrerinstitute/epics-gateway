@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace GWConsole
 {
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     class Program
     {
         static void Main(string[] args)

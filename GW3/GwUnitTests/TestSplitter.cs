@@ -3,10 +3,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using GatewayLogic;
 using System.IO;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace GwUnitTests
 {
     [TestClass]
+    [ExcludeFromCodeCoverage]
     public class TestSplitter
     {
         [TestMethod]

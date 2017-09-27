@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace SpeedTest
 {
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     class Program
     {
         delegate CAClient CATest(int i, ParallelLoopState loop, CAClient client);
