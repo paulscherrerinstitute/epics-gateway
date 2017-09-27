@@ -386,7 +386,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(1000)]
+        [Timeout(10000)]
         public void CheckWriteNotify()
         {
             using (var gateway = new Gateway())
