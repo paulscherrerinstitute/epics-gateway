@@ -75,16 +75,21 @@ namespace GatewayLogic
 
         public void LoadConfig()
         {
+            if (System.Configuration.ConfigurationManager.AppSettings["configURL"] == null || System.Configuration.ConfigurationManager.AppSettings["gatewayName"] == null)
+                throw new Exception("Direct config");
+            LoadConfig(System.Configuration.ConfigurationManager.AppSettings["configURL"], System.Configuration.ConfigurationManager.AppSettings["gatewayName"]);
+        }
+
+        public void LoadConfig(string configUrl, string gatewayName)
+        {
             bool freshConfig = false;
             try
             {
-                if (System.Configuration.ConfigurationManager.AppSettings["configURL"] == null || System.Configuration.ConfigurationManager.AppSettings["gatewayName"] == null)
-                    throw new Exception("Direct config");
                 using (var client = new System.Net.WebClient())
                 {
-                    string config = client.DownloadString(System.Configuration.ConfigurationManager.AppSettings["configURL"] + System.Configuration.ConfigurationManager.AppSettings["gatewayName"]);
+                    string config = client.DownloadString(configUrl + gatewayName);
                     Log.Write(LogLevel.Detail, "Loading configuration from");
-                    Log.Write(LogLevel.Detail, System.Configuration.ConfigurationManager.AppSettings["configURL"] + System.Configuration.ConfigurationManager.AppSettings["gatewayName"]);
+                    Log.Write(LogLevel.Detail, configUrl + gatewayName);
                     using (var txtReader = new System.IO.StringReader(config))
                     {
                         var serializer = new System.Xml.Serialization.XmlSerializer(typeof(Configuration.Configuration));
@@ -96,7 +101,7 @@ namespace GatewayLogic
             }
             catch
             {
-                Log.Write(LogLevel.Detail, , "Loading configuration from gateway.xml");
+                Log.Write(LogLevel.Detail, "Loading configuration from gateway.xml");
                 using (var txtReader = new System.IO.StreamReader("gateway.xml"))
                 {
                     var serializer = new System.Xml.Serialization.XmlSerializer(typeof(Configuration.Configuration));

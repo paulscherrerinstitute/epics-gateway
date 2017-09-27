@@ -27,6 +27,8 @@ namespace GatewayLogic.Configuration
         [XmlElement("Name")]
         public string GatewayName { get; set; }
 
+        public int SearchPreventionTimeout { get; set; } = 500;
+
 
         private IPEndPoint sideA;
         [XmlElement("LocalAddressSideA")]
@@ -101,27 +103,6 @@ namespace GatewayLogic.Configuration
                 .ToList();
         }
 
-        static public IPEndPoint ParseAddress(string addr)
-        {
-            string[] parts = addr.Split(new char[] { ':' });
-            try
-            {
-                return new IPEndPoint(IPAddress.Parse(parts[0].Trim()), int.Parse(parts[1].Trim()));
-            }
-            catch (Exception ex)
-            {
-                try
-                {
-                    return new IPEndPoint(Dns.GetHostEntry(parts[0]).AddressList.First(), int.Parse(parts[1].Trim()));
-                }
-                catch (Exception ex2)
-                {
-                    //PBCaGw.Services.Log.TraceEvent(System.Diagnostics.TraceEventType.Critical, -1, "Wrong IP: " + addr);
-                    throw ex2;
-                }
-            }
-        }
-
         private IPEndPoint sideB;
 
         [XmlElement("LocalAddressSideB")]
@@ -148,5 +129,26 @@ namespace GatewayLogic.Configuration
 
         [XmlIgnore]
         public IPEndPoint SideBEndPoint => sideB;
+
+        static private IPEndPoint ParseAddress(string addr)
+        {
+            string[] parts = addr.Split(new char[] { ':' });
+            try
+            {
+                return new IPEndPoint(IPAddress.Parse(parts[0].Trim()), int.Parse(parts[1].Trim()));
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    return new IPEndPoint(Dns.GetHostEntry(parts[0]).AddressList.First(), int.Parse(parts[1].Trim()));
+                }
+                catch (Exception ex2)
+                {
+                    //PBCaGw.Services.Log.TraceEvent(System.Diagnostics.TraceEventType.Critical, -1, "Wrong IP: " + addr);
+                    throw ex2;
+                }
+            }
+        }
     }
 }

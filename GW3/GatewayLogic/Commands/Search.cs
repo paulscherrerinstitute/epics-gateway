@@ -43,11 +43,11 @@ namespace GatewayLogic.Commands
 
                 return;
             }
-            /*if ((DateTime.UtcNow - record.LastSearch).TotalSeconds < 0.5)
+            if ((DateTime.UtcNow - record.LastSearch).TotalMilliseconds < connection.Gateway.Configuration.SearchPreventionTimeout)
             {
                 connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search is too new, we drop it");
                 return;
-            }*/
+            }
 
             connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search sent for: " + channelName);
             record.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter1, When = DateTime.UtcNow });
