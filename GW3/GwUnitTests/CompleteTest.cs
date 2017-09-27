@@ -435,7 +435,7 @@ namespace GwUnitTests
                 {
                     client.Configuration.SearchAddress = "127.0.0.1:5432";
                     var clientChannel = client.CreateChannel<string>("TEST-DATE");
-                    client.Configuration.WaitTimeout = 200;
+                    client.Configuration.WaitTimeout = 2000;
 
                     // Serverside
                     using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
