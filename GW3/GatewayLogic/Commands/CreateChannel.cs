@@ -19,9 +19,9 @@ namespace GatewayLogic.Commands
 
             Configuration.SecurityAccess access;
             if (((TcpClientConnection)connection).Listener == connection.Gateway.tcpSideA)
-                access = connection.Gateway.Configuration.Security.EvaluateSideA(channelName, null, null, packet.Sender.Address.ToString());
+                access = connection.Gateway.Configuration.Security.EvaluateSideA(channelName, "", "", packet.Sender.Address.ToString());
             else
-                access = connection.Gateway.Configuration.Security.EvaluateSideB(channelName, null, null, packet.Sender.Address.ToString());
+                access = connection.Gateway.Configuration.Security.EvaluateSideB(channelName, "", "", packet.Sender.Address.ToString());
 
             // Rules prevent searching
             if (access == Configuration.SecurityAccess.NONE)
@@ -114,9 +114,9 @@ namespace GatewayLogic.Commands
 
                     Configuration.SecurityAccess access;
                     if (((TcpClientConnection)destConn).Listener == connection.Gateway.tcpSideA)
-                        access = connection.Gateway.Configuration.Security.EvaluateSideA(channelInfo.ChannelName, null, null, ((TcpClientConnection)destConn).RemoteEndPoint.Address.ToString());
+                        access = connection.Gateway.Configuration.Security.EvaluateSideA(channelInfo.ChannelName, "", "", ((TcpClientConnection)destConn).RemoteEndPoint.Address.ToString());
                     else
-                        access = connection.Gateway.Configuration.Security.EvaluateSideB(channelInfo.ChannelName, null, null, ((TcpClientConnection)destConn).RemoteEndPoint.Address.ToString());
+                        access = connection.Gateway.Configuration.Security.EvaluateSideB(channelInfo.ChannelName, "", "", ((TcpClientConnection)destConn).RemoteEndPoint.Address.ToString());
 
                     // Rules prevent searching
                     if (access == Configuration.SecurityAccess.NONE)

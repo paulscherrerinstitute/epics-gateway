@@ -473,5 +473,85 @@ namespace GwUnitTests
                 }
             }
         }
+
+
+        [TestMethod]
+        [Timeout(1000)]
+        public void CheckGetNotRead()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.Security.RulesSideA.Add(new GatewayLogic.Configuration.SecurityRule { ChannelPattern = "T*", Access = GatewayLogic.Configuration.SecurityAccess.NONE });
+                gateway.Start();
+
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                    serverChannel.Value = "Works fine!";
+
+                    // Client
+
+                    using (var client = new CAClient())
+                    {
+                        client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                        client.Configuration.WaitTimeout = 100;
+                        server.Start();
+
+                        var msg = "";
+                        try
+                        {
+                            clientChannel.Get();
+                        }
+                        catch (Exception ex)
+                        {
+                            msg = ex.Message;
+                        }
+                        Assert.AreEqual("Connection timeout.", msg);
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        [Timeout(1000)]
+        public void CheckChannelReadonly()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.Security.RulesSideA.Add(new GatewayLogic.Configuration.SecurityRule { ChannelPattern = "T*", Access = GatewayLogic.Configuration.SecurityAccess.READ });
+                gateway.Start();
+
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                    serverChannel.Value = "Works fine!";
+
+                    // Client
+
+                    using (var client = new CAClient())
+                    {
+                        client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                        client.Configuration.WaitTimeout = 1000;
+                        server.Start();
+
+                        clientChannel.Connect();
+
+                        Assert.AreEqual(EpicsSharp.ChannelAccess.Constants.AccessRights.ReadOnly, clientChannel.AccessRight);
+                    }
+                }
+            }
+        }
     }
 }

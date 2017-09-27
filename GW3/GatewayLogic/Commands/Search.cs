@@ -24,9 +24,9 @@ namespace GatewayLogic.Commands
 
             Configuration.SecurityAccess access;
             if (connection == connection.Gateway.udpSideA)
-                access = connection.Gateway.Configuration.Security.EvaluateSideA(channelName, null, null, packet.Sender.Address.ToString());
+                access = connection.Gateway.Configuration.Security.EvaluateSideA(channelName, "", "", packet.Sender.Address.ToString());
             else
-                access = connection.Gateway.Configuration.Security.EvaluateSideB(channelName, null, null, packet.Sender.Address.ToString());
+                access = connection.Gateway.Configuration.Security.EvaluateSideB(channelName, "", "", packet.Sender.Address.ToString());
 
             // Rules prevent searching
             if (access == Configuration.SecurityAccess.NONE)

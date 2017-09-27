@@ -131,6 +131,8 @@ namespace GatewayLogic
 
             udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
             udpSideB = new UdpResponseReceiver(this, this.Configuration.SideBEndPoint);
+
+            Configuration.Security.Init();
         }
 
         public void Cleanup()
