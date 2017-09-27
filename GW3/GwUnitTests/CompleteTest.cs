@@ -138,7 +138,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(2000)]
+        [Timeout(5000)]
         public void ReconnectServer()
         {
             using (var gateway = new Gateway())
@@ -153,7 +153,7 @@ namespace GwUnitTests
 
                 using (var client = new CAClient())
                 {
-                    client.Configuration.WaitTimeout = 200;
+                    client.Configuration.WaitTimeout = 1000;
                     client.Configuration.SearchAddress = "127.0.0.1:5432";
                     var clientChannel = client.CreateChannel<string>("TEST-DATE");
                     clientChannel.MonitorChanged += (channel, newValue) =>
