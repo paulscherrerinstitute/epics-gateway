@@ -25,10 +25,13 @@ namespace GatewayLogic.Connections
         private Splitter splitter;
         public bool IsDirty { get { return isDirty; } }
 
-        public TcpClientConnection(Gateway gateway, IPEndPoint endPoint, Socket socket) : base(gateway)
+        public TcpClientListener Listener { get; }
+
+        public TcpClientConnection(Gateway gateway, IPEndPoint endPoint, Socket socket, TcpClientListener listener) : base(gateway)
         {
             splitter = new Splitter();
             this.Socket = socket;
+            this.Listener = listener;
             gateway.Log.Write(LogLevel.Connection, "Start TCP client connection on " + endPoint);
         }
 

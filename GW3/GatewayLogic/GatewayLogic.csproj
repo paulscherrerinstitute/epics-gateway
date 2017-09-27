@@ -80,7 +80,6 @@
     <Compile Include="DataPacket.cs" />
     <Compile Include="Gateway.cs" />
     <Compile Include="Connections\GatewayConnection.cs" />
-    <Compile Include="SecurityAccess.cs" />
     <Compile Include="Services\ChannelInformation.cs" />
     <Compile Include="Connections\ClientConnection.cs" />
     <Compile Include="Services\Client.cs" />

@@ -85,11 +85,11 @@ namespace GatewayLogic.Connections
                 {
                     return;
                 }*/
-                catch(ObjectDisposedException ex1)
+                catch (ObjectDisposedException ex1)
                 {
                     return;
                 }
-                catch(Exception ex2)
+                catch (Exception ex2)
                 {
                     Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex2);
                     if (!disposed)
@@ -115,7 +115,7 @@ namespace GatewayLogic.Connections
                         Log.TraceEvent(System.Diagnostics.TraceEventType.Start, chain.ChainId, "New client connection: " + clientEndPoint);
                     TcpManager.RegisterClient(clientEndPoint, chain);*/
                     //TcpReceiver receiver = (TcpReceiver)chain[0];
-                    var receiver = new TcpClientConnection(Gateway, ipSource, client);
+                    var receiver = new TcpClientConnection(Gateway, ipSource, client, this);
                     Gateway.ClientConnection.Add(receiver);
 
                     // Send version

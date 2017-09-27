@@ -21,6 +21,17 @@ namespace GatewayLogic.Commands
             }
 
             string channelName = packet.GetDataAsString();
+
+            Configuration.SecurityAccess access;
+            if (connection == connection.Gateway.udpSideA)
+                access = connection.Gateway.Configuration.Security.EvaluateSideA(channelName, null, null, packet.Sender.Address.ToString());
+            else
+                access = connection.Gateway.Configuration.Security.EvaluateSideB(channelName, null, null, packet.Sender.Address.ToString());
+
+            // Rules prevent searching
+            if (access == Configuration.SecurityAccess.NONE)
+                return;
+
             connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search for: " + channelName);
 
             var record = connection.Gateway.SearchInformation.Get(channelName);

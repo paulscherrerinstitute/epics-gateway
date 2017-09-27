@@ -16,6 +16,17 @@ namespace GatewayLogic.Commands
         public override void DoRequest(GatewayConnection connection, DataPacket packet)
         {
             string channelName = packet.GetDataAsString();
+
+            Configuration.SecurityAccess access;
+            if (((TcpClientConnection)connection).Listener == connection.Gateway.tcpSideA)
+                access = connection.Gateway.Configuration.Security.EvaluateSideA(channelName, null, null, packet.Sender.Address.ToString());
+            else
+                access = connection.Gateway.Configuration.Security.EvaluateSideB(channelName, null, null, packet.Sender.Address.ToString());
+
+            // Rules prevent searching
+            if (access == Configuration.SecurityAccess.NONE)
+                return;
+
             if (!connection.Gateway.ChannelInformation.HasChannelInformation(channelName) && !connection.Gateway.SearchInformation.HasChannelServerInformation(channelName))
             {
 
@@ -40,7 +51,7 @@ namespace GatewayLogic.Commands
                     resPacket.DataType = 0;
                     resPacket.DataCount = 0;
                     resPacket.Parameter1 = packet.Parameter1;
-                    resPacket.Parameter2 = (uint)(SecurityAccess.ALL);
+                    resPacket.Parameter2 = (uint)access;
                     resPacket.Destination = packet.Sender;
                     connection.Send(resPacket);
 
@@ -101,12 +112,22 @@ namespace GatewayLogic.Commands
                     if (destConn == null)
                         continue;
 
+                    Configuration.SecurityAccess access;
+                    if (((TcpClientConnection)destConn).Listener == connection.Gateway.tcpSideA)
+                        access = connection.Gateway.Configuration.Security.EvaluateSideA(channelInfo.ChannelName, null, null, ((TcpClientConnection)destConn).RemoteEndPoint.Address.ToString());
+                    else
+                        access = connection.Gateway.Configuration.Security.EvaluateSideB(channelInfo.ChannelName, null, null, ((TcpClientConnection)destConn).RemoteEndPoint.Address.ToString());
+
+                    // Rules prevent searching
+                    if (access == Configuration.SecurityAccess.NONE)
+                        return;
+
                     DataPacket resPacket = DataPacket.Create(0);
                     resPacket.Command = 22;
                     resPacket.DataType = 0;
                     resPacket.DataCount = 0;
                     resPacket.Parameter1 = client.Id;
-                    resPacket.Parameter2 = (uint)(SecurityAccess.ALL);
+                    resPacket.Parameter2 = (uint)access;
                     resPacket.Destination = client.Client;
                     destConn.Send(resPacket);
 
