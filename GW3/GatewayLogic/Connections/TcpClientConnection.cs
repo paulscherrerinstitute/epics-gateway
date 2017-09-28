@@ -29,6 +29,8 @@ namespace GatewayLogic.Connections
 
         public TcpClientConnection(Gateway gateway, IPEndPoint endPoint, Socket socket, TcpClientListener listener) : base(gateway)
         {
+            gateway.DiagnosticServer.NbTcpCreated++;
+
             splitter = new Splitter();
             this.Socket = socket;
             this.Listener = listener;
@@ -70,6 +72,8 @@ namespace GatewayLogic.Connections
 
         public override void Send(DataPacket packet)
         {
+            Gateway.DiagnosticServer.NbNewData++;
+
             try
             {
                 socket.Send(packet.Data, packet.BufferSize, SocketFlags.None);
@@ -166,6 +170,8 @@ namespace GatewayLogic.Connections
                 {
                     foreach (var p in splitter.Split(mainPacket))
                     {
+                        Gateway.DiagnosticServer.NbMessages++;
+
                         //Console.WriteLine("=> Packet size " + p.MessageSize + " (command " + p.Command + ")");
                         //Log.Write("Packet number " + (pi++) + " command " + p.Command);
                         if (!socket.Connected)

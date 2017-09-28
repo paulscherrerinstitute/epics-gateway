@@ -29,6 +29,7 @@ namespace GatewayLogic
         internal SearchInformation SearchInformation { get; private set; } = new SearchInformation();
         internal ClientConnection ClientConnection { get; }
         internal ServerConnection ServerConnection { get; }
+        internal DiagnosticServer DiagnosticServer { get; private set; }
         public Log Log { get; } = new Log();
 
         internal event EventHandler OneSecUpdate;
@@ -132,6 +133,8 @@ namespace GatewayLogic
             udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
             udpSideB = new UdpResponseReceiver(this, this.Configuration.SideBEndPoint);
 
+            DiagnosticServer = new DiagnosticServer(this, Configuration.SideBEndPoint.Address);
+
             Configuration.Security.Init();
         }
 
@@ -155,12 +158,22 @@ namespace GatewayLogic
 
             ClientConnection.Dispose();
             ServerConnection.Dispose();
+
+            DiagnosticServer.Dispose();
         }
 
         internal void DropClient(TcpClientConnection tcpClientConnection)
         {
             ClientConnection.Remove(tcpClientConnection);
             ChannelInformation.DisconnectClient(tcpClientConnection);
+        }
+
+        public static string Version
+        {
+            get
+            {
+                return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            }
         }
     }
 }

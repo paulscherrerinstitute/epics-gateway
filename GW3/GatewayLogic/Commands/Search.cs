@@ -32,15 +32,19 @@ namespace GatewayLogic.Commands
             if (access == Configuration.SecurityAccess.NONE)
                 return;
 
+            connection.Gateway.DiagnosticServer.NbSearches++;
+
             connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search for: " + channelName);
 
             var record = connection.Gateway.SearchInformation.Get(channelName);
+
+            DataPacket newPacket;
 
             // Connection known, we answer we knows it
             if (record.Server != null)
             {
                 connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search cached for: " + channelName);
-                var newPacket = (DataPacket)packet.Clone();
+                newPacket = (DataPacket)packet.Clone();
 
                 if (connection == connection.Gateway.udpSideA)
                     newPacket.DataType = (UInt16)connection.Gateway.Configuration.SideBEndPoint.Port;
@@ -68,19 +72,23 @@ namespace GatewayLogic.Commands
             record.Channel = channelName;
 
             // Diagnostic search
-            /*var newPacket = (DataPacket)packet.Clone();
+            newPacket = (DataPacket)packet.Clone();
             newPacket.Parameter1 = gwcid;
             newPacket.Parameter2 = gwcid;
-            newPacket.Destination = new IPEndPoint(chain.Gateway.Configuration.LocalSideB.Address, 7890);*/
-            /*if (chain.Side == Workers.ChainSide.SIDE_B)
-                newPacket.ReverseAnswer = true;*/
-            //connection.Send(newPacket);
+            newPacket.Destination = new IPEndPoint(connection.Gateway.Configuration.SideBEndPoint.Address, 7890);
+            if (connection == connection.Gateway.udpSideB)
+            {
+                newPacket.ReverseAnswer = true;
+                connection.Send(newPacket);
+            }
+            else
+                connection.Send(newPacket);
 
             record.LastSearch = DateTime.UtcNow;
             // Send to all the destinations
             foreach (IPEndPoint dest in connection.Destinations)
             {
-                var newPacket = (DataPacket)packet.Clone();
+                newPacket = (DataPacket)packet.Clone();
                 newPacket.Parameter1 = gwcid;
                 newPacket.Parameter2 = gwcid;
                 newPacket.Destination = dest;

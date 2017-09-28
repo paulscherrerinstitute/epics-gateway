@@ -127,5 +127,16 @@ namespace GatewayLogic.Services
                 monitors.RemoveAll(row => row.ChannelInformation.GatewayId == channelId);
             }
         }
+
+        public int Count
+        {
+            get
+            {
+                lock (dictionaryLock)
+                {
+                    return monitors.Count;
+                }
+            }
+        }
     }
 }

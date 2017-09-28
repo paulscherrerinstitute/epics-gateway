@@ -35,6 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ChannelAccess, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ChannelAccess.2017.9.20.1\lib\net45\ChannelAccess.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -78,6 +81,7 @@
     <Compile Include="Connections\GatewayConnectionCollection.cs" />
     <Compile Include="Connections\GatewayTcpConnection.cs" />
     <Compile Include="DataPacket.cs" />
+    <Compile Include="DiagnosticServer.cs" />
     <Compile Include="Gateway.cs" />
     <Compile Include="Connections\GatewayConnection.cs" />
     <Compile Include="Services\ChannelInformation.cs" />
@@ -100,6 +104,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="nuget.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

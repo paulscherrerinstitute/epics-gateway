@@ -24,6 +24,8 @@ namespace GatewayLogic.Connections
 
         public TcpServerConnection(Gateway gateway, IPEndPoint destination) : base(gateway)
         {
+            gateway.DiagnosticServer.NbTcpCreated++;
+
             RemoteEndPoint = destination;
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
@@ -87,6 +89,8 @@ namespace GatewayLogic.Connections
 
             foreach (var p in splitter.Split(mainPacket))
             {
+                Gateway.DiagnosticServer.NbMessages++;
+
                 //Console.WriteLine("+> Packet size " + p.MessageSize + " (command " + p.Command + ")");
                 p.Sender = RemoteEndPoint;
                 Commands.CommandHandler.ExecuteResponseHandler(p.Command, this, p);
@@ -118,6 +122,8 @@ namespace GatewayLogic.Connections
 
         public override void Send(DataPacket packet)
         {
+            Gateway.DiagnosticServer.NbNewData++;
+
             lock (lockObject)
             {
                 try

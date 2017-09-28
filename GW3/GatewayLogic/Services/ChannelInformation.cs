@@ -237,5 +237,16 @@ namespace GatewayLogic.Services
             }
             Gateway.MonitorInformation.Drop(gatewayId, false);
         }
+
+        public int Count
+        {
+            get
+            {
+                lock (dictionaryLock)
+                {
+                    return dictionary.Count;
+                }
+            }
+        }
     }
 }

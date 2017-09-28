@@ -555,5 +555,38 @@ namespace GwUnitTests
                 }
             }
         }
+
+        [TestMethod]
+        [Timeout(30000)]
+        public void CheckGetGatewayVersion()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.GatewayName = "TESTGW";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Start();
+
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                    serverChannel.Value = "Works fine!";
+
+                    // Client
+
+                    using (var client = new CAClient())
+                    {
+                        client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        var clientChannel = client.CreateChannel<string>("TESTGW:VERSION");
+                        server.Start();
+
+                        Assert.AreEqual(Gateway.Version, clientChannel.Get());
+                    }
+                }
+            }
+        }
     }
 }

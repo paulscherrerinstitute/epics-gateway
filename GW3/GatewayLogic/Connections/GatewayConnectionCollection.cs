@@ -58,5 +58,17 @@ namespace GatewayLogic.Connections
             dictionary.Remove(tcpClientConnection.RemoteEndPoint);
             lockDictionary.Release();
         }
+
+
+        public int Count
+        {
+            get
+            {
+                lockDictionary.Wait();
+                var result = dictionary.Count;
+                lockDictionary.Release();
+                return result;
+            }
+        }
     }
 }
