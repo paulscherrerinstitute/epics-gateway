@@ -106,15 +106,14 @@ namespace GwUnitTests
                     var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
                     serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
                     serverChannel.Value = "Works fine!";
-
+                    server.Start();
+                    
                     // Client
-
                     using (var client = new CAClient())
                     {
                         client.Configuration.WaitTimeout = 200;
                         client.Configuration.SearchAddress = "127.0.0.1:5432";
                         var clientChannel = client.CreateChannel<string>("TEST-DATE");
-                        server.Start();
 
                         Assert.AreEqual("Works fine!", clientChannel.Get());
 
@@ -149,6 +148,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.SearchPreventionTimeout = 0;
                 gateway.Start();
 
 
@@ -167,10 +167,10 @@ namespace GwUnitTests
                     {
 
                         ChannelStatusDelegate disconnectFunction = (sender, newStatus) =>
-                    {
-                        if (newStatus == EpicsSharp.ChannelAccess.Constants.ChannelStatus.DISCONNECTED)
-                            autoReset.Set();
-                    };
+                        {
+                            if (newStatus == EpicsSharp.ChannelAccess.Constants.ChannelStatus.DISCONNECTED)
+                                autoReset.Set();
+                        };
                         clientChannel.StatusChanged += disconnectFunction;
 
 
