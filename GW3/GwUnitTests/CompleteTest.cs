@@ -6,6 +6,7 @@ using System.Net;
 using EpicsSharp.ChannelAccess.Client;
 using System.Threading;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace GwUnitTests
 {
@@ -576,7 +577,6 @@ namespace GwUnitTests
                     serverChannel.Value = "Works fine!";
 
                     // Client
-
                     using (var client = new CAClient())
                     {
                         client.Configuration.SearchAddress = "127.0.0.1:5432";
@@ -588,5 +588,80 @@ namespace GwUnitTests
                 }
             }
         }
+
+        [TestMethod]
+        [Timeout(3000)]
+        public void CheckSubArrayGet()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Start();
+
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannel = server.CreateArrayRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAIntSubArrayRecord>("TEST-SUBARR", 20);
+                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                    for (var i = 0; i < 20; i++)
+                        serverChannel.Value.Data[i] = i;
+                    serverChannel.Value.SetSubArray(0, 5);
+
+                    // Client
+                    using (var client = new CAClient())
+                    {
+                        client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        var clientChannel = client.CreateChannel<int[]>("TEST-SUBARR");
+                        server.Start();
+
+                        var response = clientChannel.Get();
+                        Assert.AreEqual(5, response.Length);
+                        Assert.IsTrue(new int[]{ 0, 1, 2, 3, 4 }.SequenceEqual(response));
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        [Timeout(3000)]
+        public void CheckSubArrayPut()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Start();
+
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannel = server.CreateArrayRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAIntSubArrayRecord>("TEST-SUBARR", 20);
+                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                    for (var i = 0; i < 20; i++)
+                        serverChannel.Value.Data[i] = i;
+                    serverChannel.Value.SetSubArray(0, 5);
+
+                    // Client
+                    using (var client = new CAClient())
+                    {
+                        client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        var clientChannel = client.CreateChannel<int[]>("TEST-SUBARR");
+                        server.Start();
+
+                        var putArr = new int[] { 4, 3, 2, 1, 0 };
+                        clientChannel.Put(putArr);
+                        Assert.AreEqual(5, serverChannel.Value.Length);
+                        for (var i = 0;i<5;i++)
+                        {
+                            Assert.AreEqual(putArr[i], serverChannel.Value[i]);
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }

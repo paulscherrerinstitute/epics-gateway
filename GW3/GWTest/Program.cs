@@ -16,8 +16,8 @@ namespace GWTest
     {
         static void Main(string[] args)
         {
-            Test();
-            Test();
+            TestDiagnosticServer();
+            //Test();
             //S1();
             Console.ReadKey();
         }
@@ -107,6 +107,33 @@ namespace GWTest
 
             gateway.Dispose();
             server.Dispose();
+            client.Dispose();
+        }
+        static void TestDiagnosticServer()
+        {
+            var gateway = new Gateway();
+            gateway.Configuration.GatewayName = "TESTGW-DIAG";
+            gateway.Configuration.SideA = "127.0.0.1:5432";
+            gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+            gateway.Configuration.SideB = "127.0.0.1:5055";
+            gateway.Start();
+
+            var client = new CAClient();
+            client.Configuration.SearchAddress = "127.0.0.1:7890";
+            var cpuChannel = client.CreateChannel<double>("TESTGW-DIAG:CPU");
+            var memChannel = client.CreateChannel<double>("TESTGW-DIAG:MEM-FREE");
+           
+            ChannelValueDelegate<double> handler = (sender, newValue)=>
+            {
+                Console.WriteLine(sender.ChannelName + ": " + newValue);
+            };
+
+            cpuChannel.MonitorChanged += handler;
+            memChannel.MonitorChanged += handler;
+
+            Console.ReadKey();
+
+            gateway.Dispose();
             client.Dispose();
         }
     }

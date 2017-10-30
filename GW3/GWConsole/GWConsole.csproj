@@ -49,9 +49,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\GatewayLogic\GatewayLogic.csproj">
       <Project>{0dccc8c2-9ff8-42f6-aea5-5d59337d7d79}</Project>
       <Name>GatewayLogic</Name>

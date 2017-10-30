@@ -17,9 +17,8 @@ namespace GatewayLogic
     public class DiagnosticServer : IDisposable
     {
         readonly CADoubleRecord channelCpu;
-        PerformanceCounter cpuCounter;
         readonly CADoubleRecord channelMem;
-        PerformanceCounter ramCounter;
+        readonly CADoubleRecord channelAverageCpu;
         readonly CAIntRecord channelNbClientConn;
         readonly CAIntRecord channelNbServerConn;
         readonly CAIntRecord channelKnownChannels;
@@ -35,7 +34,6 @@ namespace GatewayLogic
         readonly CAIntRecord channelHeartBeat;
         readonly CAStringRecord channelVersion;
         readonly CAStringRecord channelBuild;
-        readonly CADoubleRecord channelAverageCpu;
         readonly CAStringRecord runningTime;
         readonly DateTime startTime = DateTime.Now;
 
@@ -155,33 +153,6 @@ namespace GatewayLogic
             channelHeartBeat.PrepareRecord += channelHeartBeat_PrepareRecord;
             channelHeartBeat.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
             diagServer.Start();
-
-            System.Threading.ThreadPool.QueueUserWorkItem((obj) =>
-            {
-                try
-                {
-                    cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-                }
-                catch
-                {
-                    try
-                    {
-                        cpuCounter = new PerformanceCounter("Processor Information", "% Processor Time", "_Total");
-                    }
-                    catch
-                    {
-
-                    }
-                }
-                try
-                {
-                    ramCounter = new PerformanceCounter("Memory", "Available MBytes");
-                }
-                catch
-                {
-                }
-
-            }, null);
         }
 
         void channelHeartBeat_PrepareRecord(object sender, EventArgs e)
@@ -284,7 +255,8 @@ namespace GatewayLogic
         {
             try
             {
-                channelMem.Value = ramCounter.NextValue();
+                DiagnosticInfo.GetMemoryUsage(out UInt64 total, out UInt64 free);
+                channelMem.Value = free;
             }
             catch
             {
@@ -295,7 +267,7 @@ namespace GatewayLogic
         {
             try
             {
-                channelCpu.Value = cpuCounter.NextValue();
+                channelCpu.Value = DiagnosticInfo.GetCPUUsage();
             }
             catch
             {
