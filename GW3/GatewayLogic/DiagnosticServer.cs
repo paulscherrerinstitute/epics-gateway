@@ -100,12 +100,12 @@ namespace GatewayLogic
             channelNbMessagesPerSec.CanBeRemotlySet = false;
             channelNbMessagesPerSec.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC5;
             channelNbMessagesPerSec.PrepareRecord += new EventHandler(channelNbMessagesPerSec_PrepareRecord);
-            // DataPacket created per sec
+            // DataPacket sent per sec
             channelNbCreatedPacketPerSec = diagServer.CreateRecord<CAIntRecord>(gateway.Configuration.GatewayName + ":NEWDATA-SEC");
             channelNbCreatedPacketPerSec.CanBeRemotlySet = false;
             channelNbCreatedPacketPerSec.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC5;
             channelNbCreatedPacketPerSec.PrepareRecord += new EventHandler(channelNbCreatedPacketPerSec_PrepareRecord);
-            // DataPacket created per sec
+            // Number of package ready to be re-used
             channelNbPooledPacket = diagServer.CreateRecord<CAIntRecord>(gateway.Configuration.GatewayName + ":POOLED-DATA");
             channelNbPooledPacket.CanBeRemotlySet = false;
             channelNbPooledPacket.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC5;
