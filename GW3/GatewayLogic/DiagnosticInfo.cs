@@ -57,7 +57,8 @@ namespace GatewayLogic
 
         public static double GetCPUUsage()
         {
-            if (!GetSystemTimes(out FileTime f_idleTime, out FileTime f_kernelTime, out FileTime f_userTime))
+            FileTime f_idleTime, f_kernelTime, f_userTime;
+            if (!GetSystemTimes(out f_idleTime, out f_kernelTime, out f_userTime))
                 throw new Exception("Native call to GetSystemTimes() failed");
             var idleTime = ULong(f_idleTime);
             var kernelTime = ULong(f_kernelTime);
@@ -78,7 +79,8 @@ namespace GatewayLogic
 
         public static double GetMemoryUsage()
         {
-            return GetMemoryUsage(out UInt64 a, out UInt64 b);
+            UInt64 a, b;
+            return GetMemoryUsage(out a, out b);
         }
 
         public static double GetMemoryUsage(out UInt64 total, out UInt64 available)

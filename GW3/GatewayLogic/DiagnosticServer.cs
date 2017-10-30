@@ -255,7 +255,8 @@ namespace GatewayLogic
         {
             try
             {
-                DiagnosticInfo.GetMemoryUsage(out UInt64 total, out UInt64 free);
+                UInt64 total, free;
+                DiagnosticInfo.GetMemoryUsage(out total, out free);
                 channelMem.Value = free;
             }
             catch
