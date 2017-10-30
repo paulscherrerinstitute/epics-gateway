@@ -625,6 +625,58 @@ namespace GwUnitTests
         }
 
         [TestMethod]
+        [Timeout(5000)]
+        public void CheckSubArrayMonitor()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Start();
+
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannel = server.CreateArrayRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAIntSubArrayRecord>("TEST-SUBARR", 20);
+                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.HZ2;
+                    for (var i = 0; i < 20; i++)
+                        serverChannel.Value.Data[i] = i;
+                    serverChannel.Value.SetSubArray(0, 5);
+                    var scount = 0;
+                    serverChannel.PrepareRecord += (s, e) => {
+                        scount++;
+                        serverChannel.Value.SetSubArray(scount, 5);
+                    };
+                    // Client
+                    using (var client = new CAClient())
+                    {
+                        client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        var clientChannel = client.CreateChannel<int[]>("TEST-SUBARR");
+                        server.Start();
+
+                        AutoResetEvent are = new AutoResetEvent(false);
+                        var ccount = 0;
+                        ChannelValueDelegate<int[]> handler = (s,v) =>
+                        {
+                            ccount++;
+                            if (ccount >= 5)
+                                are.Set();
+                            Assert.AreEqual(5, v.Length);
+                            for (var i = 0;i<5;i++)
+                            {
+                                Assert.AreEqual(serverChannel.Value[i], v[i]);
+                            }
+                        };
+
+                        clientChannel.MonitorChanged += handler;
+                        are.WaitOne();
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
         [Timeout(3000)]
         public void CheckSubArrayPut()
         {
