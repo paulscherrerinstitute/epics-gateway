@@ -107,7 +107,7 @@ namespace GwUnitTests
                     serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
                     serverChannel.Value = "Works fine!";
                     server.Start();
-                    
+
                     // Client
                     using (var client = new CAClient())
                     {
@@ -618,7 +618,7 @@ namespace GwUnitTests
 
                         var response = clientChannel.Get();
                         Assert.AreEqual(5, response.Length);
-                        Assert.IsTrue(new int[]{ 0, 1, 2, 3, 4 }.SequenceEqual(response));
+                        Assert.IsTrue(new int[] { 0, 1, 2, 3, 4 }.SequenceEqual(response));
                     }
                 }
             }
@@ -644,7 +644,8 @@ namespace GwUnitTests
                         serverChannel.Value.Data[i] = i;
                     serverChannel.Value.SetSubArray(0, 5);
                     var scount = 0;
-                    serverChannel.PrepareRecord += (s, e) => {
+                    serverChannel.PrepareRecord += (s, e) =>
+                    {
                         scount++;
                         serverChannel.Value.SetSubArray(scount, 5);
                     };
@@ -653,20 +654,69 @@ namespace GwUnitTests
                     {
                         client.Configuration.SearchAddress = "127.0.0.1:5432";
                         var clientChannel = client.CreateChannel<int[]>("TEST-SUBARR");
+                        clientChannel.WishedDataCount = 0;
                         server.Start();
 
                         AutoResetEvent are = new AutoResetEvent(false);
                         var ccount = 0;
-                        ChannelValueDelegate<int[]> handler = (s,v) =>
+                        ChannelValueDelegate<int[]> handler = (s, v) =>
                         {
                             ccount++;
                             if (ccount >= 5)
                                 are.Set();
-                            Assert.AreEqual(5, v.Length);
-                            for (var i = 0;i<5;i++)
-                            {
-                                Assert.AreEqual(serverChannel.Value[i], v[i]);
-                            }
+                            Assert.IsTrue(serverChannel.SequenceEqual(v));
+                        };
+
+                        clientChannel.MonitorChanged += handler;
+                        are.WaitOne();
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        [Timeout(5000)]
+        public void CheckSubArrayMonitorVariableSize()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Start();
+
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannel = server.CreateArrayRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAIntSubArrayRecord>("TEST-SUBARR", 20);
+                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.HZ2;
+                    for (var i = 0; i < 20; i++)
+                        serverChannel.Value.Data[i] = i;
+                    serverChannel.Value.SetSubArray(0, 5);
+                    var scount = 0;
+                    serverChannel.PrepareRecord += (s, e) =>
+                    {
+                        Console.WriteLine("Idx: " + scount);
+                        scount++;
+                        serverChannel.Value.SetSubArray(0, scount);
+                    };
+                    // Client
+                    using (var client = new CAClient())
+                    {
+                        client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        var clientChannel = client.CreateChannel<int[]>("TEST-SUBARR");
+                        clientChannel.WishedDataCount = 0;
+                        server.Start();
+
+                        AutoResetEvent are = new AutoResetEvent(false);
+                        var ccount = 0;
+                        ChannelValueDelegate<int[]> handler = (s, v) =>
+                        {
+                            Console.WriteLine("Received size: " + v.Length);
+                            ccount++;
+                            if (ccount >= 5)
+                                are.Set();
+                            Assert.IsTrue(serverChannel.SequenceEqual(v));
                         };
 
                         clientChannel.MonitorChanged += handler;
@@ -706,7 +756,7 @@ namespace GwUnitTests
                         var putArr = new int[] { 4, 3, 2, 1, 0 };
                         clientChannel.Put(putArr);
                         Assert.AreEqual(5, serverChannel.Value.Length);
-                        for (var i = 0;i<5;i++)
+                        for (var i = 0; i < 5; i++)
                         {
                             Assert.AreEqual(putArr[i], serverChannel.Value[i]);
                         }

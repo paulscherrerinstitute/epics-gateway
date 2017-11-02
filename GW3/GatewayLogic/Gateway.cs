@@ -127,11 +127,22 @@ namespace GatewayLogic
 
         public void Start()
         {
-            tcpSideA = new TcpClientListener(this, this.Configuration.SideAEndPoint);
-            tcpSideB = new TcpClientListener(this, this.Configuration.SideBEndPoint);
+            if (this.Configuration.ConfigurationType == GatewayLogic.Configuration.ConfigurationType.UNIDIRECTIONAL)
+            {
+                tcpSideA = new TcpClientListener(this, this.Configuration.SideAEndPoint);
+                tcpSideB = new TcpClientListener(this, this.Configuration.SideBEndPoint);
 
-            udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
-            udpSideB = new UdpResponseReceiver(this, this.Configuration.SideBEndPoint);
+                udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
+                udpSideB = new UdpResponseReceiver(this, this.Configuration.SideBEndPoint);
+            }
+            else
+            {
+                tcpSideA = new TcpClientListener(this, this.Configuration.SideAEndPoint);
+                tcpSideB = new TcpClientListener(this, this.Configuration.SideBEndPoint);
+
+                udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
+                udpSideB = new UdpReceiver(this, this.Configuration.SideBEndPoint);
+            }
 
             DiagnosticServer = new DiagnosticServer(this, Configuration.SideBEndPoint.Address);
 
