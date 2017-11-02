@@ -60,6 +60,7 @@ namespace GatewayLogic
             channelCpu.CanBeRemotlySet = false;
             channelCpu.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC5;
             channelCpu.PrepareRecord += new EventHandler(channelCPU_PrepareRecord);
+            channelCPU_PrepareRecord(null, null);
 
             // Mem free
             channelMem = diagServer.CreateRecord<CADoubleRecord>(gateway.Configuration.GatewayName + ":MEM-FREE");
@@ -67,6 +68,7 @@ namespace GatewayLogic
             channelMem.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC5;
             channelMem.EngineeringUnits = "Mb";
             channelMem.PrepareRecord += new EventHandler(channelMEM_PrepareRecord);
+            channelMEM_PrepareRecord(null, null);
 
             // NB Client connections
             channelNbClientConn = diagServer.CreateRecord<CAIntRecord>(gateway.Configuration.GatewayName + ":NBCLIENTS");

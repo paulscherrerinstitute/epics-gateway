@@ -350,11 +350,11 @@ namespace GwUnitTests
                     {
                         using (var clientB = new CAClient())
                         {
-                            clientA.Configuration.WaitTimeout = 200;
+                            clientA.Configuration.WaitTimeout = 500;
                             clientA.Configuration.SearchAddress = "127.0.0.1:5432";
                             var clientChannelA = clientA.CreateChannel<string>("TEST-DATE");
 
-                            clientB.Configuration.WaitTimeout = 200;
+                            clientB.Configuration.WaitTimeout = 500;
                             clientB.Configuration.SearchAddress = "127.0.0.1:5432";
                             var clientChannelB = clientB.CreateChannel<string>("TEST-DATE");
 
