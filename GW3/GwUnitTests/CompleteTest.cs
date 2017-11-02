@@ -649,24 +649,26 @@ namespace GwUnitTests
                         var clientChannel = client.CreateChannel<int[]>("TEST-SUBARR");
                         clientChannel.WishedDataCount = 0;
 
-                        AutoResetEvent arEvt = new AutoResetEvent(false);
-                        ChannelValueDelegate<int[]> handler = (s, v) =>
+                        using (AutoResetEvent arEvt = new AutoResetEvent(false))
                         {
-                            Assert.IsTrue(serverChannel.SequenceEqual(v));
-                            arEvt.Set();
-                        };
+                            ChannelValueDelegate<int[]> handler = (s, v) =>
+                            {
+                                Assert.IsTrue(serverChannel.SequenceEqual(v));
+                                arEvt.Set();
+                            };
 
-                        clientChannel.MonitorChanged += handler;
-                        serverChannel.Value.SetSubArray(0, 5);
-                        arEvt.WaitOne();
-                        serverChannel.Value.SetSubArray(1, 5);
-                        arEvt.WaitOne();
-                        serverChannel.Value.SetSubArray(2, 5);
-                        arEvt.WaitOne();
-                        serverChannel.Value.SetSubArray(3, 5);
-                        arEvt.WaitOne();
-                        serverChannel.Value.SetSubArray(7, 5);
-                        arEvt.WaitOne();
+                            clientChannel.MonitorChanged += handler;
+                            serverChannel.Value.SetSubArray(0, 5);
+                            arEvt.WaitOne();
+                            serverChannel.Value.SetSubArray(1, 5);
+                            arEvt.WaitOne();
+                            serverChannel.Value.SetSubArray(2, 5);
+                            arEvt.WaitOne();
+                            serverChannel.Value.SetSubArray(3, 5);
+                            arEvt.WaitOne();
+                            serverChannel.Value.SetSubArray(7, 5);
+                            arEvt.WaitOne();
+                        }
                     }
                 }
             }
@@ -697,24 +699,26 @@ namespace GwUnitTests
                         var clientChannel = client.CreateChannel<int[]>("TEST-SUBARR");
                         clientChannel.WishedDataCount = 0;
 
-                        AutoResetEvent arEvt = new AutoResetEvent(false);
-                        ChannelValueDelegate<int[]> handler = (s, v) =>
+                        using (AutoResetEvent arEvt = new AutoResetEvent(false))
                         {
-                            Assert.IsTrue(serverChannel.SequenceEqual(v));
-                            arEvt.Set();
-                        };
+                            ChannelValueDelegate<int[]> handler = (s, v) =>
+                            {
+                                Assert.IsTrue(serverChannel.SequenceEqual(v));
+                                arEvt.Set();
+                            };
 
-                        clientChannel.MonitorChanged += handler;
-                        serverChannel.Value.SetSubArray(0, 1);
-                        arEvt.WaitOne();
-                        serverChannel.Value.SetSubArray(0, 2);
-                        arEvt.WaitOne();
-                        serverChannel.Value.SetSubArray(0, 3);
-                        arEvt.WaitOne();
-                        serverChannel.Value.SetSubArray(0, 10);
-                        arEvt.WaitOne();
-                        serverChannel.Value.SetSubArray(3, 9);
-                        arEvt.WaitOne();
+                            clientChannel.MonitorChanged += handler;
+                            serverChannel.Value.SetSubArray(0, 1);
+                            arEvt.WaitOne();
+                            serverChannel.Value.SetSubArray(0, 2);
+                            arEvt.WaitOne();
+                            serverChannel.Value.SetSubArray(0, 3);
+                            arEvt.WaitOne();
+                            serverChannel.Value.SetSubArray(0, 10);
+                            arEvt.WaitOne();
+                            serverChannel.Value.SetSubArray(3, 9);
+                            arEvt.WaitOne();
+                        }
                     }
                 }
             }
