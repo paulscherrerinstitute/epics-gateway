@@ -626,7 +626,7 @@ namespace GwUnitTests
 
         [TestMethod]
         [Timeout(5000)]
-        public void CheckSubArrayMonitor()
+        public void CheckSubArrayMonitorVariableIndex()
         {
             using (var gateway = new Gateway())
             {
@@ -635,40 +635,38 @@ namespace GwUnitTests
                 gateway.Configuration.SideB = "127.0.0.1:5055";
                 gateway.Start();
 
-                // Serverside
                 using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
                 {
-                    var serverChannel = server.CreateArrayRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAIntSubArrayRecord>("TEST-SUBARR", 20);
-                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.HZ2;
-                    for (var i = 0; i < 20; i++)
-                        serverChannel.Value.Data[i] = i;
-                    serverChannel.Value.SetSubArray(0, 5);
-                    var scount = 0;
-                    serverChannel.PrepareRecord += (s, e) =>
-                    {
-                        scount++;
-                        serverChannel.Value.SetSubArray(scount, 5);
-                    };
-                    // Client
                     using (var client = new CAClient())
                     {
+                        var serverChannel = server.CreateArrayRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAIntSubArrayRecord>("TEST-SUBARR", 20);
+                        for (var i = 0; i < 20; i++)
+                            serverChannel.Value.Data[i] = i;
+                        serverChannel.Value.SetSubArray(0, 0);
+                        server.Start();
+
                         client.Configuration.SearchAddress = "127.0.0.1:5432";
                         var clientChannel = client.CreateChannel<int[]>("TEST-SUBARR");
                         clientChannel.WishedDataCount = 0;
-                        server.Start();
 
-                        AutoResetEvent are = new AutoResetEvent(false);
-                        var ccount = 0;
+                        AutoResetEvent arEvt = new AutoResetEvent(false);
                         ChannelValueDelegate<int[]> handler = (s, v) =>
                         {
-                            ccount++;
-                            if (ccount >= 5)
-                                are.Set();
+                            arEvt.Set();
                             Assert.IsTrue(serverChannel.SequenceEqual(v));
                         };
 
                         clientChannel.MonitorChanged += handler;
-                        are.WaitOne();
+                        serverChannel.Value.SetSubArray(0, 5);
+                        arEvt.WaitOne();
+                        serverChannel.Value.SetSubArray(1, 5);
+                        arEvt.WaitOne();
+                        serverChannel.Value.SetSubArray(2, 5);
+                        arEvt.WaitOne();
+                        serverChannel.Value.SetSubArray(3, 5);
+                        arEvt.WaitOne();
+                        serverChannel.Value.SetSubArray(7, 5);
+                        arEvt.WaitOne();
                     }
                 }
             }
@@ -685,42 +683,38 @@ namespace GwUnitTests
                 gateway.Configuration.SideB = "127.0.0.1:5055";
                 gateway.Start();
 
-                // Serverside
                 using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
                 {
-                    var serverChannel = server.CreateArrayRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAIntSubArrayRecord>("TEST-SUBARR", 20);
-                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.HZ2;
-                    for (var i = 0; i < 20; i++)
-                        serverChannel.Value.Data[i] = i;
-                    serverChannel.Value.SetSubArray(0, 5);
-                    var scount = 0;
-                    serverChannel.PrepareRecord += (s, e) =>
-                    {
-                        Console.WriteLine("Idx: " + scount);
-                        scount++;
-                        serverChannel.Value.SetSubArray(0, scount);
-                    };
-                    // Client
                     using (var client = new CAClient())
                     {
+                        var serverChannel = server.CreateArrayRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAIntSubArrayRecord>("TEST-SUBARR", 20);
+                        for (var i = 0; i < 20; i++)
+                            serverChannel.Value.Data[i] = i;
+                        serverChannel.Value.SetSubArray(0, 0);
+                        server.Start();
+
                         client.Configuration.SearchAddress = "127.0.0.1:5432";
                         var clientChannel = client.CreateChannel<int[]>("TEST-SUBARR");
                         clientChannel.WishedDataCount = 0;
-                        server.Start();
 
-                        AutoResetEvent are = new AutoResetEvent(false);
-                        var ccount = 0;
+                        AutoResetEvent arEvt = new AutoResetEvent(false);
                         ChannelValueDelegate<int[]> handler = (s, v) =>
                         {
-                            Console.WriteLine("Received size: " + v.Length);
-                            ccount++;
-                            if (ccount >= 5)
-                                are.Set();
+                            arEvt.Set();
                             Assert.IsTrue(serverChannel.SequenceEqual(v));
                         };
 
                         clientChannel.MonitorChanged += handler;
-                        are.WaitOne();
+                        serverChannel.Value.SetSubArray(0, 1);
+                        arEvt.WaitOne();
+                        serverChannel.Value.SetSubArray(0, 2);
+                        arEvt.WaitOne();
+                        serverChannel.Value.SetSubArray(0, 3);
+                        arEvt.WaitOne();
+                        serverChannel.Value.SetSubArray(0, 10);
+                        arEvt.WaitOne();
+                        serverChannel.Value.SetSubArray(3, 9);
+                        arEvt.WaitOne();
                     }
                 }
             }
