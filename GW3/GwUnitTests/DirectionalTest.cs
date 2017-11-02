@@ -14,6 +14,7 @@ namespace GwUnitTests
     public class DirectionalTest
     {
         [TestMethod]
+        [ExpectedExceptionWithMessage(typeof(Exception),ExpectedMessage = "Connection timeout.")]
         public void TestUnidirectionalGet()
         {
             using (var gateway = new Gateway())
@@ -49,11 +50,14 @@ namespace GwUnitTests
 
                     using (var client = new CAClient())
                     {
+                        client.Configuration.WaitTimeout = 200;
                         client.Configuration.SearchAddress = "127.0.0.1:5055";
                         var clientChannel = client.CreateChannel<string>("TEST-SERVER-B");
 
-                        Exception e = Assert.ThrowsException<Exception>(() => { clientChannel.Get(); });
-                        Assert.AreEqual("Connection timeout.", e.Message);
+                        clientChannel.Get();
+
+                        /*Exception e = Assert.ThrowsException<Exception>(() => { clientChannel.Get(); });
+                        Assert.AreEqual("Connection timeout.", e.Message);*/
                     }
                 }
             }
@@ -106,6 +110,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
+        [ExpectedExceptionWithMessage(typeof(Exception), ExpectedMessage = "Connection timeout.")]
         public void TestUnidirectionalDiagnostic()
         {
             using (var gateway = new Gateway())
@@ -131,10 +136,12 @@ namespace GwUnitTests
                 using (var client = new CAClient())
                 {
                     client.Configuration.SearchAddress = "127.0.0.1:5055";
+                    client.Configuration.WaitTimeout = 200;
                     var clientChannel = client.CreateChannel<double>("TEST-UDGW:MEM-FREE");
 
-                    Exception e = Assert.ThrowsException<Exception>(() => { clientChannel.Get(); });
-                        Assert.AreEqual("Connection timeout.", e.Message);
+                    clientChannel.Get();
+                    /*Exception e = Assert.ThrowsException<Exception>(() => { clientChannel.Get(); });
+                        Assert.AreEqual("Connection timeout.", e.Message);*/
                 }
             }
         }
