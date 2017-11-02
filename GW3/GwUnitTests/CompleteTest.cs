@@ -652,8 +652,8 @@ namespace GwUnitTests
                         AutoResetEvent arEvt = new AutoResetEvent(false);
                         ChannelValueDelegate<int[]> handler = (s, v) =>
                         {
-                            arEvt.Set();
                             Assert.IsTrue(serverChannel.SequenceEqual(v));
+                            arEvt.Set();
                         };
 
                         clientChannel.MonitorChanged += handler;
@@ -700,8 +700,8 @@ namespace GwUnitTests
                         AutoResetEvent arEvt = new AutoResetEvent(false);
                         ChannelValueDelegate<int[]> handler = (s, v) =>
                         {
-                            arEvt.Set();
                             Assert.IsTrue(serverChannel.SequenceEqual(v));
+                            arEvt.Set();
                         };
 
                         clientChannel.MonitorChanged += handler;
