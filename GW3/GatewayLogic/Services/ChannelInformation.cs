@@ -238,6 +238,29 @@ namespace GatewayLogic.Services
             Gateway.MonitorInformation.Drop(gatewayId, false);
         }
 
+        public Dictionary<string, List<string>> KnownClients
+        {
+            get
+            {
+                Dictionary<string, List<Client>> data;
+                lock (dictionaryLock)
+                {
+                    data = dictionary.Values.ToDictionary(key => key.ChannelName, val => val.GetClientConnections().ToList());
+                }
+                var result = new Dictionary<string, List<string>>();
+                foreach (var i in data)
+                {
+                    foreach (var j in i.Value.Select(row => row.Connection.Name))
+                    {
+                        if (!result.ContainsKey(j))
+                            result.Add(j, new List<string>());
+                        result[j].Add(i.Key);
+                    }
+                }
+                return result;
+            }
+        }
+
         public int Count
         {
             get

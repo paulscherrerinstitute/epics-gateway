@@ -38,6 +38,7 @@ namespace GatewayLogic.Commands
             var searchInfo = connection.Gateway.SearchInformation.Get(channelName);
             var channelInfo = connection.Gateway.ChannelInformation.Get(channelName, searchInfo);
             channelInfo.RegisterClient(packet.Parameter1, (TcpClientConnection)connection);
+            connection.Gateway.GotNewClientChannel(packet.Sender.ToString(), channelName);
 
             lock (channelInfo.LockObject)
             {
@@ -78,6 +79,7 @@ namespace GatewayLogic.Commands
                             connection.Gateway.ServerConnection.CreateConnection(connection.Gateway, searchInfo.Server, (tcpConnection) =>
                             {
                                 channelInfo.TcpConnection = tcpConnection;
+                                connection.Gateway.GotNewIocChannel(tcpConnection.Name, channelInfo.ChannelName);
                                 tcpConnection.LinkChannel(channelInfo);
                                 var newPacket = (DataPacket)packet.Clone();
                                 newPacket.Parameter1 = channelInfo.GatewayId;
@@ -97,6 +99,7 @@ namespace GatewayLogic.Commands
         {
             locker.Wait();
             var channelInfo = connection.Gateway.ChannelInformation.Get(packet.Parameter1);
+
             connection.Gateway.Log.Write(Services.LogLevel.Detail, "Answer for create channel " + channelInfo.ChannelName);
             lock (channelInfo.LockObject)
             {

@@ -17,5 +17,7 @@ namespace GatewayLogic.Connections
         public bool HasSentEcho { get; set; }
 
         public DateTime LastMessage { get; set; }
+
+        public abstract string Name { get; }
     }
 }

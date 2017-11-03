@@ -120,6 +120,17 @@ namespace GatewayLogic.Connections
             }
         }
 
+        public List<string> Channels
+        {
+            get
+            {
+                lock (channels)
+                {
+                    return channels.Select(row => row.ChannelName).ToList();
+                }
+            }
+        }
+
         public override void Send(DataPacket packet)
         {
             Gateway.DiagnosticServer.NbNewData++;
@@ -142,6 +153,7 @@ namespace GatewayLogic.Connections
         {
             socket.Dispose();
             Gateway.ServerConnection.Remove(this);
+            Gateway.GotDropedIoc(Name);
 
             lock (channels)
             {
@@ -162,5 +174,7 @@ namespace GatewayLogic.Connections
                 }
             }
         }
+
+        public override string Name => RemoteEndPoint.ToString();
     }
 }

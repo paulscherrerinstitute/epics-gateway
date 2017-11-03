@@ -1,6 +1,7 @@
 ﻿using GatewayLogic.Connections;
 using GatewayLogic.Services;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,11 @@ using System.Xml.Serialization;
 
 namespace GatewayLogic
 {
+    public delegate void NewIocChannelDelegate(string ioc, string channel);
+    public delegate void NewClientChannelDelegate(string client, string channel);
+    public delegate void DropIocDelegate(string ioc);
+    public delegate void DropClientDelegate(string client);
+
     public class Gateway : IDisposable
     {
         public const int BUFFER_SIZE = 8192 * 30;
@@ -26,14 +32,26 @@ namespace GatewayLogic
         internal MonitorInformation MonitorInformation { get; private set; } = new MonitorInformation();
         internal ReadNotifyInformation ReadNotifyInformation { get; private set; } = new ReadNotifyInformation();
         internal WriteNotifyInformation WriteNotifyInformation { get; private set; } = new WriteNotifyInformation();
+
         internal SearchInformation SearchInformation { get; private set; } = new SearchInformation();
         internal ClientConnection ClientConnection { get; }
         internal ServerConnection ServerConnection { get; }
         internal DiagnosticServer DiagnosticServer { get; private set; }
         public Log Log { get; } = new Log();
 
+        //internal readonly ConcurrentDictionary<string, ConcurrentBag<string>> KnownIocs = new ConcurrentDictionary<string, ConcurrentBag<string>>();
+        //internal readonly ConcurrentDictionary<string, ConcurrentBag<string>> KnownClients = new ConcurrentDictionary<string, ConcurrentBag<string>>();
+
+        public event NewIocChannelDelegate NewIocChannel;
+        public event NewClientChannelDelegate NewClientChannel;
+        public event DropIocDelegate DropedIoc;
+        public event DropClientDelegate DropedClient;
+        public event EventHandler UpdateSearch;
+
         internal event EventHandler OneSecUpdate;
         internal event EventHandler TenSecUpdate;
+
+        public List<KeyValuePair<string, string>> CurrentSearches = new List<KeyValuePair<string, string>>();
 
         bool isDiposed = false;
 
@@ -71,6 +89,22 @@ namespace GatewayLogic
                     Log.Write(LogLevel.Error, ex.ToString());
                 }
                 count++;
+            }
+        }
+
+        public Dictionary<string, List<string>> KnownIocs
+        {
+            get
+            {
+                return ServerConnection.ToDictionary(key => key.Name, val => val.Channels);
+            }
+        }
+
+        public Dictionary<string, List<string>> KnownClients
+        {
+            get
+            {
+                return ChannelInformation.KnownClients;
             }
         }
 
@@ -146,6 +180,7 @@ namespace GatewayLogic
 
             DiagnosticServer = new DiagnosticServer(this, Configuration.SideBEndPoint.Address);
 
+            this.TenSecUpdate += UpdateSearchInformation;
             Configuration.Security.Init();
         }
 
@@ -184,6 +219,102 @@ namespace GatewayLogic
             get
             {
                 return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            }
+        }
+
+        internal void Search(string channelName, string endpoint)
+        {
+            lock (CurrentSearches)
+            {
+                CurrentSearches.Add(new KeyValuePair<string, string>(channelName, endpoint));
+            }
+        }
+
+        private void UpdateSearchInformation(object sender, EventArgs e)
+        {
+            GotUpdateSearch();
+            lock (CurrentSearches)
+            {
+                CurrentSearches.Clear();
+            }
+        }
+
+        public List<KeyValuePair<string, int>> Searches
+        {
+            get
+            {
+                lock (CurrentSearches)
+                {
+                    return CurrentSearches.GroupBy(row => row.Key)
+                        .Select(row => new KeyValuePair<string, int>(row.Key, row.Count())).ToList();
+                }
+            }
+        }
+
+        public List<KeyValuePair<string, int>> Searchers
+        {
+            get
+            {
+                lock (CurrentSearches)
+                {
+                    return CurrentSearches.GroupBy(row => row.Value)
+                        .Select(row => new KeyValuePair<string, int>(row.Key, row.Count())).ToList();
+                }
+            }
+        }
+
+        public void GotNewIocChannel(string ioc, string channel)
+        {
+            try
+            {
+                NewIocChannel?.Invoke(ioc, channel);
+            }
+            catch
+            {
+            }
+        }
+
+        public void GotNewClientChannel(string client, string channel)
+        {
+            try
+            {
+                NewClientChannel?.Invoke(client, channel);
+            }
+            catch
+            {
+            }
+        }
+
+        public void GotDropedIoc(string ioc)
+        {
+            try
+            {
+                DropedIoc?.Invoke(ioc);
+            }
+            catch
+            {
+            }
+        }
+
+        public void GotDropedClient(string client)
+        {
+            try
+            {
+                DropedClient?.Invoke(client);
+            }
+            catch
+            {
+            }
+        }
+
+        public void GotUpdateSearch()
+        {
+            try
+            {
+                UpdateSearch?.Invoke(this, null);
+            }
+            catch
+            {
             }
         }
     }

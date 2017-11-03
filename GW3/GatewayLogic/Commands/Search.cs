@@ -35,6 +35,7 @@ namespace GatewayLogic.Commands
             connection.Gateway.DiagnosticServer.NbSearches++;
 
             connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search for: " + channelName);
+            connection.Gateway.Search(channelName, packet.Sender.ToString());
 
             var record = connection.Gateway.SearchInformation.Get(channelName);
 

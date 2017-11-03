@@ -70,6 +70,8 @@ namespace GatewayLogic.Connections
             }
         }
 
+        public override string Name => this.RemoteEndPoint.ToString();
+
         public override void Send(DataPacket packet)
         {
             Gateway.DiagnosticServer.NbNewData++;
@@ -89,6 +91,11 @@ namespace GatewayLogic.Connections
                 Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
                 Dispose();
             }
+        }
+
+        internal void LinkChannel(ChannelInformation.ChannelInformationDetails channelInformationDetails)
+        {
+            throw new NotImplementedException();
         }
 
         public void Flush()
@@ -161,8 +168,17 @@ namespace GatewayLogic.Connections
                 Dispose();
                 return;
             }
+
+            // We receive a debug port request.
             this.LastMessage = DateTime.UtcNow;
             var mainPacket = DataPacket.Create(buffer, n);
+
+            if (buffer[0] == 126)
+            {
+                Gateway.ClientConnection.Remove(this);
+                Gateway.ClientConnection.Add(new DebugPortConnection(Gateway, this.Socket, this.RemoteEndPoint, (IPEndPoint)this.Socket.LocalEndPoint, mainPacket));
+                return;
+            }
 
             try
             {
@@ -217,6 +233,7 @@ namespace GatewayLogic.Connections
             disposed = true;
 
             this.Gateway.DropClient(this);
+            Gateway.GotDropedClient(Name);
 
             IPEndPoint endPoint = null;
             try

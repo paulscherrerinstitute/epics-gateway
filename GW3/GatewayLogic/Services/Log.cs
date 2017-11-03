@@ -16,7 +16,7 @@ namespace GatewayLogic.Services
 
     public class Log
     {
-        public delegate void LogHandler(string source, string message);
+        public delegate void LogHandler(LogLevel level, string source, string message);
         public delegate bool LogFilter(LogLevel level);
 
         public event LogHandler Handler = Log.DefaultHandler;
@@ -27,7 +27,7 @@ namespace GatewayLogic.Services
             return true;
         }
 
-        private static void DefaultHandler(string source, string message)
+        private static void DefaultHandler(LogLevel level, string source, string message)
         {
             Console.Write(DateTime.UtcNow.ToString("HH:mm:ss"));
             Console.Write(" - ");
@@ -43,7 +43,7 @@ namespace GatewayLogic.Services
         {
             if (this.Filter != null && !this.Filter(level))
                 return;
-            Handler?.Invoke(sourceFilePath.Split(new char[] { '\\' }).Last().Split(new char[] { '.' }).First() + "." + memberName + ":" + sourceLineNumber, message);
+            Handler?.Invoke(level, sourceFilePath.Split(new char[] { '\\' }).Last().Split(new char[] { '.' }).First() + "." + memberName + ":" + sourceLineNumber, message);
         }
     }
 }

@@ -7,20 +7,20 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic.Connections
 {
-    class ClientConnection : GatewayConnectionCollection<TcpClientConnection>, IDisposable
+    class ClientConnection : GatewayConnectionCollection<GatewayTcpConnection>, IDisposable
     {
         internal ClientConnection(Gateway gateway) : base(gateway)
         {
         }
 
-        public void Add(TcpClientConnection client)
+        public void Add(GatewayTcpConnection client)
         {
             lockDictionary.Wait();
             dictionary.Add(client.RemoteEndPoint, client);
             lockDictionary.Release();
         }
 
-        public TcpClientConnection Get(IPEndPoint client)
+        public GatewayTcpConnection Get(IPEndPoint client)
         {
             lockDictionary.Wait();
             if (!dictionary.ContainsKey(client))

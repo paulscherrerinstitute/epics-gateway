@@ -78,6 +78,7 @@
     <Compile Include="Configuration\SecurityFilter.cs" />
     <Compile Include="Configuration\SecurityRule.cs" />
     <Compile Include="Configuration\UserFilter.cs" />
+    <Compile Include="Connections\DebugPortConnection.cs" />
     <Compile Include="Connections\GatewayConnectionCollection.cs" />
     <Compile Include="Connections\GatewayTcpConnection.cs" />
     <Compile Include="DataPacket.cs" />

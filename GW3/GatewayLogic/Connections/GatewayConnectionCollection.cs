@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic.Connections
 {
-    class GatewayConnectionCollection<TType> where TType : GatewayTcpConnection
+    class GatewayConnectionCollection<TType> : IEnumerable<TType> where TType : GatewayTcpConnection
     {
         public Gateway Gateway { get; }
 
@@ -59,6 +60,19 @@ namespace GatewayLogic.Connections
             lockDictionary.Release();
         }
 
+
+        public IEnumerator<TType> GetEnumerator()
+        {
+            lockDictionary.Wait();
+            var result = dictionary.Values.ToList();
+            lockDictionary.Release();
+            return result.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
 
         public int Count
         {
