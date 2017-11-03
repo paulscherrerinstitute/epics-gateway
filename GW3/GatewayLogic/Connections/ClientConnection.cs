@@ -15,6 +15,8 @@ namespace GatewayLogic.Connections
 
         public void Add(GatewayTcpConnection client)
         {
+            if (client.RemoteEndPoint == null)
+                return;
             lockDictionary.Wait();
             dictionary.Add(client.RemoteEndPoint, client);
             lockDictionary.Release();
