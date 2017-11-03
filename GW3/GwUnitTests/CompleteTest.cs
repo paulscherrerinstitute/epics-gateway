@@ -869,5 +869,164 @@ namespace GwUnitTests
                 }
             }
         }
+
+        [TestMethod]
+        [Timeout(7000)]
+        public void CheckGetRemoteIocs()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.GatewayName = "TEST";
+                gateway.Start();
+
+                System.Configuration.ConfigurationManager.AppSettings["gatewayDebugSearch"] = "127.0.0.1:5432";
+
+                using (var evtWait = new AutoResetEvent(false))
+                {
+                    using (var dbg = new DebugContext("TEST"))
+                    {
+                        dbg.ConnectionState += (DebugContext ctx, System.Data.ConnectionState state) =>
+                        {
+                            evtWait.Set();
+                        };
+                        evtWait.WaitOne();
+                        dbg.RefreshAllIocs += (DebugContext ctx) =>
+                        {
+                            foreach (var l in ctx.Iocs)
+                                Console.WriteLine("=> " + l.Name);
+                            evtWait.Set();
+                        };
+                        // Serverside
+                        using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                        {
+                            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                            serverChannel.Value = "Works fine!";
+
+                            // Client
+
+                            using (var client = new CAClient())
+                            {
+                                client.Configuration.SearchAddress = "127.0.0.1:5432";
+                                var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                                server.Start();
+
+                                Assert.AreEqual("Works fine!", clientChannel.Get());
+                            }
+                        }
+                        evtWait.WaitOne();
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        [Timeout(7000)]
+        public void CheckNewRemoteIocs()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.GatewayName = "TEST";
+                gateway.Start();
+
+                System.Configuration.ConfigurationManager.AppSettings["gatewayDebugSearch"] = "127.0.0.1:5432";
+
+                using (var evtWait = new AutoResetEvent(false))
+                {
+                    using (var dbg = new DebugContext("TEST"))
+                    {
+                        dbg.ConnectionState += (DebugContext ctx, System.Data.ConnectionState state) =>
+                        {
+                            evtWait.Set();
+                        };
+                        evtWait.WaitOne();
+                        dbg.NewIocChannel += (DebugContext ctx, string host, string channel) =>
+                        {
+                            Console.WriteLine("=> " + host + " " + channel);
+                            if (host == "127.0.0.1:5056" && channel == "TEST-DATE")
+                                evtWait.Set();
+                        };
+                        // Serverside
+                        using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                        {
+                            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                            serverChannel.Value = "Works fine!";
+
+                            // Client
+
+                            using (var client = new CAClient())
+                            {
+                                client.Configuration.SearchAddress = "127.0.0.1:5432";
+                                var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                                server.Start();
+
+                                Assert.AreEqual("Works fine!", clientChannel.Get());
+                            }
+                        }
+                        evtWait.WaitOne();
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        [Timeout(7000)]
+        public void CheckNewRemoteClient()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.GatewayName = "TEST";
+                gateway.Start();
+
+                System.Configuration.ConfigurationManager.AppSettings["gatewayDebugSearch"] = "127.0.0.1:5432";
+
+                using (var evtWait = new AutoResetEvent(false))
+                {
+                    using (var dbg = new DebugContext("TEST"))
+                    {
+                        dbg.ConnectionState += (DebugContext ctx, System.Data.ConnectionState state) =>
+                        {
+                            evtWait.Set();
+                        };
+                        evtWait.WaitOne();
+                        dbg.NewClientChannel += (DebugContext ctx, string host, string channel) =>
+                        {
+                            Console.WriteLine("=> " + host + " " + channel);
+                            if (host.StartsWith("127.0.0.1:") && channel == "TEST-DATE")
+                                evtWait.Set();
+                        };
+                        // Serverside
+                        using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                        {
+                            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                            serverChannel.Value = "Works fine!";
+
+                            // Client
+
+                            using (var client = new CAClient())
+                            {
+                                client.Configuration.SearchAddress = "127.0.0.1:5432";
+                                var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                                server.Start();
+
+                                Assert.AreEqual("Works fine!", clientChannel.Get());
+                            }
+                        }
+                        evtWait.WaitOne();
+                    }
+                }
+            }
+        }
     }
 }
