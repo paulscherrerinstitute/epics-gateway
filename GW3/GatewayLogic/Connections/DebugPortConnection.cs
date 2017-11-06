@@ -1,4 +1,5 @@
-﻿using GatewayLogic.Services;
+﻿using EpicsSharp.ChannelAccess.Client;
+using GatewayLogic.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -45,23 +46,31 @@ namespace GatewayLogic.Connections
             // We need to act as a forwarder
             if (destGateway != gateway.Configuration.GatewayName)
             {
-                /*PBCaGw.Services.Record record;
-                record = PBCaGw.Services.InfoService.ChannelEndPoint[destGateway + ":VERSION"];
-                if (record == null)
+                System.Threading.ThreadPool.QueueUserWorkItem((obj) =>
                 {
-                    System.Threading.ThreadPool.QueueUserWorkItem(action => chain.Dispose());
-                    return;
-                }
+                    using (var caClient = new CAClient())
+                    {
+                        caClient.Configuration.SearchAddress = Gateway.Configuration.RemoteSideA + ";" + Gateway.Configuration.RemoteSideB;
+                        using (var destChan = caClient.CreateChannel<string>(destGateway + ":VERSION"))
+                        {
+                            try
+                            {
+                                destChan.Connect();
 
-                forwarder = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                forwarder.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-                forwarder.Connect(record.Destination);
-
-                forwarder.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
-
-                forwarder.Send(packet.Data, 0, packet.BufferSize, SocketFlags.None);
-
-                return;*/
+                                forwarder = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                                forwarder.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+                                forwarder.Connect(Configuration.Configuration.ParseAddress(destChan.IOC));
+                                forwarder.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
+                                forwarder.Send(packet.Data, 0, packet.BufferSize, SocketFlags.None);
+                            }
+                            catch
+                            {
+                                System.Threading.ThreadPool.QueueUserWorkItem(action => this.Dispose());
+                            }
+                        }
+                    }
+                });
+                return;
             }
 
             sendStream = new BufferedStream(new NetworkStream(socket));
@@ -131,8 +140,6 @@ namespace GatewayLogic.Connections
             gateway.UpdateSearch += SendSearch;
 
             gateway.Log.Handler += GatewayLogEntry;
-            /*PBCaGw.Services.DebugTraceListener.LogEntry += GatewayLogEntry;
-            PBCaGw.Services.DebugTraceListener.TraceLevelChanged += new System.EventHandler(DebugTraceListenerTraceLevelChanged);*/
         }
 
         void ReceiveTcpData(System.IAsyncResult ar)
@@ -396,14 +403,8 @@ namespace GatewayLogic.Connections
             else switch ((DebugDataType)packet.GetUInt32(pos))
                 {
                     case DebugDataType.FULL_LOGS:
-                        /*PBCaGw.Services.DebugTraceListener.TraceAll = true;
-                        if (PBCaGw.Services.Log.WillDisplay(System.Diagnostics.TraceEventType.Information))
-                            PBCaGw.Services.Log.TraceEvent(TraceEventType.Information, 0, "Debug set to show all messages.");*/
                         break;
                     case DebugDataType.CRITICAL_LOGS:
-                        /*if (PBCaGw.Services.Log.WillDisplay(System.Diagnostics.TraceEventType.Information))
-                            PBCaGw.Services.Log.TraceEvent(TraceEventType.Information, 0, "Debug set to show critical messages.");
-                        PBCaGw.Services.DebugTraceListener.TraceAll = false;*/
                         break;
                 }
         }

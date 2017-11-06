@@ -40,16 +40,7 @@ namespace GatewayLogic.Configuration
             }
             set
             {
-                var ip = value.Split(new char[] { ':' }).First();
-                var port = 5064;
-                try
-                {
-                    port = int.Parse(value.Split(new char[] { ':' })[1]);
-                }
-                catch
-                {
-                }
-                sideA = new IPEndPoint(IPAddress.Parse(ip), port);
+                sideA = ParseAddress(value);
             }
         }
 
@@ -114,23 +105,14 @@ namespace GatewayLogic.Configuration
             }
             set
             {
-                var ip = value.Split(new char[] { ':' }).First();
-                var port = 5064;
-                try
-                {
-                    port = int.Parse(value.Split(new char[] { ':' })[1]);
-                }
-                catch
-                {
-                }
-                sideB = new IPEndPoint(IPAddress.Parse(ip), port);
+                sideB = ParseAddress(value);
             }
         }
 
         [XmlIgnore]
         public IPEndPoint SideBEndPoint => sideB;
 
-        static private IPEndPoint ParseAddress(string addr)
+        static public IPEndPoint ParseAddress(string addr)
         {
             string[] parts = addr.Split(new char[] { ':' });
             try
