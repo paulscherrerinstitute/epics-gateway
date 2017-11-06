@@ -31,6 +31,7 @@ namespace GatewayLogic.Commands
             {
 
                 connection.Gateway.Log.Write(Services.LogLevel.Error, "Channel is not known");
+                connection.Dispose();
                 return;
             }
             connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel for " + channelName + "  from " + ((TcpClientConnection)connection).RemoteEndPoint + " CID " + packet.Parameter1);
@@ -99,8 +100,13 @@ namespace GatewayLogic.Commands
         {
             locker.Wait();
             var channelInfo = connection.Gateway.ChannelInformation.Get(packet.Parameter1);
+            if(channelInfo == null)
+            {
+                connection.Dispose();
+                return;
+            }
 
-            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Answer for create channel " + channelInfo.ChannelName);
+            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Answer for create channel " + channelInfo?.ChannelName);
             lock (channelInfo.LockObject)
             {
                 channelInfo.DataCount = packet.DataCount;

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GatewayLogic.Connections
@@ -19,6 +20,8 @@ namespace GatewayLogic.Connections
         List<Action> toCallWhenReady = new List<Action>();
         readonly byte[] buffer = new byte[Gateway.BUFFER_SIZE];
         Splitter splitter = new Splitter();
+        object disposedLock = new object();
+        bool disposed = false;
 
         readonly List<ChannelInformation.ChannelInformationDetails> channels = new List<ChannelInformation.ChannelInformationDetails>();
 
@@ -29,8 +32,39 @@ namespace GatewayLogic.Connections
             RemoteEndPoint = destination;
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-            IAsyncResult result = socket.BeginConnect(destination, ConnectionBuilt, null);
+            var evt = new AutoResetEvent(false);
+            IAsyncResult result = socket.BeginConnect(destination, (IAsyncResult ar) =>
+                {
+                    evt.Set();
+                    lock (lockObject)
+                    {
+                        isConnected = true;
+
+                        foreach (var action in toCallWhenReady)
+                            action();
+                        toCallWhenReady.Clear();
+
+                        try
+                        {
+                            socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
+                        }
+                        catch (Exception ex)
+                        {
+                            //Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
+                            Dispose();
+                        }
+                    }
+                }, null);
             Gateway = gateway;
+            ThreadPool.QueueUserWorkItem((obj) =>
+            {
+                if(!evt.WaitOne(5000))
+                {
+                    Gateway.Log.Write(LogLevel.Error, "Cannot connect to " + destination.ToString());
+                    this.Dispose();
+                }
+                evt.Dispose();
+            });
         }
 
         private void ConnectionBuilt(IAsyncResult ar)
@@ -76,9 +110,10 @@ namespace GatewayLogic.Connections
             {
                 size = socket.EndReceive(ar);
             }
-            catch (ObjectDisposedException ex)
+            catch (Exception ex)
             {
-                Gateway.Log.Write(Services.LogLevel.Error, ex.ToString());
+                //Gateway.Log.Write(Services.LogLevel.Error, ex.ToString());
+                this.Dispose();
                 // Stop receiving
                 return;
             }
@@ -151,6 +186,12 @@ namespace GatewayLogic.Connections
 
         public override void Dispose()
         {
+            lock (disposedLock)
+            {
+                if (disposed)
+                    return;
+                disposed = true;
+            }
             socket.Dispose();
             Gateway.ServerConnection.Remove(this);
             Gateway.GotDropedIoc(Name);

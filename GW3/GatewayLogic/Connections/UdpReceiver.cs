@@ -47,10 +47,16 @@ namespace GatewayLogic.Connections
 
         public override void Send(DataPacket packet)
         {
-            if (this == Gateway.udpSideA)
-                Gateway.udpSideB.receiver.SendTo(packet.Data, packet.BufferSize, SocketFlags.None, packet.Destination);
-            else
-                Gateway.udpSideA.receiver.SendTo(packet.Data, packet.BufferSize, SocketFlags.None, packet.Destination);
+            try
+            {
+                if (this == Gateway.udpSideA)
+                    Gateway.udpSideB.receiver.SendTo(packet.Data, packet.BufferSize, SocketFlags.None, packet.Destination);
+                else
+                    Gateway.udpSideA.receiver.SendTo(packet.Data, packet.BufferSize, SocketFlags.None, packet.Destination);
+            }
+            catch
+            {
+            }
         }
 
         void GotUdpMessage(IAsyncResult ar)
@@ -73,6 +79,7 @@ namespace GatewayLogic.Connections
             splitter.Reset();
             foreach (var p in splitter.Split(DataPacket.Create(buff, size, false)))
             {
+                Gateway.DiagnosticServer.NbMessages++;
                 p.Sender = (IPEndPoint)epSender;
                 if (this is UdpResponseReceiver)
                     Commands.CommandHandler.ExecuteResponseHandler(p.Command, this, p);

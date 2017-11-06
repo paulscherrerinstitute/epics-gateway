@@ -15,26 +15,26 @@ namespace StressTest
 {
     class Program
     {
-        const int NB_SERVERS = 1;
-        const int NB_CLIENTS = 1;
+        const int NB_SERVERS = 30;
+        const int NB_CLIENTS = 300;
         const int NB_CHANNELS = 10;
         const int NB_LOOPS = 1;
-        const int NB_CHECKED = 1;
-        const int WAIT_TIMEOUT = 1000;
+        const int NB_CHECKED = 30;
+        const int WAIT_TIMEOUT = 10000;
 
         static void Main(string[] args)
         {
             if (args.Length > 0 && args[0] == "server")
             {
-                Console.WriteLine("Start server " + args[1]);
+                //Console.WriteLine("Start server " + args[1]);
                 Server(int.Parse(args[1]));
                 return;
             }
 
             if (args.Length > 0 && args[0] == "client")
             {
-                Console.WriteLine("Start client " + args[1]);
-                Client();
+                //Console.WriteLine("Start client " + args[1]);
+                Environment.Exit(Client());
                 return;
             }
 
@@ -45,14 +45,24 @@ namespace StressTest
                 for (var i = 0; i < NB_SERVERS; i++)
                     addrs += (i != 0 ? ";" : "") + "127.0.0.1:" + (5056 + i);
                 gateway.Configuration.RemoteSideB = addrs;
+                gateway.Configuration.GatewayName = "STRESSGW";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
                 gateway.Log.Filter = (level) => { return level >= GatewayLogic.Services.LogLevel.Error; };
                 gateway.Start();
 
                 var current = Process.GetCurrentProcess();
 
+                var clientTot = 0;
+                var clientNb = 0;
+
                 EventHandler serverExit = (obj, evt) => { ((Process)obj).Start(); };
-                EventHandler clientExit = (obj, evt) => { ((Process)obj).Start(); };
+                EventHandler clientExit = (obj, evt) =>
+                {
+                    var p = ((Process)obj);
+                    clientTot += p.ExitCode;
+                    clientNb++;
+                    p.Start();
+                };
 
                 var servers = Enumerable.Range(0, NB_SERVERS)
                     .Select(i =>
@@ -60,8 +70,6 @@ namespace StressTest
                         var p = new Process();
                         p.StartInfo = new ProcessStartInfo(current.ProcessName, "server " + i)
                         {
-                            /*RedirectStandardOutput = true,
-                            RedirectStandardError = true,*/
                             UseShellExecute = false
                         };
                         p.EnableRaisingEvents = true;
@@ -76,8 +84,6 @@ namespace StressTest
                         var p = new Process();
                         p.StartInfo = new ProcessStartInfo(current.ProcessName, "client " + i)
                         {
-                            /*RedirectStandardOutput = true,
-                            RedirectStandardError = true,*/
                             UseShellExecute = false
                         };
                         p.EnableRaisingEvents = true;
@@ -93,48 +99,89 @@ namespace StressTest
                       {
                           Thread.Sleep(rnd.Next(100, 3000));
                           var p = rnd.Next(0, clients.Count);
-                          Console.WriteLine("Killing client " + p);
-                          clients[p].Kill();
+                          //Console.WriteLine("Killing client " + p);
+                          try
+                          {
+                              clients[p].Kill();
+                          }
+                          catch
+                          {
+                          }
+
+                          p = rnd.Next(0, servers.Count);
+                          //Console.WriteLine("Killing server " + p);
+                          try
+                          {
+                              servers[p].Kill();
+                          }
+                          catch
+                          {
+                          }
                       }
                   });
                 randomKiller.IsBackground = true;
                 randomKiller.Start();
 
-                Console.WriteLine("Press any key to stop...");
-                Console.ReadKey();
-
                 AppDomain.CurrentDomain.ProcessExit += (obj, evt) =>
-                 {
-                     servers.ForEach(row => row.Exited -= serverExit);
-                     clients.ForEach(row => row.Exited -= clientExit);
+                {
+                    servers.ForEach(row => row.Exited -= serverExit);
+                    clients.ForEach(row => row.Exited -= clientExit);
 
-                     servers.ForEach(row => row.Kill());
-                     clients.ForEach(row => row.Kill());
-                 };
+                    servers.ForEach(row => { try { row.Kill(); } catch { } });
+                    clients.ForEach(row => { try { row.Kill(); } catch { } });
+                };
+
+                using (var client = new CAClient())
+                {
+                    client.Configuration.SearchAddress = "127.0.0.1:5432";
+                    client.Configuration.WaitTimeout = WAIT_TIMEOUT;
+                    var dbgSearchSec = client.CreateChannel<string>("STRESSGW:SEARCH-SEC");
+                    var searchSec = "";
+                    dbgSearchSec.MonitorChanged += (chan, val) =>
+                     {
+                         searchSec = val;
+                     };
+                    var dbgMsgSec = client.CreateChannel<string>("STRESSGW:MESSAGES-SEC");
+                    var nbClients = "";
+                    var dbgClients = client.CreateChannel<string>("STRESSGW:NBCLIENTS");
+                    dbgClients.MonitorChanged += (chan, val) =>
+                    {
+                        nbClients = val;
+                    };
+                    dbgMsgSec.MonitorChanged += (chan, val) =>
+                      {
+                          var qual = clientTot / (clientNb == 0 ? 1 : clientNb);
+                          clientNb = 0;
+                          clientTot = 0;
+                          Console.Write("Msg/sec: " + val + ", Search/sec: " + searchSec + ", NB Clients: " + nbClients + ", Qual: " + qual + "                   \r");
+                          Console.Out.Flush();
+                      };
+
+                    Console.WriteLine("Press any key to stop...");
+                    Console.ReadKey();
+                }
             }
         }
 
-        private static void Client()
+        private static int Client()
         {
             var rnd = new Random();
             switch (rnd.Next(0, 3))
             {
                 case 0:
-                    Console.WriteLine("Ten sec monitor");
-                    MonitorTenSecAction();
-                    break;
+                    //Console.WriteLine("Ten sec monitor");
+                    return MonitorTenSecAction();
                 case 1:
-                    Console.WriteLine("All monitors");
-                    MonitorOnceAction();
-                    break;
+                    //Console.WriteLine("All monitors");
+                    return MonitorOnceAction();
                 case 2:
-                    Console.WriteLine("Get all");
-                    GetOnceAction();
-                    break;
+                    //Console.WriteLine("Get all");
+                    return GetOnceAction();
             }
+            return 0;
         }
 
-        static void MonitorTenSecAction()
+        static int MonitorTenSecAction()
         {
             var rnd = new Random();
             var channelNames = Enumerable.Range(0, NB_SERVERS * NB_CHANNELS)
@@ -143,6 +190,9 @@ namespace StressTest
                 .Select(row => row.Key)
                 .Take(NB_CHECKED)
                 .ToList();
+
+            var tot = 0;
+            var totOk = 0;
 
             for (var i = 0; i < NB_LOOPS; i++)
             {
@@ -155,20 +205,30 @@ namespace StressTest
 
                     var multiEvt = new CountdownEvent(channels.Count());
 
+                    var nb = 0;
                     channels.ForEach((row) =>
                     {
                         row.MonitorChanged += (chan, val) =>
                         {
                             multiEvt.Signal();
+                            Interlocked.Increment(ref nb);
                         };
                     });
                     multiEvt.Wait(WAIT_TIMEOUT);
+                    tot += channels.Count;
+                    totOk += nb;
+                    /*if (nb != channels.Count)
+                        Console.WriteLine("!!! NOT ALL is read: " + (channels.Count - nb) + " / " + channels.Count);
+                    else
+                        Console.WriteLine("Monitor complete");*/
+
                     Thread.Sleep(10000);
                 }
             }
+            return totOk * 100 / tot;
         }
 
-        static void MonitorOnceAction()
+        static int MonitorOnceAction()
         {
             var rnd = new Random();
             var channelNames = Enumerable.Range(0, NB_SERVERS * NB_CHANNELS)
@@ -177,6 +237,9 @@ namespace StressTest
                 .Select(row => row.Key)
                 .Take(NB_CHECKED)
                 .ToList();
+
+            var tot = 0;
+            var totOk = 0;
 
             for (var i = 0; i < NB_LOOPS; i++)
             {
@@ -189,19 +252,28 @@ namespace StressTest
 
                     var multiEvt = new CountdownEvent(channels.Count());
 
+                    var nb = 0;
                     channels.ForEach((row) =>
                     {
                         row.MonitorChanged += (chan, val) =>
                             {
                                 multiEvt.Signal();
+                                Interlocked.Increment(ref nb);
                             };
                     });
                     multiEvt.Wait(WAIT_TIMEOUT);
+                    tot += channels.Count;
+                    totOk += nb;
+                    /*if (nb != channels.Count)
+                        Console.WriteLine("!!! NOT ALL is read: " + (channels.Count - nb) + " / " + channels.Count);
+                    else
+                        Console.WriteLine("Monitor complete");*/
                 }
             }
+            return totOk * 100 / tot;
         }
 
-        static void GetOnceAction()
+        static int GetOnceAction()
         {
             var rnd = new Random();
             var channelNames = Enumerable.Range(0, NB_SERVERS * NB_CHANNELS)
@@ -210,6 +282,9 @@ namespace StressTest
                 .Select(row => row.Key)
                 .Take(NB_CHECKED)
                 .ToList();
+
+            var tot = 0;
+            var totOk = 0;
 
             for (var i = 0; i < NB_LOOPS; i++)
             {
@@ -221,8 +296,17 @@ namespace StressTest
                     var channels = channelNames.Select(row => client.CreateChannel<string>(row)).ToList();
 
                     var res = client.MultiGet<string>(channels);
+                    var nb = res.Count(row => row == null);
+
+                    tot += channels.Count;
+                    totOk += channels.Count - nb;
+                    /*if (nb != 0)
+                        Console.WriteLine("!!! CAGET Incomplete: " + nb + " / " + channels.Count);
+                    else
+                        Console.WriteLine("CAGET Complete");*/
                 }
             }
+            return totOk * 100 / tot;
         }
 
         static void Server(int serverId)

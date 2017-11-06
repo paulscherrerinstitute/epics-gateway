@@ -21,6 +21,7 @@ namespace GatewayLogic.Commands
                 if (channel == null)
                 {
                     connection.Gateway.Log.Write(Services.LogLevel.Error, "Event add on wrong channel.");
+                    connection.Dispose();
                     return;
                 }
                 connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event add on " + channel.ChannelName);
@@ -75,6 +76,12 @@ namespace GatewayLogic.Commands
             lock (lockObject)
             {
                 var monitor = connection.Gateway.MonitorInformation.GetByGatewayId(packet.Parameter2);
+                if(monitor == null)
+                {
+                    connection.Gateway.Log.Write(Services.LogLevel.Error, "Event add response on unknown");
+                    connection.Dispose();
+                    return;
+                }
                 monitor.HasReceivedFirstResult = true;
                 connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event add response on " + monitor.ChannelInformation.ChannelName);
                 clients = monitor.GetClients();

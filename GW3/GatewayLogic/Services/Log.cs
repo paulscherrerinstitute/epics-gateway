@@ -21,6 +21,7 @@ namespace GatewayLogic.Services
 
         public event LogHandler Handler = Log.DefaultHandler;
         public LogFilter Filter = Log.ShowAll;
+        private object lockObject = new object();
 
         private static bool ShowAll(LogLevel level)
         {
@@ -43,7 +44,10 @@ namespace GatewayLogic.Services
         {
             if (this.Filter != null && !this.Filter(level))
                 return;
-            Handler?.Invoke(level, sourceFilePath.Split(new char[] { '\\' }).Last().Split(new char[] { '.' }).First() + "." + memberName + ":" + sourceLineNumber, message);
+            lock (lockObject)
+            {
+                Handler?.Invoke(level, sourceFilePath.Split(new char[] { '\\' }).Last().Split(new char[] { '.' }).First() + "." + memberName + ":" + sourceLineNumber, message);
+            }
         }
     }
 }

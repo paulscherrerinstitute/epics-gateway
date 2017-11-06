@@ -16,6 +16,7 @@ namespace GatewayLogic.Connections
     class TcpClientConnection : GatewayTcpConnection
     {
         readonly byte[] buffer = new byte[Gateway.BUFFER_SIZE];
+        object disposedLock = new object();
         bool disposed = false;
 
         NetworkStream netStream;
@@ -88,7 +89,7 @@ namespace GatewayLogic.Connections
             }
             catch (Exception ex)
             {
-                Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
+                //Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
                 Dispose();
             }
         }
@@ -228,9 +229,12 @@ namespace GatewayLogic.Connections
 
         public override void Dispose()
         {
-            if (disposed)
-                return;
-            disposed = true;
+            lock (disposedLock)
+            {
+                if (disposed)
+                    return;
+                disposed = true;
+            }
 
             this.Gateway.DropClient(this);
             Gateway.GotDropedClient(Name);
