@@ -39,9 +39,6 @@ namespace GatewayLogic
         internal DiagnosticServer DiagnosticServer { get; private set; }
         public Log Log { get; } = new Log();
 
-        //internal readonly ConcurrentDictionary<string, ConcurrentBag<string>> KnownIocs = new ConcurrentDictionary<string, ConcurrentBag<string>>();
-        //internal readonly ConcurrentDictionary<string, ConcurrentBag<string>> KnownClients = new ConcurrentDictionary<string, ConcurrentBag<string>>();
-
         public event NewIocChannelDelegate NewIocChannel;
         public event NewClientChannelDelegate NewClientChannel;
         public event DropIocDelegate DropedIoc;
@@ -51,7 +48,8 @@ namespace GatewayLogic
         internal event EventHandler OneSecUpdate;
         internal event EventHandler TenSecUpdate;
 
-        public List<KeyValuePair<string, string>> CurrentSearches = new List<KeyValuePair<string, string>>();
+        private Dictionary<string, int> searches = new Dictionary<string, int>();
+        private Dictionary<string, int> searchers = new Dictionary<string, int>();
 
         bool isDiposed = false;
 
@@ -224,18 +222,25 @@ namespace GatewayLogic
 
         internal void Search(string channelName, string endpoint)
         {
-            lock (CurrentSearches)
+            lock (searches)
             {
-                CurrentSearches.Add(new KeyValuePair<string, string>(channelName, endpoint));
+                if (!searches.ContainsKey(channelName))
+                    searches.Add(channelName, 0);
+                searches[channelName]++;
+
+                if (!searchers.ContainsKey(endpoint))
+                    searchers.Add(endpoint, 0);
+                searchers[endpoint]++;
             }
         }
 
         private void UpdateSearchInformation(object sender, EventArgs e)
         {
             GotUpdateSearch();
-            lock (CurrentSearches)
+            lock (searches)
             {
-                CurrentSearches.Clear();
+                searches.Clear();
+                searchers.Clear();
             }
         }
 
@@ -243,10 +248,9 @@ namespace GatewayLogic
         {
             get
             {
-                lock (CurrentSearches)
+                lock (searches)
                 {
-                    return CurrentSearches.GroupBy(row => row.Key)
-                        .Select(row => new KeyValuePair<string, int>(row.Key, row.Count())).ToList();
+                    return searches.Select(row => new KeyValuePair<string, int>(row.Key, row.Value)).ToList();
                 }
             }
         }
@@ -255,10 +259,9 @@ namespace GatewayLogic
         {
             get
             {
-                lock (CurrentSearches)
+                lock (searches)
                 {
-                    return CurrentSearches.GroupBy(row => row.Value)
-                        .Select(row => new KeyValuePair<string, int>(row.Key, row.Count())).ToList();
+                    return searchers.Select(row => new KeyValuePair<string, int>(row.Key, row.Value)).ToList();
                 }
             }
         }
