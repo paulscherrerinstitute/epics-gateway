@@ -85,6 +85,8 @@ namespace GatewayLogic.Commands
                     continue;
                 var newPacket = (DataPacket)packet.Clone();
                 var conn = connection.Gateway.ClientConnection.Get(client.Client);
+                if (conn == null)
+                    return;
                 newPacket.Destination = conn.RemoteEndPoint;
                 newPacket.Parameter2 = client.Id;
                 conn.Send(newPacket);

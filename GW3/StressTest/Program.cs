@@ -15,11 +15,12 @@ namespace StressTest
 {
     class Program
     {
-        const int NB_SERVERS = 20;
-        const int NB_CLIENTS = 20;
+        const int NB_SERVERS = 1;
+        const int NB_CLIENTS = 1;
         const int NB_CHANNELS = 10;
-        const int NB_LOOPS = 10;
-        const int NB_CHECKED = 30;
+        const int NB_LOOPS = 1;
+        const int NB_CHECKED = 1;
+        const int WAIT_TIMEOUT = 1000;
 
         static void Main(string[] args)
         {
@@ -50,6 +51,9 @@ namespace StressTest
 
                 var current = Process.GetCurrentProcess();
 
+                EventHandler serverExit = (obj, evt) => { ((Process)obj).Start(); };
+                EventHandler clientExit = (obj, evt) => { ((Process)obj).Start(); };
+
                 var servers = Enumerable.Range(0, NB_SERVERS)
                     .Select(i =>
                     {
@@ -61,6 +65,7 @@ namespace StressTest
                             UseShellExecute = false
                         };
                         p.EnableRaisingEvents = true;
+                        p.Exited += serverExit;
                         p.Start();
                         return p;
                     }).ToList();
@@ -76,14 +81,24 @@ namespace StressTest
                             UseShellExecute = false
                         };
                         p.EnableRaisingEvents = true;
+                        p.Exited += clientExit;
                         p.Start();
                         return p;
                     }).ToList();
 
-                EventHandler serverExit = (obj, evt) => { ((Process)obj).Start(); };
-                EventHandler clientExit = (obj, evt) => { ((Process)obj).Start(); };
-                servers.ForEach(row => row.Exited += serverExit);
-                clients.ForEach(row => row.Exited += clientExit);
+                var rnd = new Random();
+                var randomKiller = new Thread((obj) =>
+                  {
+                      while (true)
+                      {
+                          Thread.Sleep(rnd.Next(100, 3000));
+                          var p = rnd.Next(0, clients.Count);
+                          Console.WriteLine("Killing client " + p);
+                          clients[p].Kill();
+                      }
+                  });
+                randomKiller.IsBackground = true;
+                randomKiller.Start();
 
                 Console.WriteLine("Press any key to stop...");
                 Console.ReadKey();
@@ -102,7 +117,7 @@ namespace StressTest
         private static void Client()
         {
             var rnd = new Random();
-            switch (rnd.Next(0, 2))
+            switch (rnd.Next(0, 3))
             {
                 case 0:
                     Console.WriteLine("Ten sec monitor");
@@ -134,7 +149,7 @@ namespace StressTest
                 using (var client = new CAClient())
                 {
                     client.Configuration.SearchAddress = "127.0.0.1:5432";
-                    client.Configuration.WaitTimeout = 1000;
+                    client.Configuration.WaitTimeout = WAIT_TIMEOUT;
 
                     var channels = channelNames.Select(row => client.CreateChannel<string>(row)).ToList();
 
@@ -147,7 +162,7 @@ namespace StressTest
                             multiEvt.Signal();
                         };
                     });
-                    multiEvt.Wait();
+                    multiEvt.Wait(WAIT_TIMEOUT);
                     Thread.Sleep(10000);
                 }
             }
@@ -168,7 +183,7 @@ namespace StressTest
                 using (var client = new CAClient())
                 {
                     client.Configuration.SearchAddress = "127.0.0.1:5432";
-                    client.Configuration.WaitTimeout = 1000;
+                    client.Configuration.WaitTimeout = WAIT_TIMEOUT;
 
                     var channels = channelNames.Select(row => client.CreateChannel<string>(row)).ToList();
 
@@ -181,7 +196,7 @@ namespace StressTest
                                 multiEvt.Signal();
                             };
                     });
-                    multiEvt.Wait();
+                    multiEvt.Wait(WAIT_TIMEOUT);
                 }
             }
         }
@@ -201,7 +216,7 @@ namespace StressTest
                 using (var client = new CAClient())
                 {
                     client.Configuration.SearchAddress = "127.0.0.1:5432";
-                    client.Configuration.WaitTimeout = 1000;
+                    client.Configuration.WaitTimeout = WAIT_TIMEOUT;
 
                     var channels = channelNames.Select(row => client.CreateChannel<string>(row)).ToList();
 
