@@ -85,8 +85,6 @@ namespace StressTest
                 servers.ForEach(row => row.Exited += serverExit);
                 clients.ForEach(row => row.Exited += clientExit);
 
-
-
                 Console.WriteLine("Press any key to stop...");
                 Console.ReadKey();
 
@@ -212,16 +210,16 @@ namespace StressTest
             }
         }
 
-        static void Server(int port)
+        static void Server(int serverId)
         {
             using (var evt = new AutoResetEvent(false))
             {
-                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), port, port))
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), (5056 + serverId), (5056 + serverId)))
                 {
                     var serverChannels = new List<CAStringRecord>();
                     for (var i = 0; i < NB_CHANNELS; i++)
                     {
-                        var serverChannel = server.CreateRecord<CAStringRecord>("STRESS-TEST-" + ((i + 1) + (port - 5056 * NB_SERVERS)));
+                        var serverChannel = server.CreateRecord<CAStringRecord>("STRESS-TEST-" + ((i + 1) + (serverId * NB_SERVERS)));
                         serverChannel.Value = "Works fine! - " + i;
                         serverChannel.PrepareRecord += (rec, obj) =>
                           {
