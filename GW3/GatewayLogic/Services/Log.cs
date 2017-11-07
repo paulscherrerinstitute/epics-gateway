@@ -49,5 +49,10 @@ namespace GatewayLogic.Services
                 Handler?.Invoke(level, sourceFilePath.Split(new char[] { '\\' }).Last().Split(new char[] { '.' }).First() + "." + memberName + ":" + sourceLineNumber, message);
             }
         }
+
+        public void ClearHandlers()
+        {
+            Handler = null;
+        }
     }
 }

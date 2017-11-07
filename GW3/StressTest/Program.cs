@@ -5,6 +5,7 @@ using GatewayLogic;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -16,7 +17,7 @@ namespace StressTest
     class Program
     {
         const int NB_SERVERS = 30;
-        const int NB_CLIENTS = 300;
+        const int NB_CLIENTS = 2;
         const int NB_CHANNELS = 10;
         const int NB_LOOPS = 1;
         const int NB_CHECKED = 30;
@@ -38,6 +39,8 @@ namespace StressTest
                 return;
             }
 
+            Console.WriteLine("Starting controller...");
+
             using (var gateway = new Gateway())
             {
                 gateway.Configuration.SideA = "127.0.0.1:5432";
@@ -47,7 +50,27 @@ namespace StressTest
                 gateway.Configuration.RemoteSideB = addrs;
                 gateway.Configuration.GatewayName = "STRESSGW";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
-                gateway.Log.Filter = (level) => { return level >= GatewayLogic.Services.LogLevel.Error; };
+                //gateway.Log.Filter = (level) => { return level >= GatewayLogic.Services.LogLevel.Error; };
+                gateway.Log.ClearHandlers();
+                var logBuffer = new List<string>();
+                gateway.Log.Handler += (level, source, message) =>
+                 {
+                     lock (logBuffer)
+                     {
+                         logBuffer.Add(DateTime.UtcNow.ToString("HH:mm:ss") + " - " + source + "\t" + message);
+                         while (logBuffer.Count > 100)
+                             logBuffer.RemoveAt(0);
+                     }
+
+                     if (level >= GatewayLogic.Services.LogLevel.Error)
+                     {
+                         Console.Write(DateTime.UtcNow.ToString("HH:mm:ss"));
+                         Console.Write(" - ");
+                         Console.Write(source);
+                         Console.Write("\t");
+                         Console.WriteLine(message);
+                     }
+                 };
                 gateway.Start();
 
                 var current = Process.GetCurrentProcess();
@@ -59,8 +82,11 @@ namespace StressTest
                 EventHandler clientExit = (obj, evt) =>
                 {
                     var p = ((Process)obj);
-                    clientTot += p.ExitCode;
-                    clientNb++;
+                    if (p.ExitCode >= 0)
+                    {
+                        clientTot += p.ExitCode;
+                        clientNb++;
+                    }
                     p.Start();
                 };
 
@@ -70,6 +96,7 @@ namespace StressTest
                         var p = new Process();
                         p.StartInfo = new ProcessStartInfo(current.ProcessName, "server " + i)
                         {
+                            RedirectStandardOutput = true,
                             UseShellExecute = false
                         };
                         p.EnableRaisingEvents = true;
@@ -84,6 +111,7 @@ namespace StressTest
                         var p = new Process();
                         p.StartInfo = new ProcessStartInfo(current.ProcessName, "client " + i)
                         {
+                            RedirectStandardOutput = true,
                             UseShellExecute = false
                         };
                         p.EnableRaisingEvents = true;
@@ -98,21 +126,39 @@ namespace StressTest
                       while (true)
                       {
                           Thread.Sleep(rnd.Next(100, 3000));
-                          var p = rnd.Next(0, clients.Count);
-                          //Console.WriteLine("Killing client " + p);
-                          try
+                          if (NB_CLIENTS < 10 && rnd.Next(0, 100) > 80)
                           {
-                              clients[p].Kill();
+                              var p = rnd.Next(0, clients.Count);
+                              //Console.WriteLine("Killing client " + p);
+                              try
+                              {
+                                  clients[p].Kill();
+                              }
+                              catch
+                              {
+                              }
                           }
-                          catch
+                          else
                           {
+                              var nb = rnd.Next(0, NB_CLIENTS / 10);
+                              for (var j = 0; j < nb; j++)
+                              {
+                                  var p = rnd.Next(0, clients.Count);
+                                  //Console.WriteLine("Killing client " + p);
+                                  try
+                                  {
+                                      clients[p].Kill();
+                                  }
+                                  catch
+                                  {
+                                  }
+                              }
                           }
 
-                          p = rnd.Next(0, servers.Count);
                           //Console.WriteLine("Killing server " + p);
                           try
                           {
-                              servers[p].Kill();
+                              servers[rnd.Next(0, servers.Count)].Kill();
                           }
                           catch
                           {
@@ -122,6 +168,42 @@ namespace StressTest
                 randomKiller.IsBackground = true;
                 randomKiller.Start();
 
+                var consoleCatcher = new Thread((obj) =>
+                  {
+                      var buff = new char[1024];
+                      while (true)
+                      {
+                          Thread.Sleep(100);
+                          foreach (var c in clients)
+                          {
+                              var n = c.StandardOutput.Read(buff, 0, buff.Length);
+                              if (n == 0)
+                                  continue;
+                              var text = new string(buff, 0, n);
+                              Console.Write(text);
+                              if (text.Contains("!!"))
+                              {
+                                  lock (logBuffer)
+                                  {
+                                      logBuffer.ForEach(row => Console.WriteLine(row));
+                                      logBuffer.Clear();
+                                  }
+                              }
+                          }
+
+                          foreach (var c in servers)
+                          {
+                              var n = c.StandardOutput.Read(buff, 0, buff.Length);
+                              if (n == 0)
+                                  continue;
+                              var text = new string(buff, 0, n);
+                              Console.Write(text);
+                          }
+                      }
+                  });
+                consoleCatcher.IsBackground = true;
+                consoleCatcher.Start();
+
                 AppDomain.CurrentDomain.ProcessExit += (obj, evt) =>
                 {
                     servers.ForEach(row => row.Exited -= serverExit);
@@ -130,6 +212,7 @@ namespace StressTest
                     servers.ForEach(row => { try { row.Kill(); } catch { } });
                     clients.ForEach(row => { try { row.Kill(); } catch { } });
                 };
+                Console.WriteLine("All started...");
 
                 using (var client = new CAClient())
                 {
@@ -178,7 +261,7 @@ namespace StressTest
                     //Console.WriteLine("Get all");
                     return GetOnceAction();
             }
-            return 0;
+            return -1;
         }
 
         static int MonitorTenSecAction()
@@ -217,9 +300,9 @@ namespace StressTest
                     multiEvt.Wait(WAIT_TIMEOUT);
                     tot += channels.Count;
                     totOk += nb;
-                    /*if (nb != channels.Count)
+                    if (nb != channels.Count)
                         Console.WriteLine("!!! NOT ALL is read: " + (channels.Count - nb) + " / " + channels.Count);
-                    else
+                    /*else
                         Console.WriteLine("Monitor complete");*/
 
                     Thread.Sleep(10000);
@@ -264,9 +347,9 @@ namespace StressTest
                     multiEvt.Wait(WAIT_TIMEOUT);
                     tot += channels.Count;
                     totOk += nb;
-                    /*if (nb != channels.Count)
+                    if (nb != channels.Count)
                         Console.WriteLine("!!! NOT ALL is read: " + (channels.Count - nb) + " / " + channels.Count);
-                    else
+                    /*else
                         Console.WriteLine("Monitor complete");*/
                 }
             }
@@ -300,9 +383,9 @@ namespace StressTest
 
                     tot += channels.Count;
                     totOk += channels.Count - nb;
-                    /*if (nb != 0)
+                    if (nb != 0)
                         Console.WriteLine("!!! CAGET Incomplete: " + nb + " / " + channels.Count);
-                    else
+                    /*else
                         Console.WriteLine("CAGET Complete");*/
                 }
             }
