@@ -199,6 +199,7 @@ namespace GatewayLogic.Services
             {
                 dictionary.Remove(channel.ChannelName);
                 gateway.SearchInformation.Remove(channel.ChannelName);
+                gateway.MonitorInformation.Drop(channel.GatewayId);
             }
         }
 

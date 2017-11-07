@@ -201,7 +201,11 @@ namespace GatewayLogic.Connections
                 var newPacket = DataPacket.Create(0);
                 newPacket.Command = 27;
                 foreach (var channel in channels)
+                {
                     Gateway.ChannelInformation.Remove(Gateway, channel);
+                    //Gateway.SearchInformation.Remove(channel.ChannelName);
+                    //Gateway.MonitorInformation.Drop(channel.GatewayId);
+                }
 
                 foreach (var channel in channels)
                 {
