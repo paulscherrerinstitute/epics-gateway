@@ -18,6 +18,11 @@ namespace GatewayLogic.Connections
             if (client.RemoteEndPoint == null)
                 return;
             lockDictionary.Wait();
+            if(dictionary.ContainsKey(client.RemoteEndPoint))
+            {
+                lockDictionary.Release();
+                return;
+            }
             dictionary.Add(client.RemoteEndPoint, client);
             lockDictionary.Release();
         }

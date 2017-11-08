@@ -25,20 +25,20 @@ namespace GatewayLogic.Connections
             List<TType> toDelete;
             lockDictionary.Wait();
             toDelete = dictionary.Values.Where(row => (DateTime.UtcNow - row.LastMessage).TotalSeconds > 90).ToList();
+
+            var toCheck = dictionary.Values.Where(row => (DateTime.UtcNow - row.LastMessage).TotalSeconds > 30).ToList();
             lockDictionary.Release();
 
             toDelete.ForEach(row => row.Dispose());
 
-            lockDictionary.Wait();
             var echoPacket = DataPacket.Create(0);
             echoPacket.Command = 23;
 
-            foreach (var conn in dictionary.Values.Where(row => (DateTime.UtcNow - row.LastMessage).TotalSeconds > 30))
+            foreach (var conn in toCheck)
             {
                 conn.HasSentEcho = true;
                 conn.Send(echoPacket);
             }
-            lockDictionary.Release();
         }
 
         protected readonly SemaphoreSlim lockDictionary = new SemaphoreSlim(1);

@@ -198,9 +198,9 @@ namespace GatewayLogic.Services
             lock (dictionaryLock)
             {
                 dictionary.Remove(channel.ChannelName);
-                gateway.SearchInformation.Remove(channel.ChannelName);
-                gateway.MonitorInformation.Drop(channel.GatewayId);
             }
+            gateway.SearchInformation.Remove(channel.ChannelName);
+            gateway.MonitorInformation.Drop(channel.GatewayId);
         }
 
         internal void ForceDropUnused()
