@@ -64,7 +64,7 @@ namespace StressTest
                              logBuffer.RemoveAt(0);
                      }
 
-                     if (level >= GatewayLogic.Services.LogLevel.Error)
+                     if (level >= GatewayLogic.Services.LogLevel.Critical)
                      {
                          Console.Write(DateTime.UtcNow.ToString("HH:mm:ss"));
                          Console.Write(" - ");
@@ -200,7 +200,7 @@ namespace StressTest
                       }
                   });
                 randomKiller.IsBackground = true;
-                //randomKiller.Start();
+                randomKiller.Start();
 
                 AppDomain.CurrentDomain.ProcessExit += (obj, evt) =>
                 {

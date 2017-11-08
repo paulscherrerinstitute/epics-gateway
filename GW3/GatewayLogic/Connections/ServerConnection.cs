@@ -18,6 +18,11 @@ namespace GatewayLogic.Connections
 
         public void CreateConnection(Gateway gateway, IPEndPoint endPoint, TcpConnectionReady connectionReady)
         {
+            if (endPoint == null)
+            {
+                gateway.Log.Write(Services.LogLevel.Error, "Endpoint cannot be null");
+                return;
+            }
             lockDictionary.Wait();
             if (dictionary.ContainsKey(endPoint))
             {

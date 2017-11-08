@@ -84,7 +84,7 @@ namespace GatewayLogic
                 }
                 catch (Exception ex)
                 {
-                    Log.Write(LogLevel.Error, ex.ToString());
+                    Log.Write(LogLevel.Critical, ex.ToString());
                 }
                 count++;
             }

@@ -140,9 +140,13 @@ namespace GatewayLogic.Connections
             {
                 this.Dispose();
             }
+            catch (ObjectDisposedException ex2)
+            {
+                this.Dispose();
+            }
             catch (Exception ex)
             {
-                Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
+                Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
                 this.Dispose();
             }
         }
@@ -192,7 +196,9 @@ namespace GatewayLogic.Connections
                     return;
                 disposed = true;
             }
-            socket.Dispose();
+            socket?.Dispose();
+            if (Gateway == null)
+                return;
             Gateway.ServerConnection.Remove(this);
             Gateway.GotDropedIoc(Name);
 

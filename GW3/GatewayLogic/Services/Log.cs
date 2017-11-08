@@ -11,7 +11,8 @@ namespace GatewayLogic.Services
         Detail = 0,
         Command,
         Connection,
-        Error
+        Error,
+        Critical
     }
 
     public class Log

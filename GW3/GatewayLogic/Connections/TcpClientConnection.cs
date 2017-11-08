@@ -64,9 +64,14 @@ namespace GatewayLogic.Connections
                 {
                     socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
                 }
+                catch(SocketException ex1)
+                {
+                    this.Dispose();
+                }
                 catch (Exception ex)
                 {
-                    Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
+                    Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
+                    this.Dispose();
                 }
             }
         }
@@ -109,7 +114,7 @@ namespace GatewayLogic.Connections
                 }
                 catch (Exception ex)
                 {
-                    Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
+                    Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
                 }
                 isDirty = false;
             }
@@ -155,7 +160,7 @@ namespace GatewayLogic.Connections
             {
                 /*if (Log.WillDisplay(System.Diagnostics.TraceEventType.Error))
                     Log.TraceEvent(System.Diagnostics.TraceEventType.Error, Chain.ChainId, ex.Message);*/
-                Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
+                Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
                 Dispose();
                 return;
             }
@@ -201,7 +206,7 @@ namespace GatewayLogic.Connections
             }
             catch (Exception ex)
             {
-                Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
+                Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
                 Dispose();
             }
 
@@ -219,7 +224,7 @@ namespace GatewayLogic.Connections
             }
             catch (Exception ex)
             {
-                Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
+                Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
                 Dispose();
             }
 
@@ -246,7 +251,7 @@ namespace GatewayLogic.Connections
             }
             catch (Exception ex)
             {
-                Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
+                Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
             }
 
             try
