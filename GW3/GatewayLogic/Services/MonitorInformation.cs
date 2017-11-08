@@ -79,7 +79,13 @@ namespace GatewayLogic.Services
                 newPacket.DataCount = DataCount;
                 newPacket.Parameter1 = ChannelInformation.ServerId.Value;
                 newPacket.Parameter2 = GatewayId;
-                this.ChannelInformation.TcpConnection.Send(newPacket);
+                try
+                {
+                    this.ChannelInformation.TcpConnection.Send(newPacket);
+                }
+                catch
+                {
+                }
             }
         }
         public MonitorInformationDetail Get(ChannelInformation.ChannelInformationDetails channelInformation, ushort dataType, uint dataCount, UInt16 monitorMask)
@@ -119,11 +125,17 @@ namespace GatewayLogic.Services
 
         internal void Drop(uint channelId, bool sendToServer = true)
         {
+            List<MonitorInformationDetail> toDrop;
             lock (dictionaryLock)
             {
-                var toDrop = monitors.Where(row => row.ChannelInformation.GatewayId == channelId).ToList();
-                if (sendToServer)
-                    toDrop.ForEach(row => row.Drop());
+                toDrop = monitors.Where(row => row.ChannelInformation.GatewayId == channelId).ToList();
+            }
+
+            if (sendToServer)
+                toDrop.ForEach(row => row.Drop());
+
+            lock (dictionaryLock)
+            { 
                 monitors.RemoveAll(row => row.ChannelInformation.GatewayId == channelId);
             }
         }

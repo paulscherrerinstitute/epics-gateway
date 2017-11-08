@@ -37,7 +37,13 @@ namespace GatewayLogic.Connections
             foreach (var conn in toCheck)
             {
                 conn.HasSentEcho = true;
-                conn.Send(echoPacket);
+                try
+                {
+                    conn.Send(echoPacket);
+                }
+                catch
+                {
+                }
             }
         }
 
