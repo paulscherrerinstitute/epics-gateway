@@ -16,9 +16,9 @@ namespace StressTest
 {
     class Program
     {
-        const int NB_SERVERS = 30;
-        const int NB_CLIENTS = 200;
-        const int NB_CHANNELS = 10;
+        const int NB_SERVERS = 1;
+        const int NB_CLIENTS = 1;
+        const int NB_CHANNELS = 30;
         const int NB_LOOPS = 1;
         const int NB_CHECKED = 30;
         const int WAIT_TIMEOUT = 10000;
@@ -461,12 +461,12 @@ namespace StressTest
                         var id = (i + (serverId * NB_CHANNELS));
                         var serverChannel = server.CreateRecord<CAStringRecord>("STRESS-TEST-" + id);
                         serverChannel.Value = "Works fine! - " + id + " - " + DateTime.UtcNow.ToLongTimeString();
-                        serverChannel.PrepareRecord += (rec, obj) =>
+                        /*serverChannel.PrepareRecord += (rec, obj) =>
                           {
                               var chanId = ((CARecord)rec).Name.Split(new char[] { '-' }).Last();
                               serverChannel.Value = "Works fine! - " + chanId + " - " + DateTime.UtcNow.ToLongTimeString();
                           };
-                        serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.HZ10;
+                        serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.HZ10;*/
                         serverChannels.Add(serverChannel);
                     }
                     server.Start();

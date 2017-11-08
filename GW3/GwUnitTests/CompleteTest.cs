@@ -8,6 +8,7 @@ using System.Threading;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using GatewayDebugData;
+using System.Collections.Generic;
 
 namespace GwUnitTests
 {
@@ -85,6 +86,48 @@ namespace GwUnitTests
                         server.Start();
 
                         Assert.AreEqual("Works fine!", clientChannel.Get());
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        [Timeout(1000)]
+        public void CheckMultiGet()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Start();
+
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannels = new List<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>();
+                    for (var i = 0; i < 20; i++)
+                    {
+                        serverChannels.Add(server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-CHAN-" + i));
+                        serverChannels[i].Value = "Works fine! - " + i;
+                    }
+                    server.Start();
+
+                    // Client
+
+                    using (var client = new CAClient())
+                    {
+                        client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        var clientChannels = new List<Channel<string>>();
+                        for (var i = 0; i < 20; i++)
+                        {
+                            clientChannels.Add(client.CreateChannel<string>("TEST-CHAN-" + i));
+                        }
+                        var res = client.MultiGet<string>(clientChannels);
+                        for (var i = 0; i < 20; i++)
+                        {
+                            Assert.AreEqual("Works fine! - " + i, res[i]);
+                        }
                     }
                 }
             }
