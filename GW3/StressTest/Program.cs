@@ -16,8 +16,8 @@ namespace StressTest
 {
     class Program
     {
-        const int NB_SERVERS = 1;
-        const int NB_CLIENTS = 1;
+        const int NB_SERVERS = 20;
+        const int NB_CLIENTS = 200;
         const int NB_CHANNELS = 30;
         const int NB_LOOPS = 1;
         const int NB_CHECKED = 30;
@@ -39,6 +39,8 @@ namespace StressTest
                 return;
             }
 
+            Console.SetWindowSize(130, 60);
+            Console.SetBufferSize(130, 500);
             Console.WriteLine("Starting controller...");
 
             using (var gateway = new Gateway())
@@ -249,10 +251,10 @@ namespace StressTest
             {
                 case 0:
                     //Console.WriteLine("Ten sec monitor");
-                    //return MonitorTenSecAction();
+                    return MonitorTenSecAction();
                 case 1:
                     //Console.WriteLine("All monitors");
-                    //return MonitorOnceAction();
+                    return MonitorOnceAction();
                 case 2:
                     //Console.WriteLine("Get all");
                     return GetOnceAction();
@@ -308,10 +310,10 @@ namespace StressTest
                     for (var j = 0; j < channels.Count; j++)
                     {
                         var id = channels[j].ChannelName.Split(new char[] { '-' }).Last();
-                        if (res[i] != null && !((string)res[i]).Contains("- " + id + " -"))
+                        if (res[j] != null && !((string)res[j]).Contains("- " + id + " -"))
                         {
                             wrongData = true;
-                            Console.WriteLine("Was expecting id " + id + " found :" + res[i]);
+                            Console.WriteLine("Was expecting id " + id + " found :" + res[j]);
                             break;
                         }
                     }
@@ -378,10 +380,10 @@ namespace StressTest
                     for (var j = 0; j < channels.Count; j++)
                     {
                         var id = channels[j].ChannelName.Split(new char[] { '-' }).Last();
-                        if (res[i] != null && !((string)res[i]).Contains("- " + id + " -"))
+                        if (res[j] != null && !((string)res[j]).Contains("- " + id + " -"))
                         {
                             wrongData = true;
-                            Console.WriteLine("Was expecting id " + id + " found :" + res[i]);
+                            Console.WriteLine("Was expecting id " + id + " found :" + res[j]);
                             break;
                         }
                     }
@@ -428,11 +430,11 @@ namespace StressTest
                     for (var j = 0; j < channels.Count; j++)
                     {
                         var id = channels[j].ChannelName.Split(new char[] { '-' }).Last();
-                        if (res[i] != null && !((string)res[i]).Contains("- " + id + " -"))
+                        if (res[j] != null && !((string)res[j]).Contains("- " + id + " -"))
                         {
                             wrongData = true;
-                            Console.WriteLine("Was expecting id " + id + " found :" + res[i]);
-                            break;
+                            Console.WriteLine("Was expecting id " + id + " (" + channels[j].ChannelName + ") found: " + res[j]);
+                            //break;
                         }
                     }
                     if (wrongData)

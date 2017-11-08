@@ -18,8 +18,8 @@ namespace GatewayLogic.Commands
                 connection.Gateway.Log.Write(Services.LogLevel.Error, "Read notify on wrong channel.");
                 return;
             }
-            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Read notify on " + channel.ChannelName);
             var read = connection.Gateway.ReadNotifyInformation.Get(channel, packet.Parameter2, (TcpClientConnection)connection);
+            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Read notify on " + channel.ChannelName + " SID " + channel.ServerId + " IOID " + read.GatewayId + " CIOID " + packet.Parameter2);
             packet.Parameter1 = channel.ServerId.Value;
             packet.Parameter2 = read.GatewayId;
             packet.Destination = channel.TcpConnection.RemoteEndPoint;
@@ -28,6 +28,7 @@ namespace GatewayLogic.Commands
 
         public override void DoResponse(GatewayConnection connection, DataPacket packet)
         {
+            packet = (DataPacket)packet.Clone();
             var read = connection.Gateway.ReadNotifyInformation.GetByGatewayId(packet.Parameter2);
             if (read == null)
                 return;
@@ -42,12 +43,12 @@ namespace GatewayLogic.Commands
                 packet.Parameter2 = read.ClientId;
                 read.Client.Send(packet);
 
-                if(client.WaitingReadyNotify)
+                if (client.WaitingReadyNotify)
                     client.WaitingReadyNotify = false;
             }
             else
             {
-                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Read notify response on " + read.ChannelInformation.ChannelName);
+                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Read notify response on " + read.ChannelInformation.ChannelName + " IOID " + packet.Parameter2 + " CIOID " + read.ClientId);
                 packet.Parameter2 = read.ClientId;
                 read.Client.Send(packet);
             }

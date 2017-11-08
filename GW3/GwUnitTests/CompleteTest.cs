@@ -92,7 +92,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(1000)]
+        [Timeout(5000)]
         public void CheckMultiGet()
         {
             using (var gateway = new Gateway())
@@ -115,18 +115,21 @@ namespace GwUnitTests
 
                     // Client
 
-                    using (var client = new CAClient())
+                    for (var j = 0; j < 5; j++)
                     {
-                        client.Configuration.SearchAddress = "127.0.0.1:5432";
-                        var clientChannels = new List<Channel<string>>();
-                        for (var i = 0; i < 20; i++)
+                        using (var client = new CAClient())
                         {
-                            clientChannels.Add(client.CreateChannel<string>("TEST-CHAN-" + i));
-                        }
-                        var res = client.MultiGet<string>(clientChannels);
-                        for (var i = 0; i < 20; i++)
-                        {
-                            Assert.AreEqual("Works fine! - " + i, res[i]);
+                            client.Configuration.SearchAddress = "127.0.0.1:5432";
+                            var clientChannels = new List<Channel<string>>();
+                            for (var i = 0; i < 20; i++)
+                            {
+                                clientChannels.Add(client.CreateChannel<string>("TEST-CHAN-" + i));
+                            }
+                            var res = client.MultiGet<string>(clientChannels);
+                            for (var i = 0; i < 20; i++)
+                            {
+                                Assert.AreEqual("Works fine! - " + i, res[i]);
+                            }
                         }
                     }
                 }

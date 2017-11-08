@@ -43,11 +43,11 @@ namespace GatewayLogic.Commands
 
             lock (channelInfo.LockObject)
             {
-                locker.Release();
                 // We have all the info, we shall answer
                 if (channelInfo.ServerId.HasValue && searchInfo.Server != null)
                 {
-                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel info is known.");
+                    locker.Release();
+                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel info is known (" + channelName + " => " + channelInfo.ServerId + ").");
                     DataPacket resPacket = DataPacket.Create(0);
                     resPacket.Command = 22;
                     resPacket.DataType = 0;
@@ -69,8 +69,8 @@ namespace GatewayLogic.Commands
                 else
                 {
                     connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel info must be found.");
-
                     channelInfo.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter1 });
+
                     if (!channelInfo.ConnectionIsBuilding)
                     {
                         connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection must be made");
@@ -92,6 +92,7 @@ namespace GatewayLogic.Commands
                             });
                         }
                     }
+                    locker.Release();
                 }
             }
         }
@@ -100,8 +101,9 @@ namespace GatewayLogic.Commands
         {
             locker.Wait();
             var channelInfo = connection.Gateway.ChannelInformation.Get(packet.Parameter1);
-            if(channelInfo == null)
+            if (channelInfo == null)
             {
+                locker.Release();
                 connection.Dispose();
                 return;
             }
