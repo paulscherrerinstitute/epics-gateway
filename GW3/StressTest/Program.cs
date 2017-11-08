@@ -78,32 +78,49 @@ namespace StressTest
                 var clientTot = 0;
                 var clientNb = 0;
 
+                var lockReportObject = new object();
+
                 EventHandler serverExit = (obj, evt) => { ((Process)obj).Start(); };
                 EventHandler clientExit = (obj, evt) =>
                 {
-                    var p = ((Process)obj);
-
-                    var text = p.StandardOutput.ReadToEnd();
-                    /*if (text.Contains("!!"))
+                    lock (lockReportObject)
                     {
-                        Console.WriteLine("--------------------------------------------------");
-                        Console.Write(text);
-                        lock (logBuffer)
+                        var p = ((Process)obj);
+
+                        var text = p.StandardOutput.ReadToEnd();
+                        if (text.Contains("!! Wrong"))
                         {
-                            logBuffer.ForEach(row => Console.WriteLine(row));
-                            logBuffer.Clear();
+                            Console.WriteLine("--------------------------------------------------");
+                            lock (logBuffer)
+                            {
+                                logBuffer.ForEach(row => Console.WriteLine(row));
+                                logBuffer.Clear();
+                            }
+                            Console.WriteLine("--------------------------------------------------");
+                            Console.Write(text);
+                            Console.WriteLine("--------------------------------------------------");
                         }
-                        Console.WriteLine("--------------------------------------------------");
-                    }
-                    else
-                        Console.Write(text);*/
+                        /*else if (text.Contains("!!"))
+                        {
+                            Console.WriteLine("--------------------------------------------------");
+                            Console.Write(text);
+                            lock (logBuffer)
+                            {
+                                logBuffer.ForEach(row => Console.WriteLine(row));
+                                logBuffer.Clear();
+                            }
+                            Console.WriteLine("--------------------------------------------------");
+                        }
+                        else
+                            Console.Write(text);*/
 
-                    if (p.ExitCode >= 0)
-                    {
-                        clientTot += p.ExitCode;
-                        clientNb++;
+                        if (p.ExitCode >= 0)
+                        {
+                            clientTot += p.ExitCode;
+                            clientNb++;
+                        }
+                        p.Start();
                     }
-                    p.Start();
                 };
 
                 var servers = Enumerable.Range(0, NB_SERVERS)
@@ -246,7 +263,7 @@ namespace StressTest
         static int MonitorTenSecAction()
         {
             var rnd = new Random();
-            var channelNames = Enumerable.Range(0, NB_SERVERS * NB_CHANNELS)
+            var channelNames = Enumerable.Range(0, NB_SERVERS * NB_CHANNELS - 1)
                 .Select(row => new KeyValuePair<string, double>("STRESS-TEST-" + (row + 1), rnd.Next()))
                 .OrderBy(row => row.Value)
                 .Select(row => row.Key)
@@ -268,15 +285,38 @@ namespace StressTest
                     var multiEvt = new CountdownEvent(channels.Count());
 
                     var nb = 0;
+                    var res = new string[channels.Count];
                     channels.ForEach((row) =>
                     {
                         row.MonitorChanged += (chan, val) =>
                         {
+                            for (var j = 0; j < channels.Count; j++)
+                            {
+                                if (channels[j].ChannelName == chan.ChannelName)
+                                {
+                                    res[j] = val;
+                                    break;
+                                }
+                            }
                             multiEvt.Signal();
                             Interlocked.Increment(ref nb);
                         };
                     });
                     multiEvt.Wait(WAIT_TIMEOUT);
+
+                    bool wrongData = false;
+                    for (var j = 0; j < channels.Count; j++)
+                    {
+                        var id = channels[j].ChannelName.Split(new char[] { '-' }).Last();
+                        if (res[i] != null && !((string)res[i]).Contains("- " + id + " -"))
+                        {
+                            wrongData = true;
+                            Console.WriteLine("Was expecting id " + id + " found :" + res[i]);
+                            break;
+                        }
+                    }
+                    if (wrongData)
+                        Console.WriteLine("!!! Wrong data");
                     tot += channels.Count;
                     totOk += nb;
                     if (nb != channels.Count)
@@ -293,7 +333,7 @@ namespace StressTest
         static int MonitorOnceAction()
         {
             var rnd = new Random();
-            var channelNames = Enumerable.Range(0, NB_SERVERS * NB_CHANNELS)
+            var channelNames = Enumerable.Range(0, NB_SERVERS * NB_CHANNELS - 1)
                 .Select(row => new KeyValuePair<string, double>("STRESS-TEST-" + (row + 1), rnd.Next()))
                 .OrderBy(row => row.Value)
                 .Select(row => row.Key)
@@ -315,15 +355,39 @@ namespace StressTest
                     var multiEvt = new CountdownEvent(channels.Count());
 
                     var nb = 0;
+                    var res = new string[channels.Count];
                     channels.ForEach((row) =>
                     {
                         row.MonitorChanged += (chan, val) =>
                             {
+                                for (var j = 0; j < channels.Count; j++)
+                                {
+                                    if (channels[j].ChannelName == chan.ChannelName)
+                                    {
+                                        res[j] = val;
+                                        break;
+                                    }
+                                }
                                 multiEvt.Signal();
                                 Interlocked.Increment(ref nb);
                             };
                     });
                     multiEvt.Wait(WAIT_TIMEOUT);
+
+                    bool wrongData = false;
+                    for (var j = 0; j < channels.Count; j++)
+                    {
+                        var id = channels[j].ChannelName.Split(new char[] { '-' }).Last();
+                        if (res[i] != null && !((string)res[i]).Contains("- " + id + " -"))
+                        {
+                            wrongData = true;
+                            Console.WriteLine("Was expecting id " + id + " found :" + res[i]);
+                            break;
+                        }
+                    }
+                    if (wrongData)
+                        Console.WriteLine("!!! Wrong data");
+
                     tot += channels.Count;
                     totOk += nb;
                     if (nb != channels.Count)
@@ -338,7 +402,7 @@ namespace StressTest
         static int GetOnceAction()
         {
             var rnd = new Random();
-            var channelNames = Enumerable.Range(0, NB_SERVERS * NB_CHANNELS)
+            var channelNames = Enumerable.Range(0, NB_SERVERS * NB_CHANNELS - 1)
                 .Select(row => new KeyValuePair<string, double>("STRESS-TEST-" + (row + 1), rnd.Next()))
                 .OrderBy(row => row.Value)
                 .Select(row => row.Key)
@@ -360,6 +424,20 @@ namespace StressTest
                     var res = client.MultiGet<string>(channels);
                     var nb = res.Count(row => row == null);
 
+                    bool wrongData = false;
+                    for (var j = 0; j < channels.Count; j++)
+                    {
+                        var id = channels[j].ChannelName.Split(new char[] { '-' }).Last();
+                        if (res[i] != null && !((string)res[i]).Contains("- " + id + " -"))
+                        {
+                            wrongData = true;
+                            Console.WriteLine("Was expecting id " + id + " found :" + res[i]);
+                            break;
+                        }
+                    }
+                    if (wrongData)
+                        Console.WriteLine("!!! Wrong data");
+
                     tot += channels.Count;
                     totOk += channels.Count - nb;
                     if (nb != 0)
@@ -380,11 +458,13 @@ namespace StressTest
                     var serverChannels = new List<CAStringRecord>();
                     for (var i = 0; i < NB_CHANNELS; i++)
                     {
-                        var serverChannel = server.CreateRecord<CAStringRecord>("STRESS-TEST-" + ((i + 1) + (serverId * NB_SERVERS)));
-                        serverChannel.Value = "Works fine! - " + i;
+                        var id = (i + (serverId * NB_CHANNELS));
+                        var serverChannel = server.CreateRecord<CAStringRecord>("STRESS-TEST-" + id);
+                        serverChannel.Value = "Works fine! - " + id + " - " + DateTime.UtcNow.ToLongTimeString();
                         serverChannel.PrepareRecord += (rec, obj) =>
                           {
-                              serverChannel.Value = "Works fine! - " + i + " - " + DateTime.UtcNow.ToLongTimeString();
+                              var chanId = ((CARecord)rec).Name.Split(new char[] { '-' }).Last();
+                              serverChannel.Value = "Works fine! - " + chanId + " - " + DateTime.UtcNow.ToLongTimeString();
                           };
                         serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.HZ10;
                         serverChannels.Add(serverChannel);

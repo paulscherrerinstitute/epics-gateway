@@ -45,7 +45,7 @@ namespace GatewayLogic.Commands
             {
                 locker.Release();
                 // We have all the info, we shall answer
-                if (channelInfo.ServerId.HasValue)
+                if (channelInfo.ServerId.HasValue && searchInfo.Server != null)
                 {
                     connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel info is known.");
                     DataPacket resPacket = DataPacket.Create(0);
