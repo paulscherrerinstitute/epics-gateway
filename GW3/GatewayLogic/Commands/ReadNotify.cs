@@ -28,7 +28,6 @@ namespace GatewayLogic.Commands
 
         public override void DoResponse(GatewayConnection connection, DataPacket packet)
         {
-            packet = (DataPacket)packet.Clone();
             var read = connection.Gateway.ReadNotifyInformation.GetByGatewayId(packet.Parameter2);
             if (read == null)
                 return;

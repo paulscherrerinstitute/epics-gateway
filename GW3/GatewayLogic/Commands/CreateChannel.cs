@@ -75,6 +75,7 @@ namespace GatewayLogic.Commands
                     {
                         connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection must be made");
                         channelInfo.ConnectionIsBuilding = true;
+                        locker.Release();
                         if (channelInfo.TcpConnection == null)
                         {
                             connection.Gateway.ServerConnection.CreateConnection(connection.Gateway, searchInfo.Server, (tcpConnection) =>
@@ -92,7 +93,8 @@ namespace GatewayLogic.Commands
                             });
                         }
                     }
-                    locker.Release();
+                    else
+                        locker.Release();
                 }
             }
         }
