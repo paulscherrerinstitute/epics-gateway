@@ -249,10 +249,10 @@ namespace StressTest
             {
                 case 0:
                     //Console.WriteLine("Ten sec monitor");
-                    return MonitorTenSecAction();
+                    //return MonitorTenSecAction();
                 case 1:
                     //Console.WriteLine("All monitors");
-                    return MonitorOnceAction();
+                    //return MonitorOnceAction();
                 case 2:
                     //Console.WriteLine("Get all");
                     return GetOnceAction();
