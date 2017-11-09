@@ -15,9 +15,11 @@ namespace GatewayLogic.Commands
 
         public override void DoRequest(GatewayConnection connection, DataPacket packet)
         {
+            DataPacket newPacket = null;
+            ChannelInformation.ChannelInformationDetails channel;
             lock (lockObject)
             {
-                var channel = connection.Gateway.ChannelInformation.Get(packet.Parameter1);
+                channel = connection.Gateway.ChannelInformation.Get(packet.Parameter1);
                 if (channel == null)
                 {
                     connection.Gateway.Log.Write(Services.LogLevel.Error, "Event add on wrong channel.");
@@ -36,11 +38,11 @@ namespace GatewayLogic.Commands
                     monitor.FirstTime = false;
 
                     monitor.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter2 });
-                    var newPacket = (DataPacket)packet.Clone();
+                    newPacket = (DataPacket)packet.Clone();
                     newPacket.Parameter1 = channel.ServerId.Value;
                     newPacket.Parameter2 = monitor.GatewayId;
                     newPacket.Destination = channel.TcpConnection.RemoteEndPoint;
-                    channel.TcpConnection.Send(newPacket);
+                    //channel.TcpConnection.Send(newPacket);
                 }
                 // We must send a Read Notify to get the first result
                 else if (monitor.HasReceivedFirstResult == true)
@@ -54,13 +56,13 @@ namespace GatewayLogic.Commands
                     read.EventClientId = packet.Parameter2;
                     read.Monitor = monitor;
 
-                    var newPacket = DataPacket.Create(0);
+                    newPacket = DataPacket.Create(0);
                     newPacket.Command = 15;
                     newPacket.DataType = packet.DataType;
                     newPacket.DataCount = packet.DataCount;
                     newPacket.Parameter1 = channel.ServerId.Value;
                     newPacket.Parameter2 = read.GatewayId;
-                    channel.TcpConnection.Send(newPacket);
+                    //channel.TcpConnection.Send(newPacket);
                 }
                 else
                 {
@@ -68,6 +70,8 @@ namespace GatewayLogic.Commands
                     monitor.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter2 });
                 }
             }
+            if(newPacket != null)
+                channel.TcpConnection.Send(newPacket);
         }
 
         public override void DoResponse(GatewayConnection connection, DataPacket packet)
@@ -79,7 +83,7 @@ namespace GatewayLogic.Commands
                 if(monitor == null)
                 {
                     connection.Gateway.Log.Write(Services.LogLevel.Error, "Event add response on unknown");
-                    connection.Dispose();
+                    ThreadPool.QueueUserWorkItem((obj) => { connection.Dispose(); });
                     return;
                 }
                 monitor.HasReceivedFirstResult = true;

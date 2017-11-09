@@ -205,36 +205,38 @@ namespace GatewayLogic.Services
 
         internal void ForceDropUnused()
         {
+            List<ChannelInformationDetails> toDrop;
             lock (dictionaryLock)
             {
-                var toDrop = new List<string>();
-                foreach (var channel in dictionary.Values)
-                {
-                    if (channel.NBConnected == 0)
-                    {
-                        toDrop.Add(channel.ChannelName);
-                        channel.Drop(Gateway);
-                    }
-                }
-                toDrop.ForEach(row => dictionary.Remove(row));
+                toDrop = dictionary.Values.Where(row => row.NBConnected == 0).ToList();
+            }
+
+            toDrop.ForEach(channel => channel.Drop(Gateway));
+
+            lock (dictionaryLock)
+            {
+                toDrop.ForEach(row => dictionary.Remove(row.ChannelName));
             }
         }
 
         internal void ServerDrop(uint gatewayId)
         {
+            IEnumerable<Client> clients;
             lock (dictionaryLock)
             {
                 var channel = dictionary.Values.FirstOrDefault(row => row.GatewayId == gatewayId);
                 if (channel == null)
                     return;
-                var newPacket = DataPacket.Create(0);
-                newPacket.Command = 27;
-                foreach (var client in channel.GetClientConnections())
-                {
-                    newPacket.Parameter1 = client.Id;
-                    client.Connection.Send(newPacket);
-                }
+                clients = channel.GetClientConnections();
                 dictionary.Remove(channel.ChannelName);
+            }
+
+            var newPacket = DataPacket.Create(0);
+            newPacket.Command = 27;
+            foreach (var client in clients)
+            {
+                newPacket.Parameter1 = client.Id;
+                client.Connection.Send(newPacket);
             }
             Gateway.MonitorInformation.Drop(gatewayId, false);
         }

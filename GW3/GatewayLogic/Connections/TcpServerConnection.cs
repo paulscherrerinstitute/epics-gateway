@@ -58,7 +58,7 @@ namespace GatewayLogic.Connections
             Gateway = gateway;
             ThreadPool.QueueUserWorkItem((obj) =>
             {
-                if(!evt.WaitOne(5000))
+                if (!evt.WaitOne(5000))
                 {
                     Gateway.Log.Write(LogLevel.Error, "Cannot connect to " + destination.ToString());
                     this.Dispose();
@@ -174,8 +174,8 @@ namespace GatewayLogic.Connections
         {
             Gateway.DiagnosticServer.NbNewData++;
 
-            lock (lockObject)
-            {
+            /*lock (lockObject)
+            {*/
                 try
                 {
                     socket.Send(packet.Data, packet.BufferSize, SocketFlags.None);
@@ -183,9 +183,9 @@ namespace GatewayLogic.Connections
                 }
                 catch (Exception ex)
                 {
-                    this.Dispose();
+                    ThreadPool.QueueUserWorkItem((obj) => { this.Dispose(); });
                 }
-            }
+            //}
         }
 
         public override void Dispose()
@@ -202,26 +202,28 @@ namespace GatewayLogic.Connections
             Gateway.ServerConnection.Remove(this);
             Gateway.GotDropedIoc(Name);
 
+            List<ChannelInformation.ChannelInformationDetails> channelsCopy;
             lock (channels)
             {
-                var newPacket = DataPacket.Create(0);
-                newPacket.Command = 27;
-                foreach (var channel in channels)
-                {
-                    Gateway.ChannelInformation.Remove(Gateway, channel);
-                    //Gateway.SearchInformation.Remove(channel.ChannelName);
-                    //Gateway.MonitorInformation.Drop(channel.GatewayId);
-                }
+                channelsCopy = channels.ToList();
+            }
+            var newPacket = DataPacket.Create(0);
+            newPacket.Command = 27;
+            foreach (var channel in channelsCopy)
+            {
+                Gateway.ChannelInformation.Remove(Gateway, channel);
+                //Gateway.SearchInformation.Remove(channel.ChannelName);
+                //Gateway.MonitorInformation.Drop(channel.GatewayId);
+            }
 
-                foreach (var channel in channels)
+            foreach (var channel in channelsCopy)
+            {
+                Gateway.Log.Write(LogLevel.Detail, "Disposing channel " + channel.ChannelName);
+                foreach (var client in channel.GetClientConnections())
                 {
-                    Gateway.Log.Write(LogLevel.Detail, "Disposing channel " + channel.ChannelName);
-                    foreach (var client in channel.GetClientConnections())
-                    {
-                        newPacket.Parameter1 = client.Id;
-                        newPacket.Destination = client.Connection.RemoteEndPoint;
-                        client.Connection.Send(newPacket);
-                    }
+                    newPacket.Parameter1 = client.Id;
+                    newPacket.Destination = client.Connection.RemoteEndPoint;
+                    client.Connection.Send(newPacket);
                 }
             }
         }

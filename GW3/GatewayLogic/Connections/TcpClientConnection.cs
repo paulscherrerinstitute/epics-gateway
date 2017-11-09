@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GatewayLogic.Connections
@@ -115,6 +116,7 @@ namespace GatewayLogic.Connections
                 catch (Exception ex)
                 {
                     Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
+                    ThreadPool.QueueUserWorkItem((obj) => { this.Dispose(); });
                 }
                 isDirty = false;
             }

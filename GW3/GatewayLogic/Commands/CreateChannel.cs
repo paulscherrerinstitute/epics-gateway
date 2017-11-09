@@ -41,62 +41,62 @@ namespace GatewayLogic.Commands
             channelInfo.RegisterClient(packet.Parameter1, (TcpClientConnection)connection);
             connection.Gateway.GotNewClientChannel(packet.Sender.ToString(), channelName);
 
-            lock (channelInfo.LockObject)
+            /*lock (channelInfo.LockObject)
+            {*/
+            // We have all the info, we shall answer
+            if (channelInfo.ServerId.HasValue && searchInfo.Server != null)
             {
-                // We have all the info, we shall answer
-                if (channelInfo.ServerId.HasValue && searchInfo.Server != null)
+                locker.Release();
+                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel info is known (" + channelName + " => " + channelInfo.ServerId + ").");
+                DataPacket resPacket = DataPacket.Create(0);
+                resPacket.Command = 22;
+                resPacket.DataType = 0;
+                resPacket.DataCount = 0;
+                resPacket.Parameter1 = packet.Parameter1;
+                resPacket.Parameter2 = (uint)access;
+                resPacket.Destination = packet.Sender;
+                connection.Send(resPacket);
+
+                resPacket = (DataPacket)packet.Clone();
+                resPacket.Command = 18;
+                resPacket.Destination = packet.Sender;
+                resPacket.DataType = channelInfo.DataType;
+                resPacket.DataCount = channelInfo.DataCount;
+                resPacket.Parameter1 = packet.Parameter1;
+                resPacket.Parameter2 = channelInfo.GatewayId;
+                connection.Send(resPacket);
+            }
+            else
+            {
+                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel info must be found.");
+                channelInfo.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter1 });
+
+                if (!channelInfo.ConnectionIsBuilding)
                 {
+                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection must be made");
+                    channelInfo.ConnectionIsBuilding = true;
                     locker.Release();
-                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel info is known (" + channelName + " => " + channelInfo.ServerId + ").");
-                    DataPacket resPacket = DataPacket.Create(0);
-                    resPacket.Command = 22;
-                    resPacket.DataType = 0;
-                    resPacket.DataCount = 0;
-                    resPacket.Parameter1 = packet.Parameter1;
-                    resPacket.Parameter2 = (uint)access;
-                    resPacket.Destination = packet.Sender;
-                    connection.Send(resPacket);
-
-                    resPacket = (DataPacket)packet.Clone();
-                    resPacket.Command = 18;
-                    resPacket.Destination = packet.Sender;
-                    resPacket.DataType = channelInfo.DataType;
-                    resPacket.DataCount = channelInfo.DataCount;
-                    resPacket.Parameter1 = packet.Parameter1;
-                    resPacket.Parameter2 = channelInfo.GatewayId;
-                    connection.Send(resPacket);
-                }
-                else
-                {
-                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel info must be found.");
-                    channelInfo.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter1 });
-
-                    if (!channelInfo.ConnectionIsBuilding)
+                    if (channelInfo.TcpConnection == null)
                     {
-                        connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection must be made");
-                        channelInfo.ConnectionIsBuilding = true;
-                        locker.Release();
-                        if (channelInfo.TcpConnection == null)
+                        connection.Gateway.ServerConnection.CreateConnection(connection.Gateway, searchInfo.Server, (tcpConnection) =>
                         {
-                            connection.Gateway.ServerConnection.CreateConnection(connection.Gateway, searchInfo.Server, (tcpConnection) =>
-                            {
-                                channelInfo.TcpConnection = tcpConnection;
-                                connection.Gateway.GotNewIocChannel(tcpConnection.Name, channelInfo.ChannelName);
-                                tcpConnection.LinkChannel(channelInfo);
-                                var newPacket = (DataPacket)packet.Clone();
-                                newPacket.Parameter1 = channelInfo.GatewayId;
-                                newPacket.Parameter2 = Gateway.CA_PROTO_VERSION;
+                            channelInfo.TcpConnection = tcpConnection;
+                            connection.Gateway.GotNewIocChannel(tcpConnection.Name, channelInfo.ChannelName);
+                            tcpConnection.LinkChannel(channelInfo);
+                            var newPacket = (DataPacket)packet.Clone();
+                            newPacket.Parameter1 = channelInfo.GatewayId;
+                            newPacket.Parameter2 = Gateway.CA_PROTO_VERSION;
                                 //if(connection.Gateway.s)
                                 //newPacket.Sender
                                 newPacket.Destination = searchInfo.Server;
-                                channelInfo.TcpConnection.Send(newPacket);
-                            });
-                        }
+                            channelInfo.TcpConnection.Send(newPacket);
+                        });
                     }
-                    else
-                        locker.Release();
                 }
+                else
+                    locker.Release();
             }
+            //}
         }
 
         public override void DoResponse(GatewayConnection connection, DataPacket packet)
@@ -111,46 +111,50 @@ namespace GatewayLogic.Commands
             }
 
             connection.Gateway.Log.Write(Services.LogLevel.Detail, "Answer for create channel " + channelInfo?.ChannelName);
-            lock (channelInfo.LockObject)
+            IEnumerable<ClientId> clients;
+
+            /*lock (channelInfo.LockObject)
+            {*/
+            channelInfo.DataCount = packet.DataCount;
+            channelInfo.DataType = packet.DataType;
+
+            channelInfo.ServerId = packet.Parameter2;
+            clients = channelInfo.GetClients();
+            //}
+            locker.Release();
+
+            foreach (var client in clients)
             {
-                channelInfo.DataCount = packet.DataCount;
-                channelInfo.DataType = packet.DataType;
+                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Sending answer to " + client.Client);
+                var destConn = connection.Gateway.ClientConnection.Get(client.Client);
+                if (destConn == null)
+                    continue;
 
-                channelInfo.ServerId = packet.Parameter2;
-                locker.Release();
-                foreach (var client in channelInfo.GetClients())
-                {
-                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Sending answer to " + client.Client);
-                    var destConn = connection.Gateway.ClientConnection.Get(client.Client);
-                    if (destConn == null)
-                        continue;
+                Configuration.SecurityAccess access;
+                if (((TcpClientConnection)destConn).Listener == connection.Gateway.tcpSideA)
+                    access = connection.Gateway.Configuration.Security.EvaluateSideA(channelInfo.ChannelName, "", "", ((TcpClientConnection)destConn).RemoteEndPoint.Address.ToString());
+                else
+                    access = connection.Gateway.Configuration.Security.EvaluateSideB(channelInfo.ChannelName, "", "", ((TcpClientConnection)destConn).RemoteEndPoint.Address.ToString());
 
-                    Configuration.SecurityAccess access;
-                    if (((TcpClientConnection)destConn).Listener == connection.Gateway.tcpSideA)
-                        access = connection.Gateway.Configuration.Security.EvaluateSideA(channelInfo.ChannelName, "", "", ((TcpClientConnection)destConn).RemoteEndPoint.Address.ToString());
-                    else
-                        access = connection.Gateway.Configuration.Security.EvaluateSideB(channelInfo.ChannelName, "", "", ((TcpClientConnection)destConn).RemoteEndPoint.Address.ToString());
+                // Rules prevent searching
+                if (access == Configuration.SecurityAccess.NONE)
+                    return;
 
-                    // Rules prevent searching
-                    if (access == Configuration.SecurityAccess.NONE)
-                        return;
+                DataPacket resPacket = DataPacket.Create(0);
+                resPacket.Command = 22;
+                resPacket.DataType = 0;
+                resPacket.DataCount = 0;
+                resPacket.Parameter1 = client.Id;
+                resPacket.Parameter2 = (uint)access;
+                resPacket.Destination = client.Client;
+                destConn.Send(resPacket);
 
-                    DataPacket resPacket = DataPacket.Create(0);
-                    resPacket.Command = 22;
-                    resPacket.DataType = 0;
-                    resPacket.DataCount = 0;
-                    resPacket.Parameter1 = client.Id;
-                    resPacket.Parameter2 = (uint)access;
-                    resPacket.Destination = client.Client;
-                    destConn.Send(resPacket);
-
-                    resPacket = (DataPacket)packet.Clone();
-                    resPacket.Command = 18;
-                    resPacket.Destination = client.Client;
-                    resPacket.Parameter1 = client.Id;
-                    resPacket.Parameter2 = channelInfo.GatewayId;
-                    destConn.Send(resPacket);
-                }
+                resPacket = (DataPacket)packet.Clone();
+                resPacket.Command = 18;
+                resPacket.Destination = client.Client;
+                resPacket.Parameter1 = client.Id;
+                resPacket.Parameter2 = channelInfo.GatewayId;
+                destConn.Send(resPacket);
             }
         }
     }
