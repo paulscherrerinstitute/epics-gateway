@@ -12,15 +12,61 @@ namespace GWConsole
     {
         static void Main(string[] args)
         {
-            var gateway = new Gateway();
-            gateway.LoadConfig("https://inventory.psi.ch/soap/gatewayConfig.aspx?gateway=", "PBGW");
+            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.SetWindowSize(130, 60);
+            Console.SetBufferSize(130, 500);
+            Console.Clear();
+            Console.WriteLine("Starting...");
 
-            /*Console.WriteLine("Starting...");
             var gateway = new Gateway();
-            gateway.Configuration.SideA = "129.129.130.45:5055";
-            gateway.Configuration.SideB = "129.129.130.45:5056";
+            gateway.LoadConfig("https://inventory.psi.ch/soap/gatewayConfig.aspx?gateway=", System.Configuration.ConfigurationManager.AppSettings["GatewayName"]);
+            var levelToLog = int.Parse(System.Configuration.ConfigurationManager.AppSettings["Log"] ?? "0");
+            gateway.Log.Filter = (level) =>
+             {
+                 return ((int)level >= levelToLog);
+             };
+            gateway.Log.ClearHandlers();
+            gateway.Log.Handler += (level, source, message) =>
+              {
+                  switch(level)
+                  {
+                      case GatewayLogic.Services.LogLevel.Command:
+                          Console.ForegroundColor = ConsoleColor.DarkGray;
+                          break;
+                      case GatewayLogic.Services.LogLevel.Connection:
+                          Console.ForegroundColor = ConsoleColor.Green;
+                          break;
+                      case GatewayLogic.Services.LogLevel.Critical:
+                          Console.ForegroundColor = ConsoleColor.Red;
+                          break;
+                      case GatewayLogic.Services.LogLevel.Detail:
+                          Console.ForegroundColor = ConsoleColor.Gray;
+                          break;
+                      case GatewayLogic.Services.LogLevel.Error:
+                          Console.ForegroundColor = ConsoleColor.Yellow;
+                          break;
+                  }
+
+                  Console.Write(DateTime.UtcNow.ToString("HH:mm:ss"));
+                  Console.Write(" - ");
+                  Console.Write(source);
+                  Console.Write("\t");
+                  Console.WriteLine(message);
+
+                  Console.ForegroundColor = ConsoleColor.Gray;
+              };
+
+            Console.Title = "Gateway " + gateway.Configuration.GatewayName;
+            Console.CancelKeyPress += (obj, evt) =>
+            {
+                Console.WriteLine("Stopping...");
+                gateway.Dispose();
+                Environment.Exit(0);
+            };
             gateway.Start();
-            Console.ReadKey();*/
+            Console.WriteLine("Ctrl+C to quit...");
+            while (true)
+                Console.ReadKey();
         }
     }
 }

@@ -9,10 +9,10 @@ namespace GatewayLogic.Services
     public enum LogLevel : int
     {
         Detail = 0,
-        Command,
-        Connection,
-        Error,
-        Critical
+        Command = 1,
+        Connection = 2,
+        Error = 3,
+        Critical = 4
     }
 
     public class Log
