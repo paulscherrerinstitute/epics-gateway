@@ -108,9 +108,9 @@ namespace GatewayLogic
 
         public void LoadConfig()
         {
-            if (System.Configuration.ConfigurationManager.AppSettings["configURL"] == null || System.Configuration.ConfigurationManager.AppSettings["gatewayName"] == null)
+            if (System.Configuration.ConfigurationManager.AppSettings["gatewayName"] == null)
                 throw new Exception("Direct config");
-            LoadConfig(System.Configuration.ConfigurationManager.AppSettings["configURL"], System.Configuration.ConfigurationManager.AppSettings["gatewayName"]);
+            LoadConfig(System.Configuration.ConfigurationManager.AppSettings["configURL"] ?? "https://inventory.psi.ch/soap/gatewayConfig.aspx?gateway=", System.Configuration.ConfigurationManager.AppSettings["gatewayName"]);
         }
 
         public void LoadConfig(string configUrl, string gatewayName)

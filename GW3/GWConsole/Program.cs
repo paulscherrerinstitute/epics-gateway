@@ -19,8 +19,8 @@ namespace GWConsole
             Console.WriteLine("Starting...");
 
             var gateway = new Gateway();
-            gateway.LoadConfig("https://inventory.psi.ch/soap/gatewayConfig.aspx?gateway=", System.Configuration.ConfigurationManager.AppSettings["GatewayName"]);
-            var levelToLog = int.Parse(System.Configuration.ConfigurationManager.AppSettings["Log"] ?? "0");
+            gateway.LoadConfig();
+            var levelToLog = int.Parse(System.Configuration.ConfigurationManager.AppSettings["log"] ?? "0");
             gateway.Log.Filter = (level) =>
              {
                  return ((int)level >= levelToLog);
