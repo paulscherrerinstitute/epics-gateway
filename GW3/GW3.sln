@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StressTest", "StressTest\St
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GWService", "GWService\GWService.csproj", "{330D97BA-5E11-45A7-AA1A-69D6DE3C1685}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GWWatchdog", "GWWatchdog\GWWatchdog.csproj", "{2194FDAE-A462-4E76-BC4E-695D7BB8226E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -89,6 +91,14 @@ Global
 		{330D97BA-5E11-45A7-AA1A-69D6DE3C1685}.Release|Any CPU.Build.0 = Release|Any CPU
 		{330D97BA-5E11-45A7-AA1A-69D6DE3C1685}.Release|x86.ActiveCfg = Release|Any CPU
 		{330D97BA-5E11-45A7-AA1A-69D6DE3C1685}.Release|x86.Build.0 = Release|Any CPU
+		{2194FDAE-A462-4E76-BC4E-695D7BB8226E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2194FDAE-A462-4E76-BC4E-695D7BB8226E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2194FDAE-A462-4E76-BC4E-695D7BB8226E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2194FDAE-A462-4E76-BC4E-695D7BB8226E}.Debug|x86.Build.0 = Debug|Any CPU
+		{2194FDAE-A462-4E76-BC4E-695D7BB8226E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2194FDAE-A462-4E76-BC4E-695D7BB8226E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2194FDAE-A462-4E76-BC4E-695D7BB8226E}.Release|x86.ActiveCfg = Release|Any CPU
+		{2194FDAE-A462-4E76-BC4E-695D7BB8226E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,7 +107,7 @@ Global
 		SolutionGuid = {68B36B5E-C4FC-4605-A5E1-8A59433EA06F}
 	EndGlobalSection
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 9
+		SccNumberOfProjects = 10
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.psi.ch/defaultcollection
 		SccLocalPath0 = .
@@ -125,5 +135,8 @@ Global
 		SccProjectUniqueName8 = GWService\\GWService.csproj
 		SccProjectName8 = GWService
 		SccLocalPath8 = GWService
+		SccProjectUniqueName9 = GWWatchdog\\GWWatchdog.csproj
+		SccProjectName9 = GWWatchdog
+		SccLocalPath9 = GWWatchdog
 	EndGlobalSection
 EndGlobal
