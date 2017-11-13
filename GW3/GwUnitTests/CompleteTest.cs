@@ -876,7 +876,7 @@ namespace GwUnitTests
                         dbg.DebugLog += (string source, System.Diagnostics.TraceEventType eventType, int chainId, string message) =>
                         {
                             Console.WriteLine("--" + message);
-                            if (message == "Read notify response on TEST-DATE")
+                            if (message.StartsWith("Read notify response on TEST-DATE"))
                                 evtWait.Set();
                         };
                         // Serverside
@@ -1156,7 +1156,7 @@ namespace GwUnitTests
                             dbg.DebugLog += (string source, System.Diagnostics.TraceEventType eventType, int chainId, string message) =>
                             {
                                 Console.WriteLine("--" + message);
-                                if (message == "Read notify response on TEST-DATE")
+                                if (message.StartsWith("Read notify response on TEST-DATE"))
                                     evtWait.Set();
                             };
                             // Serverside
