@@ -159,6 +159,8 @@ namespace GatewayLogic
 
         public void Start()
         {
+            DiagnosticServer = new DiagnosticServer(this, Configuration.SideBEndPoint.Address);
+
             if (this.Configuration.ConfigurationType == GatewayLogic.Configuration.ConfigurationType.UNIDIRECTIONAL)
             {
                 tcpSideA = new TcpClientListener(this, this.Configuration.SideAEndPoint);
@@ -175,8 +177,6 @@ namespace GatewayLogic
                 udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
                 udpSideB = new UdpReceiver(this, this.Configuration.SideBEndPoint);
             }
-
-            DiagnosticServer = new DiagnosticServer(this, Configuration.SideBEndPoint.Address);
 
             this.TenSecUpdate += UpdateSearchInformation;
             Configuration.Security.Init();

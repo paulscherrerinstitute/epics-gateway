@@ -13,8 +13,20 @@ namespace GWConsole
         static void Main(string[] args)
         {
             Console.BackgroundColor = ConsoleColor.DarkBlue;
-            Console.SetWindowSize(130, 60);
-            Console.SetBufferSize(130, 500);
+            try
+            {
+                Console.SetWindowSize(130, 60);
+            }
+            catch
+            {
+            }
+            try
+            {
+                Console.SetBufferSize(130, 500);
+            }
+            catch
+            {
+            }
             Console.Clear();
             Console.WriteLine("Starting...");
 

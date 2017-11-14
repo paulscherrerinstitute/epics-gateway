@@ -35,6 +35,11 @@ namespace GatewayLogic.Commands
             if (read.IsEventAdd)
             {
                 var client = read.Monitor.GetClients().FirstOrDefault(row => row.Id == read.EventClientId);
+                if (client == null)
+                {
+                    connection.Gateway.Log.Write(LogLevel.Error, "Read back for monitor => monitor client not found");
+                    return;
+                }
 
                 connection.Gateway.Log.Write(Services.LogLevel.Detail, "Read notify response for event add on " + read.ChannelInformation.ChannelName);
                 packet.Command = 1;
@@ -42,7 +47,7 @@ namespace GatewayLogic.Commands
                 packet.Parameter2 = read.ClientId;
                 read.Client.Send(packet);
 
-                if (client.WaitingReadyNotify)
+                //if (client.WaitingReadyNotify)
                     client.WaitingReadyNotify = false;
             }
             else
