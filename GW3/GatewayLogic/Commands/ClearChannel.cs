@@ -8,9 +8,10 @@ namespace GatewayLogic.Commands
         {
             var channel = connection.Gateway.ChannelInformation.Get(packet.Parameter1);
 
-            if (channel != null)
-                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Clear channel on " + channel.ChannelName);
+            if (channel == null)
+                return;
 
+            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Clear channel on " + channel.ChannelName);
             channel.DisconnectClient((TcpClientConnection)connection);
             connection.Send(packet);
         }

@@ -48,9 +48,9 @@ namespace GatewayLogic.Commands
                 newPacket = (DataPacket)packet.Clone();
 
                 if (connection == connection.Gateway.udpSideA)
-                    newPacket.DataType = (UInt16)connection.Gateway.Configuration.SideBEndPoint.Port;
-                else
                     newPacket.DataType = (UInt16)connection.Gateway.Configuration.SideAEndPoint.Port;
+                else
+                    newPacket.DataType = (UInt16)connection.Gateway.Configuration.SideBEndPoint.Port;
                 newPacket.Parameter1 = 0xffffffff;
                 newPacket.Parameter2 = packet.Parameter1;
                 newPacket.Destination = packet.Sender;
@@ -103,7 +103,7 @@ namespace GatewayLogic.Commands
 
             if (search == null)
             {
-                connection.Gateway.Log.Write(Services.LogLevel.Error, "Search answer for nothing...");
+                //connection.Gateway.Log.Write(Services.LogLevel.Error, "Search answer for nothing...");
                 return;
             }
 

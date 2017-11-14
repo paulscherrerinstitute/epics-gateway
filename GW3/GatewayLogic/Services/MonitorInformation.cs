@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -46,13 +47,13 @@ namespace GatewayLogic.Services
                 }
             }
 
-            internal void RemoveClient(Gateway gateway, uint clientId)
+            internal void RemoveClient(Gateway gateway, IPEndPoint endPoint, uint clientId)
             {
                 lock (gateway.MonitorInformation.dictionaryLock)
                 {
                     lock (clients)
                     {
-                        clients.RemoveAll(row => row.Id == clientId);
+                        clients.RemoveAll(row => row.Id == clientId && row.Client == endPoint);
                         // No more clients, we should cancel the monitor
                         if (clients.Count == 0)
                         {

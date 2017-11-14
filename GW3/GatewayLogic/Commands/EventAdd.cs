@@ -70,34 +70,42 @@ namespace GatewayLogic.Commands
                     monitor.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter2 });
                 }
             }
-            if(newPacket != null)
+            if (newPacket != null)
                 channel.TcpConnection.Send(newPacket);
         }
 
         public override void DoResponse(GatewayConnection connection, DataPacket packet)
         {
             IEnumerable<ClientId> clients = null;
+            MonitorInformation.MonitorInformationDetail monitor;
             lock (lockObject)
             {
-                var monitor = connection.Gateway.MonitorInformation.GetByGatewayId(packet.Parameter2);
-                if(monitor == null)
+                monitor = connection.Gateway.MonitorInformation.GetByGatewayId(packet.Parameter2);
+                if (monitor == null)
                 {
                     connection.Gateway.Log.Write(Services.LogLevel.Error, "Event add response on unknown");
                     ThreadPool.QueueUserWorkItem((obj) => { connection.Dispose(); });
                     return;
                 }
                 monitor.HasReceivedFirstResult = true;
-                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event add response on " + monitor.ChannelInformation.ChannelName);
                 clients = monitor.GetClients();
+                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event add response on " + monitor.ChannelInformation.ChannelName + " clients " + clients.Count());
             }
             foreach (var client in clients)
             {
                 if (client.WaitingReadyNotify)
+                {
+                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event waiting first response on " + monitor.ChannelInformation.ChannelName);
                     continue;
+                }
                 var newPacket = (DataPacket)packet.Clone();
                 var conn = connection.Gateway.ClientConnection.Get(client.Client);
                 if (conn == null)
-                    return;
+                {
+                    connection.Gateway.Log.Write(Services.LogLevel.Error, "Event response for client which disappeared");
+                    monitor.RemoveClient(connection.Gateway, client.Client, client.Id);
+                    continue;
+                }
                 newPacket.Destination = conn.RemoteEndPoint;
                 newPacket.Parameter2 = client.Id;
                 conn.Send(newPacket);

@@ -15,7 +15,7 @@ namespace GatewayLogic.Commands
             var channel = connection.Gateway.ChannelInformation.Get(packet.Parameter1);
             if (channel == null)
             {
-                connection.Gateway.Log.Write(Services.LogLevel.Error, "Read notify on wrong channel.");
+                connection.Gateway.Log.Write(Services.LogLevel.Error, "Read notify on wrong channel. " + packet.Parameter1);
                 return;
             }
             var read = connection.Gateway.ReadNotifyInformation.Get(channel, packet.Parameter2, (TcpClientConnection)connection);
@@ -48,7 +48,7 @@ namespace GatewayLogic.Commands
                 read.Client.Send(packet);
 
                 //if (client.WaitingReadyNotify)
-                    client.WaitingReadyNotify = false;
+                client.WaitingReadyNotify = false;
             }
             else
             {

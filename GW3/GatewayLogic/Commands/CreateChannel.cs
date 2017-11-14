@@ -30,7 +30,7 @@ namespace GatewayLogic.Commands
             if (!connection.Gateway.ChannelInformation.HasChannelInformation(channelName) && !connection.Gateway.SearchInformation.HasChannelServerInformation(channelName))
             {
 
-                connection.Gateway.Log.Write(Services.LogLevel.Error, "Channel is not known");
+                connection.Gateway.Log.Write(Services.LogLevel.Error, "Channel is not known: "+channelName);
                 connection.Dispose();
                 return;
             }
@@ -61,7 +61,8 @@ namespace GatewayLogic.Commands
                     resPacket.Destination = packet.Sender;
                     connection.Send(resPacket);
 
-                    resPacket = (DataPacket)packet.Clone();
+                    //resPacket = (DataPacket)packet.Clone();
+                    resPacket = DataPacket.Create(0);
                     resPacket.Command = 18;
                     resPacket.Destination = packet.Sender;
                     resPacket.DataType = channelInfo.DataType;
@@ -146,7 +147,7 @@ namespace GatewayLogic.Commands
 
                 foreach (var client in clients)
                 {
-                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Sending answer to " + client.Client);
+                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Sending answer to " + client.Client + " GWID " + channelInfo.GatewayId);
                     var destConn = connection.Gateway.ClientConnection.Get(client.Client);
                     if (destConn == null)
                         continue;
@@ -170,8 +171,10 @@ namespace GatewayLogic.Commands
                     resPacket.Destination = client.Client;
                     destConn.Send(resPacket);
 
-                    resPacket = (DataPacket)packet.Clone();
+                    resPacket = DataPacket.Create(0);
                     resPacket.Command = 18;
+                    resPacket.DataCount = packet.DataCount;
+                    resPacket.DataType = packet.DataType;
                     resPacket.Destination = client.Client;
                     resPacket.Parameter1 = client.Id;
                     resPacket.Parameter2 = channelInfo.GatewayId;
