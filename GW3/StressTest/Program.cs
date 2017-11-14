@@ -17,7 +17,7 @@ namespace StressTest
     class Program
     {
         const int NB_SERVERS = 20;
-        const int NB_CLIENTS = 100;
+        const int NB_CLIENTS = 50;
         const int NB_CHANNELS = 10;
         const int NB_LOOPS = 1;
         const int NB_CHECKED = 20;
@@ -202,14 +202,16 @@ namespace StressTest
                 randomKiller.IsBackground = true;
                 randomKiller.Start();
 
-                AppDomain.CurrentDomain.ProcessExit += (obj, evt) =>
-                {
-                    servers.ForEach(row => row.Exited -= serverExit);
-                    clients.ForEach(row => row.Exited -= clientExit);
+                EventHandler quitStressTest = (obj, evt) =>
+                 {
+                     servers.ForEach(row => row.Exited -= serverExit);
+                     clients.ForEach(row => row.Exited -= clientExit);
 
-                    servers.ForEach(row => { try { row.Kill(); } catch { } });
-                    clients.ForEach(row => { try { row.Kill(); } catch { } });
-                };
+                     servers.ForEach(row => { try { row.Kill(); } catch { } });
+                     clients.ForEach(row => { try { row.Kill(); } catch { } });
+                 };
+
+                AppDomain.CurrentDomain.ProcessExit += quitStressTest;
                 Console.WriteLine("All started...");
 
                 using (var client = new CAClient())
@@ -229,17 +231,31 @@ namespace StressTest
                     {
                         nbClients = val;
                     };
+                    var dbgTime = client.CreateChannel<string>("STRESSGW:RUNNING-TIME");
+                    var nbMsg = "";
                     dbgMsgSec.MonitorChanged += (chan, val) =>
                       {
-                          var qual = clientTot / (clientNb == 0 ? 1 : clientNb);
-                          clientNb = 0;
-                          clientTot = 0;
-                          Console.Write("Msg/sec: " + val + ", Search/sec: " + searchSec + ", NB Clients: " + nbClients + ", Qual: " + qual + "                   \r");
-                          Console.Out.Flush();
+                          nbMsg = val;
                       };
+                    dbgTime.MonitorChanged += (chan, val) =>
+                    {
+                        var qual = clientTot / (clientNb == 0 ? 1 : clientNb);
+                        clientNb = 0;
+                        clientTot = 0;
+                        Console.Write(val + " - Msg/sec: " + nbMsg + ", Search/sec: " + searchSec + ", NB Clients: " + nbClients + ", Qual: " + qual + "                   \r");
+                        Console.Out.Flush();
+                    };
 
-                    Console.WriteLine("Press any key to stop...");
-                    Console.ReadKey();
+                    Console.CancelKeyPress += (obj, evt) =>
+                    {
+                        Console.WriteLine("Stopping...");
+                        quitStressTest(null, null);
+                        gateway.Dispose();
+                        Environment.Exit(0);
+                    };
+                    Console.WriteLine("Ctrl+C to stop...");
+                    while(true)
+                        Console.ReadKey();
                 }
             }
         }
