@@ -227,7 +227,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(5000)]
+        [Timeout(10000)]
         public void ReconnectServer()
         {
             using (var gateway = new Gateway())
@@ -306,7 +306,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(2000)]
+        [Timeout(4000)]
         public void CancelMonitorAndRebuild()
         {
             using (var gateway = new Gateway())
