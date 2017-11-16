@@ -82,6 +82,7 @@ namespace GatewayLogic.Connections
         public override void Send(DataPacket packet)
         {
             Gateway.DiagnosticServer.NbNewData++;
+            this.LastMessage = DateTime.UtcNow;
 
             try
             {

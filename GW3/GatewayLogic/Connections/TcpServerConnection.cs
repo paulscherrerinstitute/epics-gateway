@@ -173,10 +173,11 @@ namespace GatewayLogic.Connections
         public override void Send(DataPacket packet)
         {
             Gateway.DiagnosticServer.NbNewData++;
+            this.LastMessage = DateTime.UtcNow;
 
             /*lock (lockObject)
             {*/
-                try
+            try
                 {
                     socket.Send(packet.Data, packet.BufferSize, SocketFlags.None);
                     //Console.WriteLine("Sending data to server: " + packet.Command);
