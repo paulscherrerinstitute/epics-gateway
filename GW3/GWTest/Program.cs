@@ -113,13 +113,13 @@ namespace GWTest
         {
             var gateway = new Gateway();
             gateway.Configuration.GatewayName = "TESTGW-DIAG";
-            gateway.Configuration.SideA = "127.0.0.1:5432";
+            gateway.Configuration.SideA = "129.129.130.45:5436";
             gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
             gateway.Configuration.SideB = "127.0.0.1:5055";
             gateway.Start();
 
-            var client = new CAClient();
-            client.Configuration.SearchAddress = "127.0.0.1:7890";
+            /*var client = new CAClient();
+            client.Configuration.SearchAddress = "129.129.130.45:5436";
             var cpuChannel = client.CreateChannel<double>("TESTGW-DIAG:CPU");
             var memChannel = client.CreateChannel<double>("TESTGW-DIAG:MEM-FREE");
            
@@ -129,12 +129,12 @@ namespace GWTest
             };
 
             cpuChannel.MonitorChanged += handler;
-            memChannel.MonitorChanged += handler;
+            memChannel.MonitorChanged += handler;*/
 
             Console.ReadKey();
 
             gateway.Dispose();
-            client.Dispose();
+            //client.Dispose();
         }
     }
 }

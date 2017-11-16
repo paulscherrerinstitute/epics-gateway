@@ -42,6 +42,7 @@ namespace GatewayLogic.Commands
                     newPacket.Parameter1 = channel.ServerId.Value;
                     newPacket.Parameter2 = monitor.GatewayId;
                     newPacket.Destination = channel.TcpConnection.RemoteEndPoint;
+                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "New channel monitor " + monitor.GatewayId);
                     //channel.TcpConnection.Send(newPacket);
                 }
                 // We must send a Read Notify to get the first result

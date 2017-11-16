@@ -13,6 +13,7 @@ namespace GatewayLogic.Services
         readonly List<MonitorInformationDetail> monitors = new List<MonitorInformationDetail>();
 
         private uint nextId = 1;
+
         object counterLock = new object();
 
         public class MonitorInformationDetail
@@ -113,6 +114,14 @@ namespace GatewayLogic.Services
             lock (dictionaryLock)
             {
                 return monitors.FirstOrDefault(row => row.GatewayId == id);
+            }
+        }
+
+        public MonitorInformationDetail GetByClientId(IPEndPoint clientEndPoint, uint clientId)
+        {
+            lock (dictionaryLock)
+            {
+                return monitors.FirstOrDefault(row => row.clients.Any(r2=>r2.Client == clientEndPoint && r2.Id == clientId));
             }
         }
 

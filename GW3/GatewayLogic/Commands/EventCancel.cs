@@ -6,7 +6,8 @@ namespace GatewayLogic.Commands
     {
         public override void DoRequest(GatewayConnection connection, DataPacket packet)
         {
-            var monitor = connection.Gateway.MonitorInformation.GetByGatewayId(packet.Parameter2);
+            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Request clear channel monitor " + packet.Parameter2);
+            var monitor = connection.Gateway.MonitorInformation.GetByClientId(packet.Sender, packet.Parameter2);
 
             if (monitor != null && monitor.ChannelInformation != null)
             {

@@ -1259,7 +1259,7 @@ namespace GwUnitTests
 
 
         [TestMethod]
-        [Timeout(3000)]
+        [Timeout(6000)]
         public void CheckCascadeDebug()
         {
             using (var gateway = new Gateway())
