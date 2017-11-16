@@ -55,6 +55,7 @@ namespace GatewayLogic.Commands
                 newPacket.Parameter2 = packet.Parameter1;
                 newPacket.Destination = packet.Sender;
                 newPacket.SetUInt16(16, Gateway.CA_PROTO_VERSION);
+                newPacket.ReverseAnswer = true;
                 connection.Send(newPacket);
 
                 return;

@@ -49,10 +49,20 @@ namespace GatewayLogic.Connections
         {
             try
             {
-                if (this == Gateway.udpSideA)
-                    Gateway.udpSideB.receiver.SendTo(packet.Data, packet.BufferSize, SocketFlags.None, packet.Destination);
+                if (packet.ReverseAnswer)
+                {
+                    if (this == Gateway.udpSideA)
+                        Gateway.udpSideA.receiver.SendTo(packet.Data, packet.BufferSize, SocketFlags.None, packet.Destination);
+                    else
+                        Gateway.udpSideB.receiver.SendTo(packet.Data, packet.BufferSize, SocketFlags.None, packet.Destination);
+                }
                 else
-                    Gateway.udpSideA.receiver.SendTo(packet.Data, packet.BufferSize, SocketFlags.None, packet.Destination);
+                {
+                    if (this == Gateway.udpSideA)
+                        Gateway.udpSideB.receiver.SendTo(packet.Data, packet.BufferSize, SocketFlags.None, packet.Destination);
+                    else
+                        Gateway.udpSideA.receiver.SendTo(packet.Data, packet.BufferSize, SocketFlags.None, packet.Destination);
+                }
             }
             catch
             {
