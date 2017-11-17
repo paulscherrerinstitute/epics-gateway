@@ -85,7 +85,7 @@ namespace GatewayLogic.Connections
                 return;
             }
 
-            Gateway.Log.Write(Services.LogLevel.Detail, "Receiving: " + epSender.ToString());
+            //Gateway.Log.Write(Services.LogLevel.Detail, "Receiving: " + epSender.ToString());
             splitter.Reset();
             foreach (var p in splitter.Split(DataPacket.Create(buff, size, false)))
             {
