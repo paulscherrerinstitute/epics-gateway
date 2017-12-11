@@ -556,6 +556,98 @@ namespace GwUnitTests
         }
 
         [TestMethod]
+        [Timeout(5000)]
+        public void DoubleMonitorContinue3()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Start();
+
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                    serverChannel.Value = "Works fine!";
+                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.HZ10;
+                    serverChannel.PrepareRecord += (obj, evt) =>
+                    {
+                        serverChannel.Value = "Works fine! - " + DateTime.UtcNow.ToShortTimeString() + "." + DateTime.UtcNow.Millisecond;
+                    };
+
+                    var serverChannelB = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATEB");
+                    serverChannelB.Value = "Works fineB!";
+                    serverChannelB.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.HZ10;
+                    serverChannelB.PrepareRecord += (obj, evt) =>
+                    {
+                        serverChannelB.Value = "Works fineB! - " + DateTime.UtcNow.ToShortTimeString() + "." + DateTime.UtcNow.Millisecond;
+                    };
+
+                    server.Start();
+
+                    // Client
+
+                    using (var autoResetA = new AutoResetEvent(false))
+                    {
+                        using (var autoResetB = new AutoResetEvent(false))
+                        {
+                            using (var clientA = new CAClient())
+                            {
+                                clientA.Configuration.WaitTimeout = 200;
+                                clientA.Configuration.SearchAddress = "127.0.0.1:5432";
+                                var clientChannelA = clientA.CreateChannel<string>("TEST-DATE");
+                                var clientChannelB = clientA.CreateChannel<string>("TEST-DATEB");
+
+                                Console.WriteLine("Add first monitor");
+                                clientChannelA.MonitorChanged += (chan, newValue) =>
+                                {
+                                    Console.WriteLine("== A > " + newValue);
+                                    autoResetA.Set();
+                                };
+
+                                autoResetA.WaitOne();
+
+                                autoResetA.WaitOne();
+
+                                Console.WriteLine("Add first monitor");
+                                clientChannelB.MonitorChanged += (chan, newValue) =>
+                                {
+                                    Console.WriteLine("== B > " + newValue);
+                                    autoResetB.Set();
+                                };
+
+                                autoResetB.WaitOne();
+
+                                autoResetB.WaitOne();
+
+                                Console.WriteLine("== DISPOSE B");
+                                clientChannelB.Dispose();
+                                Thread.Sleep(500);
+
+                                clientChannelB = clientA.CreateChannel<string>("TEST-DATEB");
+                                Console.WriteLine("== Recreate B");
+
+                                Console.WriteLine("Add first monitor");
+                                clientChannelB.MonitorChanged += (chan, newValue) =>
+                                {
+                                    Console.WriteLine("== B > " + newValue);
+                                    autoResetB.Set();
+                                };
+
+                                autoResetB.WaitOne();
+
+                                autoResetB.WaitOne();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        [TestMethod]
         [Timeout(10000)]
         public void DoubleDifferedMonitor()
         {

@@ -120,6 +120,21 @@ namespace GatewayLogic.Commands
                             });
                         }
                     }
+                    else if(channelInfo.ServerId == null && channelInfo.TcpConnection != null)
+                    {
+                        channelInfo.ConnectionIsBuilding = true;
+
+                        connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel for " + channelName + " has been sent");
+                        connection.Gateway.GotNewIocChannel(channelInfo.TcpConnection.Name, channelInfo.ChannelName);
+                        var newPacket = (DataPacket)packet.Clone();
+                        newPacket.Parameter1 = channelInfo.GatewayId;
+                        newPacket.Parameter2 = Gateway.CA_PROTO_VERSION;
+                        newPacket.Destination = searchInfo.Server;
+                        channelInfo.TcpConnection.Send(newPacket);
+
+                        locked = false;
+                        locker.Release();
+                    }
                     else
                     {
                         locked = false;

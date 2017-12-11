@@ -26,7 +26,7 @@ namespace GatewayLogic.Commands
                     connection.Dispose();
                     return;
                 }
-                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event add on " + channel.ChannelName);
+                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event add on " + channel.ChannelName + " client id " + packet.Parameter2);
 
                 // A monitor on datacount 0 will always be a new monitor
                 var monitorMask = packet.GetUInt16(12 + (int)packet.HeaderSize);
@@ -50,12 +50,12 @@ namespace GatewayLogic.Commands
                 {
                     monitor.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter2, WaitingReadyNotify = true });
 
-                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "First event result already sent. Sent ReadNotify.");
-
                     var read = connection.Gateway.ReadNotifyInformation.Get(channel, packet.Parameter2, (TcpClientConnection)connection);
                     read.IsEventAdd = true;
                     read.EventClientId = packet.Parameter2;
                     read.Monitor = monitor;
+
+                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "First event result already sent. Sent ReadNotify (client id: " + packet.Parameter2 + " gw id: " + read.GatewayId + ").");
 
                     newPacket = DataPacket.Create(0);
                     newPacket.Command = 15;
@@ -110,6 +110,7 @@ namespace GatewayLogic.Commands
                 newPacket.Destination = conn.RemoteEndPoint;
                 newPacket.Parameter2 = client.Id;
                 conn.Send(newPacket);
+                connection.Gateway.Log.Write(Services.LogLevel.Error, "Sending event response on " + monitor.ChannelInformation.ChannelName + " client " + client.Id);
             }
         }
     }

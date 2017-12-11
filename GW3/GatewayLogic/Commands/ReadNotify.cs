@@ -37,7 +37,7 @@ namespace GatewayLogic.Commands
                 var client = read.Monitor.GetClients().FirstOrDefault(row => row.Id == read.EventClientId);
                 if (client == null)
                 {
-                    connection.Gateway.Log.Write(LogLevel.Error, "Read back for monitor => monitor client not found");
+                    connection.Gateway.Log.Write(LogLevel.Error, "Read back for monitor => monitor client not found (id: " + read.EventClientId + ")");
                     return;
                 }
 
