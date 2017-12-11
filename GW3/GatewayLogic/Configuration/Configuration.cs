@@ -27,7 +27,7 @@ namespace GatewayLogic.Configuration
         [XmlElement("Name")]
         public string GatewayName { get; set; }
 
-        public int SearchPreventionTimeout { get; set; } = 500;
+        public int SearchPreventionTimeout { get; set; } = 100;
 
 
         private IPEndPoint sideA;

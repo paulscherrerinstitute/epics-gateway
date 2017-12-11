@@ -30,7 +30,7 @@ namespace GatewayLogic.Commands
             if (!connection.Gateway.ChannelInformation.HasChannelInformation(channelName) && !connection.Gateway.SearchInformation.HasChannelServerInformation(channelName))
             {
 
-                connection.Gateway.Log.Write(Services.LogLevel.Error, "Channel is not known: "+channelName);
+                connection.Gateway.Log.Write(Services.LogLevel.Error, "Channel is not known: " + channelName);
                 connection.Dispose();
                 return;
             }
@@ -73,12 +73,29 @@ namespace GatewayLogic.Commands
                 }
                 else
                 {
-                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel info must be found.");
+                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel for " + channelName + " info must be found.");
                     channelInfo.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter1 });
 
-                    if (!channelInfo.ConnectionIsBuilding)
+                    // We already have a TcpConnection
+                    /*if (channelInfo.TcpConnection != null)
                     {
-                        connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection must be made");
+                        locked = false;
+                        locker.Release();
+
+                        connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection for " + channelName + " was already here...");
+                        connection.Gateway.GotNewIocChannel(channelInfo.TcpConnection.Name, channelInfo.ChannelName);
+                        channelInfo.TcpConnection.LinkChannel(channelInfo);
+                        var newPacket = (DataPacket)packet.Clone();
+                        newPacket.Parameter1 = channelInfo.GatewayId;
+                        newPacket.Parameter2 = Gateway.CA_PROTO_VERSION;
+                        //if(connection.Gateway.s)
+                        //newPacket.Sender
+                        newPacket.Destination = searchInfo.Server;
+                        channelInfo.TcpConnection.Send(newPacket);
+                    }
+                    else*/ if (!channelInfo.ConnectionIsBuilding)
+                    {
+                        connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection for " + channelName + " must be made");
                         channelInfo.ConnectionIsBuilding = true;
                         locked = false;
                         locker.Release();
@@ -88,6 +105,7 @@ namespace GatewayLogic.Commands
                             {
                                 connection.Gateway.ServerConnection.CreateConnection(connection.Gateway, searchInfo.Server, (tcpConnection) =>
                                 {
+                                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection for " + channelName + " has been created");
                                     channelInfo.TcpConnection = tcpConnection;
                                     connection.Gateway.GotNewIocChannel(tcpConnection.Name, channelInfo.ChannelName);
                                     tcpConnection.LinkChannel(channelInfo);
@@ -129,6 +147,7 @@ namespace GatewayLogic.Commands
                     locked = false;
                     locker.Release();
                     connection.Dispose();
+                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Answer for unknown channel");
                     return;
                 }
 
@@ -144,6 +163,7 @@ namespace GatewayLogic.Commands
                 clients = channelInfo.GetClients();
                 locked = false;
                 locker.Release();
+                channelInfo.ConnectionIsBuilding = false;
 
                 foreach (var client in clients)
                 {
