@@ -19,7 +19,7 @@ namespace GatewayLogic.Services
 
         public ChannelInformation(Gateway gateway)
         {
-            Gateway = Gateway;
+            Gateway = gateway;
             gateway.TenSecUpdate += (sender, evt) =>
               {
                   lock (dictionaryLock)

@@ -624,6 +624,7 @@ namespace GwUnitTests
 
                                 Console.WriteLine("== DISPOSE B");
                                 clientChannelB.Dispose();
+                                gateway.Cleanup();
                                 Thread.Sleep(500);
 
                                 clientChannelB = clientA.CreateChannel<string>("TEST-DATEB");
