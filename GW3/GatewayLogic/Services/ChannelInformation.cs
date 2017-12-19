@@ -127,7 +127,8 @@ namespace GatewayLogic.Services
                 {
                     lock (clients)
                     {
-                        return (connectedClients.Count == 0 && (DateTime.UtcNow - this.LastUse).TotalMinutes > 30);
+                        //return (connectedClients.Count == 0 && (DateTime.UtcNow - this.LastUse).TotalMinutes > 30);
+                        return (connectedClients.Count == 0 && (DateTime.UtcNow - this.LastUse).TotalMinutes > 30) || (this.ConnectionIsBuilding== true && (DateTime.UtcNow - this.StartBuilding).TotalSeconds > 2);
                     }
                 }
             }
@@ -145,6 +146,7 @@ namespace GatewayLogic.Services
 
             public uint DataCount { get; set; }
             public ushort DataType { get; set; }
+            public DateTime StartBuilding { get; internal set; }
         }
 
         public ChannelInformationDetails Get(uint id)

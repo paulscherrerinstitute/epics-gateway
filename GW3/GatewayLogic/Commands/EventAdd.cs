@@ -110,7 +110,7 @@ namespace GatewayLogic.Commands
                 newPacket.Destination = conn.RemoteEndPoint;
                 newPacket.Parameter2 = client.Id;
                 conn.Send(newPacket);
-                connection.Gateway.Log.Write(Services.LogLevel.Error, "Sending event response on " + monitor.ChannelInformation.ChannelName + " client " + client.Id);
+                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Sending event response on " + monitor.ChannelInformation.ChannelName + " client " + client.Id);
             }
         }
     }

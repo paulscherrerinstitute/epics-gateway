@@ -97,6 +97,7 @@ namespace GatewayLogic.Commands
                     {
                         connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection for " + channelName + " must be made");
                         channelInfo.ConnectionIsBuilding = true;
+                        channelInfo.StartBuilding = DateTime.UtcNow;
                         locked = false;
                         locker.Release();
                         if (channelInfo.TcpConnection == null)
@@ -120,9 +121,10 @@ namespace GatewayLogic.Commands
                             });
                         }
                     }
-                    else if(channelInfo.ServerId == null && channelInfo.TcpConnection != null)
+                    /*else if(channelInfo.ServerId == null && channelInfo.TcpConnection != null && channelInfo.ConnectionIsBuilding == false)
                     {
                         channelInfo.ConnectionIsBuilding = true;
+                        channelInfo.StartBuilding = DateTime.UtcNow;
 
                         connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel for " + channelName + " has been sent");
                         connection.Gateway.GotNewIocChannel(channelInfo.TcpConnection.Name, channelInfo.ChannelName);
@@ -134,7 +136,7 @@ namespace GatewayLogic.Commands
 
                         locked = false;
                         locker.Release();
-                    }
+                    }*/
                     else
                     {
                         locked = false;
