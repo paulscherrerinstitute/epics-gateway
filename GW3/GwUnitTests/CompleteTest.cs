@@ -1086,7 +1086,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(8000)]
+        [Timeout(14000)]
         public void CheckGetRemoteDebugLog()
         {
             using (var gateway = new Gateway())
@@ -1139,7 +1139,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(7000)]
+        [Timeout(14000)]
         public void CheckGetRemoteSearches()
         {
             using (var gateway = new Gateway())
@@ -1192,7 +1192,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(7000)]
+        [Timeout(14000)]
         public void CheckGetRemoteIocs()
         {
             using (var gateway = new Gateway())
@@ -1298,7 +1298,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(7000)]
+        [Timeout(14000)]
         public void CheckNewRemoteClient()
         {
             using (var gateway = new Gateway())
@@ -1352,7 +1352,7 @@ namespace GwUnitTests
 
 
         [TestMethod]
-        [Timeout(8000)]
+        [Timeout(14000)]
         public void CheckCascadeDebug()
         {
             using (var gateway = new Gateway())
