@@ -137,7 +137,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(1000)]
+        [Timeout(5000)]
         public void CheckCascadeGet()
         {
             using (var gateway = new Gateway())
