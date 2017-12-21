@@ -1086,7 +1086,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(2000)]
+        [Timeout(4000)]
         public void CheckGetRemoteDebugLog()
         {
             using (var gateway = new Gateway())
