@@ -1245,7 +1245,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(7000)]
+        [Timeout(14000)]
         public void CheckNewRemoteIocs()
         {
             using (var gateway = new Gateway())
