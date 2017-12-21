@@ -61,6 +61,8 @@ namespace GatewayLogic.Connections
 
         internal void Remove(TType tcpClientConnection)
         {
+            if (tcpClientConnection.RemoteEndPoint == null)
+                return;
             lockDictionary.Wait();
             dictionary.Remove(tcpClientConnection.RemoteEndPoint);
             lockDictionary.Release();
