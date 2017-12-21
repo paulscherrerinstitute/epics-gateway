@@ -12,6 +12,7 @@ namespace GwUnitTests
     public class TestSplitter
     {
         [TestMethod]
+        [Timeout(1000)]
         public void CheckCompleteMessageSplitting()
         {
             var buffer = new MemoryStream();
@@ -33,6 +34,8 @@ namespace GwUnitTests
         }
 
         [TestMethod]
+        [Timeout(1000)]
+
         public void CheckSimpleSplitting()
         {
             var buffer = new MemoryStream();
@@ -67,6 +70,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
+        [Timeout(1000)]
         //[Timeout(100)]
         public void CheckSplittingLeftOver()
         {

@@ -14,6 +14,7 @@ namespace GwUnitTests
     public class DirectionalTest
     {
         [TestMethod]
+        [Timeout(10000)]
         [ExpectedExceptionWithMessage(typeof(Exception),ExpectedMessage = "Connection timeout.")]
         public void TestUnidirectionalGet()
         {
@@ -64,6 +65,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
+        [Timeout(10000)]
         public void TestBidirectionalGet()
         {
             using (var gateway = new Gateway())
@@ -110,6 +112,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
+        [Timeout(10000)]
         [ExpectedExceptionWithMessage(typeof(Exception), ExpectedMessage = "Connection timeout.")]
         public void TestUnidirectionalDiagnostic()
         {
@@ -147,6 +150,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
+        [Timeout(10000)]
         public void TestBidirectionalDiagnostic()
         {
             using (var gateway = new Gateway())
