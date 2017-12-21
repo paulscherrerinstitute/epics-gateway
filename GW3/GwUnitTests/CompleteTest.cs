@@ -414,7 +414,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(2000)]
+        [Timeout(5000)]
         public void DoubleMonitorContinue()
         {
             using (var gateway = new Gateway())
