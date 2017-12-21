@@ -16,6 +16,8 @@ namespace GatewayLogic
 {
     public class DiagnosticServer : IDisposable
     {
+        public const int DEBUG_PORT = 4890;
+
         readonly CADoubleRecord channelCpu;
         readonly CADoubleRecord channelMem;
         readonly CADoubleRecord channelAverageCpu;
@@ -52,8 +54,8 @@ namespace GatewayLogic
             this.gateway = gateway;
             // Starts the diagnostic server
             // using the CAServer library
-            diagServer = new CAServer(address, 7891, 7891);
-            gateway.Log.Write(Services.LogLevel.Connection, "Starting debug server on " + 7891);
+            diagServer = new CAServer(address, DEBUG_PORT, DEBUG_PORT);
+            gateway.Log.Write(Services.LogLevel.Connection, "Starting debug server on " + DEBUG_PORT);
             // CPU usage
             channelCpu = diagServer.CreateRecord<CADoubleRecord>(gateway.Configuration.GatewayName + ":CPU");
             channelCpu.EngineeringUnits = "%";

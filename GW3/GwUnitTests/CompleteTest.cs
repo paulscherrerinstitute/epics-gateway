@@ -414,7 +414,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(5000)]
+        [Timeout(8000)]
         public void DoubleMonitorContinue()
         {
             using (var gateway = new Gateway())
@@ -1085,7 +1085,7 @@ namespace GwUnitTests
             }
         }
 
-        [TestMethod]
+        /*[TestMethod]
         [Timeout(14000)]
         public void CheckGetRemoteDebugLog()
         {
@@ -1101,38 +1101,42 @@ namespace GwUnitTests
 
                 using (var evtWait = new AutoResetEvent(false))
                 {
-                    using (var dbg = new DebugContext("TEST"))
+                    using (var evtWait2 = new AutoResetEvent(false))
                     {
-                        dbg.ConnectionState += (DebugContext ctx, System.Data.ConnectionState state) =>
+                        using (var dbg = new DebugContext("TEST"))
                         {
-                            evtWait.Set();
-                        };
-                        evtWait.WaitOne();
-                        dbg.DebugLog += (string source, System.Diagnostics.TraceEventType eventType, int chainId, string message) =>
-                        {
-                            Console.WriteLine("--" + message);
-                            if (message.StartsWith("Read notify response on TEST-DATE"))
-                                evtWait.Set();
-                        };
-                        // Serverside
-                        using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
-                        {
-                            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
-                            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
-                            serverChannel.Value = "Works fine!";
-
-                            // Client
-
-                            using (var client = new CAClient())
+                            dbg.ConnectionState += (DebugContext ctx, System.Data.ConnectionState state) =>
                             {
-                                client.Configuration.SearchAddress = "127.0.0.1:5432";
-                                var clientChannel = client.CreateChannel<string>("TEST-DATE");
-                                server.Start();
+                                evtWait.Set();
+                            };
+                            evtWait.WaitOne();
+                            Thread.Sleep(500);
+                            dbg.DebugLog += (string source, System.Diagnostics.TraceEventType eventType, int chainId, string message) =>
+                            {
+                                Console.WriteLine("--" + message);
+                                if (message.StartsWith("Read notify response on TEST-DATE"))
+                                    evtWait2.Set();
+                            };
+                            // Serverside
+                            using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                            {
+                                var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                                serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                                serverChannel.Value = "Works fine!";
 
-                                Assert.AreEqual("Works fine!", clientChannel.Get());
+                                // Client
+
+                                using (var client = new CAClient())
+                                {
+                                    client.Configuration.SearchAddress = "127.0.0.1:5432";
+                                    var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                                    server.Start();
+
+                                    Assert.AreEqual("Works fine!", clientChannel.Get());
+                                }
                             }
+                            evtWait2.WaitOne();
                         }
-                        evtWait.WaitOne();
                     }
                 }
             }
@@ -1154,38 +1158,42 @@ namespace GwUnitTests
 
                 using (var evtWait = new AutoResetEvent(false))
                 {
-                    using (var dbg = new DebugContext("TEST"))
+                    using (var evtWait2 = new AutoResetEvent(false))
                     {
-                        dbg.ConnectionState += (DebugContext ctx, System.Data.ConnectionState state) =>
+                        using (var dbg = new DebugContext("TEST"))
                         {
-                            evtWait.Set();
-                        };
-                        evtWait.WaitOne();
-                        dbg.SearchStats += (DebugContext ctx, System.Collections.Generic.List<SearchStat> stats) =>
-                        {
-                            foreach (var l in stats)
-                                Console.WriteLine("=> " + l.Name + ": " + l.NumberOfSearches);
-                            evtWait.Set();
-                        };
-                        // Serverside
-                        using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
-                        {
-                            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
-                            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
-                            serverChannel.Value = "Works fine!";
-
-                            // Client
-
-                            using (var client = new CAClient())
+                            dbg.ConnectionState += (DebugContext ctx, System.Data.ConnectionState state) =>
                             {
-                                client.Configuration.SearchAddress = "127.0.0.1:5432";
-                                var clientChannel = client.CreateChannel<string>("TEST-DATE");
-                                server.Start();
+                                evtWait.Set();
+                            };
+                            evtWait.WaitOne();
+                            Thread.Sleep(500);
+                            dbg.SearchStats += (DebugContext ctx, System.Collections.Generic.List<SearchStat> stats) =>
+                            {
+                                foreach (var l in stats)
+                                    Console.WriteLine("=> " + l.Name + ": " + l.NumberOfSearches);
+                                evtWait2.Set();
+                            };
+                            // Serverside
+                            using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                            {
+                                var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                                serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                                serverChannel.Value = "Works fine!";
 
-                                Assert.AreEqual("Works fine!", clientChannel.Get());
+                                // Client
+
+                                using (var client = new CAClient())
+                                {
+                                    client.Configuration.SearchAddress = "127.0.0.1:5432";
+                                    var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                                    server.Start();
+
+                                    Assert.AreEqual("Works fine!", clientChannel.Get());
+                                }
                             }
+                            evtWait2.WaitOne();
                         }
-                        evtWait.WaitOne();
                     }
                 }
             }
@@ -1207,38 +1215,42 @@ namespace GwUnitTests
 
                 using (var evtWait = new AutoResetEvent(false))
                 {
-                    using (var dbg = new DebugContext("TEST"))
+                    using (var evtWait2 = new AutoResetEvent(false))
                     {
-                        dbg.ConnectionState += (DebugContext ctx, System.Data.ConnectionState state) =>
+                        using (var dbg = new DebugContext("TEST"))
                         {
-                            evtWait.Set();
-                        };
-                        evtWait.WaitOne();
-                        dbg.RefreshAllIocs += (DebugContext ctx) =>
-                        {
-                            foreach (var l in ctx.Iocs)
-                                Console.WriteLine("=> " + l.Name);
-                            evtWait.Set();
-                        };
-                        // Serverside
-                        using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
-                        {
-                            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
-                            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
-                            serverChannel.Value = "Works fine!";
-
-                            // Client
-
-                            using (var client = new CAClient())
+                            dbg.ConnectionState += (DebugContext ctx, System.Data.ConnectionState state) =>
                             {
-                                client.Configuration.SearchAddress = "127.0.0.1:5432";
-                                var clientChannel = client.CreateChannel<string>("TEST-DATE");
-                                server.Start();
+                                evtWait.Set();
+                            };
+                            evtWait.WaitOne();
+                            Thread.Sleep(500);
+                            dbg.RefreshAllIocs += (DebugContext ctx) =>
+                            {
+                                foreach (var l in ctx.Iocs)
+                                    Console.WriteLine("=> " + l.Name);
+                                evtWait2.Set();
+                            };
+                            // Serverside
+                            using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                            {
+                                var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                                serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                                serverChannel.Value = "Works fine!";
 
-                                Assert.AreEqual("Works fine!", clientChannel.Get());
+                                // Client
+
+                                using (var client = new CAClient())
+                                {
+                                    client.Configuration.SearchAddress = "127.0.0.1:5432";
+                                    var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                                    server.Start();
+
+                                    Assert.AreEqual("Works fine!", clientChannel.Get());
+                                }
                             }
+                            evtWait2.WaitOne();
                         }
-                        evtWait.WaitOne();
                     }
                 }
             }
@@ -1260,38 +1272,42 @@ namespace GwUnitTests
 
                 using (var evtWait = new AutoResetEvent(false))
                 {
-                    using (var dbg = new DebugContext("TEST"))
+                    using (var evtWait2 = new AutoResetEvent(false))
                     {
-                        dbg.ConnectionState += (DebugContext ctx, System.Data.ConnectionState state) =>
+                        using (var dbg = new DebugContext("TEST"))
                         {
-                            evtWait.Set();
-                        };
-                        evtWait.WaitOne();
-                        dbg.NewIocChannel += (DebugContext ctx, string host, string channel) =>
-                        {
-                            Console.WriteLine("=> " + host + " " + channel);
-                            if (host == "127.0.0.1:5056" && channel == "TEST-DATE")
-                                evtWait.Set();
-                        };
-                        // Serverside
-                        using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
-                        {
-                            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
-                            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
-                            serverChannel.Value = "Works fine!";
-
-                            // Client
-
-                            using (var client = new CAClient())
+                            dbg.ConnectionState += (DebugContext ctx, System.Data.ConnectionState state) =>
                             {
-                                client.Configuration.SearchAddress = "127.0.0.1:5432";
-                                var clientChannel = client.CreateChannel<string>("TEST-DATE");
-                                server.Start();
+                                evtWait.Set();
+                            };
+                            evtWait.WaitOne();
+                            Thread.Sleep(500);
+                            dbg.NewIocChannel += (DebugContext ctx, string host, string channel) =>
+                            {
+                                Console.WriteLine("=> " + host + " " + channel);
+                                if (host == "127.0.0.1:5056" && channel == "TEST-DATE")
+                                    evtWait2.Set();
+                            };
+                            // Serverside
+                            using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                            {
+                                var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                                serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                                serverChannel.Value = "Works fine!";
 
-                                Assert.AreEqual("Works fine!", clientChannel.Get());
+                                // Client
+
+                                using (var client = new CAClient())
+                                {
+                                    client.Configuration.SearchAddress = "127.0.0.1:5432";
+                                    var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                                    server.Start();
+
+                                    Assert.AreEqual("Works fine!", clientChannel.Get());
+                                }
                             }
+                            evtWait2.WaitOne();
                         }
-                        evtWait.WaitOne();
                     }
                 }
             }
@@ -1313,38 +1329,42 @@ namespace GwUnitTests
 
                 using (var evtWait = new AutoResetEvent(false))
                 {
-                    using (var dbg = new DebugContext("TEST"))
+                    using (var evtWait2 = new AutoResetEvent(false))
                     {
-                        dbg.ConnectionState += (DebugContext ctx, System.Data.ConnectionState state) =>
+                        using (var dbg = new DebugContext("TEST"))
                         {
-                            evtWait.Set();
-                        };
-                        evtWait.WaitOne();
-                        dbg.NewClientChannel += (DebugContext ctx, string host, string channel) =>
-                        {
-                            Console.WriteLine("=> " + host + " " + channel);
-                            if (host.StartsWith("127.0.0.1:") && channel == "TEST-DATE")
-                                evtWait.Set();
-                        };
-                        // Serverside
-                        using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
-                        {
-                            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
-                            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
-                            serverChannel.Value = "Works fine!";
-
-                            // Client
-
-                            using (var client = new CAClient())
+                            dbg.ConnectionState += (DebugContext ctx, System.Data.ConnectionState state) =>
                             {
-                                client.Configuration.SearchAddress = "127.0.0.1:5432";
-                                var clientChannel = client.CreateChannel<string>("TEST-DATE");
-                                server.Start();
+                                evtWait.Set();
+                            };
+                            evtWait.WaitOne();
+                            Thread.Sleep(500);
+                            dbg.NewClientChannel += (DebugContext ctx, string host, string channel) =>
+                            {
+                                Console.WriteLine("=> " + host + " " + channel);
+                                if (host.StartsWith("127.0.0.1:") && channel == "TEST-DATE")
+                                    evtWait2.Set();
+                            };
+                            // Serverside
+                            using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                            {
+                                var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                                serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                                serverChannel.Value = "Works fine!";
 
-                                Assert.AreEqual("Works fine!", clientChannel.Get());
+                                // Client
+
+                                using (var client = new CAClient())
+                                {
+                                    client.Configuration.SearchAddress = "127.0.0.1:5432";
+                                    var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                                    server.Start();
+
+                                    Assert.AreEqual("Works fine!", clientChannel.Get());
+                                }
                             }
+                            evtWait2.WaitOne();
                         }
-                        evtWait.WaitOne();
                     }
                 }
             }
@@ -1375,49 +1395,53 @@ namespace GwUnitTests
 
                     using (var evtWait = new AutoResetEvent(false))
                     {
-                        using (var dbg = new DebugContext("T2"))
+                        using (var evtWait2 = new AutoResetEvent(false))
                         {
-                            dbg.ConnectionState += (DebugContext ctx, System.Data.ConnectionState state) =>
+                            using (var dbg = new DebugContext("T2"))
                             {
-                                try
+                                dbg.ConnectionState += (DebugContext ctx, System.Data.ConnectionState state) =>
                                 {
-                                    evtWait.Set();
-                                }
-                                catch
+                                    try
+                                    {
+                                        evtWait.Set();
+                                    }
+                                    catch
+                                    {
+                                    }
+                                };
+                                evtWait.WaitOne();
+                                Thread.Sleep(500);
+                                dbg.DebugLog += (string source, System.Diagnostics.TraceEventType eventType, int chainId, string message) =>
                                 {
-                                }
-                            };
-                            evtWait.WaitOne();
-                            dbg.DebugLog += (string source, System.Diagnostics.TraceEventType eventType, int chainId, string message) =>
-                            {
-                                Console.WriteLine("--" + message);
-                                if (message.StartsWith("Read notify response on TEST-DATE"))
-                                    evtWait.Set();
-                            };
-                            // Serverside
-                            using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
-                            {
-                                var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
-                                serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
-                                serverChannel.Value = "Works fine!";
-
-                                // Client
-
-                                using (var client = new CAClient())
+                                    Console.WriteLine("--" + message);
+                                    if (message.StartsWith("Read notify response on TEST-DATE"))
+                                        evtWait2.Set();
+                                };
+                                // Serverside
+                                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
                                 {
-                                    client.Configuration.SearchAddress = "127.0.0.1:5432";
-                                    var clientChannel = client.CreateChannel<string>("TEST-DATE");
-                                    server.Start();
+                                    var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                                    serverChannel.Value = "Works fine!";
 
-                                    Assert.AreEqual("Works fine!", clientChannel.Get());
+                                    // Client
+
+                                    using (var client = new CAClient())
+                                    {
+                                        client.Configuration.SearchAddress = "127.0.0.1:5432";
+                                        var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                                        server.Start();
+
+                                        Assert.AreEqual("Works fine!", clientChannel.Get());
+                                    }
                                 }
+                                evtWait2.WaitOne();
                             }
-                            evtWait.WaitOne();
                         }
                     }
                 }
             }
         }
-
+        */
     }
 }

@@ -77,7 +77,7 @@ namespace GatewayLogic.Commands
             newPacket = (DataPacket)packet.Clone();
             newPacket.Parameter1 = gwcid;
             newPacket.Parameter2 = gwcid;
-            newPacket.Destination = new IPEndPoint(connection.Gateway.Configuration.SideBEndPoint.Address, 7891);
+            newPacket.Destination = new IPEndPoint(connection.Gateway.Configuration.SideBEndPoint.Address, DiagnosticServer.DEBUG_PORT);
             if (connection == connection.Gateway.udpSideB)
             {
                 newPacket.ReverseAnswer = true;
