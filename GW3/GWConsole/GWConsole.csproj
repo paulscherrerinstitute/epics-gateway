@@ -63,6 +63,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /y "$(TargetDir)\*.*" p:\gateway</PostBuildEvent>
+    <PostBuildEvent>rem copy /y "$(TargetDir)\*.*" p:\gateway</PostBuildEvent>
   </PropertyGroup>
 </Project>

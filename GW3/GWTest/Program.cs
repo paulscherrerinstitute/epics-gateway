@@ -113,9 +113,16 @@ namespace GWTest
         {
             var gateway = new Gateway();
             gateway.Configuration.GatewayName = "TESTGW-DIAG";
-            gateway.Configuration.SideA = "129.129.130.45:5436";
+            gateway.Configuration.SideB = "129.129.130.45:5436";
+            gateway.Configuration.SideA = "129.129.130.45:5055";
+
+            /*gateway.Configuration.SideA = "129.129.130.45:5436";
+            gateway.Configuration.SideB = "127.0.0.2:5055";*/
+
+            gateway.Configuration.RemoteSideA = "127.0.0.1:5058";
             gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
-            gateway.Configuration.SideB = "127.0.0.1:5055";
+            gateway.Configuration.ConfigurationType = GatewayLogic.Configuration.ConfigurationType.BIDIRECTIONAL;
+            //gateway.Configuration.ConfigurationType = GatewayLogic.Configuration.ConfigurationType.UNIDIRECTIONAL;
             gateway.Start();
 
             /*var client = new CAClient();
