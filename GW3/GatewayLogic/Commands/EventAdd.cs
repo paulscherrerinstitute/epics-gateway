@@ -85,7 +85,7 @@ namespace GatewayLogic.Commands
                 if (monitor == null)
                 {
                     connection.Gateway.Log.Write(Services.LogLevel.Error, "Event add response on unknown");
-                    ThreadPool.QueueUserWorkItem((obj) => { connection.Dispose(); });
+                    //ThreadPool.QueueUserWorkItem((obj) => { connection.Dispose(); });
                     return;
                 }
                 monitor.HasReceivedFirstResult = true;
