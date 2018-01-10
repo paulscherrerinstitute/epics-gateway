@@ -48,7 +48,12 @@ namespace GatewayLogic.Commands
             if (!(command >= handlers.Length || handlers[command] == null))
                 handlers[command].DoRequest(connection, packet);
             else
+            {
                 connection.Gateway.Log.Write(Services.LogLevel.Error, "Command not supported " + command);
+                // Wrong packet handling!
+                if (command > 27)
+                    connection.Dispose();
+            }
         }
 
         /// <summary>
@@ -65,7 +70,12 @@ namespace GatewayLogic.Commands
             if (!(command >= handlers.Length || handlers[command] == null))
                 handlers[command].DoResponse(connection, packet);
             else
+            {
                 connection.Gateway.Log.Write(Services.LogLevel.Error, "Command not supported " + command);
+                // Wrong packet handling!
+                if (command > 27)
+                    connection.Dispose();
+            }
         }
 
 

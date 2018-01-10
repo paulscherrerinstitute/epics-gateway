@@ -103,7 +103,7 @@ namespace GatewayLogic.Commands
                 var conn = connection.Gateway.ClientConnection.Get(client.Client);
                 if (conn == null)
                 {
-                    connection.Gateway.Log.Write(Services.LogLevel.Error, "Event response for client which disappeared");
+                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event response for client which disappeared");
                     monitor.RemoveClient(connection.Gateway, client.Client, client.Id);
                     continue;
                 }
