@@ -35,7 +35,14 @@ namespace GatewayLogic.Connections
             var evt = new AutoResetEvent(false);
             IAsyncResult result = socket.BeginConnect(destination, (IAsyncResult ar) =>
                 {
-                    evt.Set();
+                    try
+                    {
+                        evt.Set();
+                    }
+                    catch
+                    {
+                        return;
+                    }
                     lock (lockObject)
                     {
                         isConnected = true;
@@ -117,7 +124,7 @@ namespace GatewayLogic.Connections
                 // Stop receiving
                 return;
             }
-            //Log.Write("Server received " + size + " bytes from " + this.Destination);
+            //Console.WriteLine("Server received " + size + " bytes from " + this.RemoteEndPoint);
 
             this.LastMessage = DateTime.UtcNow;
             var mainPacket = DataPacket.Create(buffer, size, false);
@@ -178,14 +185,14 @@ namespace GatewayLogic.Connections
             /*lock (lockObject)
             {*/
             try
-                {
-                    socket.Send(packet.Data, packet.BufferSize, SocketFlags.None);
-                    //Console.WriteLine("Sending data to server: " + packet.Command);
-                }
-                catch (Exception ex)
-                {
-                    ThreadPool.QueueUserWorkItem((obj) => { this.Dispose(); });
-                }
+            {
+                socket.Send(packet.Data, packet.BufferSize, SocketFlags.None);
+                //Console.WriteLine("Sending data to server: " + packet.Command + " size " + packet.BufferSize);
+            }
+            catch (Exception ex)
+            {
+                ThreadPool.QueueUserWorkItem((obj) => { this.Dispose(); });
+            }
             //}
         }
 

@@ -111,8 +111,14 @@ namespace GatewayLogic.Commands
                                     connection.Gateway.GotNewIocChannel(tcpConnection.Name, channelInfo.ChannelName);
                                     tcpConnection.LinkChannel(channelInfo);
                                     var newPacket = (DataPacket)packet.Clone();
+
+                                    /*newPacket.Parameter1 = channelInfo.GatewayId;
+                                    newPacket.Destination = searchInfo.Server;
+                                    channelInfo.TcpConnection.Send(newPacket);*/
+
                                     newPacket.Parameter1 = channelInfo.GatewayId;
                                     newPacket.Parameter2 = Gateway.CA_PROTO_VERSION;
+                                    //newPacket.Parameter2 = 11;
                                     //if(connection.Gateway.s)
                                     //newPacket.Sender
                                     newPacket.Destination = searchInfo.Server;

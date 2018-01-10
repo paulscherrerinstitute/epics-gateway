@@ -109,7 +109,10 @@ namespace GatewayLogic.Commands
             }
 
             connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search answer for " + search.Channel + " from " + packet.Sender);
-            search.Server = packet.Sender;
+            //if(packet.Parameter2 == 0xffffffff)
+                search.Server = new IPEndPoint(packet.Sender.Address, packet.DataType);
+            /*else
+                search.Server = new IPEndPoint(packet.Parameter2, packet.DataType);*/
 
             foreach (var c in search.GetClients())
             {
