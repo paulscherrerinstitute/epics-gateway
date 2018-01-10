@@ -138,8 +138,10 @@ namespace GatewayLogic
                     //remainingPacket = (DataPacket)packet.Clone();
                     if (packet.HasCompleteHeader)
                     {
-                        currentPos = packet.BufferSize;
-                        remainingPacket = DataPacket.Create(packet, packet.MessageSize);
+                        //currentPos = packet.BufferSize;
+                        //remainingPacket = DataPacket.Create(packet, packet.MessageSize);
+                        currentPos = 0;
+                        remainingPacket = (DataPacket)packet.Clone();
                     }
                     else
                     {
