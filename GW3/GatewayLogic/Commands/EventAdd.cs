@@ -23,7 +23,7 @@ namespace GatewayLogic.Commands
                 if (channel == null)
                 {
                     connection.Gateway.Log.Write(Services.LogLevel.Error, "Event add on wrong channel.");
-                    connection.Dispose();
+                    //connection.Dispose();
                     return;
                 }
                 connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event add on " + channel.ChannelName + " client id " + packet.Parameter2);
