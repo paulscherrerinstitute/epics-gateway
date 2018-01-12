@@ -178,10 +178,11 @@ namespace GatewayLogic.Connections
                 return;
             }
 
-            // We receive a debug port request.
             this.LastMessage = DateTime.UtcNow;
+
             var mainPacket = DataPacket.Create(buffer, n);
 
+            // We receive a debug port request.
             if (buffer[0] == 126)
             {
                 Gateway.ClientConnection.Remove(this);

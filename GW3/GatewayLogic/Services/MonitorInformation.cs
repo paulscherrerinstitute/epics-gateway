@@ -90,6 +90,7 @@ namespace GatewayLogic.Services
                 }
             }
         }
+
         public MonitorInformationDetail Get(ChannelInformation.ChannelInformationDetails channelInformation, ushort dataType, uint dataCount, UInt16 monitorMask)
         {
             lock (dictionaryLock)

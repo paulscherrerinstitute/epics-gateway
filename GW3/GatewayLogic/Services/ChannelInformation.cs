@@ -99,8 +99,16 @@ namespace GatewayLogic.Services
 
             internal void DisconnectClient(TcpClientConnection connection)
             {
+                List<Client> toDrop;
                 lock (clients)
                 {
+                    toDrop = connectedClients.Where(row => row.Connection == connection).ToList();
+                }
+
+                lock (clients)
+                {
+                    foreach (var i in toDrop)
+                        connection.Gateway.MonitorInformation.GetByClientId(i.Connection.RemoteEndPoint, i.Id)?.RemoveClient(connection.Gateway, i.Connection.RemoteEndPoint, i.Id);
                     connectedClients.RemoveAll(row => row.Connection == connection);
                     this.LastUse = DateTime.UtcNow;
                 }
@@ -128,7 +136,7 @@ namespace GatewayLogic.Services
                     lock (clients)
                     {
                         //return (connectedClients.Count == 0 && (DateTime.UtcNow - this.LastUse).TotalMinutes > 30);
-                        return (connectedClients.Count == 0 && (DateTime.UtcNow - this.LastUse).TotalMinutes > 30) || (this.ConnectionIsBuilding== true && (DateTime.UtcNow - this.StartBuilding).TotalSeconds > 2);
+                        return (connectedClients.Count == 0 && (DateTime.UtcNow - this.LastUse).TotalMinutes > 30) || (this.ConnectionIsBuilding == true && (DateTime.UtcNow - this.StartBuilding).TotalSeconds > 2);
                     }
                 }
             }

@@ -19,5 +19,6 @@ namespace GatewayLogic.Connections
         public DateTime LastMessage { get; set; }
 
         public abstract string Name { get; }
+        public DateTime LastEcho { get; internal set; } = DateTime.UtcNow;
     }
 }

@@ -17,14 +17,14 @@ namespace GatewayLogic.Commands
             {
                 connection.Gateway.Log.Write(LogLevel.Detail, "Echo answer received from " + packet.Sender);
                 ((GatewayTcpConnection)connection).HasSentEcho = false;
-                ((GatewayTcpConnection)connection).LastMessage = DateTime.UtcNow;
+                ((GatewayTcpConnection)connection).LastEcho = DateTime.UtcNow;
                 return;
             }
             connection.Gateway.Log.Write(LogLevel.Detail, "Echo request received from " + packet.Sender);
-            if (((DateTime.UtcNow - ((GatewayTcpConnection)connection).LastMessage)).TotalSeconds > 10)
+            if (((DateTime.UtcNow - ((GatewayTcpConnection)connection).LastEcho)).TotalSeconds > 10)
             {
                 connection.Send(packet);
-                ((GatewayTcpConnection)connection).LastMessage = DateTime.UtcNow;
+                ((GatewayTcpConnection)connection).LastEcho = DateTime.UtcNow;
             }
         }
 
