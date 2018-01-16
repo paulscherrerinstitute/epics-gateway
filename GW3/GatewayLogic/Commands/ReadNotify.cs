@@ -47,8 +47,12 @@ namespace GatewayLogic.Commands
                 packet.Parameter2 = read.ClientId;
                 read.Client.Send(packet);
 
+                var clientMonitor = read.Monitor.GetClients().FirstOrDefault(row => row.Id == read.EventClientId && row.Client == read.Client.RemoteEndPoint);
+                if (clientMonitor != null)
+                    clientMonitor.WaitingReadyNotify = false;
+
                 //if (client.WaitingReadyNotify)
-                client.WaitingReadyNotify = false;
+                //client.WaitingReadyNotify = false;
             }
             else
             {

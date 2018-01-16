@@ -186,7 +186,10 @@ namespace GatewayLogic.Connections
             {*/
             try
             {
-                socket.Send(packet.Data, packet.BufferSize, SocketFlags.None);
+                lock (socket)
+                {
+                    socket.Send(packet.Data, packet.BufferSize, SocketFlags.None);
+                }
                 //Console.WriteLine("Sending data to server: " + packet.Command + " size " + packet.BufferSize);
             }
             catch (Exception ex)

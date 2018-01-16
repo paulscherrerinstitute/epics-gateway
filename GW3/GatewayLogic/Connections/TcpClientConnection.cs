@@ -86,7 +86,10 @@ namespace GatewayLogic.Connections
 
             try
             {
-                socket.Send(packet.Data, packet.BufferSize, SocketFlags.None);
+                lock (socket)
+                {
+                    socket.Send(packet.Data, packet.BufferSize, SocketFlags.None);
+                }
                 /*lock (stream)
                 {
                     stream.Write(packet.Data, packet.Offset, packet.BufferSize);
