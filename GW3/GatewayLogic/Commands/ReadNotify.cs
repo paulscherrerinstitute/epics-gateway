@@ -34,7 +34,7 @@ namespace GatewayLogic.Commands
 
             if (read.IsEventAdd)
             {
-                var client = read.Monitor.GetClients().FirstOrDefault(row => row.Id == read.EventClientId);
+                var client = read.Monitor.GetClients().FirstOrDefault(row => row.Id == read.EventClientId && row.Client == read.Client.RemoteEndPoint);
                 if (client == null)
                 {
                     connection.Gateway.Log.Write(LogLevel.Error, "Read back for monitor => monitor client not found (id: " + read.EventClientId + ")");
@@ -47,12 +47,12 @@ namespace GatewayLogic.Commands
                 packet.Parameter2 = read.ClientId;
                 read.Client.Send(packet);
 
-                var clientMonitor = read.Monitor.GetClients().FirstOrDefault(row => row.Id == read.EventClientId && row.Client == read.Client.RemoteEndPoint);
+                /*var clientMonitor = read.Monitor.GetClients().FirstOrDefault(row => row.Id == read.EventClientId && row.Client == read.Client.RemoteEndPoint);
                 if (clientMonitor != null)
-                    clientMonitor.WaitingReadyNotify = false;
+                    clientMonitor.WaitingReadyNotify = false;*/
 
                 //if (client.WaitingReadyNotify)
-                //client.WaitingReadyNotify = false;
+                client.WaitingReadyNotify = false;
             }
             else
             {
