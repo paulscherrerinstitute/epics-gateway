@@ -60,7 +60,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(1000)]
+        [Timeout(5000)]
         public void CheckGet()
         {
             using (var gateway = new Gateway())
