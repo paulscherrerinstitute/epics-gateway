@@ -240,5 +240,7 @@ namespace GatewayLogic.Connections
         }
 
         public override string Name => RemoteEndPoint.ToString();
+
+        public uint Version { get; internal set; }
     }
 }

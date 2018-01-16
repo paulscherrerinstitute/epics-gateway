@@ -93,7 +93,8 @@ namespace GatewayLogic.Commands
                         newPacket.Destination = searchInfo.Server;
                         channelInfo.TcpConnection.Send(newPacket);
                     }
-                    else*/ if (!channelInfo.ConnectionIsBuilding)
+                    else*/
+                    if (!channelInfo.ConnectionIsBuilding)
                     {
                         connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection for " + channelName + " must be made");
                         channelInfo.ConnectionIsBuilding = true;
@@ -108,19 +109,34 @@ namespace GatewayLogic.Commands
                                 {
                                     connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection for " + channelName + " has been created");
                                     channelInfo.TcpConnection = tcpConnection;
+                                    tcpConnection.Version = searchInfo.Version;
+
+                                    // Send version
+                                    var newPacket = DataPacket.Create(0);
+                                    newPacket.Command = 0;
+                                    newPacket.PayloadSize = 0;
+                                    newPacket.DataType = 1;
+                                    newPacket.DataCount = Gateway.CA_PROTO_VERSION;
+                                    newPacket.Parameter1 = 0;
+                                    newPacket.Parameter2 = 0;
+                                    channelInfo.TcpConnection.Send(newPacket);
+                                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Sending version to " + tcpConnection.Name);
+
                                     connection.Gateway.GotNewIocChannel(tcpConnection.Name, channelInfo.ChannelName);
                                     tcpConnection.LinkChannel(channelInfo);
-                                    var newPacket = (DataPacket)packet.Clone();
+                                    newPacket = (DataPacket)packet.Clone();
 
-                                    /*newPacket.Parameter1 = channelInfo.GatewayId;
-                                    newPacket.Destination = searchInfo.Server;
-                                    channelInfo.TcpConnection.Send(newPacket);*/
+                                    /*for (var i = 0; i < 30; i++)
+                                    {
+                                        if (tcpConnection.Version != 0)
+                                            break;
+                                        Thread.Sleep(100);
+                                    }*/
+
+                                    // Old EPICS version
 
                                     newPacket.Parameter1 = channelInfo.GatewayId;
                                     newPacket.Parameter2 = Gateway.CA_PROTO_VERSION;
-                                    //newPacket.Parameter2 = 11;
-                                    //if(connection.Gateway.s)
-                                    //newPacket.Sender
                                     newPacket.Destination = searchInfo.Server;
                                     channelInfo.TcpConnection.Send(newPacket);
                                 });

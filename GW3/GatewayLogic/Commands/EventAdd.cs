@@ -17,6 +17,7 @@ namespace GatewayLogic.Commands
         {
             DataPacket newPacket = null;
             ChannelInformation.ChannelInformationDetails channel;
+
             lock (lockObject)
             {
                 channel = connection.Gateway.ChannelInformation.Get(packet.Parameter1);
@@ -26,11 +27,19 @@ namespace GatewayLogic.Commands
                     //connection.Dispose();
                     return;
                 }
+
+                var dataCount = packet.DataCount;
+                if (channel.TcpConnection.Version < Gateway.CA_PROTO_VERSION && dataCount == 0)
+                {
+                    dataCount = channel.DataCount;
+                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "CA Version too old, must set the datacount for " + channel.ChannelName+" to "+dataCount);
+                }
+
                 connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event add on " + channel.ChannelName + " client id " + packet.Parameter2);
 
                 // A monitor on datacount 0 will always be a new monitor
                 var monitorMask = packet.GetUInt16(12 + (int)packet.HeaderSize);
-                var monitor = connection.Gateway.MonitorInformation.Get(channel, packet.DataType, packet.DataCount, monitorMask);
+                var monitor = connection.Gateway.MonitorInformation.Get(channel, packet.DataType, dataCount, monitorMask);
                 // A fresh new monitor
                 if (monitor.FirstTime == true)
                 {
@@ -41,6 +50,7 @@ namespace GatewayLogic.Commands
                     newPacket = (DataPacket)packet.Clone();
                     newPacket.Parameter1 = channel.ServerId.Value;
                     newPacket.Parameter2 = monitor.GatewayId;
+                    newPacket.DataCount = dataCount;
                     newPacket.Destination = channel.TcpConnection.RemoteEndPoint;
                     connection.Gateway.Log.Write(Services.LogLevel.Detail, "New channel monitor " + monitor.GatewayId);
                     //channel.TcpConnection.Send(newPacket);
@@ -60,7 +70,7 @@ namespace GatewayLogic.Commands
                     newPacket = DataPacket.Create(0);
                     newPacket.Command = 15;
                     newPacket.DataType = packet.DataType;
-                    newPacket.DataCount = packet.DataCount;
+                    newPacket.DataCount = dataCount;
                     newPacket.Parameter1 = channel.ServerId.Value;
                     newPacket.Parameter2 = read.GatewayId;
                     //channel.TcpConnection.Send(newPacket);
@@ -96,6 +106,7 @@ namespace GatewayLogic.Commands
                 clients = monitor.GetClients();
                 connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event add response on " + monitor.ChannelInformation.ChannelName + " clients " + clients.Count());
             }
+
             foreach (var client in clients)
             {
                 if (client.WaitingReadyNotify)

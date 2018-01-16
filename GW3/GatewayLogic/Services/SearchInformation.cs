@@ -21,6 +21,7 @@ namespace GatewayLogic.Services
             public string Channel { get; internal set; }
             public IPEndPoint Server { get; internal set; }
             public DateTime LastSearch { get; internal set; }
+            public ushort Version { get; internal set; }
 
             public SearchInformationDetail(uint id)
             {

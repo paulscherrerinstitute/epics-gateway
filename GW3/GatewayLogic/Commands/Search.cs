@@ -108,9 +108,11 @@ namespace GatewayLogic.Commands
                 return;
             }
 
-            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search answer for " + search.Channel + " from " + packet.Sender);
+            var version = packet.GetUInt16(0 + (int)packet.HeaderSize);
+            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search answer for " + search.Channel + " from " + packet.Sender + " version " + version);
             //if(packet.Parameter2 == 0xffffffff)
-                search.Server = new IPEndPoint(packet.Sender.Address, packet.DataType);
+            search.Server = new IPEndPoint(packet.Sender.Address, packet.DataType);
+            search.Version = version;
             /*else
                 search.Server = new IPEndPoint(packet.Parameter2, packet.DataType);*/
 

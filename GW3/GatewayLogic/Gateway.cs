@@ -20,6 +20,7 @@ namespace GatewayLogic
     {
         public const int BUFFER_SIZE = 8192 * 30;
         public const UInt16 CA_PROTO_VERSION = 13;
+        //public const UInt16 CA_PROTO_VERSION = 11;
 
         public Configuration.Configuration Configuration { get; private set; } = new GatewayLogic.Configuration.Configuration();
 
