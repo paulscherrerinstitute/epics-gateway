@@ -123,6 +123,7 @@ namespace GWTest
             //gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
             gateway.Configuration.RemoteSideA = "127.0.0.1:5058";
             gateway.Configuration.RemoteSideB = "129.129.130.255:5064";
+            //gateway.Configuration.RemoteSideB = "sls-cagw02.psi.ch:5062";
             gateway.Configuration.ConfigurationType = GatewayLogic.Configuration.ConfigurationType.BIDIRECTIONAL;
             //gateway.Configuration.ConfigurationType = GatewayLogic.Configuration.ConfigurationType.UNIDIRECTIONAL;
             gateway.Start();

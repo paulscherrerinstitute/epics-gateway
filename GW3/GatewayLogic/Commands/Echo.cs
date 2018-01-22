@@ -21,7 +21,7 @@ namespace GatewayLogic.Commands
                 return;
             }
             connection.Gateway.Log.Write(LogLevel.Detail, "Echo request received from " + packet.Sender);
-            if (((DateTime.UtcNow - ((GatewayTcpConnection)connection).LastEcho)).TotalSeconds > 10)
+            if (((DateTime.UtcNow - ((GatewayTcpConnection)connection).LastEcho)).TotalSeconds > 0.3)
             {
                 connection.Send(packet);
                 ((GatewayTcpConnection)connection).LastEcho = DateTime.UtcNow;

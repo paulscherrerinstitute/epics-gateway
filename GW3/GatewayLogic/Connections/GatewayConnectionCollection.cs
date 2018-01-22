@@ -23,11 +23,18 @@ namespace GatewayLogic.Connections
         {
             // Dispose old one
             List<TType> toDelete;
-            lockDictionary.Wait();
-            toDelete = dictionary.Values.Where(row => (DateTime.UtcNow - row.LastMessage).TotalSeconds > 90).ToList();
+            List<TType> toCheck;
+            try
+            {
+                lockDictionary.Wait();
+                toDelete = dictionary.Values.Where(row => (DateTime.UtcNow - row.LastMessage).TotalSeconds > 90).ToList();
 
-            var toCheck = dictionary.Values.Where(row => (DateTime.UtcNow - row.LastMessage).TotalSeconds > 30).ToList();
-            lockDictionary.Release();
+                toCheck = dictionary.Values.Where(row => (DateTime.UtcNow - row.LastMessage).TotalSeconds > 5 && !toDelete.Contains(row)).ToList();
+            }
+            finally
+            {
+                lockDictionary.Release();
+            }
 
             toDelete.ForEach(row => row.Dispose());
 
