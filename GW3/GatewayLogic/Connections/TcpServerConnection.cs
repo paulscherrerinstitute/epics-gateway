@@ -188,7 +188,7 @@ namespace GatewayLogic.Connections
             {
                 lock (socket)
                 {
-                    socket.Send(packet.Data, packet.BufferSize, SocketFlags.None);
+                    socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
                 }
                 //Console.WriteLine("Sending data to server: " + packet.Command + " size " + packet.BufferSize);
             }
@@ -210,6 +210,8 @@ namespace GatewayLogic.Connections
             socket?.Dispose();
             if (Gateway == null)
                 return;
+            Gateway.Log.Write(LogLevel.Connection, "Server " + this.Name + " disconnect");
+
             Gateway.ServerConnection.Remove(this);
             Gateway.GotDropedIoc(Name);
 

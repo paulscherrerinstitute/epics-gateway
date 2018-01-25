@@ -6,12 +6,12 @@ namespace GatewayLogic.Commands
     {
         public override void DoRequest(GatewayConnection connection, DataPacket packet)
         {
-            throw new System.NotImplementedException();
+            //throw new System.NotImplementedException();
         }
 
         public override void DoResponse(GatewayConnection connection, DataPacket packet)
         {
-            throw new System.NotImplementedException();
+            //throw new System.NotImplementedException();
         }
     }
 }

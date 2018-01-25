@@ -22,6 +22,8 @@ namespace GatewayLogic.Commands
                 access = connection.Gateway.Configuration.Security.EvaluateSideA(channelName, "", "", packet.Sender.Address.ToString());
             else
                 access = connection.Gateway.Configuration.Security.EvaluateSideB(channelName, "", "", packet.Sender.Address.ToString());
+            if (access == Configuration.SecurityAccess.WRITE)
+                access = Configuration.SecurityAccess.ALL;
 
             // Rules prevent searching
             if (access == Configuration.SecurityAccess.NONE)
@@ -216,6 +218,9 @@ namespace GatewayLogic.Commands
                         access = connection.Gateway.Configuration.Security.EvaluateSideA(channelInfo.ChannelName, "", "", ((TcpClientConnection)destConn).RemoteEndPoint.Address.ToString());
                     else
                         access = connection.Gateway.Configuration.Security.EvaluateSideB(channelInfo.ChannelName, "", "", ((TcpClientConnection)destConn).RemoteEndPoint.Address.ToString());
+
+                    if (access == Configuration.SecurityAccess.WRITE)
+                        access = Configuration.SecurityAccess.ALL;
 
                     // Rules prevent searching
                     if (access == Configuration.SecurityAccess.NONE)

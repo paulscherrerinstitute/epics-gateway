@@ -16,10 +16,10 @@ namespace GatewayLogic.Connections
         internal GatewayConnectionCollection(Gateway gateway)
         {
             Gateway = gateway;
-            Gateway.TenSecUpdate += Gateway_TenSecUpdate;
+            Gateway.OneSecUpdate += Gateway_OneSecUpdate;
         }
 
-        private void Gateway_TenSecUpdate(object sender, EventArgs e)
+        private void Gateway_OneSecUpdate(object sender, EventArgs e)
         {
             // Dispose old one
             List<TType> toDelete;

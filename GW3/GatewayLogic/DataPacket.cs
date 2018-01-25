@@ -326,7 +326,9 @@ namespace GatewayLogic
         /// <returns></returns>
         public object Clone()
         {
-            DataPacket p = DataPacket.Create((int)this.BufferSize, false);
+            //DataPacket p = DataPacket.Create((int)this.BufferSize, false);
+            var p = new DataPacket();
+            p.Data = new byte[(int)this.BufferSize];
             Buffer.BlockCopy(this.Data, this.Offset, p.Data, 0, this.BufferSize);
             p.bufferSize = this.bufferSize;
             p.Sender = this.Sender;
@@ -337,7 +339,9 @@ namespace GatewayLogic
 
         public static DataPacket Create(byte[] buff)
         {
-            DataPacket p = DataPacket.Create(buff.Length, false);
+            //DataPacket p = DataPacket.Create(buff.Length, false);
+            var p = new DataPacket();
+            p.Data = new byte[buff.Length];
             Buffer.BlockCopy(buff, 0, p.Data, 0, buff.Length);
             return p;
         }
@@ -351,7 +355,8 @@ namespace GatewayLogic
         {
             var p = new DataPacket();
             p.Data = new byte[payloadSize + (countHeader ? 16 : 0)];
-            p.SetUInt16(2, (UInt16)payloadSize);
+            if (countHeader)
+                p.SetUInt16(2, (UInt16)payloadSize);
             return p;
         }
 

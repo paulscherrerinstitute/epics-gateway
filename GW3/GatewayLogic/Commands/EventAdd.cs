@@ -89,6 +89,10 @@ namespace GatewayLogic.Commands
         {
             IEnumerable<ClientId> clients = null;
             MonitorInformation.MonitorInformationDetail monitor;
+
+            if (packet.PayloadSize == 0)
+                return;
+
             lock (lockObject)
             {
                 monitor = connection.Gateway.MonitorInformation.GetByGatewayId(packet.Parameter2);

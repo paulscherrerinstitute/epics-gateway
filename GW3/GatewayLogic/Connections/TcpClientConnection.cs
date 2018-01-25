@@ -65,7 +65,7 @@ namespace GatewayLogic.Connections
                 {
                     socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
                 }
-                catch(SocketException ex1)
+                catch (SocketException ex1)
                 {
                     this.Dispose();
                 }
@@ -88,7 +88,11 @@ namespace GatewayLogic.Connections
             {
                 lock (socket)
                 {
-                    socket.Send(packet.Data, packet.BufferSize, SocketFlags.None);
+                    if(packet.DataCount == 0 && packet.Command != 22)
+                    {
+
+                    }
+                    socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
                 }
                 /*lock (stream)
                 {
@@ -247,6 +251,7 @@ namespace GatewayLogic.Connections
                     return;
                 disposed = true;
             }
+            Gateway.Log.Write(LogLevel.Connection, "Client " + this.Name + " disconnect");
 
             this.Gateway.DropClient(this);
             Gateway.GotDropedClient(Name);
