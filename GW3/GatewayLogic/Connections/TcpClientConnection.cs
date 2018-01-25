@@ -88,10 +88,6 @@ namespace GatewayLogic.Connections
             {
                 lock (socket)
                 {
-                    if(packet.DataCount == 0 && packet.Command != 22)
-                    {
-
-                    }
                     socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
                 }
                 /*lock (stream)
