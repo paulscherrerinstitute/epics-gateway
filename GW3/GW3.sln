@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.0
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GWConsole", "GWConsole\GWConsole.csproj", "{9417ADE6-2AD0-4802-8813-F6E86285B578}"
 EndProject
@@ -20,6 +20,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GWService", "GWService\GWService.csproj", "{330D97BA-5E11-45A7-AA1A-69D6DE3C1685}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GWWatchdog", "GWWatchdog\GWWatchdog.csproj", "{2194FDAE-A462-4E76-BC4E-695D7BB8226E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{9BD6BCA4-62D5-4E1A-8704-A4DD7BBCD926}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\EPICS Gateway configuration.docx = Documentation\EPICS Gateway configuration.docx
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
