@@ -28,9 +28,10 @@ namespace GatewayLogic.Configuration
         public SecurityAccess EvaluateSideA(string channel, string username, string hostname, string ip)
         {
             SecurityAccess result = SecurityAccess.ALL;
+            var lookupHostname = GetReverseLookup(ip);
             foreach (var i in RulesSideA)
             {
-                if (i.Applies(channel, username, GetReverseLookup(ip), ip))
+                if (i.Applies(channel, username, lookupHostname, ip))
                     result = i.Access;
             }
             return result;
@@ -39,9 +40,10 @@ namespace GatewayLogic.Configuration
         public SecurityAccess EvaluateSideB(string channel, string username, string hostname, string ip)
         {
             SecurityAccess result = SecurityAccess.ALL;
+            var lookupHostname = GetReverseLookup(ip);
             foreach (var i in RulesSideB)
             {
-                if (i.Applies(channel, username, GetReverseLookup(ip), ip))
+                if (i.Applies(channel, username, lookupHostname, ip))
                     result = i.Access;
             }
             return result;
@@ -62,7 +64,7 @@ namespace GatewayLogic.Configuration
                         if (hostname == null)
                             hostname = ip;
                         else
-                            hostname.Split(new char[] { '.' }).First();
+                            hostname = hostname.Split(new char[] { '.' }).First();
                     }
                     catch
                     {
