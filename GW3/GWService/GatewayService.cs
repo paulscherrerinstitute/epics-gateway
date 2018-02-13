@@ -22,6 +22,7 @@ namespace GWService
 
         protected override void OnStart(string[] args)
         {
+            System.IO.Directory.SetCurrentDirectory(System.AppDomain.CurrentDomain.BaseDirectory);
             gateway = new Gateway();
             gateway.Log.ClearHandlers();
             var levelToLog = int.Parse(System.Configuration.ConfigurationManager.AppSettings["log"] ?? "2");

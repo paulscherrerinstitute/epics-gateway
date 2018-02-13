@@ -238,7 +238,7 @@ namespace GWWatchdog
         {
             try
             {
-                ServiceController service = new ServiceController(ConfigurationManager.AppSettings["ServiceName"]);
+                ServiceController service = new ServiceController(ConfigurationManager.AppSettings["serviceName"]);
                 service.Stop();
                 service.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromMilliseconds(5000));
             }
@@ -267,12 +267,14 @@ namespace GWWatchdog
             {
                 if (Environment.UserInteractive)
                     Console.WriteLine("Starting gw");
-                ServiceController service = new ServiceController(ConfigurationManager.AppSettings["ServiceName"]);
+                ServiceController service = new ServiceController(ConfigurationManager.AppSettings["serviceName"]);
                 service.Start();
                 service.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromMilliseconds(5000));
             }
-            catch
+            catch(Exception ex)
             {
+                if (Environment.UserInteractive)
+                    Console.WriteLine(ex.ToString());
             }
         }
     }
