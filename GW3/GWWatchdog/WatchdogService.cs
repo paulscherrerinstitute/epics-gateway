@@ -159,19 +159,19 @@ namespace GWWatchdog
                         try
                         {
                             double v = cpuInfo.Get();
-                            /*lastCPUVals.Add(v);
+                            lastCPUVals.Add(v);
                             while (lastCPUVals.Count > nbCPUAvg)
                                 lastCPUVals.RemoveAt(0);
 
                             currentAVG = lastCPUVals.Average();
-                            if (lastCPUVals.Count < nbCPUAvg * 0.8 || currentAVG < 90.0)
+                            if (lastCPUVals.Count < nbCPUAvg * 0.8 || currentAVG < 95.0)
                             {
                                 isOk = true;
                                 status = GWStatus.ALL_OK;
                             }
                             else
-                                status = GWStatus.HIGH_CPU;*/
-                            isOk = true;
+                                status = GWStatus.HIGH_CPU;
+                            //isOk = true;
                         }
                         catch
                         {
