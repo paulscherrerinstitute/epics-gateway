@@ -328,8 +328,10 @@ namespace GatewayLogic
         {
             //DataPacket p = DataPacket.Create((int)this.BufferSize, false);
             var p = new DataPacket();
-            p.Data = new byte[(int)this.BufferSize];
-            Buffer.BlockCopy(this.Data, this.Offset, p.Data, 0, this.BufferSize);
+            //p.Data = new byte[(int)this.BufferSize];
+            p.Data = new byte[(int)this.MessageSize];
+            //Buffer.BlockCopy(this.Data, this.Offset, p.Data, 0, this.BufferSize);
+            Buffer.BlockCopy(this.Data, this.Offset, p.Data, 0, (int)this.MessageSize);
             p.bufferSize = this.bufferSize;
             p.Sender = this.Sender;
             p.Destination = this.Destination;

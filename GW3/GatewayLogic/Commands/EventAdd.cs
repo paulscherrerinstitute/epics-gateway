@@ -32,7 +32,7 @@ namespace GatewayLogic.Commands
                 if (channel.TcpConnection.Version < Gateway.CA_PROTO_VERSION && dataCount == 0)
                 {
                     dataCount = channel.DataCount;
-                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "CA Version too old, must set the datacount for " + channel.ChannelName+" to "+dataCount);
+                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "CA Version too old, must set the datacount for " + channel.ChannelName + " to " + dataCount);
                 }
 
                 connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event add on " + channel.ChannelName + " client id " + packet.Parameter2);
@@ -90,7 +90,7 @@ namespace GatewayLogic.Commands
             IEnumerable<ClientId> clients = null;
             MonitorInformation.MonitorInformationDetail monitor;
 
-            if (packet.PayloadSize == 0)
+            if (packet.PayloadSize == 0 || packet.DataCount == 0)
                 return;
 
             lock (lockObject)
@@ -98,12 +98,12 @@ namespace GatewayLogic.Commands
                 monitor = connection.Gateway.MonitorInformation.GetByGatewayId(packet.Parameter2);
                 if (monitor == null)
                 {
-                    connection.Gateway.Log.Write(Services.LogLevel.Error, "Event add response on unknown");
+                    connection.Gateway.Log.Write(Services.LogLevel.Error, "Event add response on unknown (" + packet.Parameter2 + ")");
                     /*var newPacket = DataPacket.Create(0);
                     newPacket.Command = 2;
                     newPacket.DataType = 1;
                     newPacket.DataCount = 1;*/
-                    ThreadPool.QueueUserWorkItem((obj) => { connection.Dispose(); });
+                    //ThreadPool.QueueUserWorkItem((obj) => { connection.Dispose(); });
                     return;
                 }
                 monitor.HasReceivedFirstResult = true;
