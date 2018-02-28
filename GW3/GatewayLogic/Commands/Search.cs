@@ -34,7 +34,7 @@ namespace GatewayLogic.Commands
 
             connection.Gateway.DiagnosticServer.NbSearches++;
 
-            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search for: " + channelName);
+            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search for: " + channelName + ", from client (" + packet.Sender.ToString() + ")");
             connection.Gateway.Search(channelName, packet.Sender.ToString());
 
             var record = connection.Gateway.SearchInformation.Get(channelName);
@@ -44,7 +44,7 @@ namespace GatewayLogic.Commands
             // Connection known, we answer we knows it
             if (record.Server != null)
             {
-                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search cached for: " + channelName);
+                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search cached for: " + channelName + ", from client (" + packet.Sender.ToString() + ")");
                 newPacket = (DataPacket)packet.Clone();
 
                 if (connection == connection.Gateway.udpSideA)
@@ -62,11 +62,11 @@ namespace GatewayLogic.Commands
             }
             if ((DateTime.UtcNow - record.LastSearch).TotalMilliseconds < connection.Gateway.Configuration.SearchPreventionTimeout)
             {
-                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search is too new, we drop it");
+                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search is too new, we drop it, from client (" + packet.Sender.ToString() + ")");
                 return;
             }
 
-            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search sent for: " + channelName);
+            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search sent for: " + channelName + ", from client (" + packet.Sender.ToString() + ")");
             record.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter1, When = DateTime.UtcNow });
             // ReSharper disable PossibleInvalidOperationException
             uint gwcid = record.GatewayId;
@@ -118,6 +118,7 @@ namespace GatewayLogic.Commands
 
             foreach (var c in search.GetClients())
             {
+                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search answer " + search.Channel + " sent to " + c.Client.ToString());
                 var newPacket = (DataPacket)packet.Clone();
 
                 if (connection == connection.Gateway.udpSideA)
