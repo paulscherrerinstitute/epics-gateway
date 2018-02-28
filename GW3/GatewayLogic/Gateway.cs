@@ -54,6 +54,8 @@ namespace GatewayLogic
 
         bool isDiposed = false;
 
+        private LogFileWriter LogFileWriter;
+
         Thread updaterThread;
 
         public Gateway()
@@ -160,6 +162,8 @@ namespace GatewayLogic
 
         public void Start()
         {
+            this.LogFileWriter = LogFileWriter.CreateIfNeeded(this);
+
             DiagnosticServer = new DiagnosticServer(this, Configuration.SideBEndPoint.Address);
 
             if (this.Configuration.ConfigurationType == GatewayLogic.Configuration.ConfigurationType.UNIDIRECTIONAL)
@@ -190,6 +194,7 @@ namespace GatewayLogic
 
         public void Dispose()
         {
+            this.LogFileWriter?.Dispose();
             tcpSideA.Dispose();
             tcpSideB.Dispose();
 
