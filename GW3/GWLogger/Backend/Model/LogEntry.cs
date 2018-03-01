@@ -12,6 +12,11 @@ namespace GWLogger.Backend.Model
     [ExcludeFromCodeCoverage]
     public class LogEntry
     {
+        public LogEntry()
+        {
+            this.LogEntryDetails = new HashSet<LogEntryDetail>();
+        }
+
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long EntryId { get; set; }
 
@@ -22,5 +27,8 @@ namespace GWLogger.Backend.Model
         public string RemoteIpPoint { get; set; }
 
         public int MessageTypeId { get; set; }
+
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<LogEntryDetail> LogEntryDetails { get; set; }
     }
 }

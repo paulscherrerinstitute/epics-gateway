@@ -20,5 +20,11 @@ namespace GWLogger.Backend.Model
         public int DetailTypeId { get; set; }
 
         public string Value { get; set; }
+
+        [ForeignKey("LogEntryId")]
+        public LogEntry LogEntry { get; set; }
+
+        [ForeignKey("DetailTypeId")]
+        public LogDetailItemType LogDetailItemType { get; set; }
     }
 }

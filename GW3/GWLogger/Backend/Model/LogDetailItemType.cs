@@ -18,5 +18,8 @@ namespace GWLogger.Backend.Model
         public int MessageTypeId { get; set; }
 
         public string Name { get; set; }
+
+        [ForeignKey("MessageTypeId")]
+        public LogMessageType LogMessageType { get; set; }
     }
 }
