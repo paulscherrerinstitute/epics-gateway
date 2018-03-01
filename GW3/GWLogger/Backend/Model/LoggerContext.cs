@@ -6,6 +6,11 @@ using System.Web;
 
 namespace GWLogger.Backend.Model
 {
+    // Open Packet Manager Console
+    // Set Default project to GWLogger
+    // Enable-Migrations
+    // Add-migration base
+
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class LoggerContext : DbContext
     {
