@@ -7,5 +7,7 @@ namespace GWLogger.Backend.DTOs
 {
     public class LogEntryDetail
     {
+        public int TypeId { get; set; }
+        public string Value { get; set; }
     }
 }
