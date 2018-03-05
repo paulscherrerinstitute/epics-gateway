@@ -91,7 +91,7 @@ namespace GatewayLogic.Services
         private void RotateLogs()
         {
             var dir = Path.GetDirectoryName(path);
-            var logDate = DateTime.UtcNow.ToString("yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
+            var logDate = DateTime.UtcNow.AddDays(-logKeepDays).ToString("yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
             var iLogDate = int.Parse(logDate);
             var filename = Path.GetFileName(path);
 
@@ -99,7 +99,7 @@ namespace GatewayLogic.Services
             {
                 var logs = Directory.GetFiles(dir, "*." + filename);
                 foreach (var f in logs.Where(row => Path.GetFileName(row).EndsWith("." + filename)
-                    && int.Parse(Path.GetFileName(row).Substring(0, 8)) < iLogDate - logKeepDays))
+                    && int.Parse(Path.GetFileName(row).Substring(0, 8)) < iLogDate))
                         File.Delete(f);
             }
 
