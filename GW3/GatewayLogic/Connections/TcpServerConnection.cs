@@ -66,7 +66,8 @@ namespace GatewayLogic.Connections
             {
                 if (!evt.WaitOne(5000))
                 {
-                    Gateway.Log.Write(LogLevel.Error, "Cannot connect to " + destination.ToString());
+                    gateway.MessageLogger.Write(destination.ToString(), Services.LogMessageType.StartTcpServerConnectionFailed);
+                    //Gateway.Log.Write(LogLevel.Error, "Cannot connect to " + destination.ToString());
                     this.Dispose();
                 }
                 evt.Dispose();
@@ -210,7 +211,8 @@ namespace GatewayLogic.Connections
             socket?.Dispose();
             if (Gateway == null)
                 return;
-            Gateway.Log.Write(LogLevel.Connection, "Server " + this.Name + " disconnect");
+            Gateway.MessageLogger.Write(this.RemoteEndPoint.ToString(), Services.LogMessageType.TcpServerConnectionClosed);
+            //Gateway.Log.Write(LogLevel.Connection, "Server " + this.Name + " disconnect");
 
             Gateway.ServerConnection.Remove(this);
             Gateway.GotDropedIoc(Name);
@@ -231,7 +233,8 @@ namespace GatewayLogic.Connections
 
             foreach (var channel in channelsCopy)
             {
-                Gateway.Log.Write(LogLevel.Detail, "Disposing channel " + channel.ChannelName);
+                Gateway.MessageLogger.Write(this.RemoteEndPoint.ToString(), Services.LogMessageType.ChannelDispose, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channel.ChannelName } });
+                //Gateway.Log.Write(LogLevel.Detail, "Disposing channel " + channel.ChannelName);
                 foreach (var client in channel.GetClientConnections())
                 {
                     newPacket.Parameter1 = client.Id;

@@ -1,4 +1,5 @@
 ﻿using GatewayLogic.Connections;
+using GatewayLogic.Services;
 
 namespace GatewayLogic.Commands
 {
@@ -9,10 +10,12 @@ namespace GatewayLogic.Commands
             var channel = connection.Gateway.ChannelInformation.Get(packet.Parameter1);
             if (channel == null)
             {
-                connection.Gateway.Log.Write(Services.LogLevel.Error, "Write on wrong channel.");
+                connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.WriteWrongChannel);
+                //connection.Gateway.Log.Write(Services.LogLevel.Error, "Write on wrong channel.");
                 return;
             }
-            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Write on " + channel.ChannelName);
+            connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.Write, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channel.ChannelName } });
+            //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Write on " + channel.ChannelName);
             packet.Parameter1 = channel.ServerId.Value;
             packet.Destination = channel.TcpConnection.RemoteEndPoint;
             channel.TcpConnection.Send(packet);

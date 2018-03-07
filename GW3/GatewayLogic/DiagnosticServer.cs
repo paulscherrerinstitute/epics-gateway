@@ -67,7 +67,7 @@ namespace GatewayLogic
                     Value=address.ToString()
                 }
             });
-            gateway.Log.Write(Services.LogLevel.Connection, "Starting debug server on " + DEBUG_PORT + " ip " + address);
+            //gateway.Log.Write(Services.LogLevel.Connection, "Starting debug server on " + DEBUG_PORT + " ip " + address);
             diagServer = new CAServer(address, DEBUG_PORT, DEBUG_PORT);
             // CPU usage
             channelCpu = diagServer.CreateRecord<CADoubleRecord>(gateway.Configuration.GatewayName + ":CPU");

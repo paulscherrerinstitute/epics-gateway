@@ -95,6 +95,28 @@ namespace GatewayLogic.Services
         [MessageDisplay("Search answer for: {channelName}, from server {endpoint}.", LogLevel.Detail)]
         SearchAnswer,
         [MessageDisplay("Search answer for: {channelName}, sent to {endpoint}.", LogLevel.Detail)]
-        SearchAnswerSent
+        SearchAnswerSent,
+        [MessageDisplay("Version request from {endpoint} => {version}.", LogLevel.Detail)]
+        VersionRequest,
+        [MessageDisplay("Version answer from {endpoint} => {version}.", LogLevel.Detail)]
+        VersionAnswer,
+        [MessageDisplay("Write on wrong channel.",LogLevel.Error)]
+        WriteWrongChannel,
+        [MessageDisplay("Write on {channelName}, from {endpoint}.", LogLevel.Detail)]
+        Write,
+        [MessageDisplay("Write Notify on wrong channel.", LogLevel.Error)]
+        WriteNotifyRequestWrongChannel,
+        [MessageDisplay("Write Notify request on {channelName}, from {endpoint}.", LogLevel.Detail)]
+        WriteNotifyRequest,
+        [MessageDisplay("Write Notify answer on {channelName}, from {endpoint}.", LogLevel.Detail)]
+        WriteNotifyAnswer,
+        [MessageDisplay("TCP Listener on {endpoint}.", LogLevel.Connection)]
+        StartClientTcpListener,
+        [MessageDisplay("Cannot connect to {endpoint}.", LogLevel.Error)]
+        StartTcpServerConnectionFailed,
+        [MessageDisplay("Server {endpoint} disconnect.", LogLevel.Connection)]
+        TcpServerConnectionClosed,
+        [MessageDisplay("Disposing channel {channelName}.", LogLevel.Detail)]
+        ChannelDispose
     }
 }

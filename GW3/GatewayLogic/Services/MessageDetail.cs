@@ -22,6 +22,7 @@ namespace GatewayLogic.Services
         GWID,
         DataCount,
         GatewayMonitorId,
-        ClientIoId
+        ClientIoId,
+        Version
     }
 }
