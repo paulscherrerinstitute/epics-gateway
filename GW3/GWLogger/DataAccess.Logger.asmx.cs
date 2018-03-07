@@ -21,6 +21,13 @@ namespace GWLogger
         }
 
         [WebMethod]
+        public void LogEntries(List<Backend.DTOs.LogEntry> logEntries)
+        {
+            foreach (var i in logEntries)
+                Backend.Controllers.LogController.LogEntry(i.Gateway, i.RemoteIpPoint, i.MessageType, i.Details);
+        }
+
+        [WebMethod]
         public void LogEntry(string gateway, string remoteIpPoint, int messageType, List<Backend.DTOs.LogEntryDetail> details)
         {
             Backend.Controllers.LogController.LogEntry(gateway, remoteIpPoint, messageType, details);

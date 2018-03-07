@@ -45,16 +45,26 @@
       <s:element name="RegisterLogMessageDetailTypeResponse">
         <s:complexType />
       </s:element>
-      <s:element name="LogEntry">
+      <s:element name="LogEntries">
         <s:complexType>
           <s:sequence>
-            <s:element minOccurs="0" maxOccurs="1" name="gateway" type="s:string" />
-            <s:element minOccurs="0" maxOccurs="1" name="remoteIpPoint" type="s:string" />
-            <s:element minOccurs="1" maxOccurs="1" name="messageType" type="s:int" />
-            <s:element minOccurs="0" maxOccurs="1" name="details" type="tns:ArrayOfLogEntryDetail" />
+            <s:element minOccurs="0" maxOccurs="1" name="logEntries" type="tns:ArrayOfLogEntry" />
           </s:sequence>
         </s:complexType>
       </s:element>
+      <s:complexType name="ArrayOfLogEntry">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="LogEntry" nillable="true" type="tns:LogEntry" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="LogEntry">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Gateway" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="RemoteIpPoint" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="MessageType" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Details" type="tns:ArrayOfLogEntryDetail" />
+        </s:sequence>
+      </s:complexType>
       <s:complexType name="ArrayOfLogEntryDetail">
         <s:sequence>
           <s:element minOccurs="0" maxOccurs="unbounded" name="LogEntryDetail" nillable="true" type="tns:LogEntryDetail" />
@@ -66,6 +76,19 @@
           <s:element minOccurs="0" maxOccurs="1" name="Value" type="s:string" />
         </s:sequence>
       </s:complexType>
+      <s:element name="LogEntriesResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="LogEntry">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gateway" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="remoteIpPoint" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="messageType" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="details" type="tns:ArrayOfLogEntryDetail" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
       <s:element name="LogEntryResponse">
         <s:complexType />
       </s:element>
@@ -83,6 +106,12 @@
   <wsdl:message name="RegisterLogMessageDetailTypeSoapOut">
     <wsdl:part name="parameters" element="tns:RegisterLogMessageDetailTypeResponse" />
   </wsdl:message>
+  <wsdl:message name="LogEntriesSoapIn">
+    <wsdl:part name="parameters" element="tns:LogEntries" />
+  </wsdl:message>
+  <wsdl:message name="LogEntriesSoapOut">
+    <wsdl:part name="parameters" element="tns:LogEntriesResponse" />
+  </wsdl:message>
   <wsdl:message name="LogEntrySoapIn">
     <wsdl:part name="parameters" element="tns:LogEntry" />
   </wsdl:message>
@@ -97,6 +126,10 @@
     <wsdl:operation name="RegisterLogMessageDetailType">
       <wsdl:input message="tns:RegisterLogMessageDetailTypeSoapIn" />
       <wsdl:output message="tns:RegisterLogMessageDetailTypeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="LogEntries">
+      <wsdl:input message="tns:LogEntriesSoapIn" />
+      <wsdl:output message="tns:LogEntriesSoapOut" />
     </wsdl:operation>
     <wsdl:operation name="LogEntry">
       <wsdl:input message="tns:LogEntrySoapIn" />
@@ -116,6 +149,15 @@
     </wsdl:operation>
     <wsdl:operation name="RegisterLogMessageDetailType">
       <soap:operation soapAction="http://gwlogger.psi.ch/RegisterLogMessageDetailType" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="LogEntries">
+      <soap:operation soapAction="http://gwlogger.psi.ch/LogEntries" style="document" />
       <wsdl:input>
         <soap:body use="literal" />
       </wsdl:input>
@@ -146,6 +188,15 @@
     </wsdl:operation>
     <wsdl:operation name="RegisterLogMessageDetailType">
       <soap12:operation soapAction="http://gwlogger.psi.ch/RegisterLogMessageDetailType" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="LogEntries">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/LogEntries" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>

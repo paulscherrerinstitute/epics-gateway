@@ -1,34 +1,74 @@
-﻿using System;
+﻿using EntityFramework.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Web;
 
 namespace GWLogger.Backend.Controllers
 {
     public static class LogController
     {
+        static List<Model.LogEntry> entryToAdd = new List<Model.LogEntry>();
+        static SemaphoreSlim lockEntry = new SemaphoreSlim(1);
+        static Thread logEntryFlusher;
+
+        static LogController()
+        {
+            logEntryFlusher = new Thread(BulkSaver);
+            logEntryFlusher.IsBackground = true;
+            logEntryFlusher.Start();
+        }
+
+        public static void BulkSaver()
+        {
+            while (true)
+            {
+                lockEntry.Wait();
+                if (entryToAdd.Count == 0)
+                {
+                    lockEntry.Release();
+                    Thread.Sleep(100);
+                    continue;
+                }
+
+                using (var ctx = new Model.LoggerContext())
+                {
+                    EFBatchOperation.For(ctx, ctx.LogEntries).InsertAll(entryToAdd);
+                }
+
+                entryToAdd.Clear();
+                lockEntry.Release();
+            }
+        }
+
         public static void LogEntry(string gateway, string remoteIpPoint, int messageType, List<DTOs.LogEntryDetail> details)
         {
-            using (var ctx = new Model.LoggerContext())
-            {
-                var newEntry = new Model.LogEntry
-                {
-                    EntryDate = DateTime.UtcNow,
-                    Gateway = gateway,
-                    MessageTypeId = messageType
-                };
-                details
-                    .Select(row => new Model.LogEntryDetail
-                    {
-                        DetailTypeId = row.TypeId,
-                        Value = row.Value
-                    })
-                    .ToList()
-                    .ForEach(row => newEntry.LogEntryDetails.Add(row));
 
-                ctx.LogEntries.Add(newEntry);
-                ctx.SaveChanges();
+            var newEntry = new Model.LogEntry
+            {
+                EntryDate = DateTime.UtcNow,
+                Gateway = gateway,
+                MessageTypeId = messageType
+            };
+            details
+                .Select(row => new Model.LogEntryDetail
+                {
+                    DetailTypeId = row.TypeId,
+                    Value = row.Value
+                })
+                .ToList()
+                .ForEach(row => newEntry.LogEntryDetails.Add(row));
+
+            lockEntry.Wait();
+            while(entryToAdd.Count() > 5000)
+            {
+                lockEntry.Release();
+                Thread.Sleep(100);
+                lockEntry.Wait();
             }
+            entryToAdd.Add(newEntry);
+            lockEntry.Release();
         }
 
         public static void RegisterLogMessageType(List<DTOs.MessageType> types)

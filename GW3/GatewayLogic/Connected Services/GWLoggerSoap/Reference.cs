@@ -9,424 +9,264 @@
 //------------------------------------------------------------------------------
 
 namespace GatewayLogic.GWLoggerSoap {
-    using System.Runtime.Serialization;
-    using System;
     
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="MessageType", Namespace="http://gwlogger.psi.ch/")]
-    [System.SerializableAttribute()]
-    public partial class MessageType : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
-        
-        [System.NonSerializedAttribute()]
-        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
-        
-        private int IdField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string NameField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string DisplayMaskField;
-        
-        [global::System.ComponentModel.BrowsableAttribute(false)]
-        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
-            get {
-                return this.extensionDataField;
-            }
-            set {
-                this.extensionDataField = value;
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
-        public int Id {
-            get {
-                return this.IdField;
-            }
-            set {
-                if ((this.IdField.Equals(value) != true)) {
-                    this.IdField = value;
-                    this.RaisePropertyChanged("Id");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(EmitDefaultValue=false)]
-        public string Name {
-            get {
-                return this.NameField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.NameField, value) != true)) {
-                    this.NameField = value;
-                    this.RaisePropertyChanged("Name");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(EmitDefaultValue=false, Order=2)]
-        public string DisplayMask {
-            get {
-                return this.DisplayMaskField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.DisplayMaskField, value) != true)) {
-                    this.DisplayMaskField = value;
-                    this.RaisePropertyChanged("DisplayMask");
-                }
-            }
-        }
-        
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-        
-        protected void RaisePropertyChanged(string propertyName) {
-            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
-            if ((propertyChanged != null)) {
-                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="IdValue", Namespace="http://gwlogger.psi.ch/")]
-    [System.SerializableAttribute()]
-    public partial class IdValue : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
-        
-        [System.NonSerializedAttribute()]
-        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
-        
-        private int IdField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string ValueField;
-        
-        [global::System.ComponentModel.BrowsableAttribute(false)]
-        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
-            get {
-                return this.extensionDataField;
-            }
-            set {
-                this.extensionDataField = value;
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
-        public int Id {
-            get {
-                return this.IdField;
-            }
-            set {
-                if ((this.IdField.Equals(value) != true)) {
-                    this.IdField = value;
-                    this.RaisePropertyChanged("Id");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(EmitDefaultValue=false)]
-        public string Value {
-            get {
-                return this.ValueField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.ValueField, value) != true)) {
-                    this.ValueField = value;
-                    this.RaisePropertyChanged("Value");
-                }
-            }
-        }
-        
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-        
-        protected void RaisePropertyChanged(string propertyName) {
-            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
-            if ((propertyChanged != null)) {
-                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="LogEntryDetail", Namespace="http://gwlogger.psi.ch/")]
-    [System.SerializableAttribute()]
-    public partial class LogEntryDetail : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
-        
-        [System.NonSerializedAttribute()]
-        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
-        
-        private int TypeIdField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string ValueField;
-        
-        [global::System.ComponentModel.BrowsableAttribute(false)]
-        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
-            get {
-                return this.extensionDataField;
-            }
-            set {
-                this.extensionDataField = value;
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
-        public int TypeId {
-            get {
-                return this.TypeIdField;
-            }
-            set {
-                if ((this.TypeIdField.Equals(value) != true)) {
-                    this.TypeIdField = value;
-                    this.RaisePropertyChanged("TypeId");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(EmitDefaultValue=false)]
-        public string Value {
-            get {
-                return this.ValueField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.ValueField, value) != true)) {
-                    this.ValueField = value;
-                    this.RaisePropertyChanged("Value");
-                }
-            }
-        }
-        
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-        
-        protected void RaisePropertyChanged(string propertyName) {
-            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
-            if ((propertyChanged != null)) {
-                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-            }
-        }
-    }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     [System.ServiceModel.ServiceContractAttribute(Namespace="http://gwlogger.psi.ch/", ConfigurationName="GWLoggerSoap.DataAccessSoap")]
     public interface DataAccessSoap {
         
-        // CODEGEN: Generating message contract since element name types from namespace http://gwlogger.psi.ch/ is not marked nillable
         [System.ServiceModel.OperationContractAttribute(Action="http://gwlogger.psi.ch/RegisterLogMessageType", ReplyAction="*")]
-        GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeResponse RegisterLogMessageType(GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeRequest request);
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        void RegisterLogMessageType(GatewayLogic.GWLoggerSoap.MessageType[] types);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://gwlogger.psi.ch/RegisterLogMessageType", ReplyAction="*")]
-        System.Threading.Tasks.Task<GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeResponse> RegisterLogMessageTypeAsync(GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeRequest request);
-        
-        // CODEGEN: Generating message contract since element name types from namespace http://gwlogger.psi.ch/ is not marked nillable
-        [System.ServiceModel.OperationContractAttribute(Action="http://gwlogger.psi.ch/RegisterLogMessageDetailType", ReplyAction="*")]
-        GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeResponse RegisterLogMessageDetailType(GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeRequest request);
+        System.Threading.Tasks.Task RegisterLogMessageTypeAsync(GatewayLogic.GWLoggerSoap.MessageType[] types);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://gwlogger.psi.ch/RegisterLogMessageDetailType", ReplyAction="*")]
-        System.Threading.Tasks.Task<GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeResponse> RegisterLogMessageDetailTypeAsync(GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeRequest request);
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        void RegisterLogMessageDetailType(GatewayLogic.GWLoggerSoap.IdValue[] types);
         
-        // CODEGEN: Generating message contract since element name gateway from namespace http://gwlogger.psi.ch/ is not marked nillable
+        [System.ServiceModel.OperationContractAttribute(Action="http://gwlogger.psi.ch/RegisterLogMessageDetailType", ReplyAction="*")]
+        System.Threading.Tasks.Task RegisterLogMessageDetailTypeAsync(GatewayLogic.GWLoggerSoap.IdValue[] types);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://gwlogger.psi.ch/LogEntries", ReplyAction="*")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        void LogEntries([System.ServiceModel.MessageParameterAttribute(Name="logEntries")] GatewayLogic.GWLoggerSoap.LogEntry[] logEntries1);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://gwlogger.psi.ch/LogEntries", ReplyAction="*")]
+        System.Threading.Tasks.Task LogEntriesAsync(GatewayLogic.GWLoggerSoap.LogEntry[] logEntries);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://gwlogger.psi.ch/LogEntry", ReplyAction="*")]
-        GatewayLogic.GWLoggerSoap.LogEntryResponse LogEntry(GatewayLogic.GWLoggerSoap.LogEntryRequest request);
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        void LogEntry(string gateway, string remoteIpPoint, int messageType, GatewayLogic.GWLoggerSoap.LogEntryDetail[] details);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://gwlogger.psi.ch/LogEntry", ReplyAction="*")]
-        System.Threading.Tasks.Task<GatewayLogic.GWLoggerSoap.LogEntryResponse> LogEntryAsync(GatewayLogic.GWLoggerSoap.LogEntryRequest request);
+        System.Threading.Tasks.Task LogEntryAsync(string gateway, string remoteIpPoint, int messageType, GatewayLogic.GWLoggerSoap.LogEntryDetail[] details);
     }
     
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.2612.0")]
+    [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-    [System.ServiceModel.MessageContractAttribute(IsWrapped=false)]
-    public partial class RegisterLogMessageTypeRequest {
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://gwlogger.psi.ch/")]
+    public partial class MessageType : object, System.ComponentModel.INotifyPropertyChanged {
         
-        [System.ServiceModel.MessageBodyMemberAttribute(Name="RegisterLogMessageType", Namespace="http://gwlogger.psi.ch/", Order=0)]
-        public GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeRequestBody Body;
+        private int idField;
         
-        public RegisterLogMessageTypeRequest() {
+        private string nameField;
+        
+        private string displayMaskField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public int Id {
+            get {
+                return this.idField;
+            }
+            set {
+                this.idField = value;
+                this.RaisePropertyChanged("Id");
+            }
         }
         
-        public RegisterLogMessageTypeRequest(GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeRequestBody Body) {
-            this.Body = Body;
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-    [System.Runtime.Serialization.DataContractAttribute(Namespace="http://gwlogger.psi.ch/")]
-    public partial class RegisterLogMessageTypeRequestBody {
-        
-        [System.Runtime.Serialization.DataMemberAttribute(EmitDefaultValue=false, Order=0)]
-        public GatewayLogic.GWLoggerSoap.MessageType[] types;
-        
-        public RegisterLogMessageTypeRequestBody() {
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public string Name {
+            get {
+                return this.nameField;
+            }
+            set {
+                this.nameField = value;
+                this.RaisePropertyChanged("Name");
+            }
         }
         
-        public RegisterLogMessageTypeRequestBody(GatewayLogic.GWLoggerSoap.MessageType[] types) {
-            this.types = types;
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-    [System.ServiceModel.MessageContractAttribute(IsWrapped=false)]
-    public partial class RegisterLogMessageTypeResponse {
-        
-        [System.ServiceModel.MessageBodyMemberAttribute(Name="RegisterLogMessageTypeResponse", Namespace="http://gwlogger.psi.ch/", Order=0)]
-        public GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeResponseBody Body;
-        
-        public RegisterLogMessageTypeResponse() {
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=2)]
+        public string DisplayMask {
+            get {
+                return this.displayMaskField;
+            }
+            set {
+                this.displayMaskField = value;
+                this.RaisePropertyChanged("DisplayMask");
+            }
         }
         
-        public RegisterLogMessageTypeResponse(GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeResponseBody Body) {
-            this.Body = Body;
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-    [System.Runtime.Serialization.DataContractAttribute()]
-    public partial class RegisterLogMessageTypeResponseBody {
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
         
-        public RegisterLogMessageTypeResponseBody() {
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-    [System.ServiceModel.MessageContractAttribute(IsWrapped=false)]
-    public partial class RegisterLogMessageDetailTypeRequest {
-        
-        [System.ServiceModel.MessageBodyMemberAttribute(Name="RegisterLogMessageDetailType", Namespace="http://gwlogger.psi.ch/", Order=0)]
-        public GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeRequestBody Body;
-        
-        public RegisterLogMessageDetailTypeRequest() {
-        }
-        
-        public RegisterLogMessageDetailTypeRequest(GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeRequestBody Body) {
-            this.Body = Body;
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
         }
     }
     
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.2612.0")]
+    [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-    [System.Runtime.Serialization.DataContractAttribute(Namespace="http://gwlogger.psi.ch/")]
-    public partial class RegisterLogMessageDetailTypeRequestBody {
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://gwlogger.psi.ch/")]
+    public partial class LogEntryDetail : object, System.ComponentModel.INotifyPropertyChanged {
         
-        [System.Runtime.Serialization.DataMemberAttribute(EmitDefaultValue=false, Order=0)]
-        public GatewayLogic.GWLoggerSoap.IdValue[] types;
+        private int typeIdField;
         
-        public RegisterLogMessageDetailTypeRequestBody() {
+        private string valueField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public int TypeId {
+            get {
+                return this.typeIdField;
+            }
+            set {
+                this.typeIdField = value;
+                this.RaisePropertyChanged("TypeId");
+            }
         }
         
-        public RegisterLogMessageDetailTypeRequestBody(GatewayLogic.GWLoggerSoap.IdValue[] types) {
-            this.types = types;
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public string Value {
+            get {
+                return this.valueField;
+            }
+            set {
+                this.valueField = value;
+                this.RaisePropertyChanged("Value");
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
         }
     }
     
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.2612.0")]
+    [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-    [System.ServiceModel.MessageContractAttribute(IsWrapped=false)]
-    public partial class RegisterLogMessageDetailTypeResponse {
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://gwlogger.psi.ch/")]
+    public partial class LogEntry : object, System.ComponentModel.INotifyPropertyChanged {
         
-        [System.ServiceModel.MessageBodyMemberAttribute(Name="RegisterLogMessageDetailTypeResponse", Namespace="http://gwlogger.psi.ch/", Order=0)]
-        public GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeResponseBody Body;
+        private string gatewayField;
         
-        public RegisterLogMessageDetailTypeResponse() {
+        private string remoteIpPointField;
+        
+        private int messageTypeField;
+        
+        private LogEntryDetail[] detailsField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public string Gateway {
+            get {
+                return this.gatewayField;
+            }
+            set {
+                this.gatewayField = value;
+                this.RaisePropertyChanged("Gateway");
+            }
         }
         
-        public RegisterLogMessageDetailTypeResponse(GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeResponseBody Body) {
-            this.Body = Body;
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public string RemoteIpPoint {
+            get {
+                return this.remoteIpPointField;
+            }
+            set {
+                this.remoteIpPointField = value;
+                this.RaisePropertyChanged("RemoteIpPoint");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=2)]
+        public int MessageType {
+            get {
+                return this.messageTypeField;
+            }
+            set {
+                this.messageTypeField = value;
+                this.RaisePropertyChanged("MessageType");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlArrayAttribute(Order=3)]
+        public LogEntryDetail[] Details {
+            get {
+                return this.detailsField;
+            }
+            set {
+                this.detailsField = value;
+                this.RaisePropertyChanged("Details");
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
         }
     }
     
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.2612.0")]
+    [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-    [System.Runtime.Serialization.DataContractAttribute()]
-    public partial class RegisterLogMessageDetailTypeResponseBody {
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://gwlogger.psi.ch/")]
+    public partial class IdValue : object, System.ComponentModel.INotifyPropertyChanged {
         
-        public RegisterLogMessageDetailTypeResponseBody() {
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-    [System.ServiceModel.MessageContractAttribute(IsWrapped=false)]
-    public partial class LogEntryRequest {
+        private int idField;
         
-        [System.ServiceModel.MessageBodyMemberAttribute(Name="LogEntry", Namespace="http://gwlogger.psi.ch/", Order=0)]
-        public GatewayLogic.GWLoggerSoap.LogEntryRequestBody Body;
+        private string valueField;
         
-        public LogEntryRequest() {
-        }
-        
-        public LogEntryRequest(GatewayLogic.GWLoggerSoap.LogEntryRequestBody Body) {
-            this.Body = Body;
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-    [System.Runtime.Serialization.DataContractAttribute(Namespace="http://gwlogger.psi.ch/")]
-    public partial class LogEntryRequestBody {
-        
-        [System.Runtime.Serialization.DataMemberAttribute(EmitDefaultValue=false, Order=0)]
-        public string gateway;
-        
-        [System.Runtime.Serialization.DataMemberAttribute(EmitDefaultValue=false, Order=1)]
-        public string remoteIpPoint;
-        
-        [System.Runtime.Serialization.DataMemberAttribute(Order=2)]
-        public int messageType;
-        
-        [System.Runtime.Serialization.DataMemberAttribute(EmitDefaultValue=false, Order=3)]
-        public GatewayLogic.GWLoggerSoap.LogEntryDetail[] details;
-        
-        public LogEntryRequestBody() {
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public int Id {
+            get {
+                return this.idField;
+            }
+            set {
+                this.idField = value;
+                this.RaisePropertyChanged("Id");
+            }
         }
         
-        public LogEntryRequestBody(string gateway, string remoteIpPoint, int messageType, GatewayLogic.GWLoggerSoap.LogEntryDetail[] details) {
-            this.gateway = gateway;
-            this.remoteIpPoint = remoteIpPoint;
-            this.messageType = messageType;
-            this.details = details;
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-    [System.ServiceModel.MessageContractAttribute(IsWrapped=false)]
-    public partial class LogEntryResponse {
-        
-        [System.ServiceModel.MessageBodyMemberAttribute(Name="LogEntryResponse", Namespace="http://gwlogger.psi.ch/", Order=0)]
-        public GatewayLogic.GWLoggerSoap.LogEntryResponseBody Body;
-        
-        public LogEntryResponse() {
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public string Value {
+            get {
+                return this.valueField;
+            }
+            set {
+                this.valueField = value;
+                this.RaisePropertyChanged("Value");
+            }
         }
         
-        public LogEntryResponse(GatewayLogic.GWLoggerSoap.LogEntryResponseBody Body) {
-            this.Body = Body;
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-    [System.Runtime.Serialization.DataContractAttribute()]
-    public partial class LogEntryResponseBody {
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
         
-        public LogEntryResponseBody() {
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
         }
     }
     
@@ -457,82 +297,36 @@ namespace GatewayLogic.GWLoggerSoap {
                 base(binding, remoteAddress) {
         }
         
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeResponse GatewayLogic.GWLoggerSoap.DataAccessSoap.RegisterLogMessageType(GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeRequest request) {
-            return base.Channel.RegisterLogMessageType(request);
-        }
-        
         public void RegisterLogMessageType(GatewayLogic.GWLoggerSoap.MessageType[] types) {
-            GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeRequest inValue = new GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeRequest();
-            inValue.Body = new GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeRequestBody();
-            inValue.Body.types = types;
-            GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeResponse retVal = ((GatewayLogic.GWLoggerSoap.DataAccessSoap)(this)).RegisterLogMessageType(inValue);
+            base.Channel.RegisterLogMessageType(types);
         }
         
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        System.Threading.Tasks.Task<GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeResponse> GatewayLogic.GWLoggerSoap.DataAccessSoap.RegisterLogMessageTypeAsync(GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeRequest request) {
-            return base.Channel.RegisterLogMessageTypeAsync(request);
-        }
-        
-        public System.Threading.Tasks.Task<GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeResponse> RegisterLogMessageTypeAsync(GatewayLogic.GWLoggerSoap.MessageType[] types) {
-            GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeRequest inValue = new GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeRequest();
-            inValue.Body = new GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeRequestBody();
-            inValue.Body.types = types;
-            return ((GatewayLogic.GWLoggerSoap.DataAccessSoap)(this)).RegisterLogMessageTypeAsync(inValue);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeResponse GatewayLogic.GWLoggerSoap.DataAccessSoap.RegisterLogMessageDetailType(GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeRequest request) {
-            return base.Channel.RegisterLogMessageDetailType(request);
+        public System.Threading.Tasks.Task RegisterLogMessageTypeAsync(GatewayLogic.GWLoggerSoap.MessageType[] types) {
+            return base.Channel.RegisterLogMessageTypeAsync(types);
         }
         
         public void RegisterLogMessageDetailType(GatewayLogic.GWLoggerSoap.IdValue[] types) {
-            GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeRequest inValue = new GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeRequest();
-            inValue.Body = new GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeRequestBody();
-            inValue.Body.types = types;
-            GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeResponse retVal = ((GatewayLogic.GWLoggerSoap.DataAccessSoap)(this)).RegisterLogMessageDetailType(inValue);
+            base.Channel.RegisterLogMessageDetailType(types);
         }
         
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        System.Threading.Tasks.Task<GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeResponse> GatewayLogic.GWLoggerSoap.DataAccessSoap.RegisterLogMessageDetailTypeAsync(GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeRequest request) {
-            return base.Channel.RegisterLogMessageDetailTypeAsync(request);
+        public System.Threading.Tasks.Task RegisterLogMessageDetailTypeAsync(GatewayLogic.GWLoggerSoap.IdValue[] types) {
+            return base.Channel.RegisterLogMessageDetailTypeAsync(types);
         }
         
-        public System.Threading.Tasks.Task<GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeResponse> RegisterLogMessageDetailTypeAsync(GatewayLogic.GWLoggerSoap.IdValue[] types) {
-            GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeRequest inValue = new GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeRequest();
-            inValue.Body = new GatewayLogic.GWLoggerSoap.RegisterLogMessageDetailTypeRequestBody();
-            inValue.Body.types = types;
-            return ((GatewayLogic.GWLoggerSoap.DataAccessSoap)(this)).RegisterLogMessageDetailTypeAsync(inValue);
+        public void LogEntries(GatewayLogic.GWLoggerSoap.LogEntry[] logEntries1) {
+            base.Channel.LogEntries(logEntries1);
         }
         
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        GatewayLogic.GWLoggerSoap.LogEntryResponse GatewayLogic.GWLoggerSoap.DataAccessSoap.LogEntry(GatewayLogic.GWLoggerSoap.LogEntryRequest request) {
-            return base.Channel.LogEntry(request);
+        public System.Threading.Tasks.Task LogEntriesAsync(GatewayLogic.GWLoggerSoap.LogEntry[] logEntries) {
+            return base.Channel.LogEntriesAsync(logEntries);
         }
         
         public void LogEntry(string gateway, string remoteIpPoint, int messageType, GatewayLogic.GWLoggerSoap.LogEntryDetail[] details) {
-            GatewayLogic.GWLoggerSoap.LogEntryRequest inValue = new GatewayLogic.GWLoggerSoap.LogEntryRequest();
-            inValue.Body = new GatewayLogic.GWLoggerSoap.LogEntryRequestBody();
-            inValue.Body.gateway = gateway;
-            inValue.Body.remoteIpPoint = remoteIpPoint;
-            inValue.Body.messageType = messageType;
-            inValue.Body.details = details;
-            GatewayLogic.GWLoggerSoap.LogEntryResponse retVal = ((GatewayLogic.GWLoggerSoap.DataAccessSoap)(this)).LogEntry(inValue);
+            base.Channel.LogEntry(gateway, remoteIpPoint, messageType, details);
         }
         
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        System.Threading.Tasks.Task<GatewayLogic.GWLoggerSoap.LogEntryResponse> GatewayLogic.GWLoggerSoap.DataAccessSoap.LogEntryAsync(GatewayLogic.GWLoggerSoap.LogEntryRequest request) {
-            return base.Channel.LogEntryAsync(request);
-        }
-        
-        public System.Threading.Tasks.Task<GatewayLogic.GWLoggerSoap.LogEntryResponse> LogEntryAsync(string gateway, string remoteIpPoint, int messageType, GatewayLogic.GWLoggerSoap.LogEntryDetail[] details) {
-            GatewayLogic.GWLoggerSoap.LogEntryRequest inValue = new GatewayLogic.GWLoggerSoap.LogEntryRequest();
-            inValue.Body = new GatewayLogic.GWLoggerSoap.LogEntryRequestBody();
-            inValue.Body.gateway = gateway;
-            inValue.Body.remoteIpPoint = remoteIpPoint;
-            inValue.Body.messageType = messageType;
-            inValue.Body.details = details;
-            return ((GatewayLogic.GWLoggerSoap.DataAccessSoap)(this)).LogEntryAsync(inValue);
+        public System.Threading.Tasks.Task LogEntryAsync(string gateway, string remoteIpPoint, int messageType, GatewayLogic.GWLoggerSoap.LogEntryDetail[] details) {
+            return base.Channel.LogEntryAsync(gateway, remoteIpPoint, messageType, details);
         }
     }
 }

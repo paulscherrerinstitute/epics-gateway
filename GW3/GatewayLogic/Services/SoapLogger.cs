@@ -18,7 +18,10 @@ namespace GatewayLogic.Services
 
         BufferBlock<LogMessage> buffer = new BufferBlock<LogMessage>();
         private Gateway gateway;
-        private Thread bufferFlusher;
+        private Thread[] bufferFlusher = new Thread[5];
+        private Thread performanceDisplay;
+        long nbSaved = 0;
+        long nbTotal = 0;
 
         static SoapLogger()
         {
@@ -33,7 +36,7 @@ namespace GatewayLogic.Services
 
             soapLogger.RegisterLogMessageType(Enum.GetValues(typeof(LogMessageType))
                 .AsQueryable()
-                .OfType<LogMessageType>()                
+                .OfType<LogMessageType>()
                 .Select(row => new MessageType
                 {
                     Id = (int)row,
@@ -63,8 +66,32 @@ namespace GatewayLogic.Services
         {
             gateway.MessageLogger.MessageHandler += MessageLogger_MessageHandler;
             this.gateway = gateway;
-            bufferFlusher = new Thread(FlushLogAsync);
-            bufferFlusher.Start();
+
+            for (var i = 0; i < bufferFlusher.Length; i++)
+            {
+                bufferFlusher[i] = new Thread(FlushLogAsync);
+                bufferFlusher[i].Start();
+            }
+
+            performanceDisplay = new Thread(() =>
+              {
+                  while (true)
+                  {
+                      Thread.Sleep(1000);
+                      if (nbTotal > 0)
+                      {
+                          Console.Write("Messages saved: " + (nbSaved * 100L / nbTotal) + " %              \r");
+                          nbTotal = 0;
+                          nbSaved = 0;
+                      }
+                      else
+                      {
+                          Console.Write("Messages saved: 100 %              \r");
+                      }
+                  }
+              });
+            performanceDisplay.IsBackground = true;
+            performanceDisplay.Start();
         }
 
         private void MessageLogger_MessageHandler(string remoteIpPoint,
@@ -79,7 +106,10 @@ namespace GatewayLogic.Services
             fullDetails.Add(new LogMessageDetail { TypeId = MessageDetail.SourceFilePath, Value = sourceFilePath });
             fullDetails.Add(new LogMessageDetail { TypeId = MessageDetail.SourceLineNumber, Value = sourceLineNumber.ToString() });
 
-            if (buffer.Count < 100)
+            nbTotal++;
+            if (buffer.Count < 1000)
+            {
+                nbSaved++;
                 buffer.Post(new LogMessage
                 {
                     Details = fullDetails,
@@ -87,39 +117,95 @@ namespace GatewayLogic.Services
                     MessageType = (int)messageType,
                     RemoteIpPoint = remoteIpPoint
                 });
+            }
         }
 
         private void FlushLogAsync()
         {
+            DataAccessSoapClient logger;
+            try
+            {
+                logger = new GWLoggerSoap.DataAccessSoapClient();
+            }
+            catch
+            {
+                logger = new GWLoggerSoap.DataAccessSoapClient(new System.ServiceModel.BasicHttpBinding(), new EndpointAddress("http://epics-gw-logger.psi.ch/DataAccess.asmx"));
+            }
+
+            LogMessage message = null;
+
             while (!shouldStop)
             {
-                LogMessage message;
-                try
+                /*// Send bunch
+                if (buffer.Count > 100)
                 {
-                    message = buffer.Receive(cancelOperation.Token);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-                catch
-                {
-                    throw;
-                }
-
-                try
-                {
-                    soapLogger.LogEntry(message.Gateway, message.RemoteIpPoint,
-                        message.MessageType, message.Details.Select(row => new LogEntryDetail
+                    var toSend = new List<LogEntry>();
+                    while (toSend.Count < 30)
+                    {
+                        try
                         {
-                            TypeId = (int)row.TypeId,
-                            Value = row.Value
-                        }).ToArray());
+                            message = buffer.Receive(cancelOperation.Token);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            break;
+                        }
+                        catch
+                        {
+                            throw;
+                        }
+
+                        toSend.Add(new LogEntry
+                        {
+                            Gateway = message.Gateway,
+                            Details = message.Details.Select(row => new LogEntryDetail
+                            {
+                                TypeId = (int)row.TypeId,
+                                Value = row.Value
+                            }).ToArray(),
+                            MessageType = message.MessageType,
+                            RemoteIpPoint = message.RemoteIpPoint
+                        });
+                    }
+
+                    try
+                    {
+                        logger.LogEntries(toSend.ToArray());
+                    }
+                    catch
+                    {
+                    }
                 }
-                catch
-                {
+                else
+                {*/
+
+                    try
+                    {
+                        message = buffer.Receive(cancelOperation.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                    catch
+                    {
+                        throw;
+                    }
+
+                    try
+                    {
+                        logger.LogEntry(message.Gateway, message.RemoteIpPoint,
+                            message.MessageType, message.Details.Select(row => new LogEntryDetail
+                            {
+                                TypeId = (int)row.TypeId,
+                                Value = row.Value
+                            }).ToArray());
+                    }
+                    catch(Exception ex)
+                    {
+                    }
                 }
-            }
+            //}
         }
 
         public void Dispose()

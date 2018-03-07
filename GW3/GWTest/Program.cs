@@ -16,7 +16,7 @@ namespace GWTest
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Some change");
+            //Console.WriteLine("Some change");
             TestDiagnosticServer();
             //Test();
             //S1();
