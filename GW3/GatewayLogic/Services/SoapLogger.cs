@@ -33,11 +33,12 @@ namespace GatewayLogic.Services
 
             soapLogger.RegisterLogMessageType(Enum.GetValues(typeof(LogMessageType))
                 .AsQueryable()
-                .OfType<LogMessageType>()
-                .Select(row => new IdValue
+                .OfType<LogMessageType>()                
+                .Select(row => new MessageType
                 {
                     Id = (int)row,
-                    Value = row.ToString()
+                    Name = row.ToString(),
+                    DisplayMask = ((MessageDisplayAttribute)(typeof(LogMessageType).GetMember(row.ToString())[0].GetCustomAttributes(typeof(MessageDisplayAttribute), false)).FirstOrDefault()).LogDisplay
                 }).ToArray());
 
             soapLogger.RegisterLogMessageDetailType(Enum.GetValues(typeof(MessageDetail))

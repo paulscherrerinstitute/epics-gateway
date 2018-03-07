@@ -31,13 +31,13 @@ namespace GWLogger.Backend.Controllers
             }
         }
 
-        public static void RegisterLogMessageType(List<DTOs.IdValue> types)
+        public static void RegisterLogMessageType(List<DTOs.MessageType> types)
         {
             using (var ctx = new Model.LoggerContext())
             {
                 var dbTypes = ctx.LogMessageTypes.ToList();
                 var toAdd = types.Where(row => !dbTypes.Any(r2 => r2.MessageTypeId == row.Id));
-                ctx.LogMessageTypes.AddRange(toAdd.Select(row => new Model.LogMessageType { MessageTypeId = row.Id, Name = row.Value }));
+                ctx.LogMessageTypes.AddRange(toAdd.Select(row => new Model.LogMessageType { MessageTypeId = row.Id, Name = row.Name, DisplayMask = row.DisplayMask }));
                 ctx.SaveChanges();
             }
         }

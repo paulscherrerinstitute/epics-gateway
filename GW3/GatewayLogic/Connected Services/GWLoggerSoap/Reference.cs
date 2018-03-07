@@ -15,6 +15,82 @@ namespace GatewayLogic.GWLoggerSoap {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="MessageType", Namespace="http://gwlogger.psi.ch/")]
+    [System.SerializableAttribute()]
+    public partial class MessageType : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        private int IdField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string NameField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string DisplayMaskField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
+        public int Id {
+            get {
+                return this.IdField;
+            }
+            set {
+                if ((this.IdField.Equals(value) != true)) {
+                    this.IdField = value;
+                    this.RaisePropertyChanged("Id");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute(EmitDefaultValue=false)]
+        public string Name {
+            get {
+                return this.NameField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.NameField, value) != true)) {
+                    this.NameField = value;
+                    this.RaisePropertyChanged("Name");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute(EmitDefaultValue=false, Order=2)]
+        public string DisplayMask {
+            get {
+                return this.DisplayMaskField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.DisplayMaskField, value) != true)) {
+                    this.DisplayMaskField = value;
+                    this.RaisePropertyChanged("DisplayMask");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="IdValue", Namespace="http://gwlogger.psi.ch/")]
     [System.SerializableAttribute()]
     public partial class IdValue : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
@@ -183,12 +259,12 @@ namespace GatewayLogic.GWLoggerSoap {
     public partial class RegisterLogMessageTypeRequestBody {
         
         [System.Runtime.Serialization.DataMemberAttribute(EmitDefaultValue=false, Order=0)]
-        public GatewayLogic.GWLoggerSoap.IdValue[] types;
+        public GatewayLogic.GWLoggerSoap.MessageType[] types;
         
         public RegisterLogMessageTypeRequestBody() {
         }
         
-        public RegisterLogMessageTypeRequestBody(GatewayLogic.GWLoggerSoap.IdValue[] types) {
+        public RegisterLogMessageTypeRequestBody(GatewayLogic.GWLoggerSoap.MessageType[] types) {
             this.types = types;
         }
     }
@@ -386,7 +462,7 @@ namespace GatewayLogic.GWLoggerSoap {
             return base.Channel.RegisterLogMessageType(request);
         }
         
-        public void RegisterLogMessageType(GatewayLogic.GWLoggerSoap.IdValue[] types) {
+        public void RegisterLogMessageType(GatewayLogic.GWLoggerSoap.MessageType[] types) {
             GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeRequest inValue = new GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeRequest();
             inValue.Body = new GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeRequestBody();
             inValue.Body.types = types;
@@ -398,7 +474,7 @@ namespace GatewayLogic.GWLoggerSoap {
             return base.Channel.RegisterLogMessageTypeAsync(request);
         }
         
-        public System.Threading.Tasks.Task<GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeResponse> RegisterLogMessageTypeAsync(GatewayLogic.GWLoggerSoap.IdValue[] types) {
+        public System.Threading.Tasks.Task<GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeResponse> RegisterLogMessageTypeAsync(GatewayLogic.GWLoggerSoap.MessageType[] types) {
             GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeRequest inValue = new GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeRequest();
             inValue.Body = new GatewayLogic.GWLoggerSoap.RegisterLogMessageTypeRequestBody();
             inValue.Body.types = types;

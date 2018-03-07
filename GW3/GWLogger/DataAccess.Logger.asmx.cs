@@ -9,7 +9,7 @@ namespace GWLogger
     public partial class DataAccess : System.Web.Services.WebService
     {
         [WebMethod]
-        public void RegisterLogMessageType(List<Backend.DTOs.IdValue> types)
+        public void RegisterLogMessageType(List<Backend.DTOs.MessageType> types)
         {
             Backend.Controllers.LogController.RegisterLogMessageType(types);
         }
