@@ -23,7 +23,7 @@ namespace GatewayLogic.Services
     {
         public static Dictionary<LogMessageType, string> Convertion { get; private set; }
 
-        private TextLogger TextLogger;
+        public TextLogger TextLogger { get; private set; }
 
         public LogFileWriter LogFileWriter { get; }
 

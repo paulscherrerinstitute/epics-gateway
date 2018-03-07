@@ -9,7 +9,7 @@ namespace GatewayLogic.Services
     class MessageLogger : IDisposable
     {
         private SoapLogger soapLogger;
-        private LogMessageConverter MessageConverter;
+        public LogMessageConverter MessageConverter { get; private set; }
 
         public MessageLogger()
         {
