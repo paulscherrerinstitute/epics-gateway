@@ -17,7 +17,7 @@ namespace GwUnitTests
     public class CompleteTest
     {
         [TestMethod]
-        [Timeout(1000)]
+        [Timeout(5000)]
         public void CheckMonitor()
         {
             using (var gateway = new Gateway())
