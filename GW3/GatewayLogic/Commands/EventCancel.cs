@@ -1,4 +1,5 @@
 ﻿using GatewayLogic.Connections;
+using GatewayLogic.Services;
 
 namespace GatewayLogic.Commands
 {
@@ -6,12 +7,14 @@ namespace GatewayLogic.Commands
     {
         public override void DoRequest(GatewayConnection connection, DataPacket packet)
         {
-            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Request cancel channel monitor " + packet.Parameter2);
+            connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EventCancelRequest, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.GatewayMonitorId, Value = packet.Parameter2.ToString() } });
+            //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Request cancel channel monitor " + packet.Parameter2);
             var monitor = connection.Gateway.MonitorInformation.GetByClientId(packet.Sender, packet.Parameter2);
 
             if (monitor != null && monitor.ChannelInformation != null)
             {
-                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Cancel channel monitor on " + monitor.ChannelInformation.ChannelName);
+                connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EventCancel, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.GatewayMonitorId, Value = packet.Parameter2.ToString() },new LogMessageDetail {TypeId=MessageDetail.ChannelName, Value= monitor.ChannelInformation.ChannelName } });
+                //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Cancel channel monitor on " + monitor.ChannelInformation.ChannelName);
 
 
                 var newPacket = DataPacket.Create(0);

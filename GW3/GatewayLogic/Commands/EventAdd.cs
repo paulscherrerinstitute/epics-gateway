@@ -115,7 +115,7 @@ namespace GatewayLogic.Commands
                 }
                 monitor.HasReceivedFirstResult = true;
                 clients = monitor.GetClients();
-                connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EventAddResponse, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = monitor.ChannelInformation.ChannelName }, new LogMessageDetail { TypeId = MessageDetail.ClientCount, Value = clients.Count().ToString() } });
+                connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EventAddResponse, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = monitor.ChannelInformation.ChannelName }, new LogMessageDetail { TypeId = MessageDetail.ClientIoId, Value = clients.Count().ToString() } });
                 //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event add response on " + monitor.ChannelInformation.ChannelName + " clients " + clients.Count());
             }
 

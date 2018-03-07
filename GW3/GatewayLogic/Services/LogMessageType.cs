@@ -71,6 +71,30 @@ namespace GatewayLogic.Services
         [MessageDisplay("Event response for client which disappeared on {channelName}.", LogLevel.Detail)]
         EventAddResponseClientDisappeared,
         [MessageDisplay("Sending event response on {channelName} client {cid}.", LogLevel.Detail)]
-        EventAddResponseSending
+        EventAddResponseSending,
+        [MessageDisplay("Request cancel channel monitor with Monitor Id {gatewayMonitorId}.", LogLevel.Detail)]
+        EventCancelRequest,
+        [MessageDisplay("Cancel channel monitor on {channelName} with Monitor Id {gatewayMonitorId}", LogLevel.Detail)]
+        EventCancel,
+        [MessageDisplay("Read notify on wrong channel. {gwid}", LogLevel.Error)]
+        ReadNotifyRequestWrongChannel,
+        [MessageDisplay("Read notify on {channelName} SID {sid}.", LogLevel.Detail)]
+        ReadNotifyRequest,
+        [MessageDisplay("Read back for monitor => monitor client not found (id: {cid}).", LogLevel.Error)]
+        ReadNotifyResponseMonitorClientNotFound,
+        [MessageDisplay("Read notify response for event add on {channelName}.", LogLevel.Detail)]
+        ReadNotifyResponseMonitor,
+        [MessageDisplay("Read notify response on {channelName}.", LogLevel.Detail)]
+        ReadNotifyResponse,
+        [MessageDisplay("Search for: {channelName}, from client {endpoint}.", LogLevel.Detail)]
+        SearchRequest,
+        [MessageDisplay("Search cached for: {channelName}, from client {endpoint}.", LogLevel.Detail)]
+        SearchRequestAnswerFromCache,
+        [MessageDisplay("Search is too new, we drop it for: {channelName}, from client {endpoint}.", LogLevel.Detail)]        
+        SearchRequestTooNew,
+        [MessageDisplay("Search answer for: {channelName}, from server {endpoint}.", LogLevel.Detail)]
+        SearchAnswer,
+        [MessageDisplay("Search answer for: {channelName}, sent to {endpoint}.", LogLevel.Detail)]
+        SearchAnswerSent
     }
 }

@@ -34,7 +34,8 @@ namespace GatewayLogic.Commands
 
             connection.Gateway.DiagnosticServer.NbSearches++;
 
-            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search for: " + channelName + ", from client (" + packet.Sender.ToString() + ")");
+            connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.SearchRequest, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
+            //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search for: " + channelName + ", from client (" + packet.Sender.ToString() + ")");
             connection.Gateway.Search(channelName, packet.Sender.ToString());
 
             var record = connection.Gateway.SearchInformation.Get(channelName);
@@ -44,7 +45,8 @@ namespace GatewayLogic.Commands
             // Connection known, we answer we knows it
             if (record.Server != null)
             {
-                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search cached for: " + channelName + ", from client (" + packet.Sender.ToString() + ")");
+                connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.SearchRequestAnswerFromCache, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
+                //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search cached for: " + channelName + ", from client (" + packet.Sender.ToString() + ")");
                 newPacket = (DataPacket)packet.Clone();
 
                 if (connection == connection.Gateway.udpSideA)
@@ -62,11 +64,13 @@ namespace GatewayLogic.Commands
             }
             if ((DateTime.UtcNow - record.LastSearch).TotalMilliseconds < connection.Gateway.Configuration.SearchPreventionTimeout)
             {
-                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search is too new, we drop it, from client (" + packet.Sender.ToString() + ")");
+                connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.SearchRequestTooNew, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
+                //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search is too new, we drop it, from client (" + packet.Sender.ToString() + ")");
                 return;
             }
 
-            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search sent for: " + channelName + ", from client (" + packet.Sender.ToString() + ")");
+            connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.SearchRequestTooNew, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
+            //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search sent for: " + channelName + ", from client (" + packet.Sender.ToString() + ")");
             record.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter1, When = DateTime.UtcNow });
             // ReSharper disable PossibleInvalidOperationException
             uint gwcid = record.GatewayId;
@@ -109,7 +113,8 @@ namespace GatewayLogic.Commands
             }
 
             var version = packet.GetUInt16(0 + (int)packet.HeaderSize);
-            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search answer for " + search.Channel + " from " + packet.Sender + " version " + version);
+            connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.SearchAnswer, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = search.Channel } });
+            //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search answer for " + search.Channel + " from " + packet.Sender + " version " + version);
             //if(packet.Parameter2 == 0xffffffff)
             search.Server = new IPEndPoint(packet.Sender.Address, packet.DataType);
             search.Version = version;
@@ -118,7 +123,8 @@ namespace GatewayLogic.Commands
 
             foreach (var c in search.GetClients())
             {
-                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search answer " + search.Channel + " sent to " + c.Client.ToString());
+                connection.Gateway.MessageLogger.Write(c.Client.ToString(), Services.LogMessageType.SearchAnswerSent, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = search.Channel } });
+                //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search answer " + search.Channel + " sent to " + c.Client.ToString());
                 var newPacket = (DataPacket)packet.Clone();
 
                 if (connection == connection.Gateway.udpSideA)
