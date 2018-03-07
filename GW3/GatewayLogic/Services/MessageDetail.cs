@@ -19,6 +19,9 @@ namespace GatewayLogic.Services
         CommandId,
         CID,
         SID,
-        GWID
+        GWID,
+        DataCount,
+        GatewayMonitorId,
+        ClientCount
     }
 }
