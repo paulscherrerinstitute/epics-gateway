@@ -1,4 +1,5 @@
 ﻿using GatewayLogic.Connections;
+using GatewayLogic.Services;
 
 namespace GatewayLogic.Commands
 {
@@ -11,8 +12,9 @@ namespace GatewayLogic.Commands
         public override void DoResponse(GatewayConnection connection, DataPacket packet)
         {
             var channel = connection.Gateway.ChannelInformation.Get(packet.Parameter1);
-            if(channel != null)
-                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Channel disconnect on " + channel.ChannelName);
+            if (channel != null)
+                connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.ChannelDisconnect, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channel.ChannelName } });
+            //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Channel disconnect on " + channel.ChannelName);
             connection.Gateway.ChannelInformation.ServerDrop(packet.Parameter1);
         }
     }

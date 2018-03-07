@@ -139,7 +139,7 @@ namespace GatewayLogic.Connections
             gateway.DropedClient += new DropClientDelegate(GatewayDropClient);
             gateway.UpdateSearch += SendSearch;
 
-            gateway.Log.Handler += GatewayLogEntry;
+            //gateway.Log.Handler += GatewayLogEntry;
         }
 
         void ReceiveTcpData(System.IAsyncResult ar)
@@ -172,7 +172,7 @@ namespace GatewayLogic.Connections
                 Dispose();
                 return;
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
                 Dispose();
                 return;
@@ -202,7 +202,7 @@ namespace GatewayLogic.Connections
             {
                 Dispose();
             }
-            catch (Exception ex)
+            catch
             {
                 Dispose();
             }
@@ -438,7 +438,7 @@ namespace GatewayLogic.Connections
             Gateway.DropedClient -= new DropClientDelegate(GatewayDropClient);
             Gateway.UpdateSearch -= SendSearch;
 
-            Gateway.Log.Handler -= GatewayLogEntry;
+            //Gateway.Log.Handler -= GatewayLogEntry;
         }
 
         public override void Send(DataPacket packet)

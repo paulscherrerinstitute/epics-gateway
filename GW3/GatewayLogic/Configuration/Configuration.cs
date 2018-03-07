@@ -119,7 +119,8 @@ namespace GatewayLogic.Configuration
             {
                 return new IPEndPoint(IPAddress.Parse(parts[0].Trim()), int.Parse(parts[1].Trim()));
             }
-            catch (Exception ex)
+            //catch (Exception ex)
+            catch
             {
                 try
                 {

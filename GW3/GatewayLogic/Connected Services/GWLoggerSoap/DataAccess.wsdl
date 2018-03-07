@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://gwlogger.psi.ch/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://gwlogger.psi.ch/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://gwlogger.psi.ch/">
+      <s:element name="RegisterLogMessageType">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="types" type="tns:ArrayOfIdValue" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfIdValue">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="IdValue" nillable="true" type="tns:IdValue" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="IdValue">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Value" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="RegisterLogMessageTypeResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="RegisterLogMessageDetailType">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="types" type="tns:ArrayOfIdValue" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RegisterLogMessageDetailTypeResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="LogEntry">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gateway" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="remoteIpPoint" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="messageType" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="details" type="tns:ArrayOfLogEntryDetail" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfLogEntryDetail">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="LogEntryDetail" nillable="true" type="tns:LogEntryDetail" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="LogEntryDetail">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="TypeId" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Value" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="LogEntryResponse">
+        <s:complexType />
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="RegisterLogMessageTypeSoapIn">
+    <wsdl:part name="parameters" element="tns:RegisterLogMessageType" />
+  </wsdl:message>
+  <wsdl:message name="RegisterLogMessageTypeSoapOut">
+    <wsdl:part name="parameters" element="tns:RegisterLogMessageTypeResponse" />
+  </wsdl:message>
+  <wsdl:message name="RegisterLogMessageDetailTypeSoapIn">
+    <wsdl:part name="parameters" element="tns:RegisterLogMessageDetailType" />
+  </wsdl:message>
+  <wsdl:message name="RegisterLogMessageDetailTypeSoapOut">
+    <wsdl:part name="parameters" element="tns:RegisterLogMessageDetailTypeResponse" />
+  </wsdl:message>
+  <wsdl:message name="LogEntrySoapIn">
+    <wsdl:part name="parameters" element="tns:LogEntry" />
+  </wsdl:message>
+  <wsdl:message name="LogEntrySoapOut">
+    <wsdl:part name="parameters" element="tns:LogEntryResponse" />
+  </wsdl:message>
+  <wsdl:portType name="DataAccessSoap">
+    <wsdl:operation name="RegisterLogMessageType">
+      <wsdl:input message="tns:RegisterLogMessageTypeSoapIn" />
+      <wsdl:output message="tns:RegisterLogMessageTypeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RegisterLogMessageDetailType">
+      <wsdl:input message="tns:RegisterLogMessageDetailTypeSoapIn" />
+      <wsdl:output message="tns:RegisterLogMessageDetailTypeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="LogEntry">
+      <wsdl:input message="tns:LogEntrySoapIn" />
+      <wsdl:output message="tns:LogEntrySoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="DataAccessSoap" type="tns:DataAccessSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="RegisterLogMessageType">
+      <soap:operation soapAction="http://gwlogger.psi.ch/RegisterLogMessageType" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RegisterLogMessageDetailType">
+      <soap:operation soapAction="http://gwlogger.psi.ch/RegisterLogMessageDetailType" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="LogEntry">
+      <soap:operation soapAction="http://gwlogger.psi.ch/LogEntry" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="DataAccessSoap12" type="tns:DataAccessSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="RegisterLogMessageType">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/RegisterLogMessageType" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RegisterLogMessageDetailType">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/RegisterLogMessageDetailType" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="LogEntry">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/LogEntry" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="DataAccess">
+    <wsdl:port name="DataAccessSoap" binding="tns:DataAccessSoap">
+      <soap:address location="http://epics-gw-logger.psi.ch/DataAccess.asmx" />
+    </wsdl:port>
+    <wsdl:port name="DataAccessSoap12" binding="tns:DataAccessSoap12">
+      <soap12:address location="http://epics-gw-logger.psi.ch/DataAccess.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

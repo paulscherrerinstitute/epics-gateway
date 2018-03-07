@@ -20,7 +20,8 @@ namespace GatewayLogic.Connections
         {
             if (endPoint == null)
             {
-                gateway.Log.Write(Services.LogLevel.Error, "Endpoint cannot be null");
+                //gateway.Log.Write(Services.LogLevel.Error, "Endpoint cannot be null");
+                gateway.MessageLogger.Write(null, Services.LogMessageType.EndPointCannotBeNull);
                 return;
             }
             lockDictionary.Wait();

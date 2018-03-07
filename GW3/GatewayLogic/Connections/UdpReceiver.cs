@@ -19,7 +19,6 @@ namespace GatewayLogic.Connections
 
         // Found on http://stackoverflow.com/questions/5199026/c-sharp-async-udp-listener-socketexception
         // Allows to reset the socket in case of malformed UDP packet.
-        public Gateway Gateway { get; set; }
 
         public UdpReceiver(Gateway gateway, IPEndPoint endPoint): base(gateway)
         {
@@ -29,7 +28,6 @@ namespace GatewayLogic.Connections
             receiver.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             receiver.IOControl(SioUdpConnReset, new byte[] { 0, 0, 0, 0 }, null);
             receiver.Bind(endPoint);
-            Gateway = gateway;
 
             if (endPoint == gateway.Configuration.SideAEndPoint)
                 this.Destinations = gateway.Configuration.remoteBEndPoints;
@@ -79,7 +77,7 @@ namespace GatewayLogic.Connections
             {
                 size = receiver.EndReceiveFrom(ar, ref epSender);
             }
-            catch (ObjectDisposedException ex)
+            catch (ObjectDisposedException)
             {
                 // Stop receiving
                 return;
@@ -102,7 +100,7 @@ namespace GatewayLogic.Connections
                 EndPoint tempRemoteEp = sender;
                 receiver.BeginReceiveFrom(buff, 0, buff.Length, SocketFlags.None, ref tempRemoteEp, GotUdpMessage, tempRemoteEp);
             }
-            catch (ObjectDisposedException ex)
+            catch (ObjectDisposedException)
             {
                 // Stop receiving
                 return;

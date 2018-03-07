@@ -23,14 +23,14 @@ namespace GatewayLogic.Services
         string lastLogDate = null;
         string currentLogFilename = null;
 
-        public static LogFileWriter CreateIfNeeded(Gateway gateway)
+        public static LogFileWriter CreateIfNeeded(TextLogger logger)
         {
             if (System.Configuration.ConfigurationManager.AppSettings["fileLogger"]?.ToLower() == "true")
-                return new LogFileWriter(gateway);
+                return new LogFileWriter(logger);
             return null;
         }
 
-        private LogFileWriter(Gateway gateway)
+        private LogFileWriter(TextLogger logger)
         {
             bufferWriter = new StreamWriter(buffer);
 
@@ -38,7 +38,7 @@ namespace GatewayLogic.Services
             bufferWriter.WriteLine(" Start loggin at " + DateTime.UtcNow.ToString("yyyy\\/MM\\/dd HH:mm:ss.fff"));
             bufferWriter.WriteLine("=============================================================================");
 
-            gateway.Log.Handler += this.LogHandler;
+            logger.Handler += this.LogHandler;
 
             flusher = new Thread(FlushLog);
             path = System.Configuration.ConfigurationManager.AppSettings["fileLoggerPath"] ?? "C:\\TEMP\\Gateway.log";

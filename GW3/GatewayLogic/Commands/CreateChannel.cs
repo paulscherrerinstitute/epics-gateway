@@ -31,12 +31,13 @@ namespace GatewayLogic.Commands
 
             if (!connection.Gateway.ChannelInformation.HasChannelInformation(channelName) && !connection.Gateway.SearchInformation.HasChannelServerInformation(channelName))
             {
-
-                connection.Gateway.Log.Write(Services.LogLevel.Error, "Channel is not known: " + channelName);
+                connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.ChannelUnknown, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
+                //connection.Gateway.Log.Write(Services.LogLevel.Error, "Channel is not known: " + channelName);
                 connection.Dispose();
                 return;
             }
-            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel for " + channelName + "  from " + ((TcpClientConnection)connection).RemoteEndPoint + " CID " + packet.Parameter1);
+            connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannel, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName }, new LogMessageDetail { TypeId = MessageDetail.CID, Value = packet.Parameter1.ToString() } });
+            //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel for " + channelName + "  from " + ((TcpClientConnection)connection).RemoteEndPoint + " CID " + packet.Parameter1);
             var locked = true;
             try
             {
@@ -53,7 +54,8 @@ namespace GatewayLogic.Commands
                 {
                     locked = false;
                     locker.Release();
-                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel info is known (" + channelName + " => " + channelInfo.ServerId + ").");
+                    connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannelInfoKnown, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName }, new LogMessageDetail { TypeId = MessageDetail.SID, Value = channelInfo.ServerId.ToString() } });
+                    //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel info is known (" + channelName + " => " + channelInfo.ServerId + ").");
                     DataPacket resPacket = DataPacket.Create(0);
                     resPacket.Command = 22;
                     resPacket.DataType = 0;
@@ -75,7 +77,8 @@ namespace GatewayLogic.Commands
                 }
                 else
                 {
-                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel for " + channelName + " info must be found.");
+                    connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannelInfoRequired, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
+                    //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel for " + channelName + " info must be found.");
                     channelInfo.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter1 });
 
                     // We already have a TcpConnection
@@ -98,7 +101,8 @@ namespace GatewayLogic.Commands
                     else*/
                     if (!channelInfo.ConnectionIsBuilding)
                     {
-                        connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection for " + channelName + " must be made");
+                        connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannelConnectionRequired, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
+                        //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection for " + channelName + " must be made");
                         channelInfo.ConnectionIsBuilding = true;
                         channelInfo.StartBuilding = DateTime.UtcNow;
                         locked = false;
@@ -109,7 +113,8 @@ namespace GatewayLogic.Commands
                             {
                                 connection.Gateway.ServerConnection.CreateConnection(connection.Gateway, searchInfo.Server, (tcpConnection) =>
                                 {
-                                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection for " + channelName + " has been created");
+                                    connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannelConnectionMade, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
+                                    //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection for " + channelName + " has been created");
                                     channelInfo.TcpConnection = tcpConnection;
                                     tcpConnection.Version = searchInfo.Version;
 
@@ -122,7 +127,7 @@ namespace GatewayLogic.Commands
                                     newPacket.Parameter1 = 0;
                                     newPacket.Parameter2 = 0;
                                     channelInfo.TcpConnection.Send(newPacket);
-                                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Sending version to " + tcpConnection.Name);
+                                    //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Sending version to " + tcpConnection.Name);
 
                                     connection.Gateway.GotNewIocChannel(tcpConnection.Name, channelInfo.ChannelName);
                                     tcpConnection.LinkChannel(channelInfo);
@@ -188,11 +193,13 @@ namespace GatewayLogic.Commands
                     locked = false;
                     locker.Release();
                     connection.Dispose();
-                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Answer for unknown channel");
+                    connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannelAnswerForUnknown);
+                    //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Answer for unknown channel");
                     return;
                 }
 
-                connection.Gateway.Log.Write(Services.LogLevel.Detail, "Answer for create channel " + channelInfo?.ChannelName);
+                connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannelAnswer, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelInfo?.ChannelName } });
+                //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Answer for create channel " + channelInfo?.ChannelName);
                 IEnumerable<ClientId> clients;
 
                 /*lock (channelInfo.LockObject)
@@ -208,10 +215,11 @@ namespace GatewayLogic.Commands
 
                 foreach (var client in clients)
                 {
-                    connection.Gateway.Log.Write(Services.LogLevel.Detail, "Sending answer to " + client.Client + " GWID " + channelInfo.GatewayId);
+                    //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Sending answer to " + client.Client + " GWID " + channelInfo.GatewayId);
                     var destConn = connection.Gateway.ClientConnection.Get(client.Client);
                     if (destConn == null)
                         continue;
+                    connection.Gateway.MessageLogger.Write(client.Client.ToString(), Services.LogMessageType.CreateChannelSendingAnswer, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelInfo?.ChannelName }, new LogMessageDetail { TypeId=MessageDetail.GWID, Value= channelInfo.GatewayId.ToString() } });
 
                     Configuration.SecurityAccess access;
                     if (((TcpClientConnection)destConn).Listener == connection.Gateway.tcpSideA)

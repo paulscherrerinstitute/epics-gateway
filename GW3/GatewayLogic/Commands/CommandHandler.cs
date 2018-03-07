@@ -1,4 +1,5 @@
 ﻿using GatewayLogic.Connections;
+using GatewayLogic.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,7 +50,8 @@ namespace GatewayLogic.Commands
                 handlers[command].DoRequest(connection, packet);
             else
             {
-                connection.Gateway.Log.Write(Services.LogLevel.Error, "Command not supported " + command);
+                connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CommandNotSupported, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.CommandId, Value = command.ToString() } });
+                //connection.Gateway.Log.Write(Services.LogLevel.Error, "Command not supported " + command);
                 // Wrong packet handling!
                 if (command > 27)
                     connection.Dispose();
@@ -71,7 +73,8 @@ namespace GatewayLogic.Commands
                 handlers[command].DoResponse(connection, packet);
             else
             {
-                connection.Gateway.Log.Write(Services.LogLevel.Error, "Command not supported " + command);
+                connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CommandNotSupported, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.CommandId, Value = command.ToString() } });
+                //connection.Gateway.Log.Write(Services.LogLevel.Error, "Command not supported " + command);
                 // Wrong packet handling!
                 if (command > 27)
                     connection.Dispose();

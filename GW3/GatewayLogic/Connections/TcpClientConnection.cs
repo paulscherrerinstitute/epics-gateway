@@ -20,12 +20,7 @@ namespace GatewayLogic.Connections
         object disposedLock = new object();
         bool disposed = false;
 
-        NetworkStream netStream;
-        BufferedStream stream;
-        bool isDirty = false;
-        //AutoResetEvent dataSent = new AutoResetEvent(true);
         private Splitter splitter;
-        public bool IsDirty { get { return isDirty; } }
 
         public TcpClientListener Listener { get; }
 
@@ -36,7 +31,8 @@ namespace GatewayLogic.Connections
             splitter = new Splitter();
             this.Socket = socket;
             this.Listener = listener;
-            gateway.Log.Write(LogLevel.Connection, "Start TCP client connection on " + endPoint);
+            gateway.MessageLogger.Write(endPoint.ToString(), LogMessageType.StartTcpClientConnection);
+            //gateway.Log.Write(LogLevel.Connection, "Start TCP client connection on " + endPoint);
         }
 
 
@@ -65,13 +61,14 @@ namespace GatewayLogic.Connections
                 {
                     socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
                 }
-                catch (SocketException ex1)
+                catch (SocketException)
                 {
                     this.Dispose();
                 }
                 catch (Exception ex)
                 {
-                    Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
+                    Gateway.MessageLogger.Write(RemoteEndPoint.ToString(), LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex.ToString() } });
+                    //Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
                     this.Dispose();
                 }
             }
@@ -97,7 +94,7 @@ namespace GatewayLogic.Connections
                     stream.Flush();
                 }*/
             }
-            catch (Exception ex)
+            catch
             {
                 //Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
                 Dispose();
@@ -107,23 +104,6 @@ namespace GatewayLogic.Connections
         internal void LinkChannel(ChannelInformation.ChannelInformationDetails channelInformationDetails)
         {
             throw new NotImplementedException();
-        }
-
-        public void Flush()
-        {
-            lock (stream)
-            {
-                try
-                {
-                    stream.Flush();
-                }
-                catch (Exception ex)
-                {
-                    Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
-                    ThreadPool.QueueUserWorkItem((obj) => { this.Dispose(); });
-                }
-                isDirty = false;
-            }
         }
 
         /// <summary>
@@ -166,7 +146,8 @@ namespace GatewayLogic.Connections
             {
                 /*if (Log.WillDisplay(System.Diagnostics.TraceEventType.Error))
                     Log.TraceEvent(System.Diagnostics.TraceEventType.Error, Chain.ChainId, ex.Message);*/
-                Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
+                Gateway.MessageLogger.Write(RemoteEndPoint.ToString(), LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex.ToString() } });
+                //Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
                 Dispose();
                 return;
             }
@@ -213,7 +194,8 @@ namespace GatewayLogic.Connections
             }
             catch (Exception ex)
             {
-                Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
+                //Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
+                Gateway.MessageLogger.Write(RemoteEndPoint.ToString(), LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex.ToString() } });
                 Dispose();
             }
 
@@ -231,7 +213,8 @@ namespace GatewayLogic.Connections
             }
             catch (Exception ex)
             {
-                Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
+                //Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
+                Gateway.MessageLogger.Write(RemoteEndPoint.ToString(), LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex.ToString() } });
                 Dispose();
             }
 
@@ -247,7 +230,8 @@ namespace GatewayLogic.Connections
                     return;
                 disposed = true;
             }
-            Gateway.Log.Write(LogLevel.Connection, "Client " + this.Name + " disconnect");
+            //Gateway.Log.Write(LogLevel.Connection, "Client " + this.Name + " disconnect");
+            Gateway.MessageLogger.Write(this.RemoteEndPoint.ToString(), LogMessageType.ClientDisconnect);
 
             this.Gateway.DropClient(this);
             Gateway.GotDropedClient(Name);
@@ -259,31 +243,14 @@ namespace GatewayLogic.Connections
             }
             catch (Exception ex)
             {
-                Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
+                Gateway.MessageLogger.Write(RemoteEndPoint.ToString(), LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex.ToString() } });
+                //Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
             }
-
-            try
-            {
-                stream.Dispose();
-            }
-            catch
-            {
-            }
-
-            /*try
-            {
-                netStream.Dispose();
-            }
-            catch
-            {
-            }*/
-
 
             try
             {
                 Socket.Shutdown(SocketShutdown.Both);
                 Socket.Disconnect(false);
-                //Socket.Disconnect(true);
                 Socket.Close();
             }
             catch

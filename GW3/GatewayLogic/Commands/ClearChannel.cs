@@ -1,4 +1,5 @@
 ﻿using GatewayLogic.Connections;
+using GatewayLogic.Services;
 
 namespace GatewayLogic.Commands
 {
@@ -11,7 +12,8 @@ namespace GatewayLogic.Commands
             if (channel == null)
                 return;
 
-            connection.Gateway.Log.Write(Services.LogLevel.Detail, "Clear channel on " + channel.ChannelName);
+            connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.ClearChannel, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channel.ChannelName } });
+            //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Clear channel on " + channel.ChannelName);
             channel.DisconnectClient((TcpClientConnection)connection);
             connection.Send(packet);
         }

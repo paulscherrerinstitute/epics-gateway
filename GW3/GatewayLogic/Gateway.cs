@@ -38,7 +38,8 @@ namespace GatewayLogic
         internal ClientConnection ClientConnection { get; }
         internal ServerConnection ServerConnection { get; }
         internal DiagnosticServer DiagnosticServer { get; private set; }
-        public Log Log { get; } = new Log();
+        internal MessageLogger MessageLogger { get; private set; }
+        //public TextLogger Log { get; private set; }
 
         public event NewIocChannelDelegate NewIocChannel;
         public event NewClientChannelDelegate NewClientChannel;
@@ -54,12 +55,14 @@ namespace GatewayLogic
 
         bool isDiposed = false;
 
-        private LogFileWriter LogFileWriter;
-
         Thread updaterThread;
 
         public Gateway()
         {
+            //Log = new TextLogger();
+            MessageLogger = new MessageLogger();
+            MessageLogger.Init(this);
+
             ChannelInformation = new ChannelInformation(this);
 
             ClientConnection = new ClientConnection(this);
@@ -87,7 +90,8 @@ namespace GatewayLogic
                 }
                 catch (Exception ex)
                 {
-                    Log.Write(LogLevel.Critical, ex.ToString());
+                    MessageLogger.Write(null, LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex.ToString() } });
+                    //Log.Write(LogLevel.Critical, ex.ToString());
                 }
                 count++;
             }
@@ -124,8 +128,16 @@ namespace GatewayLogic
                 using (var client = new System.Net.WebClient())
                 {
                     string config = client.DownloadString(configUrl + gatewayName);
-                    Log.Write(LogLevel.Detail, "Loading configuration from");
-                    Log.Write(LogLevel.Detail, configUrl + gatewayName);
+                    MessageLogger.Write(null, LogMessageType.LoadingConfiguration, new LogMessageDetail[]
+                    {
+                        new LogMessageDetail
+                        {
+                            TypeId = MessageDetail.Url,
+                            Value = configUrl + gatewayName
+                        }
+                    });
+                    //Log.Write(LogLevel.Detail, "Loading configuration from");
+                    //Log.Write(LogLevel.Detail, configUrl + gatewayName);
                     using (var txtReader = new System.IO.StringReader(config))
                     {
                         var serializer = new System.Xml.Serialization.XmlSerializer(typeof(Configuration.Configuration));
@@ -137,7 +149,8 @@ namespace GatewayLogic
             }
             catch
             {
-                Log.Write(LogLevel.Detail, "Loading configuration from gateway.xml");
+                MessageLogger.Write(null, LogMessageType.LoadingPreviousXmlConfiguration);
+                //Log.Write(LogLevel.Detail, "Loading configuration from gateway.xml");
                 using (var txtReader = new System.IO.StreamReader("gateway.xml"))
                 {
                     var serializer = new System.Xml.Serialization.XmlSerializer(typeof(Configuration.Configuration));
@@ -162,8 +175,6 @@ namespace GatewayLogic
 
         public void Start()
         {
-            this.LogFileWriter = LogFileWriter.CreateIfNeeded(this);
-
             DiagnosticServer = new DiagnosticServer(this, Configuration.SideBEndPoint.Address);
 
             if (this.Configuration.ConfigurationType == GatewayLogic.Configuration.ConfigurationType.UNIDIRECTIONAL)
@@ -194,7 +205,6 @@ namespace GatewayLogic
 
         public void Dispose()
         {
-            this.LogFileWriter?.Dispose();
             tcpSideA.Dispose();
             tcpSideB.Dispose();
 

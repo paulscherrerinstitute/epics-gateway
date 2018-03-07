@@ -12,14 +12,9 @@ namespace GWLogger.Backend.Model
     [ExcludeFromCodeCoverage]
     public class LogDetailItemType
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int ItemId { get; set; }
 
-        public int MessageTypeId { get; set; }
-
         public string Name { get; set; }
-
-        [ForeignKey("MessageTypeId")]
-        public LogMessageType LogMessageType { get; set; }
     }
 }

@@ -71,7 +71,7 @@ namespace GatewayLogic.Connections
             {
                 return;
             }*/
-            catch (Exception ex)
+            catch
             {
                 /*if (Log.WillDisplay(System.Diagnostics.TraceEventType.Critical))
                     Log.TraceEvent(System.Diagnostics.TraceEventType.Critical, -1, "Error: " + ex.Message);*/
@@ -85,13 +85,14 @@ namespace GatewayLogic.Connections
                 {
                     return;
                 }*/
-                catch (ObjectDisposedException ex1)
+                catch (ObjectDisposedException)
                 {
                     return;
                 }
                 catch (Exception ex2)
                 {
-                    Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex2);
+                    Gateway.MessageLogger.Write(ipSource.ToString(), LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex2.ToString() } });
+                    //Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex2);
                     if (!disposed)
                         Rebuild();
                 }
@@ -133,7 +134,7 @@ namespace GatewayLogic.Connections
                     packet.PayloadSize = 0;
                     receiver.Send(packet);
                 }
-                catch (Exception ex)
+                catch
                 {
                     //if (Log.WillDisplay(System.Diagnostics.TraceEventType.Verbose))
                     //    Log.TraceEvent(System.Diagnostics.TraceEventType.Verbose, -1, "Cannot get socket stream: " + ex.Message);
@@ -163,7 +164,8 @@ namespace GatewayLogic.Connections
             {
                 //if (Log.WillDisplay(System.Diagnostics.TraceEventType.Critical))
                 //    Log.TraceEvent(System.Diagnostics.TraceEventType.Critical, -1, "Error: " + ex.Message);
-                Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
+                //Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
+                Gateway.MessageLogger.Write(ipSource.ToString(), LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex.ToString() } });
                 if (!disposed)
                     Rebuild();
             }

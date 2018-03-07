@@ -15,12 +15,14 @@ namespace GatewayLogic.Commands
             packet.Destination = packet.Sender;
             if (((GatewayTcpConnection)connection).HasSentEcho)
             {
-                connection.Gateway.Log.Write(LogLevel.Detail, "Echo answer received from " + packet.Sender);
+                connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EchoAnswerReceived);
+                //connection.Gateway.Log.Write(LogLevel.Detail, "Echo answer received from " + packet.Sender);
                 ((GatewayTcpConnection)connection).HasSentEcho = false;
                 ((GatewayTcpConnection)connection).LastEcho = DateTime.UtcNow;
                 return;
             }
-            connection.Gateway.Log.Write(LogLevel.Detail, "Echo request received from " + packet.Sender);
+            connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EchoRequestReceived);
+            //connection.Gateway.Log.Write(LogLevel.Detail, "Echo request received from " + packet.Sender);
             if (((DateTime.UtcNow - ((GatewayTcpConnection)connection).LastEcho)).TotalSeconds > 0.3)
             {
                 connection.Send(packet);

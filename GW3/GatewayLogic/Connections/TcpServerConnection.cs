@@ -12,7 +12,7 @@ namespace GatewayLogic.Connections
 {
     class TcpServerConnection : GatewayTcpConnection
     {
-        public Gateway Gateway { get; private set; }
+        //public Gateway Gateway { get; private set; }
 
         Socket socket;
         object lockObject = new object();
@@ -55,14 +55,13 @@ namespace GatewayLogic.Connections
                         {
                             socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
                         }
-                        catch (Exception ex)
+                        catch
                         {
                             //Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
                             Dispose();
                         }
                     }
                 }, null);
-            Gateway = gateway;
             ThreadPool.QueueUserWorkItem((obj) =>
             {
                 if (!evt.WaitOne(5000))
@@ -88,7 +87,7 @@ namespace GatewayLogic.Connections
                 {
                     socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
                 }
-                catch (Exception ex)
+                catch
                 {
                     //Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
                     Dispose();
@@ -117,7 +116,7 @@ namespace GatewayLogic.Connections
             {
                 size = socket.EndReceive(ar);
             }
-            catch (Exception ex)
+            catch
             {
                 //Gateway.Log.Write(Services.LogLevel.Error, ex.ToString());
                 this.Dispose();
@@ -143,17 +142,18 @@ namespace GatewayLogic.Connections
             {
                 socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
             }
-            catch (SocketException ex1)
+            catch (SocketException)
             {
                 this.Dispose();
             }
-            catch (ObjectDisposedException ex2)
+            catch (ObjectDisposedException)
             {
                 this.Dispose();
             }
             catch (Exception ex)
             {
-                Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
+                //Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
+                Gateway.MessageLogger.Write(RemoteEndPoint.ToString(), LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex.ToString() } });
                 this.Dispose();
             }
         }
@@ -192,7 +192,7 @@ namespace GatewayLogic.Connections
                 }
                 //Console.WriteLine("Sending data to server: " + packet.Command + " size " + packet.BufferSize);
             }
-            catch (Exception ex)
+            catch
             {
                 ThreadPool.QueueUserWorkItem((obj) => { this.Dispose(); });
             }

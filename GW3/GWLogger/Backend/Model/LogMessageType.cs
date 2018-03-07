@@ -12,19 +12,11 @@ namespace GWLogger.Backend.Model
     [ExcludeFromCodeCoverage]
     public class LogMessageType
     {
-        public LogMessageType()
-        {
-            this.LogDetailItemTypes = new HashSet<LogDetailItemType>();
-        }
-
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int MessageTypeId { get; set; }
 
         public string Name { get; set; }
 
         public string DisplayMask { get; set; }
-
-        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<LogDetailItemType> LogDetailItemTypes { get; set; }
     }
 }

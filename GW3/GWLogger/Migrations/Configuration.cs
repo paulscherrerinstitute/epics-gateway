@@ -9,7 +9,7 @@ namespace GWLogger.Migrations
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = true;
+            AutomaticMigrationsEnabled = false;
         }
 
         protected override void Seed(GWLogger.Backend.Model.LoggerContext context)

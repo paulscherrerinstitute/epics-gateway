@@ -54,6 +54,19 @@ namespace GatewayLogic
             this.gateway = gateway;
             // Starts the diagnostic server
             // using the CAServer library
+            gateway.MessageLogger.Write(null, Services.LogMessageType.StartingDebugServer, new Services.LogMessageDetail[]
+            {
+                new Services.LogMessageDetail
+                {
+                    TypeId=Services.MessageDetail.Port,
+                    Value=DEBUG_PORT.ToString()
+                },
+                new Services.LogMessageDetail
+                {
+                    TypeId=Services.MessageDetail.Ip,
+                    Value=address.ToString()
+                }
+            });
             gateway.Log.Write(Services.LogLevel.Connection, "Starting debug server on " + DEBUG_PORT + " ip " + address);
             diagServer = new CAServer(address, DEBUG_PORT, DEBUG_PORT);
             // CPU usage
