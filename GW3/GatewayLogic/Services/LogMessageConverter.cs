@@ -66,8 +66,13 @@ namespace GatewayLogic.Services
             else
             {
                 var line = Convertion[messageType];
-                foreach (var i in details)
-                    line = Regex.Replace(line, "\\{" + i.TypeId.ToString() + "\\}", i.Value, RegexOptions.IgnoreCase);
+                if (details != null)
+                {
+                    foreach (var i in details)
+                        line = Regex.Replace(line, "\\{" + i.TypeId.ToString() + "\\}", i.Value, RegexOptions.IgnoreCase);
+                }
+                if (remoteIpPoint != null)
+                    line = Regex.Replace(line, "\\{endpoint\\}", remoteIpPoint, RegexOptions.IgnoreCase);
                 this.TextLogger.Write(LogLevel.Detail, line, memberName, sourceFilePath, sourceLineNumber);
             }
         }

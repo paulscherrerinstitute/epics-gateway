@@ -28,7 +28,7 @@ namespace GatewayLogic.Services
             }
             catch
             {
-                soapLogger = new GWLoggerSoap.DataAccessSoapClient(new System.ServiceModel.BasicHttpBinding(),new  EndpointAddress("http://epics-gw-logger.psi.ch/DataAccess.asmx"));
+                soapLogger = new GWLoggerSoap.DataAccessSoapClient(new System.ServiceModel.BasicHttpBinding(), new EndpointAddress("http://epics-gw-logger.psi.ch/DataAccess.asmx"));
             }
 
             soapLogger.RegisterLogMessageType(Enum.GetValues(typeof(LogMessageType))
@@ -73,12 +73,12 @@ namespace GatewayLogic.Services
             string sourceFilePath,
             int sourceLineNumber = 0)
         {
-            var fullDetails = new List<LogMessageDetail>(details);
+            var fullDetails = details == null ? new List<LogMessageDetail>() : new List<LogMessageDetail>(details);
             fullDetails.Add(new LogMessageDetail { TypeId = MessageDetail.SourceMemberName, Value = memberName });
             fullDetails.Add(new LogMessageDetail { TypeId = MessageDetail.SourceFilePath, Value = sourceFilePath });
             fullDetails.Add(new LogMessageDetail { TypeId = MessageDetail.SourceLineNumber, Value = sourceLineNumber.ToString() });
 
-            if(buffer.Count < 100)
+            if (buffer.Count < 100)
                 buffer.Post(new LogMessage
                 {
                     Details = fullDetails,
