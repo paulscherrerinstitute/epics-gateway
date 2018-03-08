@@ -96,16 +96,23 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Backend\Controllers\AnalyzeController.cs" />
     <Compile Include="Backend\Controllers\LogController.cs" />
+    <Compile Include="Backend\DTOs\GatewaySession.cs" />
     <Compile Include="Backend\DTOs\IdValue.cs" />
     <Compile Include="Backend\DTOs\LogEntry.cs" />
     <Compile Include="Backend\DTOs\LogEntryDetail.cs" />
     <Compile Include="Backend\DTOs\MessageType.cs" />
+    <Compile Include="Backend\DTOs\SearchRequest.cs" />
     <Compile Include="Backend\Model\LogDetailItemType.cs" />
     <Compile Include="Backend\Model\LogEntry.cs" />
     <Compile Include="Backend\Model\LogEntryDetail.cs" />
     <Compile Include="Backend\Model\LoggerContext.cs" />
     <Compile Include="Backend\Model\LogMessageType.cs" />
+    <Compile Include="DataAccess.Analyze.asmx.cs">
+      <DependentUpon>DataAccess.asmx</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="DataAccess.asmx.cs">
       <DependentUpon>DataAccess.asmx</DependentUpon>
       <SubType>Component</SubType>

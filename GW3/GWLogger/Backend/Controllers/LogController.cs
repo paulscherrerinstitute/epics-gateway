@@ -67,7 +67,8 @@ namespace GWLogger.Backend.Controllers
             {
                 EntryDate = DateTime.UtcNow,
                 Gateway = gateway,
-                MessageTypeId = messageType
+                MessageTypeId = messageType,
+                RemoteIpPoint = remoteIpPoint
             };
             details
                 .Select(row => new Model.LogEntryDetail
