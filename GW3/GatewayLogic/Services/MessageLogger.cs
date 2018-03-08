@@ -11,13 +11,19 @@ namespace GatewayLogic.Services
         private SoapLogger soapLogger;
         public LogMessageConverter MessageConverter { get; private set; }
 
-        public MessageLogger()
+        public MessageLogger(string gatewayName)
         {
-        }
-
-        public void Init(Gateway gateway)
-        {
-            soapLogger = SoapLogger.CreateIfNeeded(gateway);
+            try
+            {
+                soapLogger = SoapLogger.CreateIfNeeded(gatewayName);
+                if (soapLogger != null)
+                    MessageHandler += soapLogger.MessageLogger_MessageHandler;
+            }
+            catch
+            {
+                Console.WriteLine("!!! SOAP Message logger not available even if requested");
+                soapLogger = null;
+            }
             this.MessageConverter = new LogMessageConverter(this);
         }
 

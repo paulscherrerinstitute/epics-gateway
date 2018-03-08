@@ -17,14 +17,14 @@ namespace GatewayLogic.Services
         private CancellationTokenSource cancelOperation = new CancellationTokenSource();
 
         BufferBlock<LogMessage> buffer = new BufferBlock<LogMessage>();
-        private Gateway gateway;
-        private Thread[] bufferFlusher = new Thread[5];
-        private Thread performanceDisplay;
+        private string gatewayName;
+        private Thread bufferFlusher;
         long nbSaved = 0;
         long nbTotal = 0;
 
         static SoapLogger()
         {
+            // Build SOAP connection
             try
             {
                 soapLogger = new GWLoggerSoap.DataAccessSoapClient();
@@ -34,6 +34,7 @@ namespace GatewayLogic.Services
                 soapLogger = new GWLoggerSoap.DataAccessSoapClient(new System.ServiceModel.BasicHttpBinding(), new EndpointAddress("http://epics-gw-logger.psi.ch/DataAccess.asmx"));
             }
 
+            // Sends all message types to the server
             soapLogger.RegisterLogMessageType(Enum.GetValues(typeof(LogMessageType))
                 .AsQueryable()
                 .OfType<LogMessageType>()
@@ -44,6 +45,7 @@ namespace GatewayLogic.Services
                     DisplayMask = ((MessageDisplayAttribute)(typeof(LogMessageType).GetMember(row.ToString())[0].GetCustomAttributes(typeof(MessageDisplayAttribute), false)).FirstOrDefault()).LogDisplay
                 }).ToArray());
 
+            // Sends all message type details to the server
             soapLogger.RegisterLogMessageDetailType(Enum.GetValues(typeof(MessageDetail))
                 .AsQueryable()
                 .OfType<MessageDetail>()
@@ -55,25 +57,21 @@ namespace GatewayLogic.Services
         }
 
 
-        public static SoapLogger CreateIfNeeded(Gateway gateway)
+        public static SoapLogger CreateIfNeeded(string gatewayName)
         {
             if (System.Configuration.ConfigurationManager.AppSettings["soapLogger"]?.ToLower() == "true")
-                return new SoapLogger(gateway);
+                return new SoapLogger(gatewayName);
             return null;
         }
 
-        private SoapLogger(Gateway gateway)
+        private SoapLogger(string gatewayName)
         {
-            gateway.MessageLogger.MessageHandler += MessageLogger_MessageHandler;
-            this.gateway = gateway;
+            this.gatewayName = gatewayName;
 
-            for (var i = 0; i < bufferFlusher.Length; i++)
-            {
-                bufferFlusher[i] = new Thread(FlushLogAsync);
-                bufferFlusher[i].Start();
-            }
+            bufferFlusher = new Thread(FlushLogAsync);
+            bufferFlusher.Start();
 
-            performanceDisplay = new Thread(() =>
+            Thread performanceDisplay = new Thread(() =>
               {
                   while (true)
                   {
@@ -94,7 +92,7 @@ namespace GatewayLogic.Services
             performanceDisplay.Start();
         }
 
-        private void MessageLogger_MessageHandler(string remoteIpPoint,
+        public void MessageLogger_MessageHandler(string remoteIpPoint,
             LogMessageType messageType,
             IEnumerable<LogMessageDetail> details,
             string memberName,
@@ -107,13 +105,13 @@ namespace GatewayLogic.Services
             fullDetails.Add(new LogMessageDetail { TypeId = MessageDetail.SourceLineNumber, Value = sourceLineNumber.ToString() });
 
             nbTotal++;
-            if (buffer.Count < 1000)
+            if (buffer.Count < 8000)
             {
                 nbSaved++;
                 buffer.Post(new LogMessage
                 {
                     Details = fullDetails,
-                    Gateway = gateway.Configuration.GatewayName,
+                    Gateway = gatewayName,
                     MessageType = (int)messageType,
                     RemoteIpPoint = remoteIpPoint
                 });
@@ -122,25 +120,15 @@ namespace GatewayLogic.Services
 
         private void FlushLogAsync()
         {
-            DataAccessSoapClient logger;
-            try
-            {
-                logger = new GWLoggerSoap.DataAccessSoapClient();
-            }
-            catch
-            {
-                logger = new GWLoggerSoap.DataAccessSoapClient(new System.ServiceModel.BasicHttpBinding(), new EndpointAddress("http://epics-gw-logger.psi.ch/DataAccess.asmx"));
-            }
-
             LogMessage message = null;
 
             while (!shouldStop)
             {
-                /*// Send bunch
-                if (buffer.Count > 100)
+                // Send bunch if there is multiple entries waiting
+                if (buffer.Count > 1)
                 {
                     var toSend = new List<LogEntry>();
-                    while (toSend.Count < 30)
+                    while (toSend.Count < 100 && buffer.Count > 0)
                     {
                         try
                         {
@@ -170,14 +158,14 @@ namespace GatewayLogic.Services
 
                     try
                     {
-                        logger.LogEntries(toSend.ToArray());
+                        soapLogger.LogEntries(toSend.ToArray());
                     }
                     catch
                     {
                     }
                 }
                 else
-                {*/
+                {
 
                     try
                     {
@@ -194,18 +182,18 @@ namespace GatewayLogic.Services
 
                     try
                     {
-                        logger.LogEntry(message.Gateway, message.RemoteIpPoint,
+                        soapLogger.LogEntry(message.Gateway, message.RemoteIpPoint,
                             message.MessageType, message.Details.Select(row => new LogEntryDetail
                             {
                                 TypeId = (int)row.TypeId,
                                 Value = row.Value
                             }).ToArray());
                     }
-                    catch(Exception ex)
+                    catch
                     {
                     }
                 }
-            //}
+            }
         }
 
         public void Dispose()

@@ -12,10 +12,10 @@ namespace GWLogger.Backend.Model
     [ExcludeFromCodeCoverage]
     public class LogEntryDetail
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long EntryDetailId { get; set; }
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public Guid EntryDetailId { get; set; }
 
-        public long LogEntryId { get; set; }
+        public Guid LogEntryId { get; set; }
 
         public int DetailTypeId { get; set; }
 

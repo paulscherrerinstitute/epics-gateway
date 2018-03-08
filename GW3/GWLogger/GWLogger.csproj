@@ -117,16 +117,16 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201803071343472_base.cs" />
-    <Compile Include="Migrations\201803071343472_base.Designer.cs">
-      <DependentUpon>201803071343472_base.cs</DependentUpon>
+    <Compile Include="Migrations\201803080630034_base.cs" />
+    <Compile Include="Migrations\201803080630034_base.Designer.cs">
+      <DependentUpon>201803080630034_base.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201803071343472_base.resx">
-      <DependentUpon>201803071343472_base.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201803080630034_base.resx">
+      <DependentUpon>201803080630034_base.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

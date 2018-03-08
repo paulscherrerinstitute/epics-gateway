@@ -61,17 +61,11 @@ namespace GatewayLogic
         public Gateway()
         {
             //Log = new TextLogger();
-            MessageLogger = new MessageLogger();
-            MessageLogger.Init(this);
 
             ChannelInformation = new ChannelInformation(this);
 
             ClientConnection = new ClientConnection(this);
             ServerConnection = new ServerConnection(this);
-
-            updaterThread = new Thread(Updater);
-            updaterThread.IsBackground = true;
-            updaterThread.Start();
         }
 
         void Updater()
@@ -123,6 +117,9 @@ namespace GatewayLogic
 
         public void LoadConfig(string configUrl, string gatewayName)
         {
+            if(MessageLogger == null)
+                MessageLogger = new MessageLogger(gatewayName);
+
             bool freshConfig = false;
             try
             {
@@ -176,6 +173,13 @@ namespace GatewayLogic
 
         public void Start()
         {
+            if (MessageLogger == null)
+                MessageLogger = new MessageLogger(Configuration.GatewayName);
+
+            updaterThread = new Thread(Updater);
+            updaterThread.IsBackground = true;
+            updaterThread.Start();
+
             DiagnosticServer = new DiagnosticServer(this, Configuration.SideBEndPoint.Address);
 
             if (this.Configuration.ConfigurationType == GatewayLogic.Configuration.ConfigurationType.UNIDIRECTIONAL)

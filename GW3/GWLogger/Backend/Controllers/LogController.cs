@@ -32,13 +32,31 @@ namespace GWLogger.Backend.Controllers
                     continue;
                 }
 
-                using (var ctx = new Model.LoggerContext())
-                {
-                    EFBatchOperation.For(ctx, ctx.LogEntries).InsertAll(entryToAdd);
-                }
-
+                var toAdd = entryToAdd.ToList();
                 entryToAdd.Clear();
                 lockEntry.Release();
+
+                foreach (var i in toAdd)
+                {
+                    i.EntryId = Guid.NewGuid();
+                    foreach (var j in i.LogEntryDetails)
+                    {
+                        j.EntryDetailId = Guid.NewGuid();
+                        j.LogEntryId = i.EntryId;
+                    }
+                }
+
+                try
+                {
+                    using (var ctx = new Model.LoggerContext())
+                    {
+                        EFBatchOperation.For(ctx, ctx.LogEntries).InsertAll(toAdd);
+                        EFBatchOperation.For(ctx, ctx.LogEntryDetails).InsertAll(toAdd.SelectMany(row => row.LogEntryDetails));
+                    }
+                }
+                catch
+                {
+                }
             }
         }
 
@@ -61,7 +79,7 @@ namespace GWLogger.Backend.Controllers
                 .ForEach(row => newEntry.LogEntryDetails.Add(row));
 
             lockEntry.Wait();
-            while(entryToAdd.Count() > 5000)
+            while (entryToAdd.Count() > 30000)
             {
                 lockEntry.Release();
                 Thread.Sleep(100);

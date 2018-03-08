@@ -17,8 +17,8 @@ namespace GWLogger.Backend.Model
             this.LogEntryDetails = new HashSet<LogEntryDetail>();
         }
 
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long EntryId { get; set; }
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public Guid EntryId { get; set; }
 
         public DateTime EntryDate { get; set; }
 

@@ -10,13 +10,15 @@ namespace GatewayLogic.Commands
 {
     abstract class CommandHandler
     {
-        static readonly CommandHandler[] handlers = new CommandHandler[28];
+        static readonly CommandHandler[] handlers;
 
         /// <summary>
         /// Setup the handles in the array for quick access.
         /// </summary>
         static CommandHandler()
         {
+            handlers = new CommandHandler[28];
+
             handlers[0] = new Version();
             handlers[1] = new EventAdd();
             handlers[2] = new EventCancel();
