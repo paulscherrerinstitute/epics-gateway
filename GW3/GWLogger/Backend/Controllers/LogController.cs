@@ -18,6 +18,7 @@ namespace GWLogger.Backend.Controllers
         static LogStat errorsStats = new LogStat();
         static LogStat searchesStats = new LogStat();
         static List<int> errorMessageTypes = null;
+        static GatewaySessions gatewaySessions = new GatewaySessions();
 
         static LogController()
         {
@@ -39,6 +40,7 @@ namespace GWLogger.Backend.Controllers
                 List<LogStat.StatEntry> logs;
                 List<LogStat.StatEntry> errors;
                 List<LogStat.StatEntry> searches;
+                List<GatewaySessions.OpenSession> sessions;
 
                 using (var ctx = new Model.LoggerContext())
                 {
@@ -47,6 +49,7 @@ namespace GWLogger.Backend.Controllers
                         logs = logEntriesStats.GetListAndClear();
                         errors = errorsStats.GetListAndClear();
                         searches = searchesStats.GetListAndClear();
+                        sessions = gatewaySessions.GetAndReset();
                     }
 
                     foreach (var i in logs)
@@ -75,6 +78,18 @@ namespace GWLogger.Backend.Controllers
                             ctx.GatewaySearches.Add(new GatewaySearch { Gateway = i.Gateway, NbSearches = i.Value, Date = i.Date });
                         else
                             nbSrch.NbSearches += i.Value;
+                    }
+
+                    foreach (var i in sessions)
+                    {
+                        var session = ctx.GatewaySessions.FirstOrDefault(row => row.Gateway == i.Gateway && row.StartDate == i.Start);
+                        if (session == null)
+                            ctx.GatewaySessions.Add(new GatewaySession { Gateway = i.Gateway, StartDate = i.Start, LastEntry = i.End, NbEntries = i.NbEntries });
+                        else
+                        {
+                            session.LastEntry = i.End;
+                            session.NbEntries = i.NbEntries;
+                        }
                     }
 
                     ctx.SaveChanges();
@@ -153,6 +168,10 @@ namespace GWLogger.Backend.Controllers
             lock (logEntriesStats)
             {
                 logEntriesStats[gateway][newEntry.EntryDate.Round()]++;
+                if (newEntry.MessageTypeId == 2)
+                    gatewaySessions[gateway].Restart();
+                if(newEntry.MessageTypeId >= 2)
+                    gatewaySessions[gateway].Log();
                 if (errorMessageTypes == null)
                     using (var ctx = new LoggerContext())
                         errorMessageTypes = ctx.LogMessageTypes.Where(row => row.LogLevel >= 3).Select(row => row.MessageTypeId).ToList();
