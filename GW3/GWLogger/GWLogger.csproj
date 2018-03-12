@@ -80,6 +80,7 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Backend\Model\DB Design.cd" />
     <None Include="packages.config" />
     <None Include="Properties\PublishProfiles\AIT-IIS.pubxml" />
     <None Include="Web.Debug.config">

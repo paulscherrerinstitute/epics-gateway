@@ -28,6 +28,9 @@ namespace GWLogger.Backend.Model
 
         public int MessageTypeId { get; set; }
 
+        [ForeignKey("MessageTypeId")]
+        public LogMessageType LogMessageType { get; set; }
+
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<LogEntryDetail> LogEntryDetails { get; set; }
     }
