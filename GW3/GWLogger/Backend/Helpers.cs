@@ -7,7 +7,7 @@ namespace GWLogger.Backend
 {
     public static class Helpers
     {
-        private static DateTime Round(this DateTime dateTime, TimeSpan interval = default(TimeSpan))
+        public static DateTime Round(this DateTime dateTime, TimeSpan interval = default(TimeSpan))
         {
             if (interval == default(TimeSpan))
                 interval = TimeSpan.FromMinutes(10);

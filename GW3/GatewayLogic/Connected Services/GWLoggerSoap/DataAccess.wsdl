@@ -2,6 +2,73 @@
 <wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://gwlogger.psi.ch/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://gwlogger.psi.ch/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
   <wsdl:types>
     <s:schema elementFormDefault="qualified" targetNamespace="http://gwlogger.psi.ch/">
+      <s:element name="GetGatewaysList">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetGatewaysListResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetGatewaysListResult" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetGatewaySessionsList">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetGatewaySessionsListResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetGatewaySessionsListResult" type="tns:ArrayOfGatewaySession" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfGatewaySession">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="GatewaySession" nillable="true" type="tns:GatewaySession" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="GatewaySession">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="EndDate" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="StartDate" type="s:dateTime" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetSearchedChannels">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="datePoint" type="s:dateTime" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetSearchedChannelsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetSearchedChannelsResult" type="tns:ArrayOfSearchRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfSearchRequest">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SearchRequest" nillable="true" type="tns:SearchRequest" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SearchRequest">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Channel" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Date" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="Client" type="s:string" />
+        </s:sequence>
+      </s:complexType>
       <s:element name="RegisterLogMessageType">
         <s:complexType>
           <s:sequence>
@@ -19,6 +86,7 @@
           <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
           <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
           <s:element minOccurs="0" maxOccurs="1" name="DisplayMask" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="LogLevel" type="s:int" />
         </s:sequence>
       </s:complexType>
       <s:element name="RegisterLogMessageTypeResponse">
@@ -94,6 +162,24 @@
       </s:element>
     </s:schema>
   </wsdl:types>
+  <wsdl:message name="GetGatewaysListSoapIn">
+    <wsdl:part name="parameters" element="tns:GetGatewaysList" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewaysListSoapOut">
+    <wsdl:part name="parameters" element="tns:GetGatewaysListResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewaySessionsListSoapIn">
+    <wsdl:part name="parameters" element="tns:GetGatewaySessionsList" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewaySessionsListSoapOut">
+    <wsdl:part name="parameters" element="tns:GetGatewaySessionsListResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetSearchedChannelsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetSearchedChannels" />
+  </wsdl:message>
+  <wsdl:message name="GetSearchedChannelsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetSearchedChannelsResponse" />
+  </wsdl:message>
   <wsdl:message name="RegisterLogMessageTypeSoapIn">
     <wsdl:part name="parameters" element="tns:RegisterLogMessageType" />
   </wsdl:message>
@@ -119,6 +205,18 @@
     <wsdl:part name="parameters" element="tns:LogEntryResponse" />
   </wsdl:message>
   <wsdl:portType name="DataAccessSoap">
+    <wsdl:operation name="GetGatewaysList">
+      <wsdl:input message="tns:GetGatewaysListSoapIn" />
+      <wsdl:output message="tns:GetGatewaysListSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewaySessionsList">
+      <wsdl:input message="tns:GetGatewaySessionsListSoapIn" />
+      <wsdl:output message="tns:GetGatewaySessionsListSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetSearchedChannels">
+      <wsdl:input message="tns:GetSearchedChannelsSoapIn" />
+      <wsdl:output message="tns:GetSearchedChannelsSoapOut" />
+    </wsdl:operation>
     <wsdl:operation name="RegisterLogMessageType">
       <wsdl:input message="tns:RegisterLogMessageTypeSoapIn" />
       <wsdl:output message="tns:RegisterLogMessageTypeSoapOut" />
@@ -138,6 +236,33 @@
   </wsdl:portType>
   <wsdl:binding name="DataAccessSoap" type="tns:DataAccessSoap">
     <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetGatewaysList">
+      <soap:operation soapAction="http://gwlogger.psi.ch/GetGatewaysList" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewaySessionsList">
+      <soap:operation soapAction="http://gwlogger.psi.ch/GetGatewaySessionsList" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetSearchedChannels">
+      <soap:operation soapAction="http://gwlogger.psi.ch/GetSearchedChannels" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="RegisterLogMessageType">
       <soap:operation soapAction="http://gwlogger.psi.ch/RegisterLogMessageType" style="document" />
       <wsdl:input>
@@ -177,6 +302,33 @@
   </wsdl:binding>
   <wsdl:binding name="DataAccessSoap12" type="tns:DataAccessSoap">
     <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetGatewaysList">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/GetGatewaysList" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewaySessionsList">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/GetGatewaySessionsList" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetSearchedChannels">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/GetSearchedChannels" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="RegisterLogMessageType">
       <soap12:operation soapAction="http://gwlogger.psi.ch/RegisterLogMessageType" style="document" />
       <wsdl:input>

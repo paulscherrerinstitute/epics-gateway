@@ -1,4 +1,5 @@
 ﻿using EntityFramework.Utilities;
+using GWLogger.Backend.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,12 +13,73 @@ namespace GWLogger.Backend.Controllers
         static List<Model.LogEntry> entryToAdd = new List<Model.LogEntry>();
         static SemaphoreSlim lockEntry = new SemaphoreSlim(1);
         static Thread logEntryFlusher;
+        static Thread statFlusher;
+        static LogStat logEntriesStats = new LogStat();
+        static LogStat errorsStats = new LogStat();
+        static LogStat searchesStats = new LogStat();
+        static List<int> errorMessageTypes = null;
 
         static LogController()
         {
             logEntryFlusher = new Thread(BulkSaver);
             logEntryFlusher.IsBackground = true;
             logEntryFlusher.Start();
+
+            statFlusher = new Thread(StatUpdater);
+            statFlusher.IsBackground = true;
+            statFlusher.Start();
+        }
+
+        private static void StatUpdater()
+        {
+            while (true)
+            {
+                Thread.Sleep(1000);
+
+                List<LogStat.StatEntry> logs;
+                List<LogStat.StatEntry> errors;
+                List<LogStat.StatEntry> searches;
+
+                using (var ctx = new Model.LoggerContext())
+                {
+                    lock (logEntriesStats)
+                    {
+                        logs = logEntriesStats.GetListAndClear();
+                        errors = errorsStats.GetListAndClear();
+                        searches = searchesStats.GetListAndClear();
+                    }
+
+                    foreach (var i in logs)
+                    {
+                        var nbMsg = ctx.GatewayNbMessages.FirstOrDefault(row => row.Gateway == i.Gateway && row.Date == i.Date);
+                        if (nbMsg == null)
+                            ctx.GatewayNbMessages.Add(new GatewayNbMessage { Gateway = i.Gateway, NbMessages = i.Value, Date = i.Date });
+                        else
+                            nbMsg.NbMessages += i.Value;
+                    }
+
+
+                    foreach (var i in errors)
+                    {
+                        var nbErrs = ctx.GatewayErrors.FirstOrDefault(row => row.Gateway == i.Gateway && row.Date == i.Date);
+                        if (nbErrs == null)
+                            ctx.GatewayErrors.Add(new GatewayError { Gateway = i.Gateway, NbErrors = i.Value, Date = i.Date });
+                        else
+                            nbErrs.NbErrors += i.Value;
+                    }
+
+                    foreach (var i in searches)
+                    {
+                        var nbSrch = ctx.GatewaySearches.FirstOrDefault(row => row.Gateway == i.Gateway && row.Date == i.Date);
+                        if (nbSrch == null)
+                            ctx.GatewaySearches.Add(new GatewaySearch { Gateway = i.Gateway, NbSearches = i.Value, Date = i.Date });
+                        else
+                            nbSrch.NbSearches += i.Value;
+                    }
+
+                    ctx.SaveChanges();
+                }
+            }
         }
 
         public static void BulkSaver()
@@ -62,7 +124,6 @@ namespace GWLogger.Backend.Controllers
 
         public static void LogEntry(string gateway, string remoteIpPoint, int messageType, List<DTOs.LogEntryDetail> details)
         {
-
             var newEntry = new Model.LogEntry
             {
                 EntryDate = DateTime.UtcNow,
@@ -88,6 +149,18 @@ namespace GWLogger.Backend.Controllers
             }
             entryToAdd.Add(newEntry);
             lockEntry.Release();
+
+            lock (logEntriesStats)
+            {
+                logEntriesStats[gateway][newEntry.EntryDate.Round()]++;
+                if (errorMessageTypes == null)
+                    using (var ctx = new LoggerContext())
+                        errorMessageTypes = ctx.LogMessageTypes.Where(row => row.LogLevel >= 3).Select(row => row.MessageTypeId).ToList();
+                if (errorMessageTypes.Contains(newEntry.MessageTypeId))
+                    errorsStats[gateway][newEntry.EntryDate.Round()]++;
+                if (newEntry.MessageTypeId == 39)
+                    searchesStats[gateway][newEntry.EntryDate.Round()]++;
+            }
         }
 
         public static void RegisterLogMessageType(List<DTOs.MessageType> types)

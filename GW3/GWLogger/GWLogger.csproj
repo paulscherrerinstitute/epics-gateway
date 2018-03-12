@@ -99,6 +99,7 @@
   <ItemGroup>
     <Compile Include="Backend\Controllers\AnalyzeController.cs" />
     <Compile Include="Backend\Controllers\LogController.cs" />
+    <Compile Include="Backend\Controllers\LogStat.cs" />
     <Compile Include="Backend\DTOs\GatewaySession.cs" />
     <Compile Include="Backend\DTOs\IdValue.cs" />
     <Compile Include="Backend\DTOs\LogEntry.cs" />
@@ -132,16 +133,16 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201803080630034_base.cs" />
-    <Compile Include="Migrations\201803080630034_base.Designer.cs">
-      <DependentUpon>201803080630034_base.cs</DependentUpon>
+    <Compile Include="Migrations\201803121354211_base.cs" />
+    <Compile Include="Migrations\201803121354211_base.Designer.cs">
+      <DependentUpon>201803121354211_base.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201803080630034_base.resx">
-      <DependentUpon>201803080630034_base.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201803121354211_base.resx">
+      <DependentUpon>201803121354211_base.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

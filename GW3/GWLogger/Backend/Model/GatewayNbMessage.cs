@@ -12,10 +12,10 @@ namespace GWLogger.Backend.Model
     [ExcludeFromCodeCoverage]
     public class GatewayNbMessage
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
-        public DateTime SearchDate { get; set; }
+        [Key, Column(Order = 0)]
         public string Gateway { get; set; }
+        [Key, Column(Order = 1)]
+        public DateTime Date { get; set; }
         public int NbMessages { get; set; }
     }
 }

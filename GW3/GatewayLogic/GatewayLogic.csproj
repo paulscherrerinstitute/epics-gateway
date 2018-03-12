@@ -125,6 +125,12 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="Connected Services\GWLoggerSoap\DataAccess.wsdl" />
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.GatewaySession.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.SearchRequest.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
     <None Include="nuget.config" />
     <None Include="packages.config" />
   </ItemGroup>

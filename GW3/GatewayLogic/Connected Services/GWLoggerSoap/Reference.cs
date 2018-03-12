@@ -15,6 +15,27 @@ namespace GatewayLogic.GWLoggerSoap {
     [System.ServiceModel.ServiceContractAttribute(Namespace="http://gwlogger.psi.ch/", ConfigurationName="GWLoggerSoap.DataAccessSoap")]
     public interface DataAccessSoap {
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://gwlogger.psi.ch/GetGatewaysList", ReplyAction="*")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        string[] GetGatewaysList();
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://gwlogger.psi.ch/GetGatewaysList", ReplyAction="*")]
+        System.Threading.Tasks.Task<string[]> GetGatewaysListAsync();
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://gwlogger.psi.ch/GetGatewaySessionsList", ReplyAction="*")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        GatewayLogic.GWLoggerSoap.GatewaySession[] GetGatewaySessionsList(string gatewayName);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://gwlogger.psi.ch/GetGatewaySessionsList", ReplyAction="*")]
+        System.Threading.Tasks.Task<GatewayLogic.GWLoggerSoap.GatewaySession[]> GetGatewaySessionsListAsync(string gatewayName);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://gwlogger.psi.ch/GetSearchedChannels", ReplyAction="*")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        GatewayLogic.GWLoggerSoap.SearchRequest[] GetSearchedChannels(string gatewayName, System.DateTime datePoint);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://gwlogger.psi.ch/GetSearchedChannels", ReplyAction="*")]
+        System.Threading.Tasks.Task<GatewayLogic.GWLoggerSoap.SearchRequest[]> GetSearchedChannelsAsync(string gatewayName, System.DateTime datePoint);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://gwlogger.psi.ch/RegisterLogMessageType", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
         void RegisterLogMessageType(GatewayLogic.GWLoggerSoap.MessageType[] types);
@@ -50,47 +71,33 @@ namespace GatewayLogic.GWLoggerSoap {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://gwlogger.psi.ch/")]
-    public partial class MessageType : object, System.ComponentModel.INotifyPropertyChanged {
+    public partial class GatewaySession : object, System.ComponentModel.INotifyPropertyChanged {
         
-        private int idField;
+        private System.DateTime endDateField;
         
-        private string nameField;
-        
-        private string displayMaskField;
+        private System.DateTime startDateField;
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=0)]
-        public int Id {
+        public System.DateTime EndDate {
             get {
-                return this.idField;
+                return this.endDateField;
             }
             set {
-                this.idField = value;
-                this.RaisePropertyChanged("Id");
+                this.endDateField = value;
+                this.RaisePropertyChanged("EndDate");
             }
         }
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=1)]
-        public string Name {
+        public System.DateTime StartDate {
             get {
-                return this.nameField;
+                return this.startDateField;
             }
             set {
-                this.nameField = value;
-                this.RaisePropertyChanged("Name");
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=2)]
-        public string DisplayMask {
-            get {
-                return this.displayMaskField;
-            }
-            set {
-                this.displayMaskField = value;
-                this.RaisePropertyChanged("DisplayMask");
+                this.startDateField = value;
+                this.RaisePropertyChanged("StartDate");
             }
         }
         
@@ -270,6 +277,140 @@ namespace GatewayLogic.GWLoggerSoap {
         }
     }
     
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.2612.0")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://gwlogger.psi.ch/")]
+    public partial class MessageType : object, System.ComponentModel.INotifyPropertyChanged {
+        
+        private int idField;
+        
+        private string nameField;
+        
+        private string displayMaskField;
+        
+        private int logLevelField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public int Id {
+            get {
+                return this.idField;
+            }
+            set {
+                this.idField = value;
+                this.RaisePropertyChanged("Id");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public string Name {
+            get {
+                return this.nameField;
+            }
+            set {
+                this.nameField = value;
+                this.RaisePropertyChanged("Name");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=2)]
+        public string DisplayMask {
+            get {
+                return this.displayMaskField;
+            }
+            set {
+                this.displayMaskField = value;
+                this.RaisePropertyChanged("DisplayMask");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=3)]
+        public int LogLevel {
+            get {
+                return this.logLevelField;
+            }
+            set {
+                this.logLevelField = value;
+                this.RaisePropertyChanged("LogLevel");
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.2612.0")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://gwlogger.psi.ch/")]
+    public partial class SearchRequest : object, System.ComponentModel.INotifyPropertyChanged {
+        
+        private string channelField;
+        
+        private System.DateTime dateField;
+        
+        private string clientField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public string Channel {
+            get {
+                return this.channelField;
+            }
+            set {
+                this.channelField = value;
+                this.RaisePropertyChanged("Channel");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public System.DateTime Date {
+            get {
+                return this.dateField;
+            }
+            set {
+                this.dateField = value;
+                this.RaisePropertyChanged("Date");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=2)]
+        public string Client {
+            get {
+                return this.clientField;
+            }
+            set {
+                this.clientField = value;
+                this.RaisePropertyChanged("Client");
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     public interface DataAccessSoapChannel : GatewayLogic.GWLoggerSoap.DataAccessSoap, System.ServiceModel.IClientChannel {
     }
@@ -295,6 +436,30 @@ namespace GatewayLogic.GWLoggerSoap {
         
         public DataAccessSoapClient(System.ServiceModel.Channels.Binding binding, System.ServiceModel.EndpointAddress remoteAddress) : 
                 base(binding, remoteAddress) {
+        }
+        
+        public string[] GetGatewaysList() {
+            return base.Channel.GetGatewaysList();
+        }
+        
+        public System.Threading.Tasks.Task<string[]> GetGatewaysListAsync() {
+            return base.Channel.GetGatewaysListAsync();
+        }
+        
+        public GatewayLogic.GWLoggerSoap.GatewaySession[] GetGatewaySessionsList(string gatewayName) {
+            return base.Channel.GetGatewaySessionsList(gatewayName);
+        }
+        
+        public System.Threading.Tasks.Task<GatewayLogic.GWLoggerSoap.GatewaySession[]> GetGatewaySessionsListAsync(string gatewayName) {
+            return base.Channel.GetGatewaySessionsListAsync(gatewayName);
+        }
+        
+        public GatewayLogic.GWLoggerSoap.SearchRequest[] GetSearchedChannels(string gatewayName, System.DateTime datePoint) {
+            return base.Channel.GetSearchedChannels(gatewayName, datePoint);
+        }
+        
+        public System.Threading.Tasks.Task<GatewayLogic.GWLoggerSoap.SearchRequest[]> GetSearchedChannelsAsync(string gatewayName, System.DateTime datePoint) {
+            return base.Channel.GetSearchedChannelsAsync(gatewayName, datePoint);
         }
         
         public void RegisterLogMessageType(GatewayLogic.GWLoggerSoap.MessageType[] types) {
