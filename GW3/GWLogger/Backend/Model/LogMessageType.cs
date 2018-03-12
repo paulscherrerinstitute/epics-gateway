@@ -18,5 +18,7 @@ namespace GWLogger.Backend.Model
         public string Name { get; set; }
 
         public string DisplayMask { get; set; }
+
+        public int LogLevel { get; set; }
     }
 }

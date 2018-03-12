@@ -104,6 +104,13 @@
     <Compile Include="Backend\DTOs\LogEntryDetail.cs" />
     <Compile Include="Backend\DTOs\MessageType.cs" />
     <Compile Include="Backend\DTOs\SearchRequest.cs" />
+    <Compile Include="Backend\Helpers.cs" />
+    <Compile Include="Backend\Model\ConnectedClient.cs" />
+    <Compile Include="Backend\Model\ConnectedServer.cs" />
+    <Compile Include="Backend\Model\GatewayError.cs" />
+    <Compile Include="Backend\Model\GatewayNbMessage.cs" />
+    <Compile Include="Backend\Model\GatewaySearch.cs" />
+    <Compile Include="Backend\Model\GatewaySession.cs" />
     <Compile Include="Backend\Model\LogDetailItemType.cs" />
     <Compile Include="Backend\Model\LogEntry.cs" />
     <Compile Include="Backend\Model\LogEntryDetail.cs" />

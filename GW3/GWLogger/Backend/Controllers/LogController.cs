@@ -96,7 +96,13 @@ namespace GWLogger.Backend.Controllers
             {
                 var dbTypes = ctx.LogMessageTypes.ToList();
                 var toAdd = types.Where(row => !dbTypes.Any(r2 => r2.MessageTypeId == row.Id));
-                ctx.LogMessageTypes.AddRange(toAdd.Select(row => new Model.LogMessageType { MessageTypeId = row.Id, Name = row.Name, DisplayMask = row.DisplayMask }));
+                ctx.LogMessageTypes.AddRange(toAdd.Select(row => new Model.LogMessageType
+                {
+                    MessageTypeId = row.Id,
+                    Name = row.Name,
+                    DisplayMask = row.DisplayMask,
+                    LogLevel = row.LogLevel
+                }));
                 ctx.SaveChanges();
             }
         }

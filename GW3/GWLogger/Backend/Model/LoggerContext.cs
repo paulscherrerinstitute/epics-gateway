@@ -23,5 +23,11 @@ namespace GWLogger.Backend.Model
         public virtual DbSet<LogEntryDetail> LogEntryDetails { get; set; }
         public virtual DbSet<LogDetailItemType> LogDetailItemTypes { get; set; }
         public virtual DbSet<LogMessageType> LogMessageTypes { get; set; }
+        public virtual DbSet<GatewaySession> GatewaySessions { get; set; }
+        public virtual DbSet<GatewaySearch> GatewaySearches { get; set; }
+        public virtual DbSet<GatewayError> GatewayErrors { get; set; }
+        public virtual DbSet<GatewayNbMessage> GatewayNbMessages { get; set; }
+        public virtual DbSet<ConnectedClient> ConnectedClients { get; set; }
+        public virtual DbSet<ConnectedServer> ConnectedServers { get; set; }
     }
 }
