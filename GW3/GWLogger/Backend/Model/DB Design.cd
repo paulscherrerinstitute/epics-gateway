@@ -60,6 +60,11 @@
     <Members>
       <Method Name="LogEntry" Hidden="true" />
     </Members>
+    <AssociationLine Name="LogMessageType" Type="GWLogger.Backend.Model.LogMessageType">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.12" Y="0.206" />
+      </MemberNameLabel>
+    </AssociationLine>
     <TypeIdentifier>
       <HashCode>CAAABAAAAAAAAAAAAAAgIACAAAAAAAAAAAAAAAAAIQA=</HashCode>
       <FileName>Backend\Model\LogEntry.cs</FileName>
@@ -70,6 +75,11 @@
   </Class>
   <Class Name="GWLogger.Backend.Model.LogEntryDetail">
     <Position X="5.25" Y="3.75" Width="2" />
+    <AssociationLine Name="LogDetailItemType" Type="GWLogger.Backend.Model.LogDetailItemType">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.081" Y="0.454" />
+      </MemberNameLabel>
+    </AssociationLine>
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAIAAAAQAAAAAAAAAAAAgAAgAAAABAA=</HashCode>
       <FileName>Backend\Model\LogEntryDetail.cs</FileName>
