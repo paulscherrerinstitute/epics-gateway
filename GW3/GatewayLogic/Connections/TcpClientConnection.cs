@@ -31,7 +31,7 @@ namespace GatewayLogic.Connections
             splitter = new Splitter();
             this.Socket = socket;
             this.Listener = listener;
-            gateway.MessageLogger.Write(endPoint.ToString(), LogMessageType.StartTcpClientConnection);
+            gateway.MessageLogger.Write(socket.RemoteEndPoint.ToString(), LogMessageType.StartTcpClientConnection);
             //gateway.Log.Write(LogLevel.Connection, "Start TCP client connection on " + endPoint);
         }
 

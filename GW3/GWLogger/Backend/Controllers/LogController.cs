@@ -173,18 +173,39 @@ namespace GWLogger.Backend.Controllers
 
             lock (logEntriesStats)
             {
-                logEntriesStats[gateway][newEntry.EntryDate.Round()]++;
-                if (newEntry.MessageTypeId == 2)
-                    gatewaySessions[gateway].Restart();
-                if (newEntry.MessageTypeId >= 2)
-                    gatewaySessions[gateway].Log();
                 if (errorMessageTypes == null)
                     using (var ctx = new LoggerContext())
                         errorMessageTypes = ctx.LogMessageTypes.Where(row => row.LogLevel >= 3).Select(row => row.MessageTypeId).ToList();
-                if (errorMessageTypes.Contains(newEntry.MessageTypeId))
-                    errorsStats[gateway][newEntry.EntryDate.Round()]++;
-                if (newEntry.MessageTypeId == 39)
-                    searchesStats[gateway][newEntry.EntryDate.Round()]++;
+
+                logEntriesStats[gateway][newEntry.EntryDate.Round()]++;
+                switch (newEntry.MessageTypeId)
+                {
+                    case 4: // Start client session
+                        ClientSessions.Connect(gateway, newEntry.RemoteIpPoint);
+                        gatewaySessions[gateway].Log();
+                        break;
+                    case 6: // Ends client session
+                        ClientSessions.Disconnect(gateway, newEntry.RemoteIpPoint);
+                        gatewaySessions[gateway].Log();
+                        break;
+                    case 2: // Starts GW
+                        gatewaySessions[gateway].Restart();
+                        gatewaySessions[gateway].Log();
+                        break;
+                    case 39: //Search
+                        searchesStats[gateway][newEntry.EntryDate.Round()]++;
+                        gatewaySessions[gateway].Log();
+                        break;
+                    // Skip
+                    case 0:
+                    case 1:
+                        break;
+                    default:
+                        if (errorMessageTypes.Contains(newEntry.MessageTypeId))
+                            errorsStats[gateway][newEntry.EntryDate.Round()]++;
+                        gatewaySessions[gateway].Log();
+                        break;
+                }
             }
         }
 

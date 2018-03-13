@@ -12,11 +12,12 @@ namespace GWLogger.Backend.Model
     [ExcludeFromCodeCoverage]
     public class ConnectedClient
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
-        public DateTime StartConnection { get; set; }
-        public DateTime EndConnection { get; set; }
+        [Key, Column(Order = 0)]
         public string Gateway { get; set; }
+        [Key, Column(Order = 1)]
         public string RemoteIpPoint { get; set; }
+        [Key, Column(Order = 2)]
+        public DateTime StartConnection { get; set; }
+        public DateTime? EndConnection { get; set; }
     }
 }

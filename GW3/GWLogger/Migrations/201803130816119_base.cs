@@ -11,25 +11,23 @@ namespace GWLogger.Migrations
                 "dbo.ConnectedClients",
                 c => new
                     {
-                        Id = c.Int(nullable: false, identity: true),
+                        Gateway = c.String(nullable: false, maxLength: 128),
+                        RemoteIpPoint = c.String(nullable: false, maxLength: 128),
                         StartConnection = c.DateTime(nullable: false),
-                        EndConnection = c.DateTime(nullable: false),
-                        Gateway = c.String(),
-                        RemoteIpPoint = c.String(),
+                        EndConnection = c.DateTime(),
                     })
-                .PrimaryKey(t => t.Id);
+                .PrimaryKey(t => new { t.Gateway, t.RemoteIpPoint, t.StartConnection });
             
             CreateTable(
                 "dbo.ConnectedServers",
                 c => new
                     {
-                        Id = c.Int(nullable: false, identity: true),
+                        Gateway = c.String(nullable: false, maxLength: 128),
+                        RemoteIpPoint = c.String(nullable: false, maxLength: 128),
                         StartConnection = c.DateTime(nullable: false),
-                        EndConnection = c.DateTime(nullable: false),
-                        Gateway = c.String(),
-                        RemoteIpPoint = c.String(),
+                        EndConnection = c.DateTime(),
                     })
-                .PrimaryKey(t => t.Id);
+                .PrimaryKey(t => new { t.Gateway, t.RemoteIpPoint, t.StartConnection });
             
             CreateTable(
                 "dbo.GatewayErrors",

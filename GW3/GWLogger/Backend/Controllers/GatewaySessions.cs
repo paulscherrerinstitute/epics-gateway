@@ -70,8 +70,12 @@ namespace GWLogger.Backend.Controllers
 
             public void Restart()
             {
+                ClientSessions.DisconnectAll(this.Gateway);
+                ServerSessions.DisconnectAll(this.Gateway);
+
                 if (this.NbEntries == 0)
                     return;
+
                 if (ChangedSinceLoaded)
                     History.Add(this.Clone());
                 Start = DateTime.UtcNow.TrimToSeconds();
