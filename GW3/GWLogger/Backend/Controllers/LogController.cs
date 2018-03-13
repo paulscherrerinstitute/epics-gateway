@@ -196,6 +196,14 @@ namespace GWLogger.Backend.Controllers
                         searchesStats[gateway][newEntry.EntryDate.Round()]++;
                         gatewaySessions[gateway].Log();
                         break;
+                    case 55: // Starts server TCP
+                        ServerSessions.Connect(gateway, newEntry.RemoteIpPoint);
+                        gatewaySessions[gateway].Log();
+                        break;
+                    case 53: // Ends server TCP
+                        ServerSessions.Disconnect(gateway, newEntry.RemoteIpPoint);
+                        gatewaySessions[gateway].Log();
+                        break;
                     // Skip
                     case 0:
                     case 1:

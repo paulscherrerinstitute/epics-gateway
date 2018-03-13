@@ -115,8 +115,10 @@ namespace GatewayLogic.Services
         [MessageDisplay("Cannot connect to {endpoint}.", LogLevel.Error)]
         StartTcpServerConnectionFailed,
         [MessageDisplay("Server {endpoint} disconnect.", LogLevel.Connection)]
-        TcpServerConnectionClosed,
+        DiposeTcpServerConnection,
         [MessageDisplay("Disposing channel {channelName}.", LogLevel.Detail)]
-        ChannelDispose
+        ChannelDispose,
+        [MessageDisplay("Server {endpoint} created.", LogLevel.Connection)]
+        StartTcpServerConnection
     }
 }

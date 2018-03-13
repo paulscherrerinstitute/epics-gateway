@@ -27,6 +27,8 @@ namespace GatewayLogic.Connections
 
         public TcpServerConnection(Gateway gateway, IPEndPoint destination) : base(gateway)
         {
+            gateway.MessageLogger.Write(destination.ToString(), Services.LogMessageType.StartTcpServerConnection);
+
             gateway.DiagnosticServer.NbTcpCreated++;
 
             RemoteEndPoint = destination;
@@ -211,7 +213,7 @@ namespace GatewayLogic.Connections
             socket?.Dispose();
             if (Gateway == null)
                 return;
-            Gateway.MessageLogger.Write(this.RemoteEndPoint.ToString(), Services.LogMessageType.TcpServerConnectionClosed);
+            Gateway.MessageLogger.Write(this.RemoteEndPoint.ToString(), Services.LogMessageType.DiposeTcpServerConnection);
             //Gateway.Log.Write(LogLevel.Connection, "Server " + this.Name + " disconnect");
 
             Gateway.ServerConnection.Remove(this);
