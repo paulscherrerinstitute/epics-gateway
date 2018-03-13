@@ -1,11 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GWLogger.Backend.Controllers
 {
     internal class GatewaySessions
     {
-        Dictionary<string, OpenSession> dictionary = new Dictionary<string, OpenSession>();
+        Dictionary<string, OpenSession> dictionary;
+
+        public GatewaySessions()
+        {
+            using (var ctx = new Model.LoggerContext())
+            {
+                var lastSessions = ctx.GatewaySessions.GroupBy(key => key.Gateway)
+                    .Select(row => new { Gateway = row.Key, LastSession = row.Max(r2 => r2.StartDate) });
+
+                dictionary = ctx.GatewaySessions
+                    .Join(lastSessions, s => new { Gateway = s.Gateway, LastSession = s.StartDate }, l => l, (s, l) => s)
+                    .Select(row => new OpenSession
+                    {
+                        Gateway = row.Gateway,
+                        Start = row.StartDate,
+                        End = row.LastEntry,
+                        NbEntries = row.NbEntries
+                    }).ToDictionary(key => key.Gateway, val => val);
+            }
+        }
 
         public OpenSession this[string key]
         {
@@ -40,9 +60,10 @@ namespace GWLogger.Backend.Controllers
         public class OpenSession
         {
             public string Gateway { get; set; }
-            public DateTime Start { get; private set; } = DateTime.UtcNow;
-            public DateTime End { get; private set; } = DateTime.UtcNow;
-            public long NbEntries { get; private set; } = 0;
+            public DateTime Start { get; set; } = DateTime.UtcNow.TrimToSeconds();
+            public bool ChangedSinceLoaded { get; private set; } = false;
+            public DateTime End { get; set; } = DateTime.UtcNow.TrimToSeconds();
+            public long NbEntries { get; set; } = 0;
             public bool Changed { get; set; } = true;
 
             public List<OpenSession> History { get; private set; } = new List<OpenSession>();
@@ -51,16 +72,19 @@ namespace GWLogger.Backend.Controllers
             {
                 if (this.NbEntries == 0)
                     return;
-                History.Add(this.Clone());
-                Start = DateTime.UtcNow;
-                End = DateTime.UtcNow;
+                if (ChangedSinceLoaded)
+                    History.Add(this.Clone());
+                Start = DateTime.UtcNow.TrimToSeconds();
+                End = DateTime.UtcNow.TrimToSeconds();
                 NbEntries = 0;
                 Changed = true;
+                ChangedSinceLoaded = true;
             }
 
             public void Log()
             {
-                End = DateTime.UtcNow;
+                ChangedSinceLoaded = true;
+                End = DateTime.UtcNow.TrimToSeconds();
                 NbEntries++;
                 Changed = true;
             }

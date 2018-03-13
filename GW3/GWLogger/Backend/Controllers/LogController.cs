@@ -84,7 +84,13 @@ namespace GWLogger.Backend.Controllers
                     {
                         var session = ctx.GatewaySessions.FirstOrDefault(row => row.Gateway == i.Gateway && row.StartDate == i.Start);
                         if (session == null)
-                            ctx.GatewaySessions.Add(new GatewaySession { Gateway = i.Gateway, StartDate = i.Start, LastEntry = i.End, NbEntries = i.NbEntries });
+                            ctx.GatewaySessions.Add(new GatewaySession
+                            {
+                                Gateway = i.Gateway,
+                                StartDate = i.Start,
+                                LastEntry = i.End,
+                                NbEntries = i.NbEntries
+                            });
                         else
                         {
                             session.LastEntry = i.End;
@@ -170,7 +176,7 @@ namespace GWLogger.Backend.Controllers
                 logEntriesStats[gateway][newEntry.EntryDate.Round()]++;
                 if (newEntry.MessageTypeId == 2)
                     gatewaySessions[gateway].Restart();
-                if(newEntry.MessageTypeId >= 2)
+                if (newEntry.MessageTypeId >= 2)
                     gatewaySessions[gateway].Log();
                 if (errorMessageTypes == null)
                     using (var ctx = new LoggerContext())
@@ -195,7 +201,13 @@ namespace GWLogger.Backend.Controllers
                     DisplayMask = row.DisplayMask,
                     LogLevel = row.LogLevel
                 }));
-                ctx.SaveChanges();
+                try
+                {
+                    ctx.SaveChanges();
+                }
+                catch
+                {
+                }
             }
         }
 
@@ -206,7 +218,13 @@ namespace GWLogger.Backend.Controllers
                 var dbTypes = ctx.LogDetailItemTypes.ToList();
                 var toAdd = types.Where(row => !dbTypes.Any(r2 => r2.ItemId == row.Id));
                 ctx.LogDetailItemTypes.AddRange(toAdd.Select(row => new Model.LogDetailItemType { ItemId = row.Id, Name = row.Value }));
-                ctx.SaveChanges();
+                try
+                {
+                    ctx.SaveChanges();
+                }
+                catch
+                {
+                }
             }
         }
     }

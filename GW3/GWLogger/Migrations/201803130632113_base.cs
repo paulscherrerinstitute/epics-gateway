@@ -65,13 +65,12 @@ namespace GWLogger.Migrations
                 "dbo.GatewaySessions",
                 c => new
                     {
-                        Id = c.Int(nullable: false, identity: true),
+                        Gateway = c.String(nullable: false, maxLength: 128),
                         StartDate = c.DateTime(nullable: false),
-                        Gateway = c.String(),
                         NbEntries = c.Long(nullable: false),
                         LastEntry = c.DateTime(nullable: false),
                     })
-                .PrimaryKey(t => t.Id);
+                .PrimaryKey(t => new { t.Gateway, t.StartDate });
             
             CreateTable(
                 "dbo.LogDetailItemTypes",

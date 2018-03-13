@@ -12,15 +12,11 @@ namespace GWLogger.Backend.Model
     [ExcludeFromCodeCoverage]
     public class GatewaySession
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
-
-        public DateTime StartDate { get; set; }
-
+        [Key, Column(Order = 0)]
         public string Gateway { get; set; }
-
+        [Key, Column(Order = 1)]
+        public DateTime StartDate { get; set; }
         public long NbEntries { get; set; }
-
         public DateTime LastEntry { get; set; }
     }
 }

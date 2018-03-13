@@ -14,5 +14,11 @@ namespace GWLogger.Backend
             var halfIntervalTicks = (interval.Ticks + 1) >> 1;
             return dateTime.AddTicks(halfIntervalTicks - ((dateTime.Ticks + halfIntervalTicks) % interval.Ticks));
         }
+
+        public static DateTime TrimToSeconds(this DateTime date)
+        {
+            var ticks = TimeSpan.TicksPerSecond;
+            return new DateTime(date.Ticks - (date.Ticks % ticks), date.Kind);
+        }
     }
 }
