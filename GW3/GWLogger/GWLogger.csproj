@@ -103,10 +103,12 @@
     <Compile Include="Backend\Controllers\LogController.cs" />
     <Compile Include="Backend\Controllers\LogStat.cs" />
     <Compile Include="Backend\Controllers\ServerSessions.cs" />
+    <Compile Include="Backend\DTOs\Connection.cs" />
     <Compile Include="Backend\DTOs\GatewaySession.cs" />
     <Compile Include="Backend\DTOs\IdValue.cs" />
     <Compile Include="Backend\DTOs\LogEntry.cs" />
     <Compile Include="Backend\DTOs\LogEntryDetail.cs" />
+    <Compile Include="Backend\DTOs\LogStat.cs" />
     <Compile Include="Backend\DTOs\MessageType.cs" />
     <Compile Include="Backend\DTOs\SearchRequest.cs" />
     <Compile Include="Backend\Helpers.cs" />

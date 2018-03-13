@@ -12,7 +12,7 @@ namespace GWLogger.Backend.Controllers
         {
             using (var ctx = new LoggerContext())
             {
-                return ctx.LogEntries.GroupBy(row => row.Gateway).Select(row => row.Key).ToList();
+                return ctx.GatewaySessions.GroupBy(row => row.Gateway).Select(row => row.Key).ToList();
             }
         }
 
@@ -20,20 +20,72 @@ namespace GWLogger.Backend.Controllers
         {
             using (var ctx = new LoggerContext())
             {
-                var startDates = ctx.LogEntries.Where(row => row.Gateway == gatewayName && row.MessageTypeId == 2).OrderBy(row => row.EntryDate).Select(row => row.EntryDate).ToList();
-                var endDates = new List<DateTime>();
-                foreach (var i in startDates.Skip(1))
+                return ctx.GatewaySessions.Where(row => row.Gateway == gatewayName).OrderByDescending(row => row.StartDate)
+                .Select(row => new DTOs.GatewaySession
                 {
-                    endDates.Add(ctx.LogEntries.OrderByDescending(row => row.EntryDate)
-                        .Where(row => row.Gateway == gatewayName && row.EntryDate < i
-                        && row.MessageTypeId != 0 && row.MessageTypeId != 1).First().EntryDate);
-                }
-                endDates.Add(ctx.LogEntries.OrderByDescending(row => row.EntryDate).Where(row => row.Gateway == gatewayName).First().EntryDate);
+                    StartDate = row.StartDate,
+                    EndDate = row.LastEntry,
+                    NbEntries = row.NbEntries
+                }).ToList();
+            }
+        }
 
-                var result = new List<DTOs.GatewaySession>();
-                for (var i = 0; i < endDates.Count; i++)
-                    result.Add(new DTOs.GatewaySession { StartDate = startDates[i], EndDate = endDates[i] });
-                return result;
+        public static List<DTOs.LogStat> GetLogStats(string gatewayName, DateTime start, DateTime end)
+        {
+            using (var ctx = new LoggerContext())
+            {
+                return ctx.GatewayNbMessages.Where(row => row.Gateway == gatewayName && row.Date >= start && row.Date <= end)
+                    .Select(row => new DTOs.LogStat { Date = row.Date, Value = row.NbMessages }).ToList();
+            }
+        }
+
+        public static List<DTOs.LogStat> GetErrorStats(string gatewayName, DateTime start, DateTime end)
+        {
+            using (var ctx = new LoggerContext())
+            {
+                return ctx.GatewayErrors.Where(row => row.Gateway == gatewayName && row.Date >= start && row.Date <= end)
+                    .Select(row => new DTOs.LogStat { Date = row.Date, Value = row.NbErrors }).ToList();
+            }
+        }
+
+        public static List<DTOs.LogStat> GetSearchesStats(string gatewayName, DateTime start, DateTime end)
+        {
+            using (var ctx = new LoggerContext())
+            {
+                return ctx.GatewaySearches.Where(row => row.Gateway == gatewayName && row.Date >= start && row.Date <= end)
+                    .Select(row => new DTOs.LogStat { Date = row.Date, Value = row.NbSearches }).ToList();
+            }
+        }
+
+        public static List<DTOs.Connection> GetConnectedClients(string gatewayName, DateTime when)
+        {
+            using (var ctx = new LoggerContext())
+            {
+                return ctx.ConnectedClients.Where(row => row.Gateway == gatewayName
+                    && row.StartConnection <= when && row.EndConnection >= when)
+                    .OrderBy(row => row.RemoteIpPoint)
+                    .Select(row => new DTOs.Connection
+                    {
+                        RemoteIpPoint = row.RemoteIpPoint,
+                        Start = row.StartConnection,
+                        End = row.EndConnection
+                    }).ToList();
+            }
+        }
+
+        public static List<DTOs.Connection> GetConnectedServers(string gatewayName, DateTime when)
+        {
+            using (var ctx = new LoggerContext())
+            {
+                return ctx.ConnectedServers.Where(row => row.Gateway == gatewayName
+                    && row.StartConnection <= when && row.EndConnection >= when)
+                    .OrderBy(row => row.RemoteIpPoint)
+                    .Select(row => new DTOs.Connection
+                    {
+                        RemoteIpPoint = row.RemoteIpPoint,
+                        Start = row.StartConnection,
+                        End = row.EndConnection
+                    }).ToList();
             }
         }
 

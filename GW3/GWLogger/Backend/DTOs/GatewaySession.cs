@@ -6,5 +6,6 @@ namespace GWLogger.Backend.DTOs
     {
         public DateTime EndDate { get; set; }
         public DateTime StartDate { get; set; }
+        public long NbEntries { get; set; }
     }
 }
