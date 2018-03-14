@@ -1,0 +1,85 @@
+﻿body {
+    font-family: sans-serif;
+    font-size: 12px;
+    color: black;
+    background-color: white;
+}
+
+h1 {
+    font-size: 18px;
+    font-weight: bold;
+    display: block;
+}
+
+#methodParameters {
+    display: inline-block;
+    width: 50%;
+    vertical-align: top;
+    padding-top: 20px;
+}
+
+#prototype {
+    white-space: pre;
+    display: inline-block;
+    width: 50%;
+    overflow: hidden;
+    vertical-align: top;
+    border-left: solid 1px black;
+    box-sizing: border-box;
+    padding-left: 10px;
+}
+
+#result {
+    border-top: solid 1px black;
+    margin-top: 20px;
+    padding-top: 10px;
+    white-space: pre;
+    width: 100%;
+    overflow-wrap: break-word;
+}
+
+.apiDetails {
+    border-collapse: collapse;
+    border: solid 1px #adadad;
+    width: 100%;
+}
+
+    .apiDetails tr {
+        vertical-align: top;
+        border-bottom: 1px solid #d3d3d3;
+    }
+
+        .apiDetails tr > td:first-child {
+            padding-left: 3px;
+        }
+
+        .apiDetails tr:nth-child(2n+1) {
+            background-color: #F0F0F0;
+        }
+
+.apiCategory td {
+    background-color: #808080 !important;
+    color: white;
+    font-size: 18px;
+    padding: 3px;
+}
+
+a {
+    text-decoration: none;
+    color: #0000E0;
+    font-weight: bold;
+}
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+#searchFunction {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.highlight {
+    background-color: #ffed83 !important;
+    color: black !important;
+}

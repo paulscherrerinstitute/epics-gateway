@@ -83,9 +83,19 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Backend\Model\DB Design.cd" />
+    <Content Include="Frontend\introspection.js" />
+    <Content Include="Less\introspect.css" />
     <Content Include="Less\main.less" />
+    <Content Include="Introspection.ashx" />
     <None Include="packages.config" />
     <None Include="Properties\PublishProfiles\AIT-IIS.pubxml" />
+    <None Include="Scripts\jquery-3.3.1.intellisense.js" />
+    <Content Include="Scripts\jquery-3.3.1.js" />
+    <Content Include="Scripts\jquery-3.3.1.min.js" />
+    <Content Include="Scripts\jquery-3.3.1.slim.js" />
+    <Content Include="Scripts\jquery-3.3.1.slim.min.js" />
+    <Content Include="Scripts\jquery-3.3.1.slim.min.map" />
+    <Content Include="Scripts\jquery-3.3.1.min.map" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -143,6 +153,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Introspection.ashx.cs">
+      <DependentUpon>Introspection.ashx</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\201803130816119_base.cs" />
     <Compile Include="Migrations\201803130816119_base.Designer.cs">
       <DependentUpon>201803130816119_base.cs</DependentUpon>
@@ -156,7 +169,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Frontend\DTOs\GatewaySession.ts" />
     <TypeScriptCompile Include="Frontend\Main.ts" />
+    <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
