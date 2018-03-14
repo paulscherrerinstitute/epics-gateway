@@ -1,0 +1,4 @@
+﻿// Main class...
+class Main
+{
+}

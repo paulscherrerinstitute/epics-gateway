@@ -2,3 +2,13 @@
 **/.vs/**
 **/bin/**
 **/obj/**
+# Node modules shall not be added
+**/node_modules/**
+# Final JS output shall not be added
+**/GWLogger/main.js
+**/GWLogger/main.js.map
+# Mid JS files shall not be added
+**/GWLogger/Frontend/**/*.js
+**/GWLogger/Frontend/**/*.js.map
+# Final CSS output shall not be added
+**/GWLogger/Less/main.css

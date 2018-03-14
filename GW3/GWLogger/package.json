@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "name": "asp.net",
+  "private": true,
+  "devDependencies": {
+    "gulp": "3.9.1",
+    "rimraf": "2.6.1",
+    "gulp-watch": "4.3.11",
+    "gulp-debug": "3.1.0",
+    "gulp-typescript": "3.1.7",
+    "gulp-sourcemaps": "2.6.0",
+    "typescript": "2.3.3",
+    "gulp-less": "3.3.0",
+    "gulp-util": "3.0.8"
+  }
+}
