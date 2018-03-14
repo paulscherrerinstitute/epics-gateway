@@ -120,6 +120,7 @@
     <Compile Include="Backend\Controllers\ServerSessions.cs" />
     <Compile Include="Backend\DTOs\Connection.cs" />
     <Compile Include="Backend\DTOs\GatewaySession.cs" />
+    <Compile Include="Backend\DTOs\GatewayStats.cs" />
     <Compile Include="Backend\DTOs\IdValue.cs" />
     <Compile Include="Backend\DTOs\LogEntry.cs" />
     <Compile Include="Backend\DTOs\LogEntryDetail.cs" />
@@ -170,6 +171,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Frontend\DTOs\GatewaySession.ts" />
+    <TypeScriptCompile Include="Frontend\DTOs\GatewayStats.ts" />
     <TypeScriptCompile Include="Frontend\Main.ts" />
     <TypeScriptCompile Include="Frontend\Utils.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />

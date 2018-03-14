@@ -19,6 +19,7 @@
 
 .containterLabel
 {
+    position: absolute;
     display: block;
     width: 100px;
     text-align: center;
@@ -42,13 +43,12 @@
     width: 195px;
     bottom: 5px;
     padding: 5px;
+    padding-top: 17px;
 
-    &:before
+    &:after
     {
         .containterLabel;
         content: "Session";
-        margin-left: -5px;
-        margin-top: -5px;
     }
 }
 
@@ -66,11 +66,18 @@
     height: 45px;
     right: 5px;
 
-    &:before
+    &:after
     {
         .containterLabel;
         content: "Time Range";
     }
+}
+
+#timeRangeCanvas 
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
 }
 
 #content
@@ -81,4 +88,9 @@
     right: 5px;
     bottom: 5px;
     padding: 5px;
+}
+
+#gatewaySessions
+{
+    font-size: 12px;
 }

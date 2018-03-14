@@ -22,6 +22,12 @@ namespace GWLogger
         }
 
         [WebMethod]
+        public Backend.DTOs.GatewayStats GetStats(string gatewayName, DateTime start, DateTime end)
+        {
+            return AnalyzeController.GetStats(gatewayName, start, end);
+        }
+
+        [WebMethod]
         public List<Backend.DTOs.LogStat> GetLogStats(string gatewayName, DateTime start, DateTime end)
         {
             return AnalyzeController.GetLogStats(gatewayName,start,end);

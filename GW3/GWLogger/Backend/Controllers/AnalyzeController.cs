@@ -57,6 +57,16 @@ namespace GWLogger.Backend.Controllers
             }
         }
 
+        public static DTOs.GatewayStats GetStats(string gatewayName, DateTime start, DateTime end)
+        {
+            return new DTOs.GatewayStats
+            {
+                Logs = GetLogStats(gatewayName, start, end),
+                Searches = GetSearchesStats(gatewayName, start, end),
+                Errors = GetErrorStats(gatewayName, start, end)
+            };
+        }
+
         public static List<DTOs.Connection> GetConnectedClients(string gatewayName, DateTime when)
         {
             using (var ctx = new LoggerContext())
