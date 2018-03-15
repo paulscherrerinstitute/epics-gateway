@@ -85,11 +85,14 @@
     <Content Include="Backend\Model\DB Design.cd" />
     <Content Include="Frontend\introspection.js" />
     <Content Include="Less\introspect.css" />
+    <Content Include="Less\main.css" />
     <Content Include="Less\main.less" />
     <Content Include="Introspection.ashx" />
+    <Content Include="main.js.map" />
     <None Include="packages.config" />
     <None Include="Properties\PublishProfiles\AIT-IIS.pubxml" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
+    <Content Include="main.js" />
     <Content Include="Scripts\jquery-3.3.1.js" />
     <Content Include="Scripts\jquery-3.3.1.min.js" />
     <Content Include="Scripts\jquery-3.3.1.slim.js" />
