@@ -46,9 +46,27 @@ namespace GWLogger
         }
 
         [WebMethod]
+        public Backend.DTOs.Connections GetConnectionsBetween(string gatewayName, DateTime start, DateTime end)
+        {
+            return AnalyzeController.GetConnectionsBetween(gatewayName, start, end);
+        }
+
+        [WebMethod]
+        public List<Backend.DTOs.Connection> GetConnectedClientsBetween(string gatewayName, DateTime start, DateTime end)
+        {
+            return AnalyzeController.GetConnectedClientsBetween(gatewayName, start, end);
+        }
+
+        [WebMethod]
         public  List<Backend.DTOs.Connection> GetConnectedClients(string gatewayName, DateTime when)
         {
             return AnalyzeController.GetConnectedClients(gatewayName, when);
+        }
+
+        [WebMethod]
+        public List<Backend.DTOs.Connection> GetConnectedServersBetween(string gatewayName, DateTime start, DateTime end)
+        {
+            return AnalyzeController.GetConnectedServersBetween(gatewayName, start, end);
         }
 
         [WebMethod]

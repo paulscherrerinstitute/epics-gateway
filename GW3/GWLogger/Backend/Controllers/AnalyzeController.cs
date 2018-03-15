@@ -67,12 +67,55 @@ namespace GWLogger.Backend.Controllers
             };
         }
 
+        public static DTOs.Connections GetConnectionsBetween(string gatewayName, DateTime start, DateTime end)
+        {
+            return new DTOs.Connections
+            {
+                Clients = GetConnectedClientsBetween(gatewayName, start, end),
+                Servers = GetConnectedServersBetween(gatewayName, start, end)
+            };
+        }
+
+        public static List<DTOs.Connection> GetConnectedClientsBetween(string gatewayName, DateTime start, DateTime end)
+        {
+            using (var ctx = new LoggerContext())
+            {
+                return ctx.ConnectedClients.Where(row => row.Gateway == gatewayName
+                    && (!(row.EndConnection < start || row.StartConnection > end)
+                    || (row.EndConnection == null && end >= row.StartConnection)))
+                    .OrderBy(row => row.RemoteIpPoint)
+                    .Select(row => new DTOs.Connection
+                    {
+                        RemoteIpPoint = row.RemoteIpPoint,
+                        Start = row.StartConnection,
+                        End = row.EndConnection
+                    }).ToList();
+            }
+        }
+
         public static List<DTOs.Connection> GetConnectedClients(string gatewayName, DateTime when)
         {
             using (var ctx = new LoggerContext())
             {
                 return ctx.ConnectedClients.Where(row => row.Gateway == gatewayName
                     && row.StartConnection <= when && row.EndConnection >= when)
+                    .OrderBy(row => row.RemoteIpPoint)
+                    .Select(row => new DTOs.Connection
+                    {
+                        RemoteIpPoint = row.RemoteIpPoint,
+                        Start = row.StartConnection,
+                        End = row.EndConnection
+                    }).ToList();
+            }
+        }
+
+        public static List<DTOs.Connection> GetConnectedServersBetween(string gatewayName, DateTime start, DateTime end)
+        {
+            using (var ctx = new LoggerContext())
+            {
+                return ctx.ConnectedServers.Where(row => row.Gateway == gatewayName
+                    && (!(row.EndConnection < start || row.StartConnection > end)
+                    || (row.EndConnection == null && end >= row.StartConnection)))
                     .OrderBy(row => row.RemoteIpPoint)
                     .Select(row => new DTOs.Connection
                     {

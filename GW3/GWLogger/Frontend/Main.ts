@@ -5,6 +5,7 @@ class Main
     static Sessions: GatewaySession[];
     static Stats: GatewayStats;
     static EndDate: Date;
+    static CurrentTime: Date;
 
     static LoadGateways(): void
     {
@@ -44,7 +45,11 @@ class Main
         $.ajax({
             type: 'POST',
             url: 'DataAccess.asmx/GetStats',
-            data: JSON.stringify({ "gatewayName": Main.CurrentGateway, start: Utils.FullDateFormat(start), end: Utils.FullDateFormat(end) }),
+            data: JSON.stringify({
+                "gatewayName": Main.CurrentGateway,
+                start: Utils.FullDateFormat(start),
+                end: Utils.FullDateFormat(end)
+            }),
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             success: function (msg)
@@ -90,9 +95,6 @@ class Main
         for (var i = 0; i < Main.Stats.Searches.length; i++)
             maxNValue = Math.max(maxNValue, Main.Stats.Searches[i].Value);
 
-        /*ctx.fillStyle = "#FFFFFF00";
-        ctx.fillRect(0, 100, width, 3);*/
-
         var prevErrorValY: number = null;
 
         for (var i = 0; i < 145; i++)
@@ -117,8 +119,8 @@ class Main
                 ctx.strokeStyle = "#cc8282";
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.moveTo(Math.round(width - (i - 0.5) * w) + 0.5, Math.round(prevErrorValY) + 0.5);
-                ctx.lineTo(Math.round(width - (i + 0.5) * w) + 0.5, Math.round(bv) + 0.5);
+                ctx.moveTo(Math.round(width - (i - 0.5) * w) + 0.5, Math.round(b - prevErrorValY) + 0.5);
+                ctx.lineTo(Math.round(width - (i + 0.5) * w) + 0.5, Math.round(b - bv) + 0.5);
                 ctx.stroke();
                 ctx.lineWidth = 1;
             }
@@ -141,29 +143,43 @@ class Main
         ctx.font = "12px sans-serif";
 
         var dts = Utils.ShortGWDateFormat(Main.EndDate);
-        var w = ctx.measureText(dts).width;
+        var tw = ctx.measureText(dts).width;
         ctx.fillStyle = "rgba(255,255,255,0.7)";
-        ctx.fillRect(width - (w + 5), b + 2, w + 2, 16);
+        ctx.fillRect(width - (tw + 5), b + 2, tw + 2, 16);
         ctx.fillStyle = "#000000";
-        ctx.fillText(dts, width - (w + 5), b + 14);
+        ctx.fillText(dts, width - (tw + 5), b + 14);
 
         var dts = Utils.ShortGWDateFormat(new Date(Main.EndDate.getTime() - 72 * 10 * 60 * 1000));
-        var w = ctx.measureText(dts).width;
+        var tw = ctx.measureText(dts).width;
         ctx.fillStyle = "rgba(255,255,255,0.7)";
-        ctx.fillRect(width / 2 - w / 2, b + 2, w + 2, 16);
+        ctx.fillRect(width / 2 - tw / 2, b + 2, tw + 2, 16);
         ctx.fillStyle = "#000000";
-        ctx.fillText(dts, width / 2 - w / 2, b + 14);
+        ctx.fillText(dts, width / 2 - tw / 2, b + 14);
 
         var dts = Utils.ShortGWDateFormat(new Date(Main.EndDate.getTime() - 144 * 10 * 60 * 1000));
-        var w = ctx.measureText(dts).width;
+        var tw = ctx.measureText(dts).width;
         ctx.fillStyle = "rgba(255,255,255,0.7)";
-        ctx.fillRect(5, b + 2, w + 2, 16);
+        ctx.fillRect(5, b + 2, tw + 2, 16);
         ctx.fillStyle = "#000000";
         ctx.fillText(dts, 5, b + 14);
 
-
         ctx.fillStyle = "#E0E0E0";
         ctx.fillRect(0, Math.round(b), width, 1);
+
+        if (Main.CurrentTime)
+        {
+            var tdiff = Main.EndDate.getTime() - Main.CurrentTime.getTime();
+            var t = tdiff / (10 * 60 * 1000);
+            var x = width - Math.floor(t * w + w / 2);
+
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "rgba(0,0,255,0.7)";
+            ctx.beginPath();
+            ctx.moveTo(x + 0.5, 0);
+            ctx.lineTo(x + 0.5, height);
+            ctx.stroke();
+        }
+
     }
 
     static GetStat(logType: string, when: Date): number
@@ -207,6 +223,65 @@ class Main
         });
     }
 
+    static TimeLineSelected(evt: MouseEvent): void
+    {
+        var width = $("#timeRange").width();
+        var w = width / 145;
+        var x = evt.pageX - $("#timeRange").position().left;
+
+        var tx = Math.floor((width - x) / w);
+        Main.CurrentTime = new Date(Main.EndDate.getTime() - tx * 10 * 60 * 1000);
+        Main.DrawStats();
+        var startDate = new Date(Main.CurrentTime.getTime() - 5 * 60 * 1000);
+        var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
+
+        $.ajax({
+            type: 'POST',
+            url: 'DataAccess.asmx/GetConnectionsBetween',
+            data: JSON.stringify({
+                "gatewayName": Main.CurrentGateway,
+                "start": Utils.FullDateFormat(startDate),
+                "end": Utils.FullDateFormat(endDate)
+            }),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (msg)
+            {
+                var connections = Connections.CreateFromObject(msg.d);
+                var html = "";
+                html += "Clients connections:<br>";
+                html += "<table>";
+                for (var i = 0; i < connections.Clients.length; i++)
+                {
+                    html += "<tr>";
+                    html += "<td>" + connections.Clients[i].RemoteIpPoint + "</td>";
+                    html += "<td>" + Utils.FullDateFormat(connections.Clients[i].Start) + "</td>";
+                    html += "<td>" + (connections.Clients[i].End ? Utils.FullDateFormat(connections.Clients[i].End) : "&nbsp;") + "</td>";
+                    html + "</tr>";
+                }
+                html += "</table>";
+
+                html += "Servers (IOC) connections:<br>";
+                html += "<table>";
+                for (var i = 0; i < connections.Servers.length; i++)
+                {
+                    html += "<tr>";
+                    html += "<td>" + connections.Servers[i].RemoteIpPoint + "</td>";
+                    html += "<td>" + Utils.FullDateFormat(connections.Servers[i].Start) + "</td>";
+                    html += "<td>" + (connections.Servers[i].End ? Utils.FullDateFormat(connections.Servers[i].End) : "&nbsp;") + "</td>";
+                    html + "</tr>";
+                }
+                html += "</table>";
+
+                $("#content").html(html);
+            },
+            error: function (msg, textStatus)
+            {
+                console.log(msg.responseText);
+            }
+        });
+    }
+
     static Resize(): void
     {
         Main.DrawStats();
@@ -217,6 +292,7 @@ class Main
         Main.LoadGateways();
         $("#gatewaySelector").on("change", Main.GatewaySelected);
         $(window).on("resize", Main.Resize);
+        $("#timeRangeCanvas").click(Main.TimeLineSelected);
     }
 }
 

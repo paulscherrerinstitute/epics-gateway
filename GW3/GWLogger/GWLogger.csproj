@@ -122,6 +122,7 @@
     <Compile Include="Backend\Controllers\LogStat.cs" />
     <Compile Include="Backend\Controllers\ServerSessions.cs" />
     <Compile Include="Backend\DTOs\Connection.cs" />
+    <Compile Include="Backend\DTOs\Connections.cs" />
     <Compile Include="Backend\DTOs\GatewaySession.cs" />
     <Compile Include="Backend\DTOs\GatewayStats.cs" />
     <Compile Include="Backend\DTOs\IdValue.cs" />
@@ -173,6 +174,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Frontend\DTOs\Connections.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewaySession.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewayStats.ts" />
     <TypeScriptCompile Include="Frontend\Main.ts" />
