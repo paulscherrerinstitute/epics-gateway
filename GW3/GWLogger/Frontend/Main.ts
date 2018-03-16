@@ -225,6 +225,9 @@ class Main
 
     static TimeLineSelected(evt: MouseEvent): void
     {
+        $("#help").hide();
+        $("#clients, #servers, #logs").show();
+
         var width = $("#timeRange").width();
         var w = width / 145;
         var x = evt.pageX - $("#timeRange").position().left;
@@ -249,7 +252,6 @@ class Main
             {
                 var connections = Connections.CreateFromObject(msg.d);
                 var html = "";
-                html += "Clients connections:<br>";
                 html += "<table>";
                 for (var i = 0; i < connections.Clients.length; i++)
                 {
@@ -260,9 +262,9 @@ class Main
                     html + "</tr>";
                 }
                 html += "</table>";
+                $("#clients").html(html);
 
-                html += "Servers (IOC) connections:<br>";
-                html += "<table>";
+                html = "<table>";
                 for (var i = 0; i < connections.Servers.length; i++)
                 {
                     html += "<tr>";
@@ -272,8 +274,7 @@ class Main
                     html + "</tr>";
                 }
                 html += "</table>";
-
-                $("#content").html(html);
+                $("#servers").html(html);
             },
             error: function (msg, textStatus)
             {

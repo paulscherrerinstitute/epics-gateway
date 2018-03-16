@@ -1,6 +1,17 @@
-﻿body
+﻿@backgroundColor: #e6e6e6;
+@boxShadow: #9d9d9d 1px 1px 2px;
+@labelBackgroundColor: #edeada;
+@labelColor: #979275;
+@leftSidebar: 300px;
+@timeRangeHeight: 100px;
+@borderSpacing: 5px;
+
+
+@middleSidebar: (@leftSidebar+5)/2;
+
+body
 {
-    background-color: #e6e6e6;
+    background-color: @backgroundColor;
     color: black;
     font-family: sans-serif;
     font-size: 14px;
@@ -11,7 +22,7 @@
 {
     position: absolute;
     background-color: white;
-    box-shadow: #9d9d9d 1px 1px 2px;
+    box-shadow: @boxShadow;
     border-radius: 2px;
     display: block;
     box-sizing: border-box;
@@ -23,16 +34,16 @@
     display: block;
     width: 100px;
     text-align: center;
-    background-color: #edeada;
-    border-right: solid 1px #bfbca8;
-    border-bottom: solid 1px #bfbca8;
+    background-color: @labelBackgroundColor;
+    border-right: solid 1px darken(@labelBackgroundColor, 30%);
+    border-bottom: solid 1px darken(@labelBackgroundColor, 30%);
     border-bottom-right-radius: 3px;
     top: 0px;
     left: 0px;
     padding: 2px;
     font-weight: bold;
     font-size: 10px;
-    color: #979275;
+    color: @labelColor;
 }
 
 #sessionSelector
@@ -40,8 +51,8 @@
     .container;
     left: 0px;
     top: 0px;
-    width: 195px;
-    bottom: 5px;
+    width: @leftSidebar;
+    bottom: @borderSpacing;
     padding: 5px;
     padding-top: 17px;
 
@@ -52,7 +63,7 @@
     }
 }
 
-#gatewaySelector 
+#gatewaySelector
 {
     display: block;
     width: 100%;
@@ -62,9 +73,9 @@
 {
     .container;
     top: 0px;
-    left: 200px;
-    height: 95px;
-    right: 5px;
+    left: (@leftSidebar + @borderSpacing);
+    height: @timeRangeHeight;
+    right: @borderSpacing;
 
     &:after
     {
@@ -73,24 +84,75 @@
     }
 }
 
-#timeRangeCanvas 
+#timeRangeCanvas
 {
     position: absolute;
     left: 0px;
     top: 0px;
 }
 
-#content
+#help
 {
     .container;
-    top: 100px;
-    left: 200px;
-    right: 5px;
-    bottom: 5px;
+    top: (@timeRangeHeight + @borderSpacing);
+    left: (@leftSidebar + @borderSpacing);
+    right: @borderSpacing;
+    bottom: @borderSpacing;
     padding: 5px;
 }
 
 #gatewaySessions
 {
     font-size: 12px;
+}
+
+#clients
+{
+    .container;
+    top: (@timeRangeHeight + @borderSpacing);
+    left: (@leftSidebar + @borderSpacing);
+    width: ~"calc(50vw - @{middleSidebar} - @{borderSpacing})";
+    height: ~"calc(50% - @{timeRangeHeight} - @{borderSpacing})";
+    display: none;
+    padding-top: 16px;
+
+    &:after
+    {
+        .containterLabel;
+        content: "Clients";
+    }
+}
+
+#servers
+{
+    .container;
+    top: (@timeRangeHeight + @borderSpacing);
+    right: @borderSpacing;
+    width: ~"calc(50vw - @{middleSidebar} - @{borderSpacing})";
+    height: ~"calc(50% - @{timeRangeHeight} - @{borderSpacing})";
+    display: none;
+    padding-top: 16px;
+
+    &:after
+    {
+        .containterLabel;
+        content: "Servers";
+    }
+}
+
+#logs
+{
+    .container;
+    bottom: @borderSpacing;
+    left: (@leftSidebar + @borderSpacing);
+    right: @borderSpacing;
+    height: ~"calc(50% - @{borderSpacing} - @{borderSpacing})";
+    display: none;
+    padding-top: 16px;
+
+    &:after
+    {
+        .containterLabel;
+        content: "Logs";
+    }
 }

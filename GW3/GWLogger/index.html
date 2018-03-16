@@ -13,7 +13,19 @@
         <div id="gatewaySessions"></div>
     </div>
     <div id="timeRange"><canvas id="timeRangeCanvas"></canvas></div>
-    <div id="content">EPICS Gateway Logger</div>
+    <div id="help">
+        <h1>Welcome to the EPICS Gateway Log Analyzer</h1>
+        <h2>How to use it:</h2>
+        <ol>
+            <li>Select the gateway you want to check on the top left side. The gateway sessions are then loaded and displayed on the left bar, as well as the statistics are displayed on the time range widget.</li>
+            <li>You can click the time range widget to check out more details on that time.</li>
+        </ol>
+        <h2>Data retention:</h2>
+        Data is kept for a max. time of 10 days.
+    </div>
+    <div id="clients"></div>
+    <div id="servers"></div>
+    <div id="logs"></div>
     <script src="Scripts/jquery-3.3.1.min.js"></script>
     <script src="main.js"></script>
 </body>
