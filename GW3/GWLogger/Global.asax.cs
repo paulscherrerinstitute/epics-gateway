@@ -25,9 +25,13 @@ namespace GWLogger
 
         protected void Application_BeginRequest(object sender, EventArgs e)
         {
+            string fullOrigionalpath = Request.Url.AbsolutePath;
 
+            if (fullOrigionalpath.StartsWith("/GW/"))
+            {
+                Context.RewritePath("/index.html");
+            }
         }
-
         protected void Application_AuthenticateRequest(object sender, EventArgs e)
         {
 

@@ -1,11 +1,17 @@
 ﻿// Main class...
 class Main
 {
+    static BaseTitle: string;
     static CurrentGateway: string;
     static Sessions: GatewaySession[];
     static Stats: GatewayStats;
     static EndDate: Date;
     static CurrentTime: Date;
+
+    static Path(): string[]
+    {
+        return document.location.pathname.split('/');
+    }
 
     static LoadGateways(): void
     {
@@ -19,16 +25,30 @@ class Main
             {
                 var gateways: string[] = msg.d;
                 var options = "<option>" + gateways.join("</option><option>") + "</option>";
-                $('#gatewaySelector').find('option').remove().end().append(options).val(gateways[0]);
-
-                Main.CurrentGateway = gateways[0];
-                Main.GatewaySelected();
+                if (Main.CurrentGateway)
+                {
+                    $('#gatewaySelector').find('option').remove().end().append(options).val(Main.CurrentGateway);
+                    Main.GatewaySelected();
+                }
+                else
+                {
+                    $('#gatewaySelector').find('option').remove().end().append(options).val(gateways[0]);
+                    Main.GatewayChanged();
+                }
             },
             error: function (msg, textStatus)
             {
                 console.log(msg.responseText);
             }
         });
+    }
+
+    static GatewayChanged(): void
+    {
+        Main.CurrentGateway = $('#gatewaySelector').val();
+        window.history.pushState(null, Main.BaseTitle + " - " + Main.CurrentGateway, '/GW/' + Main.CurrentGateway);
+
+        Main.GatewaySelected();
     }
 
     static GatewaySelected(): void
@@ -64,6 +84,9 @@ class Main
                         Main.EndDate = new Date();
                 }
                 Main.DrawStats();
+
+                if (Main.CurrentTime)
+                    Main.LoadTimeInfo();
             },
             error: function (msg, textStatus)
             {
@@ -209,7 +232,7 @@ class Main
             {
                 Main.Sessions = (msg.d ? (<object[]>msg.d).map(function (c) { return GatewaySession.CreateFromObject(c); }) : []);
                 var html = "";
-                html += "<table>"; 
+                html += "<table>";
                 html += "<thead><tr><td>Start</td><td>End</td><td>NB&nbsp;Logs</td></tr></thead>";
                 html += "<tbody>";
                 for (var i = 0; i < Main.Sessions.length; i++)
@@ -230,15 +253,22 @@ class Main
 
     static TimeLineSelected(evt: MouseEvent): void
     {
-        $("#help").hide();
-        $("#clients, #servers, #logs").show();
-
         var width = $("#timeRange").width();
         var w = width / 145;
         var x = evt.pageX - $("#timeRange").position().left;
 
         var tx = Math.floor((width - x) / w);
         Main.CurrentTime = new Date(Main.EndDate.getTime() - tx * 10 * 60 * 1000);
+        window.history.pushState(null, Main.BaseTitle + " - " + Main.CurrentGateway, '/GW/' + Main.CurrentGateway + "/" + Main.CurrentTime.getTime());
+
+        Main.LoadTimeInfo();
+    }
+
+    static LoadTimeInfo()
+    {
+        $("#help").hide();
+        $("#clients, #servers, #logs").show();
+
         Main.DrawStats();
         var startDate = new Date(Main.CurrentTime.getTime() - 5 * 60 * 1000);
         var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
@@ -295,6 +325,7 @@ class Main
 
     static Refresh()
     {
+        Main.LoadSessions();
         Main.LoadLogStats();
     }
 
@@ -303,13 +334,36 @@ class Main
         Main.DrawStats();
     }
 
+    static PopState(jEvent: JQueryEventObject)
+    {
+        Main.CurrentGateway = null;
+        Main.CurrentTime = null;
+        Main.EndDate = null;
+
+        $("#help").show();
+        $("#clients, #servers, #logs").hide();
+
+        var path = Main.Path();
+        if (path.length > 2 && path[1] == "GW")
+        {
+            Main.CurrentGateway = path[2];
+            if (path.length > 3)
+                Main.CurrentTime = new Date(parseInt(path[3]));
+        }
+
+        Main.LoadGateways();
+    }
+
     static Init(): void
     {
-        Main.LoadGateways();
-        $("#gatewaySelector").on("change", Main.GatewaySelected);
+        Main.BaseTitle = window.document.title;
+        $("#gatewaySelector").on("change", Main.GatewayChanged);
         $(window).on("resize", Main.Resize);
         $("#timeRangeCanvas").click(Main.TimeLineSelected);
-        window.setInterval(Main.Refresh,1000);
+        window.setInterval(Main.Refresh, 1000);
+        $(window).bind('popstate', Main.PopState);
+
+        Main.PopState(null);
     }
 }
 
