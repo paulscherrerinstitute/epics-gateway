@@ -54,11 +54,15 @@ class Main
             dataType: 'json',
             success: function (msg)
             {
+                var resetEndDate = ((Main.EndDate && Main.Stats && Main.EndDate == Main.Stats.Logs[Main.Stats.Logs.length - 1].Date) || !(Main.EndDate && Main.Stats))
                 Main.Stats = GatewayStats.CreateFromObject(msg.d);
-                if (Main.Stats.Logs && Main.Stats.Logs.length > 0)
-                    Main.EndDate = Main.Stats.Logs[Main.Stats.Logs.length - 1].Date;
-                else
-                    Main.EndDate = new Date();
+                if (resetEndDate)
+                {
+                    if (Main.Stats.Logs && Main.Stats.Logs.length > 0)
+                        Main.EndDate = Main.Stats.Logs[Main.Stats.Logs.length - 1].Date;
+                    else
+                        Main.EndDate = new Date();
+                }
                 Main.DrawStats();
             },
             error: function (msg, textStatus)
@@ -193,7 +197,6 @@ class Main
         return 0;
     }
 
-
     static LoadSessions(): void
     {
         $.ajax({
@@ -206,14 +209,16 @@ class Main
             {
                 Main.Sessions = (msg.d ? (<object[]>msg.d).map(function (c) { return GatewaySession.CreateFromObject(c); }) : []);
                 var html = "";
-                html += "<table>";
+                html += "<table>"; 
+                html += "<thead><tr><td>Start</td><td>End</td><td>NB&nbsp;Logs</td></tr></thead>";
+                html += "<tbody>";
                 for (var i = 0; i < Main.Sessions.length; i++)
                 {
                     html += "<tr><td>" + Utils.GWDateFormat(Main.Sessions[i].StartDate) + "</td>";
                     html += "<td>" + Utils.GWDateFormat(Main.Sessions[i].EndDate) + "</td>";
                     html += "<td>" + Main.Sessions[i].NbEntries + "</td></tr>";
                 }
-                html += "</table>";
+                html += "</tbody></table>";
                 $("#gatewaySessions").html(html);
             },
             error: function (msg, textStatus)
@@ -253,6 +258,8 @@ class Main
                 var connections = Connections.CreateFromObject(msg.d);
                 var html = "";
                 html += "<table>";
+                html += "<thead><tr><td>Client</td><td>Start</td><td>End</td></tr></thead>";
+                html + "<tbody>";
                 for (var i = 0; i < connections.Clients.length; i++)
                 {
                     html += "<tr>";
@@ -261,10 +268,12 @@ class Main
                     html += "<td>" + (connections.Clients[i].End ? Utils.FullDateFormat(connections.Clients[i].End) : "&nbsp;") + "</td>";
                     html + "</tr>";
                 }
-                html += "</table>";
-                $("#clients").html(html);
+                html += "</tbody></table>";
+                $("#clientsContent").html(html);
 
                 html = "<table>";
+                html += "<thead><tr><td>Server</td><td>Start</td><td>End</td></tr></thead>";
+                html + "<tbody>";
                 for (var i = 0; i < connections.Servers.length; i++)
                 {
                     html += "<tr>";
@@ -274,13 +283,19 @@ class Main
                     html + "</tr>";
                 }
                 html += "</table>";
-                $("#servers").html(html);
+                html += "</tbody></table>";
+                $("#serversContent").html(html);
             },
             error: function (msg, textStatus)
             {
                 console.log(msg.responseText);
             }
         });
+    }
+
+    static Refresh()
+    {
+        Main.LoadLogStats();
     }
 
     static Resize(): void
@@ -294,6 +309,7 @@ class Main
         $("#gatewaySelector").on("change", Main.GatewaySelected);
         $(window).on("resize", Main.Resize);
         $("#timeRangeCanvas").click(Main.TimeLineSelected);
+        window.setInterval(Main.Refresh,1000);
     }
 }
 
