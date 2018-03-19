@@ -88,6 +88,7 @@ namespace GWLogger.Migrations
                         Gateway = c.String(),
                         RemoteIpPoint = c.String(),
                         MessageTypeId = c.Int(nullable: false),
+                        TrimmedDate = c.DateTime(nullable: false),
                     })
                 .PrimaryKey(t => t.EntryId)
                 .ForeignKey("dbo.LogMessageTypes", t => t.MessageTypeId, cascadeDelete: true)
@@ -118,7 +119,21 @@ namespace GWLogger.Migrations
                         LogLevel = c.Int(nullable: false),
                     })
                 .PrimaryKey(t => t.MessageTypeId);
-            
+
+            // Drop useless column
+            this.Sql("ALTER TABLE LogEntries DROP TrimmedDate");
+
+            // Create computed column
+            this.Sql("ALTER TABLE LogEntries ADD TrimmedDate AS DATETIMEFROMPARTS(\n" +
+                "DATEPART(YEAR, EntryDate),\n" +
+                "DATEPART(MONTH, EntryDate),\n" +
+                "DATEPART(DAY, EntryDate),\n" +
+                "DATEPART(HOUR, EntryDate),\n" +
+                "DATEPART(MINUTE, EntryDate) - DATEPART(MINUTE, EntryDate) % 10\n" +
+                ", 0, 0) PERSISTED");
+
+            // Create Index on computed column
+            this.Sql("CREATE NONCLUSTERED INDEX IDXLogEntriesTrimmedDate ON LogEntries (TrimmedDate)");
         }
         
         public override void Down()

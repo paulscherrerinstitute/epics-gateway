@@ -19,6 +19,13 @@ namespace GWLogger.Backend.Model
         {
         }
 
+        /*protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<LogEntry>()
+                .Property(p => p.TrimmedDate)
+                .HasDatabaseGeneratedOption(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.Computed);
+        }*/
+
         public virtual DbSet<LogEntry> LogEntries { get; set; }
         public virtual DbSet<LogEntryDetail> LogEntryDetails { get; set; }
         public virtual DbSet<LogDetailItemType> LogDetailItemTypes { get; set; }

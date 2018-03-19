@@ -28,6 +28,9 @@ namespace GWLogger.Backend.Model
 
         public int MessageTypeId { get; set; }
 
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public DateTime TrimmedDate { get; set; }
+
         [ForeignKey("MessageTypeId")]
         public LogMessageType LogMessageType { get; set; }
 

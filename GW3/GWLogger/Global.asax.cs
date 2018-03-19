@@ -28,9 +28,10 @@ namespace GWLogger
             string fullOrigionalpath = Request.Url.AbsolutePath;
 
             if (fullOrigionalpath.StartsWith("/GW/"))
-            {
                 Context.RewritePath("/index.html");
-            }
+            else if (fullOrigionalpath.ToLower().StartsWith("/logs"))
+                //Context.RemapHandler("/Logs.ashx");
+                Context.RemapHandler(new Logs());
         }
         protected void Application_AuthenticateRequest(object sender, EventArgs e)
         {

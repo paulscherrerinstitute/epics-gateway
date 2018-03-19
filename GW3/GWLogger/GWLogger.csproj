@@ -89,6 +89,7 @@
     <Content Include="Less\main.less" />
     <Content Include="Introspection.ashx" />
     <Content Include="main.js.map" />
+    <Content Include="Logs.ashx" />
     <None Include="packages.config" />
     <None Include="Properties\PublishProfiles\AIT-IIS.pubxml" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
@@ -161,17 +162,15 @@
     <Compile Include="Introspection.ashx.cs">
       <DependentUpon>Introspection.ashx</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201803130816119_base.cs" />
-    <Compile Include="Migrations\201803130816119_base.Designer.cs">
-      <DependentUpon>201803130816119_base.cs</DependentUpon>
+    <Compile Include="Logs.ashx.cs">
+      <DependentUpon>Logs.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201803191312193_base.cs" />
+    <Compile Include="Migrations\201803191312193_base.Designer.cs">
+      <DependentUpon>201803191312193_base.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Migrations\201803130816119_base.resx">
-      <DependentUpon>201803130816119_base.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Frontend\DTOs\Connections.ts" />
@@ -183,6 +182,11 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201803191312193_base.resx">
+      <DependentUpon>201803191312193_base.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
