@@ -8,6 +8,8 @@ class Main
     static EndDate: Date;
     static CurrentTime: Date;
 
+    static loadingLogs: JQueryXHR;
+
     static Path(): string[]
     {
         return document.location.pathname.split('/');
@@ -321,6 +323,41 @@ class Main
                 console.log(msg.responseText);
             }
         });
+
+        if (Main.loadingLogs)
+            Main.loadingLogs.abort();
+        Main.loadingLogs = $.ajax({
+            type: 'GET',
+            url: '/Logs/' + Main.CurrentGateway + '/' + startDate.getTime() + '/' + endDate.getTime(),
+            success: function (data)
+            {
+                Main.loadingLogs = null;
+                var logs: LogEntry[] = data;
+                var html = "";
+                html += "<table>";
+                html += "<thead><tr><td>Date</td><td>Type</td><td>Message</td></tr></thead>";
+                html + "<tbody>";
+                for (var i = 0; i < logs.length; i++)
+                {
+                    html += "<tr>";
+                    html += "<td>" + Utils.GWDateFormatMilis(new Date(logs[i].Date)) + "</td>";
+                    html += "<td>" + logs[i].Type + "</td>";
+                    html += "<td>" + logs[i].Message + "</td>";
+                    html + "</tr>";
+                }
+                html += "</tbody></table>";
+                $("#logsContent").html(html);
+            },
+            error: function (msg, textStatus)
+            {
+                Main.loadingLogs = null;
+                console.log(msg.responseText);
+            }
+        });
+
+        $("#logsContent").html("Loading...");
+        $("#serversContent").html("Loading...");
+        $("#clientsContent").html("Loading...");
     }
 
     static Refresh()
@@ -360,7 +397,7 @@ class Main
         $("#gatewaySelector").on("change", Main.GatewayChanged);
         $(window).on("resize", Main.Resize);
         $("#timeRangeCanvas").click(Main.TimeLineSelected);
-        window.setInterval(Main.Refresh, 1000);
+        //window.setInterval(Main.Refresh, 1000);
         $(window).bind('popstate', Main.PopState);
 
         Main.PopState(null);

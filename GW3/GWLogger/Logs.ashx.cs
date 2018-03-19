@@ -49,7 +49,7 @@ namespace GWLogger
                 var typesId = DetailTypes.Keys.ToList();
                 if (details != null)
                 {
-                    foreach (var i in details.Where(row=>typesId.Contains(row.DetailTypeId)))
+                    foreach (var i in details.Where(row => typesId.Contains(row.DetailTypeId)))
                         line = Regex.Replace(line, "\\{" + DetailTypes[i.DetailTypeId] + "\\}", i.Value, RegexOptions.IgnoreCase);
                 }
                 if (remoteIpPoint != null)
@@ -86,11 +86,13 @@ namespace GWLogger
                         logs = logs.Where(row => row.EntryDate <= end);
                     }
 
-                    logs = logs.Take(1000);
+                    logs = logs.OrderBy(row=>row.TrimmedDate).ThenBy(row => row.EntryDate).Take(100);
                 }
-                logs.Include(row => row.LogMessageType);
+                //logs.Include(row => row.LogMessageType);
 
                 context.Response.ContentType = "application/json";
+                context.Response.CacheControl = "no-cache";
+                context.Response.Expires = 0;
                 context.Response.Write("[");
 
                 var isFirst = true;
@@ -101,21 +103,21 @@ namespace GWLogger
                     isFirst = false;
                     context.Response.Write("{");
 
-                    context.Response.Write("Date:");
+                    context.Response.Write("\"Date\":");
                     context.Response.Write(i.EntryDate.ToJsDate());
                     context.Response.Write(",");
 
-                    context.Response.Write("Type:");
+                    context.Response.Write("\"Type\":");
                     context.Response.Write(i.MessageTypeId.ToString());
                     context.Response.Write(",");
 
-                    context.Response.Write("Level:");
-                    context.Response.Write(i.LogMessageType?.LogLevel);
+                    context.Response.Write("\"Level\":");
+                    context.Response.Write((i.LogMessageType?.LogLevel) ?? 0);
                     context.Response.Write(",");
 
-                    context.Response.Write("Message:'");
+                    context.Response.Write("\"Message\":\"");
                     context.Response.Write(Convert(i.RemoteIpPoint, i.MessageTypeId, i.LogEntryDetails).JsEscape());
-                    context.Response.Write("'");
+                    context.Response.Write("\"");
 
                     context.Response.Write("}");
                 }

@@ -53,7 +53,7 @@ namespace GWLogger.Backend
 
         public static string JsEscape(this string source)
         {
-            return source.Replace("\\", "\\\\").Replace("'", "\\'");
+            return source.Replace("\\", "\\\\").Replace("\"", "\\\"");
         }
     }
 }

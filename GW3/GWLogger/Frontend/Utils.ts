@@ -119,6 +119,14 @@ class Utils
             ("" + source.getHours()).padLeft("0", 2) + ":" + ("" + source.getMinutes()).padLeft("0", 2) + ":" + ("" + source.getSeconds()).padLeft("0", 2);
     }
 
+    static GWDateFormatMilis(source: Date)
+    {
+        if (!source)
+            return "";
+        return ("" + (source.getMonth() + 1)).padLeft("0", 2) + "/" + ("" + source.getDate()).padLeft("0", 2) + " " +
+            ("" + source.getHours()).padLeft("0", 2) + ":" + ("" + source.getMinutes()).padLeft("0", 2) + ":" + ("" + source.getSeconds()).padLeft("0", 2) + "." + ("" + source.getMilliseconds()).padLeft("0", 3);
+    }
+
     static ShortGWDateFormat(source: Date)
     {
         if (!source)
