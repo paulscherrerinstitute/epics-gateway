@@ -10,6 +10,9 @@ namespace GWLogger.Backend.Model
     // Set Default project to GWLogger
     // Enable-Migrations
     // Add-migration base
+    //
+    // To drop all tables:
+    // update-database -target:0
 
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class LoggerContext : DbContext
@@ -18,13 +21,6 @@ namespace GWLogger.Backend.Model
     : base("name=LoggerConnection")
         {
         }
-
-        /*protected override void OnModelCreating(DbModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<LogEntry>()
-                .Property(p => p.TrimmedDate)
-                .HasDatabaseGeneratedOption(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.Computed);
-        }*/
 
         public virtual DbSet<LogEntry> LogEntries { get; set; }
         public virtual DbSet<LogEntryDetail> LogEntryDetails { get; set; }

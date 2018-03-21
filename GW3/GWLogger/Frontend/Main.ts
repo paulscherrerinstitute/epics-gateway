@@ -272,7 +272,7 @@ class Main
         $("#clients, #servers, #logs").show();
 
         Main.DrawStats();
-        var startDate = new Date(Main.CurrentTime.getTime() - 5 * 60 * 1000);
+        var startDate = new Date(Main.CurrentTime.getTime() - 10 * 60 * 1000);
         var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
 
         $.ajax({

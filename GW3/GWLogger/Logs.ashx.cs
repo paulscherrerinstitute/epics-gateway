@@ -65,6 +65,7 @@ namespace GWLogger
                 //context.Request;
                 var path = context.Request.Path.Split(new char[] { '/' }).Skip(2).ToArray();
                 IQueryable<LogEntry> logs = ctx.LogEntries;
+                //var t = ctx.LogEntries.ToList();
                 var gateway = path[0];
                 logs = logs.Where(row => row.Gateway == gateway);
                 if (path.Length == 1)

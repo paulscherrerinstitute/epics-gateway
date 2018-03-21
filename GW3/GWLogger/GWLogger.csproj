@@ -56,9 +56,6 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
-    <Reference Include="EntityFramework.Utilities, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\EFUtilities.1.0.2\lib\EntityFramework.Utilities.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.7\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
@@ -156,6 +153,7 @@
       <SubType>Component</SubType>
       <DependentUpon>DataAccess.asmx</DependentUpon>
     </Compile>
+    <Compile Include="Backend\BulkInsert.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -165,9 +163,9 @@
     <Compile Include="Logs.ashx.cs">
       <DependentUpon>Logs.ashx</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201803191312193_base.cs" />
-    <Compile Include="Migrations\201803191312193_base.Designer.cs">
-      <DependentUpon>201803191312193_base.cs</DependentUpon>
+    <Compile Include="Migrations\201803211011177_base.cs" />
+    <Compile Include="Migrations\201803211011177_base.Designer.cs">
+      <DependentUpon>201803211011177_base.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -185,8 +183,8 @@
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201803191312193_base.resx">
-      <DependentUpon>201803191312193_base.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201803211011177_base.resx">
+      <DependentUpon>201803211011177_base.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

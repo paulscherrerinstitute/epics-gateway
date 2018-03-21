@@ -1,10 +1,9 @@
-﻿using EntityFramework.Utilities;
-using GWLogger.Backend.Model;
+﻿using GWLogger.Backend.Model;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading;
-using System.Web;
 
 namespace GWLogger.Backend.Controllers
 {
@@ -133,11 +132,11 @@ namespace GWLogger.Backend.Controllers
                 {
                     using (var ctx = new Model.LoggerContext())
                     {
-                        EFBatchOperation.For(ctx, ctx.LogEntries).InsertAll(toAdd);
-                        EFBatchOperation.For(ctx, ctx.LogEntryDetails).InsertAll(toAdd.SelectMany(row => row.LogEntryDetails));
+                        BulkInsert.InsertAll(ctx, ctx.LogEntries, toAdd);
+                        BulkInsert.InsertAll(ctx, ctx.LogEntryDetails, toAdd.SelectMany(row => row.LogEntryDetails));
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
                 }
             }

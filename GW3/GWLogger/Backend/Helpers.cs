@@ -8,7 +8,7 @@ namespace GWLogger.Backend
     public static class Helpers
     {
         // 
-        private static DateTime _jan1st1970 = new DateTime(1970, 1, 1);
+        private static DateTime _jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         /// <summary>
         /// Converts a DateTime into a (JavaScript parsable) Int64.
@@ -27,7 +27,7 @@ namespace GWLogger.Backend
         /// <returns>The date as a DateTime</returns>
         public static DateTime ToNetDate(this long from)
         {
-            return _jan1st1970.AddMilliseconds(from);
+            return _jan1st1970.AddMilliseconds(from).AddHours(TimeZoneInfo.Local.BaseUtcOffset.TotalHours);
         }
 
         public static DateTime Trim(this DateTime dateTime, TimeSpan interval = default(TimeSpan))
