@@ -12,6 +12,12 @@ using System.Web;
 
 namespace GWLogger.Backend
 {
+    /// <summary>
+    /// Implements BulkInsert via SqlBulkCopy and reflection
+    /// While the package
+    /// https://github.com/MikaelEliasson/EntityFramework.Utilities
+    /// should do basically that plus more, sadly it doesn't support computed columns.
+    /// </summary>
     public static class BulkInsert
     {
         static Dictionary<Type, List<PropertyInfo>> propCache = new Dictionary<Type, List<PropertyInfo>>();
