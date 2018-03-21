@@ -118,6 +118,7 @@
     <Compile Include="Backend\Controllers\GatewaySessions.cs" />
     <Compile Include="Backend\Controllers\LogController.cs" />
     <Compile Include="Backend\Controllers\LogStat.cs" />
+    <Compile Include="Backend\Controllers\LogStatController.cs" />
     <Compile Include="Backend\Controllers\ServerSessions.cs" />
     <Compile Include="Backend\DTOs\Connection.cs" />
     <Compile Include="Backend\DTOs\Connections.cs" />

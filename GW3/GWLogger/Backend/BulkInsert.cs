@@ -18,12 +18,12 @@ namespace GWLogger.Backend
     /// https://github.com/MikaelEliasson/EntityFramework.Utilities
     /// should do basically that plus more, sadly it doesn't support computed columns.
     /// </summary>
-    public static class BulkInsert
+    public static class Bulk
     {
         static Dictionary<Type, List<PropertyInfo>> propCache = new Dictionary<Type, List<PropertyInfo>>();
         static SemaphoreSlim cacheLock = new SemaphoreSlim(1);
 
-        public static void InsertAll<TType>(DbContext ctx, DbSet<TType> destTable, IEnumerable<TType> toAdd) where TType : class
+        public static void Insert<TType>(DbContext ctx, DbSet<TType> destTable, IEnumerable<TType> toAdd) where TType : class
         {
             if (ctx.Database.Connection.State == ConnectionState.Closed)
                 ctx.Database.Connection.Open();
