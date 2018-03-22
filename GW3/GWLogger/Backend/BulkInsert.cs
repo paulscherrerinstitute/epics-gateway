@@ -62,7 +62,8 @@ namespace GWLogger.Backend
                 }
 
                 cacheLock.Wait();
-                propCache.Add(elemType, props);
+                if (!propCache.ContainsKey(elemType))
+                    propCache.Add(elemType, props);
                 cacheLock.Release();
             }
 

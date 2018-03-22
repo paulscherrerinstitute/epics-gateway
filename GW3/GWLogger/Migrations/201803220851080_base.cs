@@ -83,7 +83,7 @@ namespace GWLogger.Migrations
                 "dbo.LogEntries",
                 c => new
                     {
-                        EntryId = c.Guid(nullable: false),
+                        EntryId = c.Long(nullable: false),
                         EntryDate = c.DateTime(nullable: false),
                         Gateway = c.String(),
                         RemoteIpPoint = c.String(),
@@ -98,8 +98,8 @@ namespace GWLogger.Migrations
                 "dbo.LogEntryDetails",
                 c => new
                     {
-                        EntryDetailId = c.Guid(nullable: false),
-                        LogEntryId = c.Guid(nullable: false),
+                        EntryDetailId = c.Long(nullable: false, identity: true),
+                        LogEntryId = c.Long(nullable: false),
                         DetailTypeId = c.Int(nullable: false),
                         Value = c.String(),
                     })

@@ -18,7 +18,7 @@ namespace GWLogger.Backend.Model
         }
 
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public Guid EntryId { get; set; }
+        public long EntryId { get; set; }
 
         public DateTime EntryDate { get; set; }
 

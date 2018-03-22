@@ -70,7 +70,7 @@ namespace GWLogger
                 logs = logs.Where(row => row.Gateway == gateway);
                 if (path.Length == 1)
                 {
-                    logs = logs.OrderByDescending(row => row.TrimmedDate).Take(100).OrderBy(row => row.EntryDate);
+                    logs = logs.OrderByDescending(row => row.EntryId).Take(100);
                 }
                 else
                 {
@@ -87,7 +87,7 @@ namespace GWLogger
                         logs = logs.Where(row => row.EntryDate <= end);
                     }
 
-                    logs = logs.OrderBy(row=>row.TrimmedDate).ThenBy(row => row.EntryDate).Take(100);
+                    logs = logs.OrderBy(row=>row.EntryId).Take(100);
                 }
                 //logs.Include(row => row.LogMessageType);
 

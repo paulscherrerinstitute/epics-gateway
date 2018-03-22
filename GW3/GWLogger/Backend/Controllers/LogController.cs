@@ -12,18 +12,38 @@ namespace GWLogger.Backend.Controllers
         static List<Model.LogEntry> entryToAdd = new List<Model.LogEntry>();
         static SemaphoreSlim lockEntry = new SemaphoreSlim(1);
         static Thread logEntryFlusher;
+        static DateTime lastCleaning = DateTime.UtcNow.AddDays(-1);
+        static long nextEntryId = 0;
 
         static LogController()
         {
             logEntryFlusher = new Thread(BulkSaver);
             logEntryFlusher.IsBackground = true;
             logEntryFlusher.Start();
+
+            using (var ctx = new LoggerContext())
+            {
+                try
+                {
+                    nextEntryId = ctx.LogEntries.Max(row => row.EntryId);
+                }
+                catch
+                {
+                    nextEntryId = 0;
+                }
+            }
         }
 
         public static void BulkSaver()
         {
             while (true)
             {
+                if ((DateTime.UtcNow - lastCleaning).TotalDays >= 0)
+                {
+                    CleanLogs();
+                    lastCleaning = DateTime.UtcNow;
+                }
+
                 lockEntry.Wait();
                 if (entryToAdd.Count == 0)
                 {
@@ -38,12 +58,10 @@ namespace GWLogger.Backend.Controllers
 
                 foreach (var i in toAdd)
                 {
-                    i.EntryId = Guid.NewGuid();
+                    var nextId = System.Threading.Interlocked.Increment(ref nextEntryId);
+                    i.EntryId = nextId;
                     foreach (var j in i.LogEntryDetails)
-                    {
-                        j.EntryDetailId = Guid.NewGuid();
-                        j.LogEntryId = i.EntryId;
-                    }
+                        j.EntryDetailId = nextId;
                 }
 
                 try
@@ -57,6 +75,18 @@ namespace GWLogger.Backend.Controllers
                 catch (Exception ex)
                 {
                 }
+            }
+        }
+
+        private static void CleanLogs()
+        {
+            using (var ctx = new Model.LoggerContext())
+            {
+                var toDeleteDate = DateTime.UtcNow.AddDays(-10);
+                ctx.Database.Connection.Open();
+
+                ctx.Database.ExecuteSqlCommand("DELETE FROM LogDetailItemTypes WHERE LogEntryId IN (SELECT EntryId FROM LogEntries WHERE TrimmedDate < @d1)", new System.Data.SqlClient.SqlParameter("@d1", toDeleteDate));
+                ctx.Database.ExecuteSqlCommand("DELETE FROM LogEntries WHERE TrimmedDate < @d1", new System.Data.SqlClient.SqlParameter("@d1", toDeleteDate));
             }
         }
 
