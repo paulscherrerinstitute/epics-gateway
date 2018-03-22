@@ -70,7 +70,7 @@ namespace GWLogger
                 logs = logs.Where(row => row.Gateway == gateway);
                 if (path.Length == 1)
                 {
-                    logs = logs.OrderByDescending(row => row.EntryId).Take(100);
+                    logs = logs.OrderByDescending(row => row.EntryId).Take(100).OrderBy(row=>row.EntryId);
                 }
                 else
                 {
