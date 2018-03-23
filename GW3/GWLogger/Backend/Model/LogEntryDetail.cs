@@ -19,6 +19,7 @@ namespace GWLogger.Backend.Model
 
         public int DetailTypeId { get; set; }
 
+        [MaxLength(255)]
         public string Value { get; set; }
 
         [ForeignKey("LogEntryId")]

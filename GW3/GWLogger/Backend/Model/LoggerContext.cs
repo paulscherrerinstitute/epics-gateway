@@ -32,5 +32,6 @@ namespace GWLogger.Backend.Model
         public virtual DbSet<GatewayNbMessage> GatewayNbMessages { get; set; }
         public virtual DbSet<ConnectedClient> ConnectedClients { get; set; }
         public virtual DbSet<ConnectedServer> ConnectedServers { get; set; }
+        public virtual DbSet<SearchedChannel> SearchedChannels { get; set; }
     }
 }

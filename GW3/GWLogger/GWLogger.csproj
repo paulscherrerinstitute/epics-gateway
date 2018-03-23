@@ -131,6 +131,7 @@
     <Compile Include="Backend\DTOs\MessageType.cs" />
     <Compile Include="Backend\DTOs\SearchRequest.cs" />
     <Compile Include="Backend\Helpers.cs" />
+    <Compile Include="Backend\Model\SearchedChannel.cs" />
     <Compile Include="Backend\Model\ConnectedClient.cs" />
     <Compile Include="Backend\Model\ConnectedServer.cs" />
     <Compile Include="Backend\Model\GatewayError.cs" />
@@ -164,9 +165,9 @@
     <Compile Include="Logs.ashx.cs">
       <DependentUpon>Logs.ashx</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201803220851080_base.cs" />
-    <Compile Include="Migrations\201803220851080_base.Designer.cs">
-      <DependentUpon>201803220851080_base.cs</DependentUpon>
+    <Compile Include="Migrations\201803231034528_base.cs" />
+    <Compile Include="Migrations\201803231034528_base.Designer.cs">
+      <DependentUpon>201803231034528_base.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -184,8 +185,8 @@
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201803220851080_base.resx">
-      <DependentUpon>201803220851080_base.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201803231034528_base.resx">
+      <DependentUpon>201803231034528_base.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

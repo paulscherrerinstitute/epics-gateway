@@ -11,7 +11,7 @@ namespace GWLogger.Migrations
                 "dbo.ConnectedClients",
                 c => new
                     {
-                        Gateway = c.String(nullable: false, maxLength: 128),
+                        Gateway = c.String(nullable: false, maxLength: 40),
                         RemoteIpPoint = c.String(nullable: false, maxLength: 128),
                         StartConnection = c.DateTime(nullable: false),
                         EndConnection = c.DateTime(),
@@ -22,7 +22,7 @@ namespace GWLogger.Migrations
                 "dbo.ConnectedServers",
                 c => new
                     {
-                        Gateway = c.String(nullable: false, maxLength: 128),
+                        Gateway = c.String(nullable: false, maxLength: 40),
                         RemoteIpPoint = c.String(nullable: false, maxLength: 128),
                         StartConnection = c.DateTime(nullable: false),
                         EndConnection = c.DateTime(),
@@ -33,7 +33,7 @@ namespace GWLogger.Migrations
                 "dbo.GatewayErrors",
                 c => new
                     {
-                        Gateway = c.String(nullable: false, maxLength: 128),
+                        Gateway = c.String(nullable: false, maxLength: 40),
                         Date = c.DateTime(nullable: false),
                         NbErrors = c.Int(nullable: false),
                     })
@@ -43,7 +43,7 @@ namespace GWLogger.Migrations
                 "dbo.GatewayNbMessages",
                 c => new
                     {
-                        Gateway = c.String(nullable: false, maxLength: 128),
+                        Gateway = c.String(nullable: false, maxLength: 40),
                         Date = c.DateTime(nullable: false),
                         NbMessages = c.Int(nullable: false),
                     })
@@ -53,7 +53,7 @@ namespace GWLogger.Migrations
                 "dbo.GatewaySearches",
                 c => new
                     {
-                        Gateway = c.String(nullable: false, maxLength: 128),
+                        Gateway = c.String(nullable: false, maxLength: 40),
                         Date = c.DateTime(nullable: false),
                         NbSearches = c.Int(nullable: false),
                     })
@@ -63,7 +63,7 @@ namespace GWLogger.Migrations
                 "dbo.GatewaySessions",
                 c => new
                     {
-                        Gateway = c.String(nullable: false, maxLength: 128),
+                        Gateway = c.String(nullable: false, maxLength: 40),
                         StartDate = c.DateTime(nullable: false),
                         NbEntries = c.Long(nullable: false),
                         LastEntry = c.DateTime(nullable: false),
@@ -75,7 +75,7 @@ namespace GWLogger.Migrations
                 c => new
                     {
                         ItemId = c.Int(nullable: false),
-                        Name = c.String(),
+                        Name = c.String(maxLength: 64),
                     })
                 .PrimaryKey(t => t.ItemId);
             
@@ -85,8 +85,8 @@ namespace GWLogger.Migrations
                     {
                         EntryId = c.Long(nullable: false),
                         EntryDate = c.DateTime(nullable: false),
-                        Gateway = c.String(),
-                        RemoteIpPoint = c.String(),
+                        Gateway = c.String(maxLength: 40),
+                        RemoteIpPoint = c.String(maxLength: 128),
                         MessageTypeId = c.Int(nullable: false),
                         TrimmedDate = c.DateTime(nullable: false),
                     })
@@ -101,7 +101,7 @@ namespace GWLogger.Migrations
                         EntryDetailId = c.Long(nullable: false, identity: true),
                         LogEntryId = c.Long(nullable: false),
                         DetailTypeId = c.Int(nullable: false),
-                        Value = c.String(),
+                        Value = c.String(maxLength: 255),
                     })
                 .PrimaryKey(t => t.EntryDetailId)
                 .ForeignKey("dbo.LogDetailItemTypes", t => t.DetailTypeId, cascadeDelete: true)
@@ -114,11 +114,24 @@ namespace GWLogger.Migrations
                 c => new
                     {
                         MessageTypeId = c.Int(nullable: false),
-                        Name = c.String(),
-                        DisplayMask = c.String(),
+                        Name = c.String(maxLength: 64),
+                        DisplayMask = c.String(maxLength: 1024),
                         LogLevel = c.Int(nullable: false),
                     })
                 .PrimaryKey(t => t.MessageTypeId);
+            
+            CreateTable(
+                "dbo.SearchedChannels",
+                c => new
+                    {
+                        Id = c.Long(nullable: false),
+                        Gateway = c.String(maxLength: 40),
+                        Client = c.String(maxLength: 128),
+                        Channel = c.String(maxLength: 128),
+                        NbSearches = c.Int(nullable: false),
+                    })
+                .PrimaryKey(t => t.Id)
+                .Index(t => new { t.Gateway, t.Client, t.Channel }, unique: true, name: "IDX_SearchedChannels");
             
         }
         
@@ -127,9 +140,11 @@ namespace GWLogger.Migrations
             DropForeignKey("dbo.LogEntries", "MessageTypeId", "dbo.LogMessageTypes");
             DropForeignKey("dbo.LogEntryDetails", "LogEntryId", "dbo.LogEntries");
             DropForeignKey("dbo.LogEntryDetails", "DetailTypeId", "dbo.LogDetailItemTypes");
+            DropIndex("dbo.SearchedChannels", "IDX_SearchedChannels");
             DropIndex("dbo.LogEntryDetails", new[] { "DetailTypeId" });
             DropIndex("dbo.LogEntryDetails", new[] { "LogEntryId" });
             DropIndex("dbo.LogEntries", new[] { "MessageTypeId" });
+            DropTable("dbo.SearchedChannels");
             DropTable("dbo.LogMessageTypes");
             DropTable("dbo.LogEntryDetails");
             DropTable("dbo.LogEntries");

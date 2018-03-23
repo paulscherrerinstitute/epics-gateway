@@ -12,7 +12,7 @@ namespace GWLogger.Backend.Model
     [ExcludeFromCodeCoverage]
     public class GatewaySearch
     {
-        [Key, Column(Order = 0)]
+        [Key, Column(Order = 0), MaxLength(40)]
         public string Gateway { get; set; }
         [Key, Column(Order = 1)]
         public DateTime Date { get; set; }

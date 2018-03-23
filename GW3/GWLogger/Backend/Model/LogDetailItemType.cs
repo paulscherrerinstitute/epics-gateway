@@ -15,6 +15,7 @@ namespace GWLogger.Backend.Model
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int ItemId { get; set; }
 
+        [MaxLength(64)]
         public string Name { get; set; }
     }
 }

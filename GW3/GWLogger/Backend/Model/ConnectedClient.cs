@@ -12,9 +12,9 @@ namespace GWLogger.Backend.Model
     [ExcludeFromCodeCoverage]
     public class ConnectedClient
     {
-        [Key, Column(Order = 0)]
+        [Key, Column(Order = 0), MaxLength(40)]
         public string Gateway { get; set; }
-        [Key, Column(Order = 1)]
+        [Key, Column(Order = 1), MaxLength(128)]
         public string RemoteIpPoint { get; set; }
         [Key, Column(Order = 2)]
         public DateTime StartConnection { get; set; }

@@ -85,7 +85,7 @@ namespace GWLogger.Backend.Controllers
                 var toDeleteDate = DateTime.UtcNow.AddDays(-10);
                 ctx.Database.Connection.Open();
 
-                ctx.Database.ExecuteSqlCommand("DELETE FROM LogDetailItemTypes WHERE LogEntryId IN (SELECT EntryId FROM LogEntries WHERE TrimmedDate < @d1)", new System.Data.SqlClient.SqlParameter("@d1", toDeleteDate));
+                ctx.Database.ExecuteSqlCommand("DELETE FROM LogEntryDetails WHERE LogEntryId IN (SELECT EntryId FROM LogEntries WHERE TrimmedDate < @d1)", new System.Data.SqlClient.SqlParameter("@d1", toDeleteDate));
                 ctx.Database.ExecuteSqlCommand("DELETE FROM LogEntries WHERE TrimmedDate < @d1", new System.Data.SqlClient.SqlParameter("@d1", toDeleteDate));
             }
         }

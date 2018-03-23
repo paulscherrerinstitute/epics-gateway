@@ -22,8 +22,10 @@ namespace GWLogger.Backend.Model
 
         public DateTime EntryDate { get; set; }
 
+        [MaxLength(40)]
         public string Gateway { get; set; }
 
+        [MaxLength(128)]
         public string RemoteIpPoint { get; set; }
 
         public int MessageTypeId { get; set; }

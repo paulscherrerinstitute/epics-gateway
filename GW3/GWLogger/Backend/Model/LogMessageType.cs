@@ -15,8 +15,10 @@ namespace GWLogger.Backend.Model
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int MessageTypeId { get; set; }
 
+        [MaxLength(64)]
         public string Name { get; set; }
 
+        [MaxLength(1024)]
         public string DisplayMask { get; set; }
 
         public int LogLevel { get; set; }
