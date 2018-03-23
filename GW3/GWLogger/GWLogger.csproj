@@ -119,6 +119,7 @@
     <Compile Include="Backend\Controllers\LogController.cs" />
     <Compile Include="Backend\Controllers\LogStat.cs" />
     <Compile Include="Backend\Controllers\LogStatController.cs" />
+    <Compile Include="Backend\Controllers\Search.cs" />
     <Compile Include="Backend\Controllers\ServerSessions.cs" />
     <Compile Include="Backend\DTOs\Connection.cs" />
     <Compile Include="Backend\DTOs\Connections.cs" />
@@ -165,9 +166,9 @@
     <Compile Include="Logs.ashx.cs">
       <DependentUpon>Logs.ashx</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201803231034528_base.cs" />
-    <Compile Include="Migrations\201803231034528_base.Designer.cs">
-      <DependentUpon>201803231034528_base.cs</DependentUpon>
+    <Compile Include="Migrations\201803231336148_base.cs" />
+    <Compile Include="Migrations\201803231336148_base.Designer.cs">
+      <DependentUpon>201803231336148_base.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -185,8 +186,8 @@
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201803231034528_base.resx">
-      <DependentUpon>201803231034528_base.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201803231336148_base.resx">
+      <DependentUpon>201803231336148_base.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

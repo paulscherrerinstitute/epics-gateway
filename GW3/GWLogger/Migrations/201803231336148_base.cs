@@ -124,14 +124,13 @@ namespace GWLogger.Migrations
                 "dbo.SearchedChannels",
                 c => new
                     {
-                        Id = c.Long(nullable: false),
-                        Gateway = c.String(maxLength: 40),
-                        Client = c.String(maxLength: 128),
-                        Channel = c.String(maxLength: 128),
+                        SearchDate = c.DateTime(nullable: false),
+                        Gateway = c.String(nullable: false, maxLength: 128),
+                        Client = c.String(nullable: false, maxLength: 128),
+                        Channel = c.String(nullable: false, maxLength: 128),
                         NbSearches = c.Int(nullable: false),
                     })
-                .PrimaryKey(t => t.Id)
-                .Index(t => new { t.Gateway, t.Client, t.Channel }, unique: true, name: "IDX_SearchedChannels");
+                .PrimaryKey(t => new { t.SearchDate, t.Gateway, t.Client, t.Channel });
             
         }
         
@@ -140,7 +139,6 @@ namespace GWLogger.Migrations
             DropForeignKey("dbo.LogEntries", "MessageTypeId", "dbo.LogMessageTypes");
             DropForeignKey("dbo.LogEntryDetails", "LogEntryId", "dbo.LogEntries");
             DropForeignKey("dbo.LogEntryDetails", "DetailTypeId", "dbo.LogDetailItemTypes");
-            DropIndex("dbo.SearchedChannels", "IDX_SearchedChannels");
             DropIndex("dbo.LogEntryDetails", new[] { "DetailTypeId" });
             DropIndex("dbo.LogEntryDetails", new[] { "LogEntryId" });
             DropIndex("dbo.LogEntries", new[] { "MessageTypeId" });

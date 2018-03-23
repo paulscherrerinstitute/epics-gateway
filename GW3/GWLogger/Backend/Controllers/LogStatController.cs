@@ -15,6 +15,7 @@ namespace GWLogger.Backend.Controllers
         static LogStat searchesStats = new LogStat();
         static List<int> errorMessageTypes = null;
         static GatewaySessions gatewaySessions = new GatewaySessions();
+        static List<Search> searchList = new List<Search>();
 
         static LogStatController()
         {
@@ -33,6 +34,7 @@ namespace GWLogger.Backend.Controllers
                 List<LogStat.StatEntry> errors;
                 List<LogStat.StatEntry> searches;
                 List<GatewaySessions.OpenSession> sessions;
+                List<Search> allSearches;
 
                 using (var ctx = new Model.LoggerContext())
                 {
@@ -42,6 +44,8 @@ namespace GWLogger.Backend.Controllers
                         errors = errorsStats.GetListAndClear();
                         searches = searchesStats.GetListAndClear();
                         sessions = gatewaySessions.GetAndReset();
+                        allSearches = searchList.ToList();
+                        searchList.Clear();
                     }
 
                     foreach (var i in logs)
@@ -90,6 +94,24 @@ namespace GWLogger.Backend.Controllers
                         }
                     }
 
+                    foreach (var i in allSearches.GroupBy(row => row))
+                    {
+                        var s = ctx.SearchedChannels.FirstOrDefault(row => row.Gateway == i.Key.Gateway && row.Client == i.Key.Client && row.Channel == i.Key.Channel && row.SearchDate == i.Key.Date);
+                        if (s == null)
+                        {
+                            ctx.SearchedChannels.Add(new SearchedChannel
+                            {
+                                Channel = i.Key.Channel,
+                                Client = i.Key.Client,
+                                Gateway = i.Key.Gateway,
+                                NbSearches = i.Count(),
+                                SearchDate = i.Key.Date
+                            });
+                        }
+                        else
+                            s.NbSearches += i.Count();
+                    }
+
                     ctx.SaveChanges();
                 }
             }
@@ -121,6 +143,16 @@ namespace GWLogger.Backend.Controllers
                         break;
                     case 39: //Search
                         searchesStats[gateway][newEntry.EntryDate.Round()]++;
+                        searchList.Add(new Search
+                        {
+                            Client = newEntry.RemoteIpPoint.Split(new char[] { ':' })[0],
+                            Gateway = gateway,
+                            Date = newEntry.EntryDate.Round(),
+                            Channel = newEntry
+                                .LogEntryDetails
+                                .Where(row => row.DetailTypeId == 7)
+                                .FirstOrDefault()?.Value
+                        });
                         gatewaySessions[gateway].Log();
                         break;
                     case 55: // Starts server TCP

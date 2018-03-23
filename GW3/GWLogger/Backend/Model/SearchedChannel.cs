@@ -12,19 +12,16 @@ namespace GWLogger.Backend.Model
     [ExcludeFromCodeCoverage]
     public class SearchedChannel
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        public long Id { get; set; }
+        [Key, Column(Order = 1)]
+        public DateTime SearchDate { get; set; }
 
-        [Index("IDX_SearchedChannels", 1, IsUnique = true), MaxLength(40)]
+        [Key, Column(Order = 2)]
         public string Gateway { get; set; }
 
-        [Index("IDX_SearchedChannels", 2, IsUnique = true)]
-        DateTime SearchDate { get; set; }
-
-        [Index("IDX_SearchedChannels", 3, IsUnique = true), MaxLength(128)]
+        [Key, Column(Order = 3)]
         public string Client { get; set; }
 
-        [Index("IDX_SearchedChannels", 4, IsUnique = true), MaxLength(128)]
+        [Key, Column(Order = 4)]
         public string Channel { get; set; }
 
         public int NbSearches { get; set; }
