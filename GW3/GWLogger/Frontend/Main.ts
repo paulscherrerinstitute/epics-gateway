@@ -61,8 +61,8 @@ class Main
 
     static LoadLogStats(): void
     {
-        //var start = new Date((new Date()).getTime() - (24 * 3600 * 1000));
-        var start = new Date(2018, 2, 12);
+        var start = new Date((new Date()).getTime() - (24 * 3600 * 1000));
+        //var start = new Date(2018, 2, 12);
         var end = new Date();
         $.ajax({
             type: 'POST',
@@ -102,7 +102,7 @@ class Main
         var canvas = (<HTMLCanvasElement>$("#timeRangeCanvas")[0]);
         var ctx = canvas.getContext("2d");
         var width = $("#timeRange").width();
-        var height = $("#timeRange").height();
+        var height = $("#timeRange").height() - 18;
 
         canvas.width = width;
         canvas.height = height;
@@ -413,7 +413,7 @@ class Main
         $.ajax({
             type: 'POST',
             url: '/DataAccess.asmx/GetSearchedChannels',
-            data: JSON.stringify({ "gatewayName": Main.CurrentGateway, "datePoint": Utils.FullDateFormat(startDate)}),
+            data: JSON.stringify({ "gatewayName": Main.CurrentGateway, "datePoint": Utils.FullDateFormat(startDate) }),
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             success: function (msg)
