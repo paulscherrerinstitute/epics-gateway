@@ -391,6 +391,18 @@ class Main
         Main.LoadGateways();
     }
 
+    static ShowActiveClients()
+    {
+        $("#clientsTabs li").removeClass("activeTab");
+        $("#clientsTabs li:nth-child(1)").addClass("activeTab");
+    }
+
+    static ShowSearches()
+    {
+        $("#clientsTabs li").removeClass("activeTab");
+        $("#clientsTabs li:nth-child(2)").addClass("activeTab");
+    }
+
     static Init(): void
     {
         Main.BaseTitle = window.document.title;
@@ -399,6 +411,8 @@ class Main
         $("#timeRangeCanvas").click(Main.TimeLineSelected);
         //window.setInterval(Main.Refresh, 1000);
         $(window).bind('popstate', Main.PopState);
+        $("#clientsTabs li:nth-child(1)").click(Main.ShowActiveClients);
+        $("#clientsTabs li:nth-child(2)").click(Main.ShowSearches);
 
         Main.PopState(null);
     }

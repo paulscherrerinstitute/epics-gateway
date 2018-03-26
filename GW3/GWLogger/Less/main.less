@@ -1,7 +1,7 @@
 ﻿@backgroundColor: #e6e6e6;
 @boxShadow: #9d9d9d 1px 1px 2px;
-@labelBackgroundColor: #edeada;
-@labelColor: #979275;
+@labelBackgroundColor: #80A080;
+@labelColor: #FFFFFF;
 @leftSidebar: 300px;
 @timeRangeHeight: 100px;
 @borderSpacing: 5px;
@@ -69,12 +69,12 @@ body
 {
     position: absolute;
     display: block;
-    width: 100px;
+    width: ~"calc(100% - 4px)";
     text-align: center;
     background-color: @labelBackgroundColor;
-    border-right: solid 1px darken(@labelBackgroundColor, 30%);
     border-bottom: solid 1px darken(@labelBackgroundColor, 30%);
-    border-bottom-right-radius: 3px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
     top: 0px;
     left: 0px;
     padding: 2px;
@@ -239,4 +239,42 @@ select
 {
     padding: 3PX;
     outline: none;
+}
+
+.tabs
+{
+    margin-top: 16px;
+    padding: 0px;
+    padding-top: 2px;
+    background-color: lighten(@labelBackgroundColor, 35%);
+
+    & li
+    {
+        display: inline-block;
+        border: solid 1px @labelBackgroundColor;
+        background-color: lighten(@labelBackgroundColor, 25%);
+        border-bottom: none;
+        padding: 5px;
+        color: #808080;
+        cursor: pointer;
+    }
+
+    & .activeTab
+    {
+        background-color: white;
+        color: black;
+        font-weight: bold;
+        padding-top: 10px;
+    }
+}
+
+#clientsTabs
+{
+    .tabs;
+}
+
+#clientsContent
+{
+    top: 55px;
+    padding-top: 0px;
 }
