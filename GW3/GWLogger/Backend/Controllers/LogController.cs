@@ -61,7 +61,7 @@ namespace GWLogger.Backend.Controllers
                     var nextId = System.Threading.Interlocked.Increment(ref nextEntryId);
                     i.EntryId = nextId;
                     foreach (var j in i.LogEntryDetails)
-                        j.EntryDetailId = nextId;
+                        j.LogEntryId = nextId;
                 }
 
                 try

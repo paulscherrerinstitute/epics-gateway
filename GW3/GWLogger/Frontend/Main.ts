@@ -330,8 +330,8 @@ class Main
     static LoadTimeInfo()
     {
         Main.DrawStats();
-        var startDate = new Date(Main.CurrentTime.getTime() - 10 * 60 * 1000);
-        var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
+        var startDate = new Date(Main.CurrentTime.getTime());
+        var endDate = new Date(startDate.getTime() + 10 * 60 * 1000);
 
         Main.ShowStats();
 

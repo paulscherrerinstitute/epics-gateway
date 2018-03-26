@@ -27,7 +27,7 @@ namespace GWLogger.Backend
         /// <returns>The date as a DateTime</returns>
         public static DateTime ToNetDate(this long from)
         {
-            return _jan1st1970.AddMilliseconds(from).AddHours(TimeZoneInfo.Local.BaseUtcOffset.TotalHours);
+            return _jan1st1970.AddMilliseconds(from).AddHours(TimeZoneInfo.Local.BaseUtcOffset.TotalHours + (TimeZoneInfo.Local.IsDaylightSavingTime(DateTime.UtcNow) ? 1 : 0));
         }
 
         public static DateTime Trim(this DateTime dateTime, TimeSpan interval = default(TimeSpan))

@@ -105,7 +105,7 @@ namespace GWLogger
                     context.Response.Write("{");
 
                     context.Response.Write("\"Date\":");
-                    context.Response.Write(i.EntryDate.ToJsDate());
+                    context.Response.Write(i.EntryDate.ToUniversalTime().ToJsDate());
                     context.Response.Write(",");
 
                     context.Response.Write("\"Type\":");
