@@ -266,12 +266,14 @@ class Main
         Main.LoadTimeInfo();
     }
 
-    static LoadTimeInfo()
+    static ShowStats()
     {
+        $("#clientsTabs li").removeClass("activeTab");
+        $("#clientsTabs li:nth-child(1)").addClass("activeTab");
+
         $("#help").hide();
         $("#clients, #servers, #logs").show();
 
-        Main.DrawStats();
         var startDate = new Date(Main.CurrentTime.getTime() - 10 * 60 * 1000);
         var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
 
@@ -323,6 +325,15 @@ class Main
                 console.log(msg.responseText);
             }
         });
+    }
+
+    static LoadTimeInfo()
+    {
+        Main.DrawStats();
+        var startDate = new Date(Main.CurrentTime.getTime() - 10 * 60 * 1000);
+        var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
+
+        Main.ShowStats();
 
         if (Main.loadingLogs)
             Main.loadingLogs.abort();
@@ -391,16 +402,48 @@ class Main
         Main.LoadGateways();
     }
 
-    static ShowActiveClients()
-    {
-        $("#clientsTabs li").removeClass("activeTab");
-        $("#clientsTabs li:nth-child(1)").addClass("activeTab");
-    }
-
     static ShowSearches()
     {
+        var current = Main.CurrentTime.getTime();
+        var startDate = new Date(current);
+
         $("#clientsTabs li").removeClass("activeTab");
         $("#clientsTabs li:nth-child(2)").addClass("activeTab");
+
+        $.ajax({
+            type: 'POST',
+            url: '/DataAccess.asmx/GetSearchedChannels',
+            data: JSON.stringify({ "gatewayName": Main.CurrentGateway, "datePoint": Utils.FullDateFormat(startDate)}),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (msg)
+            {
+                var data: SearchRequest[];
+                if (msg.d)
+                    data = (<object[]>msg.d).map(c => SearchRequest.CreateFromObject(c));
+                else
+                    data = [];
+                var html = "";
+                html += "<table>";
+                html += "<thead><tr><td>Channel</td><td>Client</td><td>NB</td><td>Date</td></tr></thead>";
+                html + "<tbody>";
+                for (var i = 0; i < data.length; i++)
+                {
+                    html += "<tr>";
+                    html += "<td>" + data[i].Channel + "</td>";
+                    html += "<td>" + data[i].Client + "</td>";
+                    html += "<td>" + data[i].NbSearches + "</td>";
+                    html += "<td>" + Utils.FullDateFormat(data[i].Date) + "</td>";
+                    html + "</tr>";
+                }
+                html += "</tbody></table>";
+                $("#clientsContent").html(html);
+            },
+            error: function (msg, textStatus)
+            {
+                console.log(msg.responseText);
+            }
+        });
     }
 
     static Init(): void
@@ -411,7 +454,7 @@ class Main
         $("#timeRangeCanvas").click(Main.TimeLineSelected);
         //window.setInterval(Main.Refresh, 1000);
         $(window).bind('popstate', Main.PopState);
-        $("#clientsTabs li:nth-child(1)").click(Main.ShowActiveClients);
+        $("#clientsTabs li:nth-child(1)").click(Main.ShowStats);
         $("#clientsTabs li:nth-child(2)").click(Main.ShowSearches);
 
         Main.PopState(null);

@@ -149,14 +149,16 @@ namespace GWLogger.Backend.Controllers
                 var start = datePoint.AddSeconds(-1);
                 var end = datePoint.AddSeconds(1);
 
-                return ctx.LogEntries.Where(row => row.MessageTypeId == 39 && row.Gateway == gatewayName && row.EntryDate >= start && row.EntryDate <= end)
+                return ctx.SearchedChannels.Where(row => row.Gateway == gatewayName && row.SearchDate == datePoint)
                 //return ctx.LogEntries.Where(row => row.MessageTypeId == 39 && row.Gateway == gatewayName)
-                    .OrderBy(row => row.EntryDate)
+                    .OrderBy(row => row.Channel)
+                    .ThenBy(row => row.Client)
                     .Select(row => new DTOs.SearchRequest
                     {
-                        Channel = row.LogEntryDetails.Where(r2 => r2.DetailTypeId == 7).FirstOrDefault().Value,
-                        Date = row.EntryDate,
-                        Client = row.RemoteIpPoint
+                        Channel = row.Channel,
+                        Date = row.SearchDate,
+                        Client = row.Client,
+                        NbSearches = row.NbSearches
                     }).ToList();
             }
         }

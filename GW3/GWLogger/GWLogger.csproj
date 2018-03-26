@@ -178,6 +178,7 @@
     <TypeScriptCompile Include="Frontend\DTOs\GatewaySession.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewayStats.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\LogEntry.ts" />
+    <TypeScriptCompile Include="Frontend\DTOs\SearchRequest.ts" />
     <TypeScriptCompile Include="Frontend\Main.ts" />
     <TypeScriptCompile Include="Frontend\Utils.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
