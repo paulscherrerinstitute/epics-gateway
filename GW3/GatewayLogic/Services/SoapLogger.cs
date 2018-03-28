@@ -70,6 +70,7 @@ namespace GatewayLogic.Services
             this.gatewayName = gatewayName;
 
             bufferFlusher = new Thread(FlushLogAsync);
+            //bufferFlusher.IsBackground = true;
             bufferFlusher.Start();
 
             Thread performanceDisplay = new Thread(() =>

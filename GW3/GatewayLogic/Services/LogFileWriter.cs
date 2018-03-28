@@ -47,6 +47,7 @@ namespace GatewayLogic.Services
                 sourceFilter = new Regex(System.Configuration.ConfigurationManager.AppSettings["fileLoggerClassFilter"]);
             logRotation = (System.Configuration.ConfigurationManager.AppSettings["fileLoggerRotation"]?.ToLower() == "true");
             logKeepDays = int.Parse(System.Configuration.ConfigurationManager.AppSettings["fileLoggerKeepDays"] ?? "5");
+            //flusher.IsBackground = true;
             flusher.Start();
         }
 

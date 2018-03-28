@@ -48,6 +48,8 @@ namespace GatewayLogic.Services
 
         public void Dispose()
         {
+            this.soapLogger?.Dispose();
+            this.soapLogger = null;
             this.MessageConverter?.Dispose();
             this.MessageConverter = null;
         }

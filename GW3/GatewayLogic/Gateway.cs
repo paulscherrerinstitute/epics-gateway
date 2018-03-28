@@ -225,6 +225,8 @@ namespace GatewayLogic
             ServerConnection.Dispose();
 
             DiagnosticServer.Dispose();
+
+            MessageLogger.Dispose();
         }
 
         internal void DropClient(TcpClientConnection tcpClientConnection)
