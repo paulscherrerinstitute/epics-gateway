@@ -142,6 +142,7 @@ namespace GWLogger.Backend.Controllers
                 {
                 }
             }
+            Logs.RefreshLookup();
         }
 
         public static void RegisterLogMessageDetailType(List<DTOs.IdValue> types)
@@ -159,6 +160,7 @@ namespace GWLogger.Backend.Controllers
                 {
                 }
             }
+            Logs.RefreshLookup();
         }
     }
 }

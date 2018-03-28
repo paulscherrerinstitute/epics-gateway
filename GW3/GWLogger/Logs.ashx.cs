@@ -6,6 +6,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Web;
 
 namespace GWLogger
@@ -18,12 +19,27 @@ namespace GWLogger
         static Dictionary<int, string> Convertion;
         static Dictionary<int, string> DetailTypes;
 
+        static ReaderWriterLockSlim changeLock = new ReaderWriterLockSlim();
+
         static Logs()
+        {
+            RefreshLookup();
+        }
+
+        static internal void RefreshLookup()
         {
             using (var ctx = new LoggerContext())
             {
-                Convertion = ctx.LogMessageTypes.ToDictionary(key => key.MessageTypeId, val => val.DisplayMask);
-                DetailTypes = ctx.LogDetailItemTypes.ToDictionary(key => key.ItemId, val => val.Name);
+                changeLock.EnterWriteLock();
+                try
+                {
+                    Convertion = ctx.LogMessageTypes.ToDictionary(key => key.MessageTypeId, val => val.DisplayMask);
+                    DetailTypes = ctx.LogDetailItemTypes.ToDictionary(key => key.ItemId, val => val.Name);
+                }
+                finally
+                {
+                    changeLock.ExitWriteLock();
+                }
             }
         }
 
@@ -89,7 +105,7 @@ namespace GWLogger
                         logs = logs.Where(row => row.EntryDate <= end);
                     }
 
-                    logs = logs.OrderBy(row => row.EntryId).Take(100);
+                    logs = logs.OrderByDescending(row => row.EntryId).Take(100).OrderBy(row => row.EntryId);
                 }
                 //logs.Include(row => row.LogMessageType);
 
@@ -98,31 +114,39 @@ namespace GWLogger
                 context.Response.Expires = 0;
                 context.Response.Write("[");
 
-                var isFirst = true;
-                foreach (var i in logs)
+                changeLock.EnterReadLock();
+                try
                 {
-                    if (!isFirst)
+                    var isFirst = true;
+                    foreach (var i in logs)
+                    {
+                        if (!isFirst)
+                            context.Response.Write(",");
+                        isFirst = false;
+                        context.Response.Write("{");
+
+                        context.Response.Write("\"Date\":");
+                        context.Response.Write(i.EntryDate.ToUniversalTime().ToJsDate());
                         context.Response.Write(",");
-                    isFirst = false;
-                    context.Response.Write("{");
 
-                    context.Response.Write("\"Date\":");
-                    context.Response.Write(i.EntryDate.ToUniversalTime().ToJsDate());
-                    context.Response.Write(",");
+                        context.Response.Write("\"Type\":");
+                        context.Response.Write(i.MessageTypeId);
+                        context.Response.Write(",");
 
-                    context.Response.Write("\"Type\":");
-                    context.Response.Write(i.MessageTypeId);
-                    context.Response.Write(",");
+                        context.Response.Write("\"Level\":");
+                        context.Response.Write(logLevels.ContainsKey(i.MessageTypeId) ? logLevels[i.MessageTypeId] : 0);
+                        context.Response.Write(",");
 
-                    context.Response.Write("\"Level\":");
-                    context.Response.Write(logLevels.ContainsKey(i.MessageTypeId) ? logLevels[i.MessageTypeId] : 0);
-                    context.Response.Write(",");
+                        context.Response.Write("\"Message\":\"");
+                        context.Response.Write(Convert(i.RemoteIpPoint, i.MessageTypeId, i.LogEntryDetails).JsEscape());
+                        context.Response.Write("\"");
 
-                    context.Response.Write("\"Message\":\"");
-                    context.Response.Write(Convert(i.RemoteIpPoint, i.MessageTypeId, i.LogEntryDetails).JsEscape());
-                    context.Response.Write("\"");
-
-                    context.Response.Write("}");
+                        context.Response.Write("}");
+                    }
+                }
+                finally
+                {
+                    changeLock.ExitReadLock();
                 }
                 context.Response.Write("]");
             }

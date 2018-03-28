@@ -64,7 +64,7 @@ namespace GatewayLogic.Services
         EventAddMonitorList,
         [MessageDisplay("Event add response on unknown => Gateway monitor id {gatewayMonitorId}.", LogLevel.Error)]
         EventResponseOnUnknown,
-        [MessageDisplay("Event add response on {channelName} clients {clientCount}.", LogLevel.Detail)]
+        [MessageDisplay("Event add response on {channelName} nb clients {clientCounts}.", LogLevel.Detail)]
         EventAddResponse,
         [MessageDisplay("Event waiting first response on {channelName}.", LogLevel.Detail)]
         EventAddResponseSkipForRead,

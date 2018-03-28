@@ -59,7 +59,7 @@ class Main
         Main.LoadLogStats();
     }
 
-    static LoadLogStats(): void
+    static LoadLogStats(refresh: boolean = false): void
     {
         var start = new Date((new Date()).getTime() - (24 * 3600 * 1000));
         //var start = new Date(2018, 2, 12);
@@ -88,7 +88,7 @@ class Main
                 Main.DrawStats();
 
                 if (Main.CurrentTime)
-                    Main.LoadTimeInfo();
+                    Main.LoadTimeInfo(refresh);
             },
             error: function (msg, textStatus)
             {
@@ -266,14 +266,17 @@ class Main
         Main.LoadTimeInfo();
     }
 
-    static ShowStats()
+    static ShowStats(showClientConnections: boolean = true)
     {
-        $("#clientsTabs li").removeClass("activeTab");
-        $("#clientsTabs li:nth-child(1)").addClass("activeTab");
+        if (showClientConnections)
+        {
+            $("#clientsTabs li").removeClass("activeTab");
+            $("#clientsTabs li:nth-child(1)").addClass("activeTab");
 
-        var prefs = Utils.Preferences;
-        prefs['showSearches'] = false
-        Utils.Preferences = prefs;
+            var prefs = Utils.Preferences;
+            prefs['showSearches'] = false
+            Utils.Preferences = prefs;
+        }
 
         var startDate = new Date(Main.CurrentTime.getTime() - 10 * 60 * 1000);
         var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
@@ -291,20 +294,23 @@ class Main
             success: function (msg)
             {
                 var connections = Connections.CreateFromObject(msg.d);
-                var html = "";
-                html += "<table>";
-                html += "<thead><tr><td>Client</td><td>Start</td><td>End</td></tr></thead>";
-                html + "<tbody>";
-                for (var i = 0; i < connections.Clients.length; i++)
+                if (showClientConnections)
                 {
-                    html += "<tr>";
-                    html += "<td>" + connections.Clients[i].RemoteIpPoint + "</td>";
-                    html += "<td>" + Utils.FullDateFormat(connections.Clients[i].Start) + "</td>";
-                    html += "<td>" + (connections.Clients[i].End ? Utils.FullDateFormat(connections.Clients[i].End) : "&nbsp;") + "</td>";
-                    html + "</tr>";
+                    var html = "";
+                    html += "<table>";
+                    html += "<thead><tr><td>Client</td><td>Start</td><td>End</td></tr></thead>";
+                    html + "<tbody>";
+                    for (var i = 0; i < connections.Clients.length; i++)
+                    {
+                        html += "<tr>";
+                        html += "<td>" + connections.Clients[i].RemoteIpPoint + "</td>";
+                        html += "<td>" + Utils.FullDateFormat(connections.Clients[i].Start) + "</td>";
+                        html += "<td>" + (connections.Clients[i].End ? Utils.FullDateFormat(connections.Clients[i].End) : "&nbsp;") + "</td>";
+                        html + "</tr>";
+                    }
+                    html += "</tbody></table>";
+                    $("#clientsContent").html(html);
                 }
-                html += "</tbody></table>";
-                $("#clientsContent").html(html);
 
                 html = "<table>";
                 html += "<thead><tr><td>Server</td><td>Start</td><td>End</td></tr></thead>";
@@ -328,7 +334,7 @@ class Main
         });
     }
 
-    static LoadTimeInfo()
+    static LoadTimeInfo(refresh: boolean = false)
     {
         Main.DrawStats();
         var startDate = new Date(Main.CurrentTime.getTime());
@@ -338,7 +344,10 @@ class Main
         $("#clients, #servers, #logs").show();
 
         if (Utils.Preferences['showSearches'] === true)
+        {
             Main.ShowSearches();
+            Main.ShowStats(false);
+        }
         else
             Main.ShowStats();
 
@@ -366,6 +375,9 @@ class Main
                 }
                 html += "</tbody></table>";
                 $("#logsContent").html(html);
+
+                // Scroll to bottom
+                $("#logsContent").scrollTop($("#logsContent")[0].scrollHeight - $("#logsContent").height());
             },
             error: function (msg, textStatus)
             {
@@ -374,15 +386,18 @@ class Main
             }
         });
 
-        $("#logsContent").html("Loading...");
-        $("#serversContent").html("Loading...");
-        $("#clientsContent").html("Loading...");
+        if (!refresh)
+        {
+            $("#logsContent").html("Loading...");
+            $("#serversContent").html("Loading...");
+            $("#clientsContent").html("Loading...");
+        }
     }
 
     static Refresh()
     {
         Main.LoadSessions();
-        Main.LoadLogStats();
+        Main.LoadLogStats(true);
     }
 
     static Resize(): void
@@ -464,7 +479,7 @@ class Main
         $("#gatewaySelector").on("change", Main.GatewayChanged);
         $(window).on("resize", Main.Resize);
         $("#timeRangeCanvas").click(Main.TimeLineSelected);
-        //window.setInterval(Main.Refresh, 1000);
+        window.setInterval(Main.Refresh, 1000);
         $(window).bind('popstate', Main.PopState);
         $("#clientsTabs li:nth-child(1)").click(Main.ShowStats);
         $("#clientsTabs li:nth-child(2)").click(Main.ShowSearches);
