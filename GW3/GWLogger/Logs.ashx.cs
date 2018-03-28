@@ -62,6 +62,8 @@ namespace GWLogger
         {
             using (var ctx = new LoggerContext())
             {
+                var logLevels = ctx.LogMessageTypes.ToDictionary(key => key.MessageTypeId, val => val.LogLevel);
+
                 //context.Request;
                 var path = context.Request.Path.Split(new char[] { '/' }).Skip(2).ToArray();
                 IQueryable<LogEntry> logs = ctx.LogEntries;
@@ -70,7 +72,7 @@ namespace GWLogger
                 logs = logs.Where(row => row.Gateway == gateway);
                 if (path.Length == 1)
                 {
-                    logs = logs.OrderByDescending(row => row.EntryId).Take(100).OrderBy(row=>row.EntryId);
+                    logs = logs.OrderByDescending(row => row.EntryId).Take(100).OrderBy(row => row.EntryId);
                 }
                 else
                 {
@@ -87,7 +89,7 @@ namespace GWLogger
                         logs = logs.Where(row => row.EntryDate <= end);
                     }
 
-                    logs = logs.OrderBy(row=>row.EntryId).Take(100);
+                    logs = logs.OrderBy(row => row.EntryId).Take(100);
                 }
                 //logs.Include(row => row.LogMessageType);
 
@@ -109,11 +111,11 @@ namespace GWLogger
                     context.Response.Write(",");
 
                     context.Response.Write("\"Type\":");
-                    context.Response.Write(i.MessageTypeId.ToString());
+                    context.Response.Write(i.MessageTypeId);
                     context.Response.Write(",");
 
                     context.Response.Write("\"Level\":");
-                    context.Response.Write((i.LogMessageType?.LogLevel) ?? 0);
+                    context.Response.Write(logLevels.ContainsKey(i.MessageTypeId) ? logLevels[i.MessageTypeId] : 0);
                     context.Response.Write(",");
 
                     context.Response.Write("\"Message\":\"");

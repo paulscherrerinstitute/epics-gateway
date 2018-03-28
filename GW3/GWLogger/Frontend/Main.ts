@@ -353,13 +353,14 @@ class Main
                 var logs: LogEntry[] = data;
                 var html = "";
                 html += "<table>";
-                html += "<thead><tr><td>Date</td><td>Type</td><td>Message</td></tr></thead>";
+                html += "<thead><tr><td>Date</td><td>Type</td><td>Level</td><td>Message</td></tr></thead>";
                 html + "<tbody>";
                 for (var i = 0; i < logs.length; i++)
                 {
                     html += "<tr>";
                     html += "<td>" + Utils.GWDateFormatMilis(new Date(logs[i].Date)) + "</td>";
                     html += "<td>" + logs[i].Type + "</td>";
+                    html += "<td>" + logs[i].Level + "</td>";
                     html += "<td>" + logs[i].Message + "</td>";
                     html + "</tr>";
                 }
