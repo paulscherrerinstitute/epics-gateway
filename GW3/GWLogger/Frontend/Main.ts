@@ -271,8 +271,9 @@ class Main
         $("#clientsTabs li").removeClass("activeTab");
         $("#clientsTabs li:nth-child(1)").addClass("activeTab");
 
-        $("#help").hide();
-        $("#clients, #servers, #logs").show();
+        var prefs = Utils.Preferences;
+        prefs['showSearches'] = false
+        Utils.Preferences = prefs;
 
         var startDate = new Date(Main.CurrentTime.getTime() - 10 * 60 * 1000);
         var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
@@ -333,7 +334,13 @@ class Main
         var startDate = new Date(Main.CurrentTime.getTime());
         var endDate = new Date(startDate.getTime() + 10 * 60 * 1000);
 
-        Main.ShowStats();
+        $("#help").hide();
+        $("#clients, #servers, #logs").show();
+
+        if (Utils.Preferences['showSearches'] === true)
+            Main.ShowSearches();
+        else
+            Main.ShowStats();
 
         if (Main.loadingLogs)
             Main.loadingLogs.abort();
@@ -406,6 +413,10 @@ class Main
     {
         var current = Main.CurrentTime.getTime();
         var startDate = new Date(current);
+
+        var prefs = Utils.Preferences;
+        prefs['showSearches'] = true
+        Utils.Preferences = prefs;
 
         $("#clientsTabs li").removeClass("activeTab");
         $("#clientsTabs li:nth-child(2)").addClass("activeTab");

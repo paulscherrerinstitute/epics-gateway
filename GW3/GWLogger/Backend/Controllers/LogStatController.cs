@@ -94,7 +94,10 @@ namespace GWLogger.Backend.Controllers
                         }
                     }
 
-                    foreach (var i in allSearches.GroupBy(row => row))
+                    foreach (var i in allSearches.GroupBy(row => row,
+                        new EqualityComparer<Search>((a, b) =>
+                            a.Channel == b.Channel && a.Client == b.Client && a.Gateway == b.Gateway && a.Date == b.Date
+                        )))
                     {
                         var s = ctx.SearchedChannels.FirstOrDefault(row => row.Gateway == i.Key.Gateway && row.Client == i.Key.Client && row.Channel == i.Key.Channel && row.SearchDate == i.Key.Date);
                         if (s == null)
@@ -126,7 +129,7 @@ namespace GWLogger.Backend.Controllers
                         errorMessageTypes = ctx.LogMessageTypes.Where(row => row.LogLevel >= 3).Select(row => row.MessageTypeId).ToList();
 
                 var gateway = newEntry.Gateway;
-                logEntriesStats[gateway][newEntry.EntryDate.Round()]++;
+                logEntriesStats[gateway][newEntry.EntryDate.Trim()]++;
                 switch (newEntry.MessageTypeId)
                 {
                     case 4: // Start client session
@@ -142,12 +145,12 @@ namespace GWLogger.Backend.Controllers
                         gatewaySessions[gateway].Log();
                         break;
                     case 39: //Search
-                        searchesStats[gateway][newEntry.EntryDate.Round()]++;
+                        searchesStats[gateway][newEntry.EntryDate.Trim()]++;
                         searchList.Add(new Search
                         {
                             Client = newEntry.RemoteIpPoint.Split(new char[] { ':' })[0],
                             Gateway = gateway,
-                            Date = newEntry.EntryDate.Round(),
+                            Date = newEntry.EntryDate.Trim(),
                             Channel = newEntry
                                 .LogEntryDetails
                                 .Where(row => row.DetailTypeId == 7)
@@ -169,7 +172,7 @@ namespace GWLogger.Backend.Controllers
                         break;
                     default:
                         if (errorMessageTypes.Contains(newEntry.MessageTypeId))
-                            errorsStats[gateway][newEntry.EntryDate.Round()]++;
+                            errorsStats[gateway][newEntry.EntryDate.Trim()]++;
                         gatewaySessions[gateway].Log();
                         break;
                 }

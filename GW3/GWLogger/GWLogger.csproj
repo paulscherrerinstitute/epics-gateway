@@ -131,6 +131,7 @@
     <Compile Include="Backend\DTOs\LogStat.cs" />
     <Compile Include="Backend\DTOs\MessageType.cs" />
     <Compile Include="Backend\DTOs\SearchRequest.cs" />
+    <Compile Include="Backend\EqualityComparer.cs" />
     <Compile Include="Backend\Helpers.cs" />
     <Compile Include="Backend\Model\SearchedChannel.cs" />
     <Compile Include="Backend\Model\ConnectedClient.cs" />

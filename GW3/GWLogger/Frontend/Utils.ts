@@ -160,4 +160,25 @@ class Utils
         }
         return new Date(parseInt(source));
     }
+
+    /**
+ * Save the preference object to local storage
+ */
+    static set Preferences(preferences: object)
+    {
+        try
+        {
+            localStorage.setItem("preferences", JSON.stringify(preferences));
+        }
+        catch (ex)
+        {
+        }
+    }
+
+    static get Preferences(): object
+    {
+        if (localStorage.getItem("preferences") != null && localStorage.getItem("preferences") != undefined)
+            return JSON.parse(localStorage.getItem("preferences"));
+        return {};
+    }
 }
