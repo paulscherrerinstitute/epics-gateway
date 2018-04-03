@@ -63,7 +63,7 @@ class Main
 
     static LoadLogStats(refresh: boolean = false): void
     {
-        var resetEndDate = refresh && ((Main.EndDate && Main.Stats && Main.EndDate == Main.Stats.Logs[Main.Stats.Logs.length - 1].Date) || !(Main.EndDate && Main.Stats))
+        var resetEndDate = refresh && ((Main.CurrentTime && Main.Stats && Main.CurrentTime == Main.Stats.Logs[Main.Stats.Logs.length - 1].Date) || !(Main.CurrentTime && Main.Stats))
 
         var start = new Date((new Date()).getTime() - (24 * 3600 * 1000));
         //var start = new Date(2018, 2, 12);
@@ -81,6 +81,14 @@ class Main
             success: function (msg)
             {
                 Main.Stats = GatewayStats.CreateFromObject(msg.d);
+
+                if (!Main.EndDate)
+                {
+                    if (Main.Stats.Logs && Main.Stats.Logs.length > 0)
+                        Main.EndDate = Main.Stats.Logs[Main.Stats.Logs.length - 1].Date;
+                    else
+                        Main.EndDate = new Date();
+                }
 
                 if (resetEndDate)
                 {
@@ -381,7 +389,7 @@ class Main
             Main.loadingLogs.abort();
         Main.loadingLogs = $.ajax({
             type: 'GET',
-            url: '/Logs/' + Main.CurrentGateway + '/' + startDate.getTime() + '/' + endDate.getTime() + (Main.Levels ? "?levels=" + Main.Levels:""),
+            url: '/Logs/' + Main.CurrentGateway + '/' + startDate.getTime() + '/' + endDate.getTime() + (Main.Levels ? "?levels=" + Main.Levels : ""),
             success: function (data)
             {
                 Main.loadingLogs = null;
