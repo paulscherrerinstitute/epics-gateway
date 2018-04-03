@@ -137,6 +137,12 @@ body
     right: @borderSpacing;
     bottom: @borderSpacing;
     padding: 5px;
+
+    &:after
+    {
+        .containterLabel;
+        content: "Help";
+    }
 }
 
 #gatewaySessions
@@ -204,13 +210,61 @@ body
     display: none;
     padding-top: 16px;
 
-    &:after
+    &:before
     {
         .containterLabel;
         content: "Logs";
     }
 }
 
+#logHelp
+{
+    position: absolute;
+    background-color: blue;
+    color: white;
+    font-size: 25px;
+    font-weight: bold;
+    right: 0;
+    bottom: 0;
+    border-top-left-radius: 40px;
+    height: 40px;
+    width: 40px;
+    padding-left: 17px;
+    padding-top: 10px;
+    box-sizing: border-box;
+    box-shadow: #606060 -1px -1px 4px;
+    cursor: pointer;
+
+    &:hover
+    {
+        color: red;
+    }
+}
+
+#closeHelp
+{
+    position: absolute;
+    background-color: red;
+    color: white;
+    font-size: 25px;
+    font-weight: bold;
+    right: 0;
+    bottom: 0;
+    border-top-left-radius: 40px;
+    height: 40px;
+    width: 40px;
+    padding-left: 17px;
+    padding-top: 10px;
+    box-sizing: border-box;
+    box-shadow: #606060 -1px -1px 4px;
+    cursor: pointer;
+    display: none;
+
+    &:hover
+    {
+        color: darkred;
+    }
+}
 
 .listContent
 {

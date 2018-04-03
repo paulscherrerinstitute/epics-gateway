@@ -34,8 +34,9 @@ class Main
                 }
                 else
                 {
-                    $('#gatewaySelector').find('option').remove().end().append(options).val(gateways[0]);
-                    Main.GatewayChanged();
+                    options = "<option value=''>-- Select a gateway --</option>" + options;
+                    $('#gatewaySelector').find('option').remove().end().append(options).val("");
+                    //Main.GatewayChanged();
                 }
             },
             error: function (msg, textStatus)
@@ -361,8 +362,11 @@ class Main
         var startDate = new Date(Main.CurrentTime.getTime());
         var endDate = new Date(startDate.getTime() + 10 * 60 * 1000);
 
-        $("#help").hide();
-        $("#clients, #servers, #logs").show();
+        if ($("#closeHelp").css("display") == "none")
+        {
+            $("#help").hide();
+            $("#clients, #servers, #logs").show();
+        }
 
         if (Utils.Preferences['showSearches'] === true)
         {
@@ -420,8 +424,11 @@ class Main
         var now = new Date();
         $("#utcTime").html(("" + now.getUTCHours()).padLeft("0", 2) + ":" + ("" + now.getUTCMinutes()).padLeft("0", 2) + ":" + ("" + now.getUTCSeconds()).padLeft("0", 2));
 
-        Main.LoadSessions();
-        Main.LoadLogStats(true);
+        if (Main.CurrentGateway)
+        {
+            Main.LoadSessions();
+            Main.LoadLogStats(true);
+        }
     }
 
     static Resize(): void
@@ -497,6 +504,20 @@ class Main
         });
     }
 
+    static ShowHelp()
+    {
+        $("#help").show();
+        $("#clients, #servers, #logs").hide();
+        $("#closeHelp").show();
+    }
+
+    static HideHelp()
+    {
+        $("#help").hide();
+        $("#clients, #servers, #logs").show();
+        $("#closeHelp").hide();
+    }
+
     static Init(): void
     {
         Main.BaseTitle = window.document.title;
@@ -507,6 +528,9 @@ class Main
         $(window).bind('popstate', Main.PopState);
         $("#clientsTabs li:nth-child(1)").click(Main.ShowStats);
         $("#clientsTabs li:nth-child(2)").click(Main.ShowSearches);
+
+        $("#logHelp").click(Main.ShowHelp);
+        $("#closeHelp").click(Main.HideHelp);
 
         Main.PopState(null);
     }
