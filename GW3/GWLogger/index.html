@@ -30,14 +30,21 @@
         Data is kept for a max. time of 10 days.
     </div>
     <div id="clients">
-        <ul id="clientsTabs">
+        <ul class="tabs" id="clientsTabs">
             <li class="activeTab">Active clients</li>
             <li>Searches</li>
         </ul>
         <div id="clientsContent" class="listContent"></div>
     </div>
     <div id="servers"><div id="serversContent" class="listContent"></div></div>
-    <div id="logs"><div id="logsContent" class="listContent"></div><div id="logHelp">?</div></div>
+    <div id="logs">
+        <ul class="tabs" id="logFilter">
+            <li class="activeTab" level="0,1,2,3,4">All</li>
+            <li level="2">Connections</li>
+            <li level="3,4">Errors</li>
+        </ul>
+        <div id="logsContent" class="listContent"></div><div id="logHelp">?</div>
+    </div>
     <div id="utcTime"></div>
     <div id="mouseCapture"></div>
     <script src="Scripts/jquery-3.3.1.min.js"></script>

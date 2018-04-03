@@ -7,6 +7,7 @@ class Main
     static Stats: GatewayStats;
     static EndDate: Date;
     static CurrentTime: Date;
+    static Levels: string;
 
     static loadingLogs: JQueryXHR;
 
@@ -380,7 +381,7 @@ class Main
             Main.loadingLogs.abort();
         Main.loadingLogs = $.ajax({
             type: 'GET',
-            url: '/Logs/' + Main.CurrentGateway + '/' + startDate.getTime() + '/' + endDate.getTime(),
+            url: '/Logs/' + Main.CurrentGateway + '/' + startDate.getTime() + '/' + endDate.getTime() + (Main.Levels ? "?levels=" + Main.Levels:""),
             success: function (data)
             {
                 Main.loadingLogs = null;
@@ -518,6 +519,15 @@ class Main
         $("#closeHelp").hide();
     }
 
+    static LogFilter(evt: JQueryEventObject)
+    {
+        $("#logFilter li").removeClass("activeTab");
+        $(evt.target).addClass("activeTab");
+        Main.Levels = evt.target.getAttribute("level");
+
+        Main.LoadTimeInfo();
+    }
+
     static Init(): void
     {
         Main.BaseTitle = window.document.title;
@@ -528,6 +538,8 @@ class Main
         $(window).bind('popstate', Main.PopState);
         $("#clientsTabs li:nth-child(1)").click(Main.ShowStats);
         $("#clientsTabs li:nth-child(2)").click(Main.ShowSearches);
+
+        $("#logFilter li").click(Main.LogFilter);
 
         $("#logHelp").click(Main.ShowHelp);
         $("#closeHelp").click(Main.HideHelp);

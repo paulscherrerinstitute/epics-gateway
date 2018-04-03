@@ -88,7 +88,7 @@ namespace GWLogger
                 logs = logs.Where(row => row.Gateway == gateway);
                 if (path.Length == 1)
                 {
-                    logs = logs.OrderByDescending(row => row.EntryId).Take(100).OrderBy(row => row.EntryId);
+                    logs = logs.OrderByDescending(row => row.EntryId);
                 }
                 else
                 {
@@ -105,9 +105,19 @@ namespace GWLogger
                         logs = logs.Where(row => row.EntryDate <= end);
                     }
 
-                    logs = logs.OrderByDescending(row => row.EntryId).Take(100).OrderBy(row => row.EntryId);
+                    logs = logs.OrderByDescending(row => row.EntryId);
+                }
+
+                var levelsRequested = context.Request["levels"];
+                if (!string.IsNullOrWhiteSpace(levelsRequested))
+                {
+                    var levels = levelsRequested.Split(new char[] { ',' }).Select(row => int.Parse(row));
+                    var msgTypes = logLevels.Where(row => levels.Contains(row.Value)).Select(row => row.Key).ToList();
+                    logs = logs.Where(row => msgTypes.Contains(row.MessageTypeId));
                 }
                 //logs.Include(row => row.LogMessageType);
+
+                logs = logs.Take(100).OrderBy(row => row.EntryId);
 
                 context.Response.ContentType = "application/json";
                 context.Response.CacheControl = "no-cache";

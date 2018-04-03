@@ -208,13 +208,19 @@ body
     right: @borderSpacing;
     height: ~"calc(50% - @{borderSpacing} - @{borderSpacing})";
     display: none;
-    padding-top: 16px;
+    //padding-top: 16px;
 
     &:before
     {
         .containterLabel;
         content: "Logs";
     }
+}
+
+#logsContent 
+{
+    top: 50px;
+    padding-top: 0px;
 }
 
 #logHelp
@@ -320,11 +326,6 @@ select
         font-weight: bold;
         padding-top: 10px;
     }
-}
-
-#clientsTabs
-{
-    .tabs;
 }
 
 #clientsContent
