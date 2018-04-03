@@ -61,6 +61,8 @@ class Main
 
     static LoadLogStats(refresh: boolean = false): void
     {
+        var resetEndDate = refresh && ((Main.EndDate && Main.Stats && Main.EndDate == Main.Stats.Logs[Main.Stats.Logs.length - 1].Date) || !(Main.EndDate && Main.Stats))
+
         var start = new Date((new Date()).getTime() - (24 * 3600 * 1000));
         //var start = new Date(2018, 2, 12);
         var end = new Date();
@@ -76,14 +78,14 @@ class Main
             dataType: 'json',
             success: function (msg)
             {
-                var resetEndDate = ((Main.EndDate && Main.Stats && Main.EndDate == Main.Stats.Logs[Main.Stats.Logs.length - 1].Date) || !(Main.EndDate && Main.Stats))
                 Main.Stats = GatewayStats.CreateFromObject(msg.d);
+
                 if (resetEndDate)
                 {
                     if (Main.Stats.Logs && Main.Stats.Logs.length > 0)
-                        Main.EndDate = Main.Stats.Logs[Main.Stats.Logs.length - 1].Date;
+                        Main.EndDate = Main.CurrentTime = Main.Stats.Logs[Main.Stats.Logs.length - 1].Date;
                     else
-                        Main.EndDate = new Date();
+                        Main.EndDate = Main.CurrentTime = new Date();
                 }
                 Main.DrawStats();
 
@@ -99,6 +101,9 @@ class Main
 
     static DrawStats(): void
     {
+        if (!Main.Stats || !Main.EndDate)
+            return;
+
         var canvas = (<HTMLCanvasElement>$("#timeRangeCanvas")[0]);
         var ctx = canvas.getContext("2d");
         var width = $("#timeRange").width();
@@ -253,13 +258,29 @@ class Main
         });
     }
 
-    static TimeLineSelected(evt: MouseEvent): void
+    static TimeLineSelected(evt: JQueryMouseEventObject): void
+    {
+        Main.TimeLineMouse(evt);
+
+        var up = () =>
+        {
+            $("#mouseCapture").hide().off("mousemove", Main.TimeLineMouse).off("mouseup").off("mouseleave");
+        }
+
+        $("#mouseCapture").show().on("mousemove", Main.TimeLineMouse).on("mouseup", up).on("mouseleave", up);
+    }
+
+    static TimeLineMouse(evt: JQueryMouseEventObject): void
     {
         var width = $("#timeRange").width();
         var w = width / 145;
         var x = evt.pageX - $("#timeRange").position().left;
 
         var tx = Math.floor((width - x) / w);
+        if (tx < 0)
+            tx = 0;
+        if (tx > 144)
+            tx = 144;
         Main.CurrentTime = new Date(Main.EndDate.getTime() - tx * 10 * 60 * 1000);
         window.history.pushState(null, Main.BaseTitle + " - " + Main.CurrentGateway, '/GW/' + Main.CurrentGateway + "/" + Main.CurrentTime.getTime());
 
@@ -396,6 +417,9 @@ class Main
 
     static Refresh()
     {
+        var now = new Date();
+        $("#utcTime").html(("" + now.getUTCHours()).padLeft("0", 2) + ":" + ("" + now.getUTCMinutes()).padLeft("0", 2) + ":" + ("" + now.getUTCSeconds()).padLeft("0", 2));
+
         Main.LoadSessions();
         Main.LoadLogStats(true);
     }
@@ -478,7 +502,7 @@ class Main
         Main.BaseTitle = window.document.title;
         $("#gatewaySelector").on("change", Main.GatewayChanged);
         $(window).on("resize", Main.Resize);
-        $("#timeRangeCanvas").click(Main.TimeLineSelected);
+        $("#timeRangeCanvas").on("mousedown", Main.TimeLineSelected);
         window.setInterval(Main.Refresh, 1000);
         $(window).bind('popstate', Main.PopState);
         $("#clientsTabs li:nth-child(1)").click(Main.ShowStats);

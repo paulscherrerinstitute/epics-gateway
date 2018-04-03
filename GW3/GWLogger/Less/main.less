@@ -89,7 +89,7 @@ body
     left: 0px;
     top: 0px;
     width: @leftSidebar;
-    bottom: @borderSpacing;
+    bottom: 40px + @borderSpacing * 2;
     padding: 5px;
     padding-top: 17px;
     overflow: hidden;
@@ -277,4 +277,32 @@ select
 {
     top: 55px;
     padding-top: 0px;
+}
+
+#mouseCapture
+{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    background-color: transparent;
+    display: none;
+}
+
+#utcTime
+{
+    .container;
+    bottom: @borderSpacing;
+    width: @leftSidebar;
+    left: 0px;
+    height: 40px;
+    padding-top: 20px;
+    text-align: center;
+
+    &:after
+    {
+        .containterLabel;
+        content: "UTC Time";
+    }
 }
