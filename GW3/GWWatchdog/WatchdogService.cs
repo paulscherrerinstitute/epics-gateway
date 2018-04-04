@@ -147,14 +147,14 @@ namespace GWWatchdog
                 if (Environment.UserInteractive)
                     Console.WriteLine("Checking...");
                 bool isOk = false;
-                for (int i = 0; i < 5; i++)
+                for (int i = 0; i < 15; i++)
                 {
                     if (Environment.UserInteractive)
                         Console.WriteLine("Trial " + i);
                     isOk = false;
                     using (var client = new CAClient())
                     {
-                        client.Configuration.WaitTimeout = 15000;
+                        client.Configuration.WaitTimeout = 3000;
                         var cpuInfo = client.CreateChannel<double>(ConfigurationManager.AppSettings["gatewayName"] + ":CPU");
                         try
                         {
