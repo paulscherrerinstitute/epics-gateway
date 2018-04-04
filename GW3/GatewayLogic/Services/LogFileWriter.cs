@@ -60,8 +60,9 @@ namespace GatewayLogic.Services
                 lock (buffer)
                 {
                     bufferWriter.Flush();
-
                     bytes = buffer.ToArray();
+                    if (bytes.Length == 0)
+                        continue;
                     buffer.Position = 0;
                     buffer.SetLength(0);
                 }
@@ -91,21 +92,27 @@ namespace GatewayLogic.Services
 
         private void RotateLogs()
         {
-            var dir = Path.GetDirectoryName(path);
-            var logDate = DateTime.UtcNow.AddDays(-logKeepDays).ToString("yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
-            var iLogDate = int.Parse(logDate);
-            var filename = Path.GetFileName(path);
-
-            if (logKeepDays > 0)
+            try
             {
-                var logs = Directory.GetFiles(dir, "*." + filename);
-                foreach (var f in logs.Where(row => Path.GetFileName(row).EndsWith("." + filename)
-                    && int.Parse(Path.GetFileName(row).Substring(0, 8)) < iLogDate))
-                        File.Delete(f);
-            }
+                var dir = Path.GetDirectoryName(path);
+                var logDate = DateTime.UtcNow.AddDays(-logKeepDays).ToString("yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
+                var iLogDate = int.Parse(logDate);
+                var filename = Path.GetFileName(path);
 
-            lastLogDate = logDate;
-            currentLogFilename = dir + "\\" + lastLogDate + "." + filename;
+                if (logKeepDays > 0)
+                {
+                    var logs = Directory.GetFiles(dir, "*." + filename);
+                    foreach (var f in logs.Where(row => Path.GetFileName(row).EndsWith("." + filename)
+                        && int.Parse(Path.GetFileName(row).Substring(0, 8)) < iLogDate))
+                        File.Delete(f);
+                }
+
+                lastLogDate = logDate;
+                currentLogFilename = dir + "\\" + lastLogDate + "." + filename;
+            }
+            catch
+            {
+            }
         }
 
         public void LogHandler(LogLevel level, string source, string message)

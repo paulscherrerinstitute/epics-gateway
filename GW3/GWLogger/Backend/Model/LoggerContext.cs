@@ -33,5 +33,7 @@ namespace GWLogger.Backend.Model
         public virtual DbSet<ConnectedClient> ConnectedClients { get; set; }
         public virtual DbSet<ConnectedServer> ConnectedServers { get; set; }
         public virtual DbSet<SearchedChannel> SearchedChannels { get; set; }
+
+        public FreeSpace FreeSpace => this.Database.SqlQuery<FreeSpace>("select TotMB, CAST(UsedMB AS INT), MaxMB from dbo.FreeSpace").AsQueryable().First();
     }
 }

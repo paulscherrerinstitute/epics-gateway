@@ -16,6 +16,8 @@ namespace GWLogger.Migrations
         {
             try
             {
+                context.Database.ExecuteSqlCommand("CREATE VIEW dbo.FreeSpace AS SELECT SUM(size / 128) AS 'TotMB', SUM(CAST(FILEPROPERTY(name, 'SpaceUsed')AS int) / 128) AS 'UsedMB', SUM(max_size / 128) AS 'MaxMB' FROM sys.database_files WHERE data_space_id = 2");
+
                 // Drop useless column
                 context.Database.ExecuteSqlCommand("ALTER TABLE LogEntries DROP COLUMN TrimmedDate");
 

@@ -37,7 +37,7 @@ namespace GWConsole
              {
                  return ((int)level >= levelToLog);
              };
-            gateway.Log.ClearHandlers();
+            //gateway.Log.ClearHandlers();
             gateway.Log.Handler += (level, source, message) =>
               {
                   switch(level)

@@ -32,5 +32,14 @@ namespace GWLogger
         {
             Backend.Controllers.LogController.LogEntry(gateway, remoteIpPoint, messageType, details);
         }
+
+        [WebMethod]
+        public Backend.Model.FreeSpace GetFreeSpace()
+        {
+            using (var ctx = new Backend.Model.LoggerContext())
+            {
+                return ctx.FreeSpace;
+            }
+        }
     }
 }

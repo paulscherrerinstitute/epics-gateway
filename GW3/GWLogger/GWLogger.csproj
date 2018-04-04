@@ -133,6 +133,7 @@
     <Compile Include="Backend\DTOs\SearchRequest.cs" />
     <Compile Include="Backend\EqualityComparer.cs" />
     <Compile Include="Backend\Helpers.cs" />
+    <Compile Include="Backend\Model\FreeSpace.cs" />
     <Compile Include="Backend\Model\SearchedChannel.cs" />
     <Compile Include="Backend\Model\ConnectedClient.cs" />
     <Compile Include="Backend\Model\ConnectedServer.cs" />
@@ -176,6 +177,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Frontend\DTOs\Connections.ts" />
+    <TypeScriptCompile Include="Frontend\DTOs\FreeSpace.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewaySession.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewayStats.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\LogEntry.ts" />

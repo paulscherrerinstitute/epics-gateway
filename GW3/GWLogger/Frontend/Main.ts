@@ -433,6 +433,19 @@ class Main
         var now = new Date();
         $("#utcTime").html(("" + now.getUTCHours()).padLeft("0", 2) + ":" + ("" + now.getUTCMinutes()).padLeft("0", 2) + ":" + ("" + now.getUTCSeconds()).padLeft("0", 2));
 
+        $.ajax({
+            type: 'POST',
+            url: 'DataAccess.asmx/GetFreeSpace',
+            data: JSON.stringify({}),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (msg)
+            {
+                var free = <FreeSpace>msg.d;
+                $("#freeSpace").html("" + (100 - Math.round(free.UsedMB * 1000 / free.MaxMB) / 10) + "%");
+            }
+        });
+
         if (Main.CurrentGateway)
         {
             Main.LoadSessions();

@@ -20,7 +20,8 @@ namespace GatewayLogic.Services
         public delegate void LogHandler(LogLevel level, string source, string message);
         public delegate bool LogFilter(LogLevel level);
 
-        public event LogHandler Handler = TextLogger.DefaultHandler;
+        //public event LogHandler Handler = TextLogger.DefaultHandler;
+        public event LogHandler Handler;
         public LogFilter Filter = TextLogger.ShowAll;
         private object lockObject = new object();
 
@@ -34,7 +35,7 @@ namespace GatewayLogic.Services
             return true;
         }
 
-        private static void DefaultHandler(LogLevel level, string source, string message)
+        public static void DefaultHandler(LogLevel level, string source, string message)
         {
             Console.Write(DateTime.UtcNow.ToString("HH:mm:ss"));
             Console.Write(" - ");

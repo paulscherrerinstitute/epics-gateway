@@ -127,6 +127,7 @@ namespace GWTest
             gateway.Configuration.RemoteSideB = "sls-cagw02.psi.ch:5062";
             //gateway.Configuration.ConfigurationType = GatewayLogic.Configuration.ConfigurationType.BIDIRECTIONAL;
             gateway.Configuration.ConfigurationType = GatewayLogic.Configuration.ConfigurationType.UNIDIRECTIONAL;
+            gateway.Log.Handler += GatewayLogic.Services.TextLogger.DefaultHandler;
             gateway.Start();
 
             /*var client = new CAClient();

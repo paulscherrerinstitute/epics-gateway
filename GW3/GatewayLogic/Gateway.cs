@@ -39,7 +39,15 @@ namespace GatewayLogic
         internal ServerConnection ServerConnection { get; }
         internal DiagnosticServer DiagnosticServer { get; private set; }
         internal MessageLogger MessageLogger { get; private set; }
-        public TextLogger Log => MessageLogger.MessageConverter.TextLogger;
+        public TextLogger Log
+        {
+            get
+            {
+                if(MessageLogger == null)
+                    MessageLogger = new MessageLogger(Configuration.GatewayName);
+                return  MessageLogger.MessageConverter.TextLogger;
+            }
+        }
         //public TextLogger Log { get; private set; }
 
         public event NewIocChannelDelegate NewIocChannel;
