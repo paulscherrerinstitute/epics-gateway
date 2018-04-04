@@ -17,10 +17,12 @@ namespace GatewayLogic.Connections
         Socket receiver;
         readonly byte[] buff = new byte[Gateway.BUFFER_SIZE];
 
+        public IPEndPoint EndPoint { get; }
+
         // Found on http://stackoverflow.com/questions/5199026/c-sharp-async-udp-listener-socketexception
         // Allows to reset the socket in case of malformed UDP packet.
 
-        public UdpReceiver(Gateway gateway, IPEndPoint endPoint): base(gateway)
+        public UdpReceiver(Gateway gateway, IPEndPoint endPoint) : base(gateway)
         {
             splitter = new Splitter();
 
@@ -28,6 +30,7 @@ namespace GatewayLogic.Connections
             receiver.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             receiver.IOControl(SioUdpConnReset, new byte[] { 0, 0, 0, 0 }, null);
             receiver.Bind(endPoint);
+            this.EndPoint = endPoint;
 
             if (endPoint == gateway.Configuration.SideAEndPoint)
                 this.Destinations = gateway.Configuration.remoteBEndPoints;
@@ -82,21 +85,16 @@ namespace GatewayLogic.Connections
                 // Stop receiving
                 return;
             }
-
-            //Gateway.Log.Write(Services.LogLevel.Detail, "Receiving: " + epSender.ToString());
-            splitter.Reset();
-            foreach (var p in splitter.Split(DataPacket.Create(buff, size, false)))
+            catch (Exception ex)
             {
-                Gateway.DiagnosticServer.NbMessages++;
-                p.Sender = (IPEndPoint)epSender;
-                if (this is UdpResponseReceiver)
-                    Commands.CommandHandler.ExecuteResponseHandler(p.Command, this, p);
-                else
-                    Commands.CommandHandler.ExecuteRequestHandler(p.Command, this, p);
+                Gateway.MessageLogger.Write(EndPoint.ToString(), Services.LogMessageType.Exception, new Services.LogMessageDetail[] { new Services.LogMessageDetail { TypeId = Services.MessageDetail.Exception, Value = ex.ToString() } });
             }
+
+            DataPacket data = null;
 
             try
             {
+                data = DataPacket.Create(buff, size, false);
                 EndPoint tempRemoteEp = sender;
                 receiver.BeginReceiveFrom(buff, 0, buff.Length, SocketFlags.None, ref tempRemoteEp, GotUdpMessage, tempRemoteEp);
             }
@@ -104,6 +102,29 @@ namespace GatewayLogic.Connections
             {
                 // Stop receiving
                 return;
+            }
+            catch (Exception ex)
+            {
+                Gateway.MessageLogger.Write(EndPoint.ToString(), Services.LogMessageType.Exception, new Services.LogMessageDetail[] { new Services.LogMessageDetail { TypeId = Services.MessageDetail.Exception, Value = ex.ToString() } });
+            }
+
+            try
+            {
+                //Gateway.Log.Write(Services.LogLevel.Detail, "Receiving: " + epSender.ToString());
+                splitter.Reset();
+                foreach (var p in splitter.Split(data))
+                {
+                    Gateway.DiagnosticServer.NbMessages++;
+                    p.Sender = (IPEndPoint)epSender;
+                    if (this is UdpResponseReceiver)
+                        Commands.CommandHandler.ExecuteResponseHandler(p.Command, this, p);
+                    else
+                        Commands.CommandHandler.ExecuteRequestHandler(p.Command, this, p);
+                }
+            }
+            catch (Exception ex)
+            {
+                Gateway.MessageLogger.Write(EndPoint.ToString(), Services.LogMessageType.Exception, new Services.LogMessageDetail[] { new Services.LogMessageDetail { TypeId = Services.MessageDetail.Exception, Value = ex.ToString() } });
             }
         }
     }

@@ -147,7 +147,7 @@ namespace GWWatchdog
                 if (Environment.UserInteractive)
                     Console.WriteLine("Checking...");
                 bool isOk = false;
-                for (int i = 0; i < 15; i++)
+                for (int i = 0; i < 30; i++)
                 {
                     if (Environment.UserInteractive)
                         Console.WriteLine("Trial " + i);
