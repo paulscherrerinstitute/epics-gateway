@@ -19,6 +19,7 @@ namespace GatewayLogic.Services
     {
         public delegate void LogHandler(LogLevel level, string source, string message);
         public delegate bool LogFilter(LogLevel level);
+        public static int? FilterLevel = null;
 
         //public event LogHandler Handler = TextLogger.DefaultHandler;
         public event LogHandler Handler;
@@ -30,9 +31,16 @@ namespace GatewayLogic.Services
 
         }
 
-        private static bool ShowAll(LogLevel level)
+        public static bool ShowAll(LogLevel level)
         {
             return true;
+        }
+
+        public static bool ShowUpToLevel(LogLevel level)
+        {
+            if (!FilterLevel.HasValue)
+                FilterLevel = int.Parse(System.Configuration.ConfigurationManager.AppSettings["logLevel"] ?? "0");
+            return (int)level >= FilterLevel;
         }
 
         public static void DefaultHandler(LogLevel level, string source, string message)

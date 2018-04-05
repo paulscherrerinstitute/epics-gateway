@@ -32,15 +32,16 @@ namespace GWConsole
 
             var gateway = new Gateway();
             gateway.LoadConfig();
+
             var levelToLog = int.Parse(System.Configuration.ConfigurationManager.AppSettings["log"] ?? "0");
-            gateway.Log.Filter = (level) =>
-             {
-                 return ((int)level >= levelToLog);
-             };
+
             //gateway.Log.ClearHandlers();
             gateway.Log.Handler += (level, source, message) =>
               {
-                  switch(level)
+                  if ((int)level < levelToLog)
+                      return;
+
+                  switch (level)
                   {
                       case GatewayLogic.Services.LogLevel.Command:
                           Console.ForegroundColor = ConsoleColor.DarkGray;

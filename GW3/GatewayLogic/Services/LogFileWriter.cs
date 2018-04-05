@@ -95,15 +95,15 @@ namespace GatewayLogic.Services
             try
             {
                 var dir = Path.GetDirectoryName(path);
-                var logDate = DateTime.UtcNow.AddDays(-logKeepDays).ToString("yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
-                var iLogDate = int.Parse(logDate);
+                var logDate = DateTime.UtcNow.ToString("yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
                 var filename = Path.GetFileName(path);
 
                 if (logKeepDays > 0)
                 {
+                    var iLogDate = DateTime.UtcNow.AddDays(-logKeepDays).ToString("yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
+
                     var logs = Directory.GetFiles(dir, "*." + filename);
-                    foreach (var f in logs.Where(row => Path.GetFileName(row).EndsWith("." + filename)
-                        && int.Parse(Path.GetFileName(row).Substring(0, 8)) < iLogDate))
+                    foreach (var f in logs.Where(row =>  Path.GetFileName(row).Substring(0, 8).CompareTo(iLogDate) < 0))
                         File.Delete(f);
                 }
 
