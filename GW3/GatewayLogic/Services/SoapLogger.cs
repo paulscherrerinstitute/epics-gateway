@@ -24,6 +24,9 @@ namespace GatewayLogic.Services
 
         static SoapLogger()
         {
+            if (System.Configuration.ConfigurationManager.AppSettings["soapLogger"]?.ToLower() != "true")
+                return;
+
             // Build SOAP connection
             try
             {
