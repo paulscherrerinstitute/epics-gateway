@@ -12,8 +12,10 @@ namespace GWLogger.Backend.Controllers
         static List<Model.LogEntry> entryToAdd = new List<Model.LogEntry>();
         static SemaphoreSlim lockEntry = new SemaphoreSlim(1);
         static Thread logEntryFlusher;
-        static DateTime lastCleaning = DateTime.UtcNow.AddDays(-1);
+        static DateTime lastCleaning = DateTime.UtcNow.AddDays(-2);
         static long nextEntryId = 0;
+        static object logCleanerLocker = new object();
+        static bool isCleaning = false;
 
         static LogController()
         {
@@ -78,16 +80,37 @@ namespace GWLogger.Backend.Controllers
             }
         }
 
-        private static void CleanLogs()
+        internal static void CleanLogs()
         {
-            using (var ctx = new Model.LoggerContext())
+            lock(logCleanerLocker)
             {
-                var toDeleteDate = DateTime.UtcNow.AddDays(-10);
-                ctx.Database.Connection.Open();
-
-                ctx.Database.ExecuteSqlCommand("DELETE FROM LogEntryDetails WHERE LogEntryId IN (SELECT EntryId FROM LogEntries WHERE TrimmedDate < @d1)", new System.Data.SqlClient.SqlParameter("@d1", toDeleteDate));
-                ctx.Database.ExecuteSqlCommand("DELETE FROM LogEntries WHERE TrimmedDate < @d1", new System.Data.SqlClient.SqlParameter("@d1", toDeleteDate));
+                if (isCleaning)
+                    return;
+                isCleaning = true;
             }
+            ThreadPool.QueueUserWorkItem((objState) =>
+            {
+                try
+                {
+                    using (var ctx = new Model.LoggerContext())
+                    {
+                        var toDeleteDate = DateTime.UtcNow.AddDays(-10);
+                        ctx.Database.Connection.Open();
+
+                        ctx.Database.CommandTimeout = 30000;
+                        ctx.Database.ExecuteSqlCommand("DELETE FROM LogEntryDetails WHERE LogEntryId IN (SELECT EntryId FROM LogEntries WHERE TrimmedDate < @d1)", new System.Data.SqlClient.SqlParameter("@d1", toDeleteDate));
+                        ctx.Database.ExecuteSqlCommand("DELETE FROM LogEntries WHERE TrimmedDate < @d1", new System.Data.SqlClient.SqlParameter("@d1", toDeleteDate));
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
+                lock(logCleanerLocker)
+                {
+                    isCleaning = false;
+                }
+            });
         }
 
         public static void LogEntry(string gateway, string remoteIpPoint, int messageType, List<DTOs.LogEntryDetail> details)

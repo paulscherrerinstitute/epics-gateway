@@ -89,7 +89,7 @@ namespace GWLogger.Backend.Controllers
                         RemoteIpPoint = row.RemoteIpPoint,
                         Start = row.StartConnection,
                         End = row.EndConnection
-                    }).ToList();
+                    }).Take(1000).ToList();
             }
         }
 
@@ -105,7 +105,7 @@ namespace GWLogger.Backend.Controllers
                         RemoteIpPoint = row.RemoteIpPoint,
                         Start = row.StartConnection,
                         End = row.EndConnection
-                    }).ToList();
+                    }).Take(1000).ToList();
             }
         }
 
@@ -122,7 +122,7 @@ namespace GWLogger.Backend.Controllers
                         RemoteIpPoint = row.RemoteIpPoint,
                         Start = row.StartConnection,
                         End = row.EndConnection
-                    }).ToList();
+                    }).Take(1000).ToList();
             }
         }
 
@@ -138,7 +138,7 @@ namespace GWLogger.Backend.Controllers
                         RemoteIpPoint = row.RemoteIpPoint,
                         Start = row.StartConnection,
                         End = row.EndConnection
-                    }).ToList();
+                    }).Take(1000).ToList();
             }
         }
 
@@ -159,7 +159,7 @@ namespace GWLogger.Backend.Controllers
                         Date = row.SearchDate,
                         Client = row.Client,
                         NbSearches = row.NbSearches
-                    }).ToList();
+                    }).Take(1000).ToList();
             }
         }
     }

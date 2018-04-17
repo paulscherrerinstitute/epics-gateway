@@ -16,6 +16,8 @@ namespace GWLogger
             var configuration = new Migrations.Configuration();
             var migrator = new System.Data.Entity.Migrations.DbMigrator(configuration);
             migrator.Update();
+
+            Backend.Controllers.LogController.CleanLogs();
         }
 
         protected void Session_Start(object sender, EventArgs e)
@@ -32,6 +34,7 @@ namespace GWLogger
             else if (fullOrigionalpath.ToLower().StartsWith("/logs"))
                 //Context.RemapHandler("/Logs.ashx");
                 Context.RemapHandler(new Logs());
+
         }
         protected void Application_AuthenticateRequest(object sender, EventArgs e)
         {
