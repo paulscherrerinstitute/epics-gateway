@@ -50,12 +50,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
-    </Reference>
-    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.7\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
@@ -114,7 +108,7 @@
   <ItemGroup>
     <Compile Include="Backend\Controllers\AnalyzeController.cs" />
     <Compile Include="Backend\Controllers\LogController.cs" />
-    <Compile Include="Backend\DataContext\DataContext.cs" />
+    <Compile Include="Backend\DataContext\Context.cs" />
     <Compile Include="Backend\DataContext\DataFile.cs" />
     <Compile Include="Backend\DataContext\DataFiles.cs" />
     <Compile Include="Backend\DataContext\LogEntry.cs" />
@@ -155,11 +149,6 @@
     <Compile Include="Logs.ashx.cs">
       <DependentUpon>Logs.ashx</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201803231336148_base.cs" />
-    <Compile Include="Migrations\201803231336148_base.Designer.cs">
-      <DependentUpon>201803231336148_base.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -175,11 +164,6 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Migrations\201803231336148_base.resx">
-      <DependentUpon>201803231336148_base.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />
   <PropertyGroup>

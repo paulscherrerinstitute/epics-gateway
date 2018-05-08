@@ -30,24 +30,37 @@ namespace GWLogger.Backend.DataContext
         private bool isAtEnd = true;
         private bool mustFlush = false;
 
-        public static string StrorageDirectory => System.Configuration.ConfigurationManager.AppSettings["storageDirectory"];
+        public static string StorageDirectory => System.Configuration.ConfigurationManager.AppSettings["storageDirectory"];
+
+        public static List<string> Gateways
+        {
+            get
+            {
+                return Directory.GetFiles(StorageDirectory, "*.data")
+                    .Select(row => row.Substring(StorageDirectory.Length + 1).Split(new char[] { '.' }))
+                    .First()
+                    .Distinct()
+                    .OrderBy(row => row)
+                    .ToList();
+            }
+        }
 
         public static void DeleteFiles(string gateway)
         {
             // Delete all the data files
-            foreach (var i in Directory.GetFiles(StrorageDirectory, gateway.ToLower() + ".*.data"))
+            foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.data"))
                 File.Delete(i);
             // Delete all the index files
-            foreach (var i in Directory.GetFiles(StrorageDirectory, gateway.ToLower() + ".*.idx"))
+            foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.idx"))
                 File.Delete(i);
             // Delete all the clientSessions files
-            foreach (var i in Directory.GetFiles(StrorageDirectory, gateway.ToLower() + ".*.clientSessions"))
+            foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.clientSessions"))
                 File.Delete(i);
             // Delete all the serverSessions files
-            foreach (var i in Directory.GetFiles(StrorageDirectory, gateway.ToLower() + ".*.serverSessions"))
+            foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.serverSessions"))
                 File.Delete(i);
             // Delete all the searches files
-            foreach (var i in Directory.GetFiles(StrorageDirectory, gateway.ToLower() + ".*.searches"))
+            foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.searches"))
                 File.Delete(i);
         }
 
@@ -123,7 +136,7 @@ namespace GWLogger.Backend.DataContext
             if (!forDate.HasValue)
                 forDate = DateTime.UtcNow;
 
-            return StrorageDirectory + "\\" + gateway.ToLower() + "." + forDate.Value.Year + ("" + forDate.Value.Month).PadLeft(2, '0') + ("" + forDate.Value.Day).PadLeft(2, '0') + extention;
+            return StorageDirectory + "\\" + gateway.ToLower() + "." + forDate.Value.Year + ("" + forDate.Value.Month).PadLeft(2, '0') + ("" + forDate.Value.Day).PadLeft(2, '0') + extention;
         }
 
         public DateTime CurrentDate
@@ -547,7 +560,7 @@ namespace GWLogger.Backend.DataContext
                     currentClientSession = null;
                 }
 
-                foreach (var i in Directory.GetFiles(StrorageDirectory, gateway.ToLower() + ".*.clientSessions"))
+                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.clientSessions"))
                 {
                     using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read), System.Text.Encoding.UTF8))
                     {
@@ -594,7 +607,7 @@ namespace GWLogger.Backend.DataContext
                     currentServerSession = null;
                 }
 
-                foreach (var i in Directory.GetFiles(StrorageDirectory, gateway.ToLower() + ".*.serverSessions"))
+                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.serverSessions"))
                 {
                     using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read), System.Text.Encoding.UTF8))
                     {
@@ -641,7 +654,7 @@ namespace GWLogger.Backend.DataContext
                     currentSearches = null;
                 }
 
-                foreach (var i in Directory.GetFiles(StrorageDirectory, gateway.ToLower() + ".*.searches"))
+                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.searches"))
                 {
                     using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read), System.Text.Encoding.UTF8))
                     {

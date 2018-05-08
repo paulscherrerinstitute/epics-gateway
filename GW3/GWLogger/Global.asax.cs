@@ -9,6 +9,8 @@ namespace GWLogger
 {
     public class Global : System.Web.HttpApplication
     {
+        public static Backend.DataContext.Context DataContext { get; } = new Backend.DataContext.Context();
+
 
         protected void Application_Start(object sender, EventArgs e)
         {
@@ -53,7 +55,7 @@ namespace GWLogger
 
         protected void Application_End(object sender, EventArgs e)
         {
-
+            DataContext.Dispose();
         }
     }
 }

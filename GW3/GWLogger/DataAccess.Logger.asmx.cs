@@ -34,12 +34,9 @@ namespace GWLogger
         }
 
         [WebMethod]
-        public Backend.Model.FreeSpace GetFreeSpace()
+        public long GetFreeSpace()
         {
-            using (var ctx = new Backend.Model.LoggerContext())
-            {
-                return ctx.FreeSpace;
-            }
+            return 0L;
         }
     }
 }

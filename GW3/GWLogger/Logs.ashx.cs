@@ -1,5 +1,4 @@
 ﻿using GWLogger.Backend;
-using GWLogger.Backend.Model;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -43,7 +42,7 @@ namespace GWLogger
             }
         }
 
-        private static string Convert(string remoteIpPoint, int messageType, IEnumerable<LogEntryDetail> details)
+        private static string Convert(string remoteIpPoint, int messageType, IEnumerable<Backend.DTOs.LogEntryDetail> details)
         {
             if (Convertion[messageType] == null)
             {

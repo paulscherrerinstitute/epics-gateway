@@ -7,13 +7,21 @@ using System.Threading.Tasks;
 
 namespace GWLogger.Backend.DataContext
 {
-    class DataContext : IDisposable
+    public class Context : IDisposable
     {
         DataFiles files = new DataFiles();
 
         public void Save(LogEntry entry)
         {
             files[entry.Gateway].Save(entry);
+        }
+
+        internal List<string> Gateways
+        {
+            get
+            {
+                return DataFile.Gateways;
+            }
         }
 
         public List<LogEntry> ReadLog(string gatewayName, DateTime start, DateTime end)

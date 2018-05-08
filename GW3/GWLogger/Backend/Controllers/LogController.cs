@@ -1,5 +1,4 @@
-﻿using GWLogger.Backend.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -9,8 +8,6 @@ namespace GWLogger.Backend.Controllers
 {
     public static class LogController
     {
-        static DataContext.DataContext context = new DataContext.DataContext();
-
         internal static void CleanLogs()
         {
 #warning must implement the cleaning
@@ -18,7 +15,7 @@ namespace GWLogger.Backend.Controllers
 
         public static void LogEntry(string gateway, string remoteIpPoint, int messageType, List<DTOs.LogEntryDetail> details)
         {
-            context.Save(new DataContext.LogEntry
+            Global.DataContext.Save(new DataContext.LogEntry
             {
                 Gateway = gateway,
                 RemoteIpPoint = remoteIpPoint,
@@ -34,10 +31,12 @@ namespace GWLogger.Backend.Controllers
 
         public static void RegisterLogMessageType(List<DTOs.MessageType> types)
         {
+#warning must implement storage of message types
         }
 
         public static void RegisterLogMessageDetailType(List<DTOs.IdValue> types)
         {
+#warning must implement storage of details types
         }
     }
 }
