@@ -31,12 +31,12 @@ namespace GWLogger.Backend.Controllers
 
         public static void RegisterLogMessageType(List<DTOs.MessageType> types)
         {
-#warning must implement storage of message types
+            Global.DataContext.MessageTypes = types;
         }
 
         public static void RegisterLogMessageDetailType(List<DTOs.IdValue> types)
         {
-#warning must implement storage of details types
+            Global.DataContext.MessageDetailTypes = types;
         }
     }
 }
