@@ -8,9 +8,31 @@ namespace GWLogger.Backend.Controllers
 {
     public static class LogController
     {
+        static Thread cleanupThread;
+
+        static LogController()
+        {
+            // Every hours check if we changed day, if yes call the data cleanup
+            cleanupThread = new Thread((obj) =>
+              {
+                  var lastCleanup = DateTime.UtcNow.ToShortDateString();
+                  while (true)
+                  {
+                      Thread.Sleep(TimeSpan.FromHours(1));
+                      if (DateTime.UtcNow.ToShortDateString() != lastCleanup)
+                      {
+                          lastCleanup = DateTime.UtcNow.ToShortDateString();
+                          CleanLogs();
+                      }
+                  }
+              });
+            cleanupThread.IsBackground = true;
+            cleanupThread.Start();
+        }
+
         internal static void CleanLogs()
         {
-#warning must implement the cleaning
+            Global.DataContext.CleanOlderThan(10);
         }
 
         public static void LogEntry(string gateway, string remoteIpPoint, int messageType, List<DTOs.LogEntryDetail> details)

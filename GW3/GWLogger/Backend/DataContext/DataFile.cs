@@ -45,6 +45,44 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
+        public void CleanOlderThan(int nbDays)
+        {
+            var toDel = DateTime.UtcNow.AddDays(-nbDays);
+
+            var needToClose = true;
+            try
+            {
+                LockObject.Wait();
+                // Delete all the data files
+                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.data").Where(row => DateOfFile(row) <= toDel))
+                {
+                    if (needToClose)
+                    {
+                        needToClose = false;
+                        CloseFiles();
+                    }
+
+                    File.Delete(i);
+                }
+                // Delete all the index files
+                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.idx").Where(row => DateOfFile(row) <= toDel))
+                    File.Delete(i);
+                // Delete all the clientSessions files
+                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.clientSessions").Where(row => DateOfFile(row) <= toDel))
+                    File.Delete(i);
+                // Delete all the serverSessions files
+                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.serverSessions").Where(row => DateOfFile(row) <= toDel))
+                    File.Delete(i);
+                // Delete all the searches files
+                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.searches").Where(row => DateOfFile(row) <= toDel))
+                    File.Delete(i);
+            }
+            finally
+            {
+                LockObject.Release();
+            }
+        }
+
         public static void DeleteFiles(string gateway)
         {
             // Delete all the data files
@@ -139,13 +177,13 @@ namespace GWLogger.Backend.DataContext
             return StorageDirectory + "\\" + gateway.ToLower() + "." + forDate.Value.Year + ("" + forDate.Value.Month).PadLeft(2, '0') + ("" + forDate.Value.Day).PadLeft(2, '0') + extention;
         }
 
-        public DateTime CurrentDate
+        public DateTime CurrentDate => DateOfFile(currentFile);
+
+        public DateTime DateOfFile(string filename)
         {
-            get
-            {
-                var dt = currentFile.Split(new char[] { '.' }).Reverse().Take(2).Last();
-                return new DateTime(int.Parse(dt.Substring(0, 4)), int.Parse(dt.Substring(4, 2)), int.Parse(dt.Substring(6, 2)));
-            }
+            var dt = filename.Split(new char[] { '.' }).Reverse().Take(2).Last();
+            return new DateTime(int.Parse(dt.Substring(0, 4)), int.Parse(dt.Substring(4, 2)), int.Parse(dt.Substring(6, 2)));
+
         }
 
         int IndexPosition(DateTime date)
@@ -731,55 +769,61 @@ namespace GWLogger.Backend.DataContext
             return result.OrderBy(row => row.Channel).ToList();
         }
 
+        internal void CloseFiles()
+        {
+
+            file.Seek(0, SeekOrigin.End);
+
+            if (clientSession != null)
+            {
+                clientSession.Seek(0, SeekOrigin.End);
+                clientSession.Dispose();
+                clientSession = null;
+                currentClientSession = null;
+            }
+            openClientSessions.Clear();
+
+            if (serverSession != null)
+            {
+                serverSession.Seek(0, SeekOrigin.End);
+                serverSession.Dispose();
+                serverSession = null;
+                currentServerSession = null;
+            }
+            openServerSessions.Clear();
+
+            if (currentSearches != null)
+            {
+                searches.Dispose();
+                searches = null;
+                currentSearches = null;
+            }
+
+            if (currentFile != null)
+            {
+                DataReader.Dispose();
+                DataReader = null;
+                DataWriter.Dispose();
+                DataWriter = null;
+                file.Dispose();
+
+                file = null;
+                currentFile = null;
+            }
+
+        }
+
         public void Dispose()
         {
             try
             {
                 LockObject.Wait();
-
-                file.Seek(0, SeekOrigin.End);
-
-                if (clientSession != null)
-                {
-                    clientSession.Seek(0, SeekOrigin.End);
-                    clientSession.Dispose();
-                    clientSession = null;
-                    currentClientSession = null;
-                }
-                openClientSessions.Clear();
-
-                if (serverSession != null)
-                {
-                    serverSession.Seek(0, SeekOrigin.End);
-                    serverSession.Dispose();
-                    serverSession = null;
-                    currentServerSession = null;
-                }
-                openServerSessions.Clear();
-
-                if (currentSearches != null)
-                {
-                    searches.Dispose();
-                    searches = null;
-                    currentSearches = null;
-                }
-
-                if (currentFile != null)
-                {
-                    DataReader.Dispose();
-                    DataReader = null;
-                    DataWriter.Dispose();
-                    DataWriter = null;
-                    file.Dispose();
-
-                    file = null;
-                    currentFile = null;
-                }
             }
             finally
             {
                 LockObject.Release();
             }
+            CloseFiles();
             LockObject.Dispose();
         }
     }

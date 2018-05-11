@@ -29,6 +29,15 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
+        public void CleanOlderThan(int nbDays)
+        {
+            lock (dataFiles)
+            {
+                foreach (var i in dataFiles)
+                    i.Value.CleanOlderThan(nbDays);
+            }
+        }
+
         public void Dispose()
         {
             lock (dataFiles)

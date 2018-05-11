@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using GWLogger.Backend.DTOs;
@@ -12,6 +13,7 @@ namespace GWLogger.Backend.DataContext
     public class Context : IDisposable
     {
         DataFiles files = new DataFiles();
+        Thread autoFlusher;
 
         public Context()
         {
@@ -41,6 +43,18 @@ namespace GWLogger.Backend.DataContext
             catch
             {
             }
+
+            autoFlusher = new Thread((obj) =>
+              {
+                  while (true)
+                  {
+                      Thread.Sleep(30000);
+                      Flush();
+                  }
+              });
+
+            autoFlusher.IsBackground = true;
+            autoFlusher.Start();
         }
 
         public void Save(LogEntry entry)
@@ -135,6 +149,11 @@ namespace GWLogger.Backend.DataContext
         public List<SearchEntry> ReadSearches(string gatewayName, DateTime start, DateTime end)
         {
             return files[gatewayName].ReadSearches(start, end);
+        }
+
+        public void CleanOlderThan(int nbDays = 10)
+        {
+            files.CleanOlderThan(nbDays);
         }
 
         public void Flush()
