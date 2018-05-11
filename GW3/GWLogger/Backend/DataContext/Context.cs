@@ -112,6 +112,11 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
+        public List<LogEntry> ReadLastLogs(string gatewayName, int nbEntries = 100)
+        {
+            return files[gatewayName].ReadLastLogs(nbEntries);
+        }
+
         public List<LogEntry> ReadLog(string gatewayName, DateTime start, DateTime end)
         {
             return files[gatewayName].ReadLog(start, end);

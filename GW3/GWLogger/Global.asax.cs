@@ -14,11 +14,6 @@ namespace GWLogger
 
         protected void Application_Start(object sender, EventArgs e)
         {
-            // Execute migration
-            var configuration = new Migrations.Configuration();
-            var migrator = new System.Data.Entity.Migrations.DbMigrator(configuration);
-            migrator.Update();
-
             Backend.Controllers.LogController.CleanLogs();
         }
 

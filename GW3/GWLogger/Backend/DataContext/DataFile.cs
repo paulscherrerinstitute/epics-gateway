@@ -434,10 +434,10 @@ namespace GWLogger.Backend.DataContext
 
         static int SerializedStringLength(int length)
         {
-            var nbBits = (Math.Log(length) / Math.Log(2)) / 8.0;
+            var nbBits = (Math.Log(length) / Math.Log(2)) / 7.0;
             var sizePrefix = (int)Math.Ceiling(Math.Max(1, nbBits));
-            if ((length & (1 << (sizePrefix * 8 - 1))) != 0)
-                sizePrefix++;
+            /*if ((length & (1 << (sizePrefix * 8 - 1))) != 0)
+                sizePrefix++;*/
             return sizePrefix + length;
         }
 
@@ -494,6 +494,7 @@ namespace GWLogger.Backend.DataContext
                             Seek(Index[IndexPosition(start)]);
                         else
                             Seek(0);
+                        isAtEnd = false;
 
                         while (DataReader.BaseStream.Position < DataReader.BaseStream.Length)
                         {
@@ -513,6 +514,57 @@ namespace GWLogger.Backend.DataContext
                     firstLoop = false;
                 }
 
+                return result;
+            }
+            finally
+            {
+                LockObject.Release();
+            }
+        }
+
+        internal List<LogEntry> ReadLastLogs(int nbEntries)
+        {
+            try
+            {
+                LockObject.Wait();
+                var files = new Queue<string>(Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.data").OrderByDescending(row => row));
+
+                var result = new List<LogEntry>();
+                while (result.Count < nbEntries && files.Count > 0)
+                {
+                    var lastFile = files.Dequeue();
+
+                    if (lastFile != currentFile)
+                        SetFile(lastFile);
+
+                    long pos = 0;
+                    for (var i = Index.Length - 1; i > 0; i--)
+                    {
+                        if (Index[i] != -1)
+                        {
+                            pos = i;
+                            break;
+                        }
+                    }
+                    isAtEnd = false;
+
+                    while (pos >= 0 && result.Count < nbEntries && Index[pos] >= 0)
+                    {
+                        var chunk = new List<LogEntry>();
+                        DataReader.BaseStream.Seek(Index[pos], SeekOrigin.Begin);
+                        while (DataReader.BaseStream.Position < DataReader.BaseStream.Length)
+                        {
+                            if (pos < Index.Length - 1 && DataReader.BaseStream.Position >= Index[pos + 1])
+                                break;
+                            chunk.Add(ReadEntry(DataReader));
+                        }
+                        result.InsertRange(0, chunk);
+                        pos--;
+                    }
+                }
+
+                if (result.Count > nbEntries)
+                    return result.Skip(result.Count - nbEntries).ToList();
                 return result;
             }
             finally

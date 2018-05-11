@@ -39,7 +39,7 @@ namespace GWLogger
             }
         }
 
-        private static string Convert(string remoteIpPoint, int messageType, IEnumerable<Backend.DTOs.LogEntryDetail> details)
+        private static string Convert(string remoteIpPoint, int messageType, IEnumerable<Backend.DataContext.LogEntryDetail> details)
         {
             if (Convertion[messageType] == null)
             {
@@ -48,7 +48,7 @@ namespace GWLogger
                 foreach (var i in details)
                 {
                     result.Append(",");
-                    result.Append(DetailTypes[i.TypeId]);
+                    result.Append(DetailTypes[i.DetailTypeId]);
                     result.Append("=");
                     result.Append(i.Value);
                 }
@@ -61,8 +61,8 @@ namespace GWLogger
                 var typesId = DetailTypes.Keys.ToList();
                 if (details != null)
                 {
-                    foreach (var i in details.Where(row => typesId.Contains(row.TypeId)))
-                        line = Regex.Replace(line, "\\{" + DetailTypes[i.TypeId] + "\\}", i.Value, RegexOptions.IgnoreCase);
+                    foreach (var i in details.Where(row => typesId.Contains(row.DetailTypeId)))
+                        line = Regex.Replace(line, "\\{" + DetailTypes[i.DetailTypeId] + "\\}", i.Value, RegexOptions.IgnoreCase);
                 }
                 if (remoteIpPoint != null)
                     line = Regex.Replace(line, "\\{endpoint\\}", remoteIpPoint, RegexOptions.IgnoreCase);
@@ -76,30 +76,25 @@ namespace GWLogger
 
             //context.Request;
             var path = context.Request.Path.Split(new char[] { '/' }).Skip(2).ToArray();
-            IQueryable<LogEntry> logs = ctx.LogEntries;
+            IEnumerable<Backend.DataContext.LogEntry> logs = null;
             //var t = ctx.LogEntries.ToList();
             var gateway = path[0];
-            logs = logs.Where(row => row.Gateway == gateway);
             if (path.Length == 1)
             {
-                logs = logs.OrderByDescending(row => row.EntryId);
+                logs = Global.DataContext.ReadLastLogs(gateway);
             }
             else
             {
                 var start = long.Parse(path[1]).ToNetDate();
                 var startTrim = start.Trim();
-                logs = logs.Where(row => row.TrimmedDate >= startTrim);
-                logs = logs.Where(row => row.EntryDate >= start);
 
                 if (path.Length > 2)
                 {
-                    var end = long.Parse(path[2]).ToNetDate();
-                    var endTrim = end.Trim();
-                    logs = logs.Where(row => row.TrimmedDate <= endTrim);
-                    logs = logs.Where(row => row.EntryDate <= end);
+                    var end = long.Parse(path[2]).ToNetDate().Trim();
+                    logs = Global.DataContext.ReadLog(gateway, start, end);
                 }
-
-                logs = logs.OrderByDescending(row => row.EntryId);
+                else
+                    logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20));
             }
 
             var levelsRequested = context.Request["levels"];
@@ -111,7 +106,7 @@ namespace GWLogger
             }
             //logs.Include(row => row.LogMessageType);
 
-            logs = logs.Take(100).OrderBy(row => row.EntryId);
+            logs = logs.Take(100);
 
             context.Response.ContentType = "application/json";
             context.Response.CacheControl = "no-cache";
