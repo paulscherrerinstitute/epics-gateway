@@ -44,12 +44,21 @@ namespace GWLogger.Backend.DataContext
             {
             }
 
+            errorMessages = messageTypes.Where(row => row.LogLevel >= 3).Select(row => row.Id).ToList();
+
             autoFlusher = new Thread((obj) =>
               {
-                  while (true)
+                  var step = 0;
+                  while (!isDisposed)
                   {
-                      Thread.Sleep(30000);
-                      Flush();
+                      Thread.Sleep(5000);
+                      files.SaveStats();
+                      step++;
+                      if (step >= 60)
+                      {
+                          step = 0;
+                          Flush();
+                      }
                   }
               });
 
@@ -59,7 +68,11 @@ namespace GWLogger.Backend.DataContext
 
         public void Save(LogEntry entry)
         {
-            files[entry.Gateway].Save(entry);
+            bool isAnError = false;
+            lock (messageTypes)
+                isAnError = errorMessages.Contains(entry.MessageTypeId);
+
+            files[entry.Gateway].Save(entry, isAnError);
         }
 
         internal List<string> Gateways
@@ -95,12 +108,16 @@ namespace GWLogger.Backend.DataContext
                         }
                         messageTypes.Clear();
                         messageTypes.AddRange(value);
+
+                        errorMessages = messageTypes.Where(row => row.LogLevel >= 3).Select(row => row.Id).ToList();
                     }
                 }
             }
         }
 
         List<IdValue> messageDetailTypes = new List<IdValue>();
+        private bool isDisposed = false;
+
         public List<IdValue> MessageDetailTypes
         {
             get
@@ -125,6 +142,8 @@ namespace GWLogger.Backend.DataContext
                 }
             }
         }
+
+        public List<int> errorMessages { get; private set; }
 
         public List<LogEntry> ReadLastLogs(string gatewayName, int nbEntries = 100)
         {
@@ -163,6 +182,10 @@ namespace GWLogger.Backend.DataContext
 
         public void Dispose()
         {
+            if (isDisposed)
+                return;
+
+            isDisposed = true;
             files.Dispose();
         }
     }

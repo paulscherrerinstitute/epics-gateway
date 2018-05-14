@@ -38,6 +38,15 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
+        public void SaveStats()
+        {
+            lock (dataFiles)
+            {
+                foreach (var i in dataFiles)
+                    i.Value.SaveStats();
+            }
+        }
+
         public void Dispose()
         {
             lock (dataFiles)

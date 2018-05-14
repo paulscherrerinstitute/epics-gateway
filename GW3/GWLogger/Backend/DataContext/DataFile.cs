@@ -16,6 +16,8 @@ namespace GWLogger.Backend.DataContext
         public long[] Index = new long[24 * 6];
         string currentFile;
 
+        public long[,] Stats = new long[24 * 3, 3];
+
         FileStream clientSession;
         string currentClientSession;
         Dictionary<string, SessionLocation> openClientSessions = new Dictionary<string, SessionLocation>();
@@ -76,6 +78,9 @@ namespace GWLogger.Backend.DataContext
                 // Delete all the searches files
                 foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.searches").Where(row => DateOfFile(row) <= toDel))
                     File.Delete(i);
+                // Delete all the stats files
+                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.stats").Where(row => DateOfFile(row) <= toDel))
+                    File.Delete(i);
             }
             finally
             {
@@ -100,6 +105,9 @@ namespace GWLogger.Backend.DataContext
             // Delete all the searches files
             foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.searches"))
                 File.Delete(i);
+            // Delete all the stats files
+            foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.stats"))
+                File.Delete(i);
         }
 
         public DataFile(string gateway)
@@ -120,12 +128,14 @@ namespace GWLogger.Backend.DataContext
         {
             if (file != null)
             {
-                if (!isAtEnd)
+                /*if (!isAtEnd)
                     file.Seek(0, SeekOrigin.End);
 
                 DataWriter.Dispose();
                 DataReader.Dispose();
-                file.Dispose();
+                file.Dispose();*/
+
+                CloseFiles();
             }
 
             currentFile = filename ?? FileName();
@@ -137,6 +147,7 @@ namespace GWLogger.Backend.DataContext
             isAtEnd = true;
 
             ReadIndex();
+            ReadStats();
         }
 
         public void SaveIndex()
@@ -169,6 +180,39 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
+        public void SaveStats()
+        {
+            var statFileName = FileName(CurrentDate, ".stats");
+            using (var writer = new BinaryWriter(File.Open(statFileName, FileMode.Create, FileAccess.Write)))
+            {
+                for (var s = 0; s < Stats.GetLength(1); s++)
+                    for (var i = 0; i < Stats.GetLength(0); i++)
+                        writer.Write(Stats[i, s]);
+            }
+        }
+
+        public void ReadStats()
+        {
+            var statFileName = FileName(CurrentDate, ".stats");
+            try
+            {
+                using (var reader = new BinaryReader(File.Open(statFileName, FileMode.Open, FileAccess.Read)))
+                {
+                    for (var s = 0; s < Stats.GetLength(1); s++)
+                        for (var i = 0; i < Stats.GetLength(0); i++)
+                            Stats[i, s] = reader.ReadInt64();
+                }
+            }
+            catch
+            {
+                for (var s = 0; s < Stats.GetLength(1); s++)
+                    for (var i = 0; i < Stats.GetLength(0); i++)
+                        Stats[i, s] = 0;
+
+                SaveStats();
+            }
+        }
+
         public string FileName(DateTime? forDate = null, string extention = ".data")
         {
             if (!forDate.HasValue)
@@ -191,7 +235,7 @@ namespace GWLogger.Backend.DataContext
             return date.Minute / 10 + date.Hour * 6;
         }
 
-        public void Save(LogEntry entry)
+        public void Save(LogEntry entry, bool isAnError)
         {
             try
             {
@@ -229,6 +273,11 @@ namespace GWLogger.Backend.DataContext
                     DataWriter.Write((byte)i.DetailTypeId);
                     DataWriter.Write(i.Value);
                 }
+
+                int statPos = entry.EntryDate.Minute / 20 + entry.EntryDate.Hour * 3;
+                Stats[statPos, 0]++;
+                if (isAnError)
+                    Stats[statPos, 2]++;
 
                 switch (entry.MessageTypeId)
                 {
@@ -337,6 +386,7 @@ namespace GWLogger.Backend.DataContext
                         }
                     case 39: // Search
                         {
+                            Stats[statPos, 1]++;
                             if (currentSearches != FileName(entry.EntryDate, ".searches"))
                             {
                                 if (searches != null)
@@ -774,6 +824,8 @@ namespace GWLogger.Backend.DataContext
 
             file.Seek(0, SeekOrigin.End);
 
+            SaveStats();
+
             if (clientSession != null)
             {
                 clientSession.Seek(0, SeekOrigin.End);
@@ -815,6 +867,8 @@ namespace GWLogger.Backend.DataContext
 
         public void Dispose()
         {
+            if (LockObject == null)
+                return;
             try
             {
                 LockObject.Wait();
@@ -825,6 +879,7 @@ namespace GWLogger.Backend.DataContext
             }
             CloseFiles();
             LockObject.Dispose();
+            LockObject = null;
         }
     }
 }
