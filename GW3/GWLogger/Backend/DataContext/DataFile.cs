@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GWLogger.Backend.DTOs;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -700,7 +701,9 @@ namespace GWLogger.Backend.DataContext
                     currentClientSession = null;
                 }
 
-                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.clientSessions"))
+                var dayStart = new DateTime(start.Year, start.Month, start.Day);
+                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.clientSessions").OrderBy(row => row)
+                    .Where(row => DateOfFile(row) >= dayStart && DateOfFile(row) <= end))
                 {
                     using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read), System.Text.Encoding.UTF8))
                     {
@@ -747,7 +750,9 @@ namespace GWLogger.Backend.DataContext
                     currentServerSession = null;
                 }
 
-                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.serverSessions"))
+                var dayStart = new DateTime(start.Year, start.Month, start.Day);
+                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.serverSessions").OrderBy(row => row)
+                    .Where(row => DateOfFile(row) >= dayStart && DateOfFile(row) <= end))
                 {
                     using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read), System.Text.Encoding.UTF8))
                     {
@@ -793,8 +798,11 @@ namespace GWLogger.Backend.DataContext
                     searches = null;
                     currentSearches = null;
                 }
+                var dayStart = new DateTime(start.Year, start.Month, start.Day);
 
-                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.searches"))
+                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.searches")
+                    .OrderBy(row => row)
+                    .Where(row => DateOfFile(row) >= dayStart && DateOfFile(row) <= end))
                 {
                     using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read), System.Text.Encoding.UTF8))
                     {
@@ -818,6 +826,53 @@ namespace GWLogger.Backend.DataContext
 
             return result.OrderBy(row => row.Channel).ToList();
         }
+
+        public GatewayStats GetStats(DateTime start, DateTime end)
+        {
+            var result = new GatewayStats
+            {
+                Searches = new List<LogStat>(),
+                Logs = new List<LogStat>(),
+                Errors = new List<LogStat>()
+            };
+
+            var stats = new List<LogStat>[] { result.Logs, result.Searches, result.Errors };
+
+            try
+            {
+                LockObject.Wait();
+
+                var dayStart = new DateTime(start.Year, start.Month, start.Day);
+
+                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.stats")
+                    .OrderBy(row => row)
+                    .Where(row => DateOfFile(row) >= dayStart && DateOfFile(row) <= end))
+                {
+
+                    using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read)))
+                    {
+                        for (var s = 0; s < Stats.GetLength(1); s++)
+                        {
+                            for (var j = 0; j < Stats.GetLength(0); j++)
+                            {
+                                var v = reader.ReadInt64();
+                                var t = DateOfFile(i).AddMinutes(20 * j);
+                                if (t >= start && t <= end)
+                                    stats[s].Add(new LogStat { Date = t, Value = v });
+                            }
+                        }
+
+                    }
+                }
+            }
+            finally
+            {
+                LockObject.Release();
+            }
+
+            return result;
+        }
+
 
         internal void CloseFiles()
         {

@@ -27,44 +27,9 @@ namespace GWLogger.Backend.Controllers
             }*/
         }
 
-        public static List<DTOs.LogStat> GetLogStats(string gatewayName, DateTime start, DateTime end)
-        {
-            return new List<DTOs.LogStat>();
-            /*using (var ctx = new LoggerContext())
-            {
-                return ctx.GatewayNbMessages.Where(row => row.Gateway == gatewayName && row.Date >= start && row.Date <= end)
-                    .Select(row => new DTOs.LogStat { Date = row.Date, Value = row.NbMessages }).ToList();
-            }*/
-        }
-
-        public static List<DTOs.LogStat> GetErrorStats(string gatewayName, DateTime start, DateTime end)
-        {
-            return new List<DTOs.LogStat>();
-            /*using (var ctx = new LoggerContext())
-            {
-                return ctx.GatewayErrors.Where(row => row.Gateway == gatewayName && row.Date >= start && row.Date <= end)
-                    .Select(row => new DTOs.LogStat { Date = row.Date, Value = row.NbErrors }).ToList();
-            }*/
-        }
-
-        public static List<DTOs.LogStat> GetSearchesStats(string gatewayName, DateTime start, DateTime end)
-        {
-            return new List<DTOs.LogStat>();
-            /*using (var ctx = new LoggerContext())
-            {
-                return ctx.GatewaySearches.Where(row => row.Gateway == gatewayName && row.Date >= start && row.Date <= end)
-                    .Select(row => new DTOs.LogStat { Date = row.Date, Value = row.NbSearches }).ToList();
-            }*/
-        }
-
         public static DTOs.GatewayStats GetStats(string gatewayName, DateTime start, DateTime end)
         {
-            return new DTOs.GatewayStats
-            {
-                Logs = GetLogStats(gatewayName, start, end),
-                Searches = GetSearchesStats(gatewayName, start, end),
-                Errors = GetErrorStats(gatewayName, start, end)
-            };
+            return Global.DataContext.GetStats(gatewayName, start, end);
         }
 
         public static DTOs.Connections GetConnectionsBetween(string gatewayName, DateTime start, DateTime end)

@@ -66,6 +66,11 @@ namespace GWLogger.Backend.DataContext
             autoFlusher.Start();
         }
 
+        public GatewayStats GetStats(string gatewayName, DateTime start, DateTime end)
+        {
+            return files[gatewayName].GetStats(start, end);
+        }
+
         public void Save(LogEntry entry)
         {
             bool isAnError = false;

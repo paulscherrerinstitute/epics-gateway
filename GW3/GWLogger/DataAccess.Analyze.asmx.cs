@@ -28,24 +28,6 @@ namespace GWLogger
         }
 
         [WebMethod]
-        public List<Backend.DTOs.LogStat> GetLogStats(string gatewayName, DateTime start, DateTime end)
-        {
-            return AnalyzeController.GetLogStats(gatewayName,start,end);
-        }
-
-        [WebMethod]
-        public  List<Backend.DTOs.LogStat> GetErrorStats(string gatewayName, DateTime start, DateTime end)
-        {
-            return AnalyzeController.GetErrorStats(gatewayName, start, end);
-        }
-
-        [WebMethod]
-        public  List<Backend.DTOs.LogStat> GetSearchesStats(string gatewayName, DateTime start, DateTime end)
-        {
-            return AnalyzeController.GetSearchesStats(gatewayName, start, end);
-        }
-
-        [WebMethod]
         public Backend.DTOs.Connections GetConnectionsBetween(string gatewayName, DateTime start, DateTime end)
         {
             return AnalyzeController.GetConnectionsBetween(gatewayName, start, end);
