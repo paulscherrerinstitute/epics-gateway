@@ -25,6 +25,8 @@ namespace GWLogger
         {
             foreach (var i in logEntries)
                 Backend.Controllers.LogController.LogEntry(i.Gateway, i.RemoteIpPoint, i.MessageType, i.Details);
+            if (System.Diagnostics.Debugger.IsAttached)
+                Global.DataContext.Flush();
         }
 
         [WebMethod]

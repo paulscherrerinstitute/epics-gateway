@@ -33,6 +33,10 @@ namespace GWLogger
                 Convertion = Global.DataContext.MessageTypes.ToDictionary(key => key.Id, val => val.DisplayMask);
                 DetailTypes = Global.DataContext.MessageDetailTypes.ToDictionary(key => key.Id, val => val.Value);
             }
+            catch(Exception ex)
+            {
+
+            }
             finally
             {
                 changeLock.ExitWriteLock();
@@ -41,14 +45,14 @@ namespace GWLogger
 
         private static string Convert(string remoteIpPoint, int messageType, IEnumerable<Backend.DataContext.LogEntryDetail> details)
         {
-            if (Convertion[messageType] == null)
+            if (!Convertion.ContainsKey(messageType) || Convertion[messageType] == null)
             {
                 var result = new StringBuilder();
                 result.Append(messageType.ToString());
                 foreach (var i in details)
                 {
                     result.Append(",");
-                    result.Append(DetailTypes[i.DetailTypeId]);
+                    result.Append(DetailTypes.ContainsKey(i.DetailTypeId) ? DetailTypes[i.DetailTypeId] : i.DetailTypeId.ToString());
                     result.Append("=");
                     result.Append(i.Value);
                 }
@@ -62,7 +66,7 @@ namespace GWLogger
                 if (details != null)
                 {
                     foreach (var i in details.Where(row => typesId.Contains(row.DetailTypeId)))
-                        line = Regex.Replace(line, "\\{" + DetailTypes[i.DetailTypeId] + "\\}", i.Value, RegexOptions.IgnoreCase);
+                        line = Regex.Replace(line, "\\{" + (DetailTypes.ContainsKey(i.DetailTypeId) ? DetailTypes[i.DetailTypeId] : i.DetailTypeId.ToString()) + "\\}", i.Value, RegexOptions.IgnoreCase);
                 }
                 if (remoteIpPoint != null)
                     line = Regex.Replace(line, "\\{endpoint\\}", remoteIpPoint, RegexOptions.IgnoreCase);
@@ -75,7 +79,7 @@ namespace GWLogger
             var logLevels = Global.DataContext.MessageTypes.ToDictionary(key => key.Id, val => val.LogLevel);
 
             //context.Request;
-            var path = context.Request.Path.Split(new char[] { '/' }).Skip(2).ToArray();
+            var path = context.Request.Path.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).ToArray();
             IEnumerable<Backend.DataContext.LogEntry> logs = null;
             //var t = ctx.LogEntries.ToList();
             var gateway = path[0];

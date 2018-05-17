@@ -13,9 +13,9 @@ namespace GWLogger.Backend.DataContext
             {
                 lock (dataFiles)
                 {
-                    if (!dataFiles.ContainsKey(gateway))
-                        dataFiles.Add(gateway, new DataFile(gateway));
-                    return dataFiles[gateway];
+                    if (!dataFiles.ContainsKey(gateway.ToLower()))
+                        dataFiles.Add(gateway.ToLower(), new DataFile(gateway.ToLower()));
+                    return dataFiles[gateway.ToLower()];
                 }
             }
         }
@@ -43,7 +43,7 @@ namespace GWLogger.Backend.DataContext
             lock (dataFiles)
             {
                 foreach (var i in dataFiles)
-                    i.Value.SaveStats();
+                    i.Value.SaveStats(true);
             }
         }
 

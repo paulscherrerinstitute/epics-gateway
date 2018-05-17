@@ -75,7 +75,7 @@ gulp.task('compile:frontend', function ()
 {
     process.chdir(__dirname);
 
-    gulp.src(['./Frontend/**/*.ts', './Scripts/typings/**/*.d.ts',])
+    gulp.src(['./Frontend/**/*.ts', './Scripts/typings/**/*.d.ts'])
         .pipe(sourcemaps.init())
         .pipe(sourcemaps.identityMap())
         .pipe(tsMain())

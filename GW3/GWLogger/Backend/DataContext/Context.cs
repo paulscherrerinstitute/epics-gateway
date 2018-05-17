@@ -52,13 +52,14 @@ namespace GWLogger.Backend.DataContext
                   while (!isDisposed)
                   {
                       Thread.Sleep(5000);
-                      files.SaveStats();
                       step++;
                       if (step >= 60)
                       {
                           step = 0;
                           Flush();
                       }
+                      else
+                          files.SaveStats();
                   }
               });
 
@@ -115,6 +116,7 @@ namespace GWLogger.Backend.DataContext
                         messageTypes.AddRange(value);
 
                         errorMessages = messageTypes.Where(row => row.LogLevel >= 3).Select(row => row.Id).ToList();
+                        Logs.RefreshLookup();
                     }
                 }
             }
@@ -144,6 +146,8 @@ namespace GWLogger.Backend.DataContext
                     }
                     messageDetailTypes.Clear();
                     messageDetailTypes.AddRange(value);
+
+                    Logs.RefreshLookup();
                 }
             }
         }
@@ -183,6 +187,7 @@ namespace GWLogger.Backend.DataContext
         public void Flush()
         {
             files.Flush();
+            files.SaveStats();
         }
 
         public void Dispose()

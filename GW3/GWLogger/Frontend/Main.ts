@@ -73,8 +73,8 @@ class Main
             url: 'DataAccess.asmx/GetStats',
             data: JSON.stringify({
                 "gatewayName": Main.CurrentGateway,
-                start: Utils.FullDateFormat(start),
-                end: Utils.FullDateFormat(end)
+                start: Utils.FullUtcDateFormat(start),
+                end: Utils.FullUtcDateFormat(end)
             }),
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
@@ -369,7 +369,7 @@ class Main
     {
         Main.DrawStats();
         var startDate = new Date(Main.CurrentTime.getTime());
-        var endDate = new Date(startDate.getTime() + 10 * 60 * 1000);
+        var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
 
         if ($("#closeHelp").css("display") == "none")
         {
@@ -555,7 +555,7 @@ class Main
         $("#gatewaySelector").on("change", Main.GatewayChanged);
         $(window).on("resize", Main.Resize);
         $("#timeRangeCanvas").on("mousedown", Main.TimeLineSelected);
-        window.setInterval(Main.Refresh, 1000);
+        window.setInterval(Main.Refresh, 1000); 
         $(window).bind('popstate', Main.PopState);
         $("#clientsTabs li:nth-child(1)").click(Main.ShowStats);
         $("#clientsTabs li:nth-child(2)").click(Main.ShowSearches);

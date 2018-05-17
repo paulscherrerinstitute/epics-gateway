@@ -17,7 +17,7 @@ namespace GWLogger.Backend.DataContext
         public long[] Index = new long[24 * 6];
         string currentFile;
 
-        public long[,] Stats = new long[24 * 3, 3];
+        public long[,] Stats = new long[24 * 6, 3];
 
         FileStream clientSession;
         string currentClientSession;
@@ -40,8 +40,7 @@ namespace GWLogger.Backend.DataContext
             get
             {
                 return Directory.GetFiles(StorageDirectory, "*.data")
-                    .Select(row => row.Substring(StorageDirectory.Length + 1).Split(new char[] { '.' }))
-                    .First()
+                    .Select(row => row.Substring(StorageDirectory.Length + 1).Split(new char[] { '.' }).First())
                     .Distinct()
                     .OrderBy(row => row)
                     .ToList();
@@ -181,14 +180,24 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        public void SaveStats()
+        public void SaveStats(bool mustLock = false)
         {
-            var statFileName = FileName(CurrentDate, ".stats");
-            using (var writer = new BinaryWriter(File.Open(statFileName, FileMode.Create, FileAccess.Write)))
+            try
             {
-                for (var s = 0; s < Stats.GetLength(1); s++)
-                    for (var i = 0; i < Stats.GetLength(0); i++)
-                        writer.Write(Stats[i, s]);
+                if (mustLock)
+                    LockObject.Wait();
+                var statFileName = FileName(CurrentDate, ".stats");
+                using (var writer = new BinaryWriter(File.Open(statFileName, FileMode.Create, FileAccess.Write)))
+                {
+                    for (var s = 0; s < Stats.GetLength(1); s++)
+                        for (var i = 0; i < Stats.GetLength(0); i++)
+                            writer.Write(Stats[i, s]);
+                }
+            }
+            finally
+            {
+                if (mustLock)
+                    LockObject.Release();
             }
         }
 
@@ -266,7 +275,7 @@ namespace GWLogger.Backend.DataContext
 
                 DataWriter.Write(entry.EntryDate.ToBinary());
                 DataWriter.Write((byte)entry.MessageTypeId);
-                DataWriter.Write(entry.RemoteIpPoint);
+                DataWriter.Write(entry.RemoteIpPoint ?? "");
 
                 DataWriter.Write((byte)entry.LogEntryDetails.Count);
                 foreach (var i in entry.LogEntryDetails)
@@ -275,10 +284,9 @@ namespace GWLogger.Backend.DataContext
                     DataWriter.Write(i.Value);
                 }
 
-                int statPos = entry.EntryDate.Minute / 20 + entry.EntryDate.Hour * 3;
-                Stats[statPos, 0]++;
+                Stats[idxPos, 0]++;
                 if (isAnError)
-                    Stats[statPos, 2]++;
+                    Stats[idxPos, 2]++;
 
                 switch (entry.MessageTypeId)
                 {
@@ -387,7 +395,7 @@ namespace GWLogger.Backend.DataContext
                         }
                     case 39: // Search
                         {
-                            Stats[statPos, 1]++;
+                            Stats[idxPos, 1]++;
                             if (currentSearches != FileName(entry.EntryDate, ".searches"))
                             {
                                 if (searches != null)
@@ -579,7 +587,7 @@ namespace GWLogger.Backend.DataContext
                         if (fileToUse != currentFile)
                             SetFile(fileToUse);
 
-                        if (firstLoop)
+                        if (firstLoop && Index[IndexPosition(start)] != -1)
                             Seek(Index[IndexPosition(start)]);
                         else
                             Seek(0);
@@ -666,7 +674,7 @@ namespace GWLogger.Backend.DataContext
         {
             var result = new LogEntry
             {
-                EntryDate = DateTime.FromBinary(stream.ReadInt64()),
+                EntryDate = DateTime.FromBinary(stream.ReadInt64()).ToUniversalTime(),
                 MessageTypeId = stream.ReadByte(),
                 RemoteIpPoint = stream.ReadString(),
                 LogEntryDetails = new List<LogEntryDetail>()
@@ -687,6 +695,9 @@ namespace GWLogger.Backend.DataContext
 
         public List<LogSession> ReadClientSessions(DateTime start, DateTime end)
         {
+            if (end == start)
+                end = end.AddMinutes(10);
+
             var result = new List<LogSession>();
 
             try
@@ -713,7 +724,7 @@ namespace GWLogger.Backend.DataContext
                         if (ed == 0)
                             entryEndDate = null;
                         else
-                            entryEndDate = DateTime.FromBinary(ed);
+                            entryEndDate = DateTime.FromBinary(ed).ToUniversalTime();
                         var endPoint = reader.ReadString();
 
                         if ((entryEndDate.HasValue && start <= entryStartDate && end >= entryEndDate.Value) || (!entryEndDate.HasValue && start <= entryStartDate))
@@ -736,6 +747,9 @@ namespace GWLogger.Backend.DataContext
 
         public List<LogSession> ReadServerSessions(DateTime start, DateTime end)
         {
+            if (end == start)
+                end = end.AddMinutes(10);
+
             var result = new List<LogSession>();
 
             try
@@ -785,6 +799,8 @@ namespace GWLogger.Backend.DataContext
 
         public List<SearchEntry> ReadSearches(DateTime start, DateTime end)
         {
+            if (end == start)
+                end = end.AddMinutes(10);
             var result = new List<SearchEntry>();
 
             try
@@ -851,17 +867,22 @@ namespace GWLogger.Backend.DataContext
 
                     using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read)))
                     {
-                        for (var s = 0; s < Stats.GetLength(1); s++)
+                        try
                         {
-                            for (var j = 0; j < Stats.GetLength(0); j++)
+                            for (var s = 0; s < Stats.GetLength(1); s++)
                             {
-                                var v = reader.ReadInt64();
-                                var t = DateOfFile(i).AddMinutes(20 * j);
-                                if (t >= start && t <= end)
-                                    stats[s].Add(new LogStat { Date = t, Value = v });
+                                for (var j = 0; j < Stats.GetLength(0); j++)
+                                {
+                                    var v = reader.ReadInt64();
+                                    var t = DateOfFile(i).AddMinutes(10 * j);
+                                    if (t >= start && t <= end)
+                                        stats[s].Add(new LogStat { Date = t, Value = v });
+                                }
                             }
                         }
-
+                        catch
+                        {
+                        }
                     }
                 }
             }
