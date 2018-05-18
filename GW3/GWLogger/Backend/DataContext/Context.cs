@@ -163,11 +163,11 @@ namespace GWLogger.Backend.DataContext
             return files[gatewayName].ReadLastLogs(nbEntries);
         }
 
-        public List<LogEntry> ReadLog(string gatewayName, DateTime start, DateTime end)
+        public List<LogEntry> ReadLog(string gatewayName, DateTime start, DateTime end, int nbMaxEntries = -1, List<int> messageTypes = null)
         {
             if (!files.Exists(gatewayName))
                 return null;
-            return files[gatewayName].ReadLog(start, end);
+            return files[gatewayName].ReadLog(start, end, nbMaxEntries, messageTypes);
         }
 
         public List<LogSession> ReadClientSessions(string gatewayName, DateTime start, DateTime end)

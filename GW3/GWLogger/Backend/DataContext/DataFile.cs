@@ -593,7 +593,7 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        public List<LogEntry> ReadLog(DateTime start, DateTime end)
+        public List<LogEntry> ReadLog(DateTime start, DateTime end, int nbMaxEntries = -1, List<int> messageTypes = null)
         {
             try
             {
@@ -617,11 +617,11 @@ namespace GWLogger.Backend.DataContext
                             Seek(0);
                         isAtEnd = false;
 
-                        while (DataReader.BaseStream.Position < DataReader.BaseStream.Length)
+                        while (DataReader.BaseStream.Position < DataReader.BaseStream.Length && (nbMaxEntries < 1 || result.Count < nbMaxEntries))
                         {
                             var entry = ReadEntry(DataReader);
 
-                            if (entry != null && entry.EntryDate >= start && entry.EntryDate <= end)
+                            if (entry != null && entry.EntryDate >= start && entry.EntryDate <= end && (messageTypes == null || messageTypes.Contains(entry.MessageTypeId)))
                             {
                                 entry.Gateway = gateway;
                                 result.Add(entry);

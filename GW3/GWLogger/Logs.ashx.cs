@@ -33,7 +33,7 @@ namespace GWLogger
                 Convertion = Global.DataContext.MessageTypes.ToDictionary(key => key.Id, val => val.DisplayMask);
                 DetailTypes = Global.DataContext.MessageDetailTypes.ToDictionary(key => key.Id, val => val.Value);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
             }
@@ -78,6 +78,14 @@ namespace GWLogger
         {
             var logLevels = Global.DataContext.MessageTypes.ToDictionary(key => key.Id, val => val.LogLevel);
 
+            List<int> msgTypes = null;
+            if (!string.IsNullOrWhiteSpace(context.Request["levels"]))
+            {
+                var levelsRequested = context.Request["levels"];
+                var levels = levelsRequested.Split(new char[] { ',' }).Select(row => int.Parse(row));
+                msgTypes = logLevels.Where(row => levels.Contains(row.Value)).Select(row => row.Key).ToList();
+            }
+
             //context.Request;
             var path = context.Request.Path.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).ToArray();
             IEnumerable<Backend.DataContext.LogEntry> logs = null;
@@ -95,22 +103,11 @@ namespace GWLogger
                 if (path.Length > 2)
                 {
                     var end = long.Parse(path[2]).ToNetDate().Trim();
-                    logs = Global.DataContext.ReadLog(gateway, start, end);
+                    logs = Global.DataContext.ReadLog(gateway, start, end, 100, msgTypes);
                 }
                 else
-                    logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20));
+                    logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), 100, msgTypes);
             }
-
-            var levelsRequested = context.Request["levels"];
-            if (!string.IsNullOrWhiteSpace(levelsRequested))
-            {
-                var levels = levelsRequested.Split(new char[] { ',' }).Select(row => int.Parse(row));
-                var msgTypes = logLevels.Where(row => levels.Contains(row.Value)).Select(row => row.Key).ToList();
-                logs = logs.Where(row => msgTypes.Contains(row.MessageTypeId));
-            }
-            //logs.Include(row => row.LogMessageType);
-
-            logs = logs.Take(100);
 
             context.Response.ContentType = "application/json";
             context.Response.CacheControl = "no-cache";
