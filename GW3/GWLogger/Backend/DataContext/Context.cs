@@ -69,6 +69,8 @@ namespace GWLogger.Backend.DataContext
 
         public GatewayStats GetStats(string gatewayName, DateTime start, DateTime end)
         {
+            if (!files.Exists(gatewayName))
+                return null;
             return files[gatewayName].GetStats(start, end);
         }
 
@@ -156,26 +158,36 @@ namespace GWLogger.Backend.DataContext
 
         public List<LogEntry> ReadLastLogs(string gatewayName, int nbEntries = 100)
         {
+            if (!files.Exists(gatewayName))
+                return null;
             return files[gatewayName].ReadLastLogs(nbEntries);
         }
 
         public List<LogEntry> ReadLog(string gatewayName, DateTime start, DateTime end)
         {
+            if (!files.Exists(gatewayName))
+                return null;
             return files[gatewayName].ReadLog(start, end);
         }
 
         public List<LogSession> ReadClientSessions(string gatewayName, DateTime start, DateTime end)
         {
+            if (!files.Exists(gatewayName))
+                return null;
             return files[gatewayName].ReadClientSessions(start, end);
         }
 
         public List<LogSession> ReadServerSessions(string gatewayName, DateTime start, DateTime end)
         {
+            if (!files.Exists(gatewayName))
+                return null;
             return files[gatewayName].ReadServerSessions(start, end);
         }
 
         public List<SearchEntry> ReadSearches(string gatewayName, DateTime start, DateTime end)
         {
+            if (!files.Exists(gatewayName))
+                return null;
             return files[gatewayName].ReadSearches(start, end);
         }
 

@@ -30,7 +30,10 @@ namespace GatewayLogic.Services
             // Build SOAP connection
             try
             {
-                soapLogger = new GWLoggerSoap.DataAccessSoapClient();
+                if (System.Configuration.ConfigurationManager.AppSettings["soapURL"] != null)
+                    soapLogger = new GWLoggerSoap.DataAccessSoapClient(new System.ServiceModel.BasicHttpBinding(), new EndpointAddress(System.Configuration.ConfigurationManager.AppSettings["soapURL"]));
+                else
+                    soapLogger = new GWLoggerSoap.DataAccessSoapClient();
             }
             catch
             {

@@ -81,7 +81,7 @@
     <Content Include="main.js.map" />
     <Content Include="Logs.ashx" />
     <None Include="packages.config" />
-    <None Include="Properties\PublishProfiles\AIT-IIS.pubxml" />
+    <None Include="Properties\PublishProfiles\GFAEPICSLOG.pubxml" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <Content Include="main.js" />
     <Content Include="Scripts\jquery-3.3.1.js" />

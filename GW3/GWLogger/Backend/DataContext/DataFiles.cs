@@ -56,5 +56,10 @@ namespace GWLogger.Backend.DataContext
                 dataFiles.Clear();
             }
         }
+
+        public bool Exists(string gatewayName)
+        {
+            return DataFile.Exists(gatewayName);
+        }
     }
 }

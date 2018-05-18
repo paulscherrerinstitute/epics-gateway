@@ -216,7 +216,7 @@ class Main
             var t = tdiff / (10 * 60 * 1000);
             var x = width - Math.floor(t * w + w / 2);
 
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 1;
             ctx.strokeStyle = "rgba(0,0,255,0.7)";
             ctx.beginPath();
             ctx.moveTo(x + 0.5, 0);

@@ -40,10 +40,24 @@ namespace GWLogger.Backend.DataContext
             get
             {
                 return Directory.GetFiles(StorageDirectory, "*.data")
-                    .Select(row => row.Substring(StorageDirectory.Length + 1).Split(new char[] { '.' }).First())
+                    .Select(row => Path.GetFileName(row).Split(new char[] { '.' }).First())
                     .Distinct()
                     .OrderBy(row => row)
                     .ToList();
+            }
+        }
+
+        static HashSet<string> knownFiles = new HashSet<string>();
+        public static bool Exists(string gatewayName)
+        {
+            lock (knownFiles)
+            {
+                if (knownFiles.Contains(gatewayName.ToLower()))
+                    return true;
+                var res = Directory.GetFiles(StorageDirectory, gatewayName.ToLower() + ".*.data").Any();
+                if (res)
+                    knownFiles.Add(gatewayName.ToLower());
+                return res;
             }
         }
 
@@ -86,6 +100,11 @@ namespace GWLogger.Backend.DataContext
             {
                 LockObject.Release();
             }
+
+            lock (knownFiles)
+            {
+                knownFiles.Clear();
+            }
         }
 
         public static void DeleteFiles(string gateway)
@@ -108,6 +127,11 @@ namespace GWLogger.Backend.DataContext
             // Delete all the stats files
             foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.stats"))
                 File.Delete(i);
+
+            lock (knownFiles)
+            {
+                knownFiles.Clear();
+            }
         }
 
         public DataFile(string gateway)
