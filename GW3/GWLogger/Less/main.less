@@ -1,10 +1,12 @@
 ﻿@backgroundColor: #e6e6e6;
 @boxShadow: #9d9d9d 1px 1px 2px;
-@labelBackgroundColor: #80A080;
+@labelBackgroundColor: #46393c;
 @labelColor: #FFFFFF;
 @leftSidebar: 300px;
 @timeRangeHeight: 100px;
 @borderSpacing: 5px;
+@tabTextColor: #e6dfdf;
+@containerBackground: #f8f8f2;
 
 @middleSidebar: (@leftSidebar+5)/2;
 
@@ -15,6 +17,7 @@ body
     font-family: sans-serif;
     font-size: 14px;
     overflow: hidden;
+    user-select: none;
 }
 
 .scrollbarStyle
@@ -40,7 +43,7 @@ body
 .container
 {
     position: absolute;
-    background-color: white;
+    background-color: @containerBackground;
     box-shadow: @boxShadow;
     border-radius: 2px;
     display: block;
@@ -226,7 +229,7 @@ body
 #logHelp
 {
     position: absolute;
-    background-color: blue;
+    background-color: #6b6750;
     color: white;
     font-size: 25px;
     font-weight: bold;
@@ -243,7 +246,7 @@ body
 
     &:hover
     {
-        color: red;
+        color: #dcc3c3;
     }
 }
 
@@ -315,7 +318,7 @@ select
         background-color: lighten(@labelBackgroundColor, 25%);
         border-bottom: none;
         padding: 5px;
-        color: #808080;
+        color: @tabTextColor;
         cursor: pointer;
     }
 
