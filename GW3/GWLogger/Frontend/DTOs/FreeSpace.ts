@@ -1,6 +1,5 @@
 ﻿interface FreeSpace
 {
+    FreeMB: number;
     TotMB: number;
-    UsedMB: number;
-    MaxMB: number;
 }

@@ -442,7 +442,7 @@ class Main
             success: function (msg)
             {
                 var free = <FreeSpace>msg.d;
-                $("#freeSpace").html("" + (100 - Math.round(free.UsedMB * 1000 / free.MaxMB) / 10) + "%");
+                $("#freeSpace").html("" + (Math.round(free.FreeMB * 1000 / free.TotMB) / 10) + "%");
             }
         });
 
@@ -555,7 +555,7 @@ class Main
         $("#gatewaySelector").on("change", Main.GatewayChanged);
         $(window).on("resize", Main.Resize);
         $("#timeRangeCanvas").on("mousedown", Main.TimeLineSelected);
-        window.setInterval(Main.Refresh, 1000); 
+        window.setInterval(Main.Refresh, 1000);
         $(window).bind('popstate', Main.PopState);
         $("#clientsTabs li:nth-child(1)").click(Main.ShowStats);
         $("#clientsTabs li:nth-child(2)").click(Main.ShowSearches);

@@ -36,9 +36,20 @@ namespace GWLogger
         }
 
         [WebMethod]
-        public long GetFreeSpace()
+        public FreeSpace GetFreeSpace()
         {
-            return 0L;
+            ulong FreeBytesAvailable;
+            ulong TotalNumberOfBytes;
+            ulong TotalNumberOfFreeBytes;
+
+            Backend.Controllers.DiskController.GetDiskFreeSpaceEx(Backend.DataContext.DataFile.StorageDirectory, out FreeBytesAvailable, out TotalNumberOfBytes, out TotalNumberOfFreeBytes);
+            return new FreeSpace { TotMB = TotalNumberOfBytes / (1024 * 1024), FreeMB = FreeBytesAvailable / (1024 * 1024) };
+        }
+
+        public class FreeSpace
+        {
+            public ulong TotMB { get; set; }
+            public ulong FreeMB { get; set; }
         }
     }
 }

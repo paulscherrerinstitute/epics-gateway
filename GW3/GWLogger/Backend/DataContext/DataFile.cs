@@ -718,22 +718,25 @@ namespace GWLogger.Backend.DataContext
                 {
                     using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read), System.Text.Encoding.UTF8))
                     {
-                        var entryStartDate = DateTime.FromBinary(reader.ReadInt64());
-                        var ed = reader.ReadInt64();
-                        DateTime? entryEndDate;
-                        if (ed == 0)
-                            entryEndDate = null;
-                        else
-                            entryEndDate = DateTime.FromBinary(ed).ToUniversalTime();
-                        var endPoint = reader.ReadString();
+                        while (reader.BaseStream.Position < reader.BaseStream.Length)
+                        {
+                            var entryStartDate = DateTime.FromBinary(reader.ReadInt64());
+                            var ed = reader.ReadInt64();
+                            DateTime? entryEndDate;
+                            if (ed == 0)
+                                entryEndDate = null;
+                            else
+                                entryEndDate = DateTime.FromBinary(ed).ToUniversalTime();
+                            var endPoint = reader.ReadString();
 
-                        if ((entryEndDate.HasValue && start <= entryStartDate && end >= entryEndDate.Value) || (!entryEndDate.HasValue && start <= entryStartDate))
-                            result.Add(new LogSession
-                            {
-                                Start = entryStartDate,
-                                End = entryEndDate,
-                                Remote = endPoint
-                            });
+                            if ((entryEndDate.HasValue && start <= entryStartDate && end >= entryEndDate.Value) || (!entryEndDate.HasValue && start <= entryStartDate))
+                                result.Add(new LogSession
+                                {
+                                    Start = entryStartDate,
+                                    End = entryEndDate,
+                                    Remote = endPoint
+                                });
+                        }
                     }
                 }
             }
@@ -770,22 +773,25 @@ namespace GWLogger.Backend.DataContext
                 {
                     using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read), System.Text.Encoding.UTF8))
                     {
-                        var entryStartDate = DateTime.FromBinary(reader.ReadInt64());
-                        var ed = reader.ReadInt64();
-                        DateTime? entryEndDate;
-                        if (ed == 0)
-                            entryEndDate = null;
-                        else
-                            entryEndDate = DateTime.FromBinary(ed);
-                        var endPoint = reader.ReadString();
+                        while (reader.BaseStream.Position < reader.BaseStream.Length)
+                        {
+                            var entryStartDate = DateTime.FromBinary(reader.ReadInt64());
+                            var ed = reader.ReadInt64();
+                            DateTime? entryEndDate;
+                            if (ed == 0)
+                                entryEndDate = null;
+                            else
+                                entryEndDate = DateTime.FromBinary(ed);
+                            var endPoint = reader.ReadString();
 
-                        if ((entryEndDate.HasValue && start <= entryStartDate && end >= entryEndDate.Value) || (!entryEndDate.HasValue && start <= entryStartDate))
-                            result.Add(new LogSession
-                            {
-                                Start = entryStartDate,
-                                End = entryEndDate,
-                                Remote = endPoint
-                            });
+                            if ((entryEndDate.HasValue && start <= entryStartDate && end >= entryEndDate.Value) || (!entryEndDate.HasValue && start <= entryStartDate))
+                                result.Add(new LogSession
+                                {
+                                    Start = entryStartDate,
+                                    End = entryEndDate,
+                                    Remote = endPoint
+                                });
+                        }
                     }
                 }
             }
@@ -822,16 +828,19 @@ namespace GWLogger.Backend.DataContext
                 {
                     using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read), System.Text.Encoding.UTF8))
                     {
-                        var entry = new SearchEntry
+                        while (reader.BaseStream.Position < reader.BaseStream.Length)
                         {
-                            Date = DateTime.FromBinary(reader.ReadInt64()),
-                            Remote = reader.ReadString(),
-                            Channel = reader.ReadString()
-                        };
+                            var entry = new SearchEntry
+                            {
+                                Date = DateTime.FromBinary(reader.ReadInt64()),
+                                Remote = reader.ReadString(),
+                                Channel = reader.ReadString()
+                            };
 
 
-                        if (entry.Date >= start && entry.Date <= end)
-                            result.Add(entry);
+                            if (entry.Date >= start && entry.Date <= end)
+                                result.Add(entry);
+                        }
                     }
                 }
             }

@@ -128,29 +128,14 @@ namespace GWLogger.Backend.Controllers
 
         public static List<DTOs.SearchRequest> GetSearchedChannels(string gatewayName, DateTime datePoint)
         {
-            return Global.DataContext.ReadSearches(gatewayName, datePoint, datePoint).Select(row => new DTOs.SearchRequest
-            {
-                Channel = row.Channel,
-                Client = row.Remote,
-                Date = row.Date
-            }).ToList();
-            /*using (var ctx = new LoggerContext())
-            {
-                var start = datePoint.AddSeconds(-1);
-                var end = datePoint.AddSeconds(1);
-
-                return ctx.SearchedChannels.Where(row => row.Gateway == gatewayName && row.SearchDate == datePoint)
-                //return ctx.LogEntries.Where(row => row.MessageTypeId == 39 && row.Gateway == gatewayName)
-                    .OrderBy(row => row.Channel)
-                    .ThenBy(row => row.Client)
-                    .Select(row => new DTOs.SearchRequest
-                    {
-                        Channel = row.Channel,
-                        Date = row.SearchDate,
-                        Client = row.Client,
-                        NbSearches = row.NbSearches
-                    }).Take(1000).ToList();
-            }*/
+            return Global.DataContext.ReadSearches(gatewayName, datePoint, datePoint).
+                GroupBy(row => row.Remote + "@" + row.Channel).Select(row => new DTOs.SearchRequest
+                {
+                    Channel = row.First().Channel,
+                    Date = row.First().Date,
+                    Client = row.First().Remote,
+                    NbSearches = row.Count()
+                }).ToList();
         }
     }
 }
