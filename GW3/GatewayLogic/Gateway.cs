@@ -80,10 +80,13 @@ namespace GatewayLogic
 
             checkDeadLock = new Thread((obj) =>
               {
+                  var span = TimeSpan.FromSeconds(10);
+                  if (System.Diagnostics.Debugger.IsAttached)
+                      span = TimeSpan.FromSeconds(60);
                   while (!isDiposed)
                   {
                       Thread.Sleep(1000);
-                      foreach (var i in SafeLock.DeadLockCheck(TimeSpan.FromSeconds(10)))
+                      foreach (var i in SafeLock.DeadLockCheck(span))
                       {
                           MessageLogger.Write(null, LogMessageType.DeadLock, null, i.MemberName, i.SourceFilePath, i.SourceLineNumber);
                           throw new DeadLockException();

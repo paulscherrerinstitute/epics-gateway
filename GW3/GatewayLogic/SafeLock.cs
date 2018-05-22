@@ -43,6 +43,7 @@ namespace GatewayLogic
         public LockInfo Holder { get; private set; }
 
         SemaphoreSlim semaphore = new SemaphoreSlim(1);
+        private bool disposed = false;
 
         public SafeLock()
         {
@@ -65,7 +66,7 @@ namespace GatewayLogic
             try
             {
                 lockLockers.Wait();
-                return lockers.Where(row => row.OpenLocks.Any() && (now - row.Holder.LockRequestedOn) > span)
+                return lockers.Where(row => row.OpenLocks.Any() && row.Holder != null && (now - row.Holder.LockRequestedOn) > span)
                     .Select(row => row.Holder).ToList();
             }
             finally
@@ -102,6 +103,8 @@ namespace GatewayLogic
                 openLockLocker.Release();
             }
             semaphore.Wait();
+            if (disposed)
+                return;
             try
             {
                 openLockLocker.Wait();
@@ -118,6 +121,8 @@ namespace GatewayLogic
                             [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
                             [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
         {
+            if (disposed)
+                return;
             try
             {
                 openLockLocker.Wait();
@@ -137,6 +142,7 @@ namespace GatewayLogic
             {
                 try
                 {
+                    openLockLocker.Wait();
                     return openLocks.ToList();
                 }
                 finally
@@ -148,6 +154,7 @@ namespace GatewayLogic
 
         public void Dispose()
         {
+            disposed = true;
             try
             {
                 lockLockers.Wait();

@@ -64,6 +64,11 @@ namespace StressTest
                              logBuffer.RemoveAt(0);
                      }
 
+                     if (message.Contains("Deadlock"))
+                     {
+
+                     }
+
                      if (level >= GatewayLogic.Services.LogLevel.Critical)
                      {
                          Console.Write(DateTime.UtcNow.ToString("HH:mm:ss"));
@@ -254,7 +259,7 @@ namespace StressTest
                         Environment.Exit(0);
                     };
                     Console.WriteLine("Ctrl+C to stop...");
-                    while(true)
+                    while (true)
                         Console.ReadKey();
                 }
             }

@@ -118,17 +118,31 @@ namespace GatewayLogic.Services
 
         public MonitorInformationDetail GetByGatewayId(uint id)
         {
-            using (dictionaryLock.Aquire())
+            try
             {
-                return monitors.FirstOrDefault(row => row.GatewayId == id);
+                using (dictionaryLock.Aquire())
+                {
+                    return monitors.FirstOrDefault(row => row.GatewayId == id);
+                }
+            }
+            catch
+            {
+                return null;
             }
         }
 
         public MonitorInformationDetail GetByClientId(IPEndPoint clientEndPoint, uint clientId)
         {
-            using (dictionaryLock.Aquire())
+            try
             {
-                return monitors.FirstOrDefault(row => row.clients.Any(r2 => r2.Client == clientEndPoint && r2.Id == clientId));
+                using (dictionaryLock.Aquire())
+                {
+                    return monitors.FirstOrDefault(row => row.clients.Any(r2 => r2.Client == clientEndPoint && r2.Id == clientId));
+                }
+            }
+            catch
+            {
+                return null;
             }
         }
 

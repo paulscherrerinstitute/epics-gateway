@@ -12,6 +12,7 @@ namespace GatewayLogic
         DataPacket remainingPacket = null;
         uint dataMissing = 0;
         int currentPos = 0;
+        //SemaphoreSlim lockSplitter = new SemaphoreSlim(1);
         SafeLock lockSplitter = new SafeLock();
 
         public IEnumerable<DataPacket> Split(DataPacket packet)

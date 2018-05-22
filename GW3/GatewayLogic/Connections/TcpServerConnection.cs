@@ -46,6 +46,8 @@ namespace GatewayLogic.Connections
                     {
                         return;
                     }
+                    if (disposed)
+                        return;
                     using (lockObject.Aquire())
                     {
                         isConnected = true;
@@ -79,6 +81,8 @@ namespace GatewayLogic.Connections
 
         private void ConnectionBuilt(IAsyncResult ar)
         {
+            if (disposed)
+                return;
             using (lockObject.Aquire())
             {
                 isConnected = true;
@@ -101,6 +105,8 @@ namespace GatewayLogic.Connections
 
         internal void WhenConnected(Action whenDone)
         {
+            if (disposed)
+                return;
             using (lockObject.Aquire())
             {
                 if (isConnected)
