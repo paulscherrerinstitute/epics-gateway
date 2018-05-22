@@ -18,7 +18,7 @@ namespace GatewayLogic.Commands
             DataPacket newPacket = null;
             ChannelInformation.ChannelInformationDetails channel;
 
-            using (lockObject.Lock)
+            using (lockObject.Aquire())
             {
                 channel = connection.Gateway.ChannelInformation.Get(packet.Parameter1);
                 if (channel == null)
@@ -99,7 +99,7 @@ namespace GatewayLogic.Commands
             if (packet.PayloadSize == 0 || packet.DataCount == 0)
                 return;
 
-            using (lockObject.Lock)
+            using (lockObject.Aquire())
             {
                 monitor = connection.Gateway.MonitorInformation.GetByGatewayId(packet.Parameter2);
                 if (monitor == null)

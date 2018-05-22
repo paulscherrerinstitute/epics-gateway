@@ -46,7 +46,7 @@ namespace GatewayLogic.Connections
                     {
                         return;
                     }
-                    using (lockObject.Lock)
+                    using (lockObject.Aquire())
                     {
                         isConnected = true;
 
@@ -79,7 +79,7 @@ namespace GatewayLogic.Connections
 
         private void ConnectionBuilt(IAsyncResult ar)
         {
-            using (lockObject.Lock)
+            using (lockObject.Aquire())
             {
                 isConnected = true;
 
@@ -101,7 +101,7 @@ namespace GatewayLogic.Connections
 
         internal void WhenConnected(Action whenDone)
         {
-            using (lockObject.Lock)
+            using (lockObject.Aquire())
             {
                 if (isConnected)
                 {
@@ -164,7 +164,7 @@ namespace GatewayLogic.Connections
 
         public void LinkChannel(ChannelInformation.ChannelInformationDetails channel)
         {
-            using (channelsLock.Lock)
+            using (channelsLock.Aquire())
             {
                 channels.Add(channel);
             }
@@ -174,7 +174,7 @@ namespace GatewayLogic.Connections
         {
             get
             {
-                using (channelsLock.Lock)
+                using (channelsLock.Aquire())
                 {
                     return channels.Select(row => row.ChannelName).ToList();
                 }
@@ -190,7 +190,7 @@ namespace GatewayLogic.Connections
             {*/
             try
             {
-                using (socketLock.Lock)
+                using (socketLock.Aquire())
                 {
                     socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
                 }
@@ -221,7 +221,7 @@ namespace GatewayLogic.Connections
             Gateway.GotDropedIoc(Name);
 
             List<ChannelInformation.ChannelInformationDetails> channelsCopy;
-            using (channelsLock.Lock)
+            using (channelsLock.Aquire())
             { 
                 channelsCopy = channels.ToList();
             }

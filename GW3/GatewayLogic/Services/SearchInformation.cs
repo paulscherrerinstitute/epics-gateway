@@ -30,7 +30,7 @@ namespace GatewayLogic.Services
 
             internal void AddClient(ClientId clientId)
             {
-                using (clientsLock.Lock)
+                using (clientsLock.Aquire())
                 {
                     clients.RemoveAll(row => (DateTime.UtcNow - row.When).TotalSeconds > 1);
                     if (!clients.Any(row => row.Client == clientId.Client && row.Id == row.Id))
@@ -40,7 +40,7 @@ namespace GatewayLogic.Services
 
             internal IEnumerable<ClientId> GetClients()
             {
-                using (clientsLock.Lock)
+                using (clientsLock.Aquire())
                 {
                     clients.RemoveAll(row => (DateTime.UtcNow - row.When).TotalSeconds > 1);
 
@@ -58,7 +58,7 @@ namespace GatewayLogic.Services
 
         internal SearchInformationDetail Get(string channelName)
         {
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 if (!dictionary.ContainsKey(channelName))
                 {
@@ -73,7 +73,7 @@ namespace GatewayLogic.Services
 
         internal bool HasChannelServerInformation(string channelName)
         {
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 return dictionary.ContainsKey(channelName) && dictionary[channelName].Server != null;
             }
@@ -81,7 +81,7 @@ namespace GatewayLogic.Services
 
         internal SearchInformationDetail Get(uint gatewayId)
         {
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 var result = dictionary.Values.FirstOrDefault(row => row.GatewayId == gatewayId);
                 return result;
@@ -90,7 +90,7 @@ namespace GatewayLogic.Services
 
         public void Dispose()
         {
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 foreach (var i in dictionary.Values)
                     i.Dispose();
@@ -101,7 +101,7 @@ namespace GatewayLogic.Services
 
         public void Remove(string channelName)
         {
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 if (dictionary.ContainsKey(channelName))
                 {

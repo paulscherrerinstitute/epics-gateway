@@ -93,6 +93,7 @@
     <Compile Include="Connections\GatewayConnectionCollection.cs" />
     <Compile Include="Connections\GatewayTcpConnection.cs" />
     <Compile Include="DataPacket.cs" />
+    <Compile Include="DeadLockException.cs" />
     <Compile Include="DiagnosticInfo.cs" />
     <Compile Include="DiagnosticServer.cs" />
     <Compile Include="Gateway.cs" />

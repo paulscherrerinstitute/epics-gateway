@@ -119,6 +119,8 @@ namespace GatewayLogic.Services
         [MessageDisplay("Disposing channel {channelName}.", LogLevel.Detail)]
         ChannelDispose,
         [MessageDisplay("Server {endpoint} created.", LogLevel.Connection)]
-        StartTcpServerConnection
+        StartTcpServerConnection,
+        [MessageDisplay("Deadlock detected.", LogLevel.Critical)]
+        DeadLock
     }
 }

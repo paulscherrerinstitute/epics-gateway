@@ -58,7 +58,7 @@ namespace GatewayLogic.Services
             {
                 Thread.Sleep(1000);
                 byte[] bytes;
-                using (bufferLock.Lock)
+                using (bufferLock.Aquire())
                 {
                     bufferWriter.Flush();
                     bytes = buffer.ToArray();
@@ -120,7 +120,7 @@ namespace GatewayLogic.Services
         {
             if (sourceFilter != null && !sourceFilter.IsMatch(source))
                 return;
-            using (bufferLock.Lock)
+            using (bufferLock.Aquire())
             {
                 bufferWriter.Write(DateTime.UtcNow.ToString("yyyy\\/MM\\/dd HH:mm:ss.fff", System.Globalization.CultureInfo.InvariantCulture));
                 bufferWriter.Write("\t");

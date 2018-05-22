@@ -77,7 +77,7 @@ namespace GatewayLogic.Connections
             sendStream = new BufferedStream(new NetworkStream(socket));
             try
             {
-                using (streamLock.Lock)
+                using (streamLock.Aquire())
                 {
                     Send((int)DebugDataType.GW_NAME);
                     Send(gateway.Configuration.GatewayName);
@@ -214,7 +214,7 @@ namespace GatewayLogic.Connections
         {
             try
             {
-                using (streamLock.Lock)
+                using (streamLock.Aquire())
                 {
                     var searches = Gateway.Searches;
                     Send((int)DebugDataType.SEARCH_STATS);
@@ -247,7 +247,7 @@ namespace GatewayLogic.Connections
         {
             try
             {
-                using (streamLock.Lock)
+                using (streamLock.Aquire())
                 {
                     /*if (PBCaGw.Services.DebugTraceListener.TraceAll)
                         Send((int)DebugDataType.FULL_LOGS);
@@ -266,7 +266,7 @@ namespace GatewayLogic.Connections
         {
             try
             {
-                using (streamLock.Lock)
+                using (streamLock.Aquire())
                 {
                     Send((int)DebugDataType.LOG);
                     Send(source);
@@ -286,7 +286,7 @@ namespace GatewayLogic.Connections
         {
             try
             {
-                using (streamLock.Lock)
+                using (streamLock.Aquire())
                 {
                     Send((int)DebugDataType.DROP_CLIENT);
                     Send(client);
@@ -303,7 +303,7 @@ namespace GatewayLogic.Connections
         {
             try
             {
-                using (streamLock.Lock)
+                using (streamLock.Aquire())
                 {
                     Send((int)DebugDataType.CLIENT_NEW_CHANNEL);
                     Send(client);
@@ -326,7 +326,7 @@ namespace GatewayLogic.Connections
         {
             try
             {
-                using (streamLock.Lock)
+                using (streamLock.Aquire())
                 {
                     Send((int)DebugDataType.DROP_IOC);
                     Send(ioc);
@@ -343,7 +343,7 @@ namespace GatewayLogic.Connections
         {
             try
             {
-                using (streamLock.Lock)
+                using (streamLock.Aquire())
                 {
                     Send((int)DebugDataType.IOC_NEW_CHANNEL);
                     Send(ioc);

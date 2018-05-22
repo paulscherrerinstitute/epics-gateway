@@ -63,6 +63,8 @@ namespace GatewayLogic
         private Dictionary<string, int> searches = new Dictionary<string, int>();
         private Dictionary<string, int> searchers = new Dictionary<string, int>();
 
+        Thread checkDeadLock;
+
         bool isDiposed = false;
 
         Thread updaterThread;
@@ -75,6 +77,20 @@ namespace GatewayLogic
 
             ClientConnection = new ClientConnection(this);
             ServerConnection = new ServerConnection(this);
+
+            checkDeadLock = new Thread((obj) =>
+              {
+                  while (!isDiposed)
+                  {
+                      Thread.Sleep(1000);
+                      foreach (var i in SafeLock.DeadLockCheck(TimeSpan.FromSeconds(10)))
+                      {
+                          MessageLogger.Write(null, LogMessageType.DeadLock, null, i.MemberName, i.SourceFilePath, i.SourceLineNumber);
+                          throw new DeadLockException();
+                      }
+                  }
+              });
+            checkDeadLock.Start();
         }
 
         void Updater()
@@ -255,7 +271,7 @@ namespace GatewayLogic
 
         internal void Search(string channelName, string endpoint)
         {
-            using (searchLock.Lock)
+            using (searchLock.Aquire())
             {
                 if (!searches.ContainsKey(channelName))
                     searches.Add(channelName, 0);
@@ -270,7 +286,7 @@ namespace GatewayLogic
         private void UpdateSearchInformation(object sender, EventArgs e)
         {
             GotUpdateSearch();
-            using (searchLock.Lock)
+            using (searchLock.Aquire())
             {
                 searches.Clear();
                 searchers.Clear();
@@ -281,7 +297,7 @@ namespace GatewayLogic
         {
             get
             {
-                using (searchLock.Lock)
+                using (searchLock.Aquire())
                 {
                     return searches.Select(row => new KeyValuePair<string, int>(row.Key, row.Value)).ToList();
                 }
@@ -292,7 +308,7 @@ namespace GatewayLogic
         {
             get
             {
-                using (searchLock.Lock)
+                using (searchLock.Aquire())
                 {
                     return searchers.Select(row => new KeyValuePair<string, int>(row.Key, row.Value)).ToList();
                 }

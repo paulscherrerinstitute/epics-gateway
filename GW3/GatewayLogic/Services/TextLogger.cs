@@ -59,7 +59,7 @@ namespace GatewayLogic.Services
         {
             if (this.Filter != null && !this.Filter(level))
                 return;
-            using (lockObject.Lock)
+            using (lockObject.Aquire())
             {
                 Handler?.Invoke(level, sourceFilePath.Split(new char[] { '\\' }).Last().Split(new char[] { '.' }).First() + "." + memberName + ":" + sourceLineNumber, message);
             }

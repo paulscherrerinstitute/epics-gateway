@@ -54,7 +54,7 @@ namespace GatewayLogic.Configuration
         {
             if (string.IsNullOrEmpty(ip)) return ip;
 
-            using (lookupLock.Lock)
+            using (lookupLock.Aquire())
             {
                 if (!ReverseIpLookup.ContainsKey(ip))
                 {

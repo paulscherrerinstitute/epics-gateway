@@ -38,7 +38,7 @@ namespace GatewayLogic.Services
 
         public ReadNotifyInformationDetail Get(ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
         {
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 var result = new ReadNotifyInformationDetail(nextId++, channelInformation, clientId, client);
                 reads.Add(result);
@@ -48,7 +48,7 @@ namespace GatewayLogic.Services
 
         public ReadNotifyInformationDetail GetByGatewayId(uint id)
         {
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 reads.RemoveAll(row => (DateTime.UtcNow - row.When).TotalSeconds > 10);
 
@@ -60,7 +60,7 @@ namespace GatewayLogic.Services
 
         public void Dispose()
         {
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 reads.Clear();
             }
@@ -69,7 +69,7 @@ namespace GatewayLogic.Services
 
         internal void Remove(ReadNotifyInformationDetail read)
         {
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 reads.Remove(read);
             }

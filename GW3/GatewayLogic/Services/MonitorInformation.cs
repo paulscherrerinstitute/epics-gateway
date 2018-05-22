@@ -42,7 +42,7 @@ namespace GatewayLogic.Services
 
             internal void AddClient(ClientId clientId)
             {
-                using (clientsLock.Lock)
+                using (clientsLock.Aquire())
                 {
                     if (!clients.Any(row => row.Client == clientId.Client && row.Id == clientId.Id))
                         clients.Add(clientId);
@@ -51,9 +51,9 @@ namespace GatewayLogic.Services
 
             internal void RemoveClient(Gateway gateway, IPEndPoint endPoint, uint clientId)
             {
-                using (gateway.MonitorInformation.dictionaryLock.Lock)
+                using (gateway.MonitorInformation.dictionaryLock.Aquire())
                 {
-                    using (clientsLock.Lock)
+                    using (clientsLock.Aquire())
                     {
                         clients.RemoveAll(row => row.Id == clientId && row.Client == endPoint);
                         // No more clients, we should cancel the monitor
@@ -68,7 +68,7 @@ namespace GatewayLogic.Services
 
             internal IEnumerable<ClientId> GetClients()
             {
-                using (clientsLock.Lock)
+                using (clientsLock.Aquire())
                 {
                     return clients.ToList();
                 }
@@ -99,7 +99,7 @@ namespace GatewayLogic.Services
 
         public MonitorInformationDetail Get(ChannelInformation.ChannelInformationDetails channelInformation, ushort dataType, uint dataCount, UInt16 monitorMask)
         {
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 MonitorInformationDetail monitor = null;
                 if (dataCount != 0)
@@ -118,7 +118,7 @@ namespace GatewayLogic.Services
 
         public MonitorInformationDetail GetByGatewayId(uint id)
         {
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 return monitors.FirstOrDefault(row => row.GatewayId == id);
             }
@@ -126,7 +126,7 @@ namespace GatewayLogic.Services
 
         public MonitorInformationDetail GetByClientId(IPEndPoint clientEndPoint, uint clientId)
         {
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 return monitors.FirstOrDefault(row => row.clients.Any(r2 => r2.Client == clientEndPoint && r2.Id == clientId));
             }
@@ -134,7 +134,7 @@ namespace GatewayLogic.Services
 
         public void Dispose()
         {
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 foreach (var i in monitors)
                     i.Dispose();
@@ -146,7 +146,7 @@ namespace GatewayLogic.Services
         internal void Drop(uint channelId, bool sendToServer = true)
         {
             List<MonitorInformationDetail> toDrop;
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 toDrop = monitors.Where(row => row.ChannelInformation.GatewayId == channelId).ToList();
             }
@@ -158,7 +158,7 @@ namespace GatewayLogic.Services
                     row.Dispose();
                 });
 
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 monitors.RemoveAll(row => row.ChannelInformation.GatewayId == channelId);
             }
@@ -168,7 +168,7 @@ namespace GatewayLogic.Services
         {
             get
             {
-                using (dictionaryLock.Lock)
+                using (dictionaryLock.Aquire())
                 {
                     return monitors.Count;
                 }

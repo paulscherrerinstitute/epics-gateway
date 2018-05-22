@@ -34,7 +34,7 @@ namespace GatewayLogic.Services
 
         public WriteNotifyInformationDetail Get(ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
         {
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 var result = new WriteNotifyInformationDetail(nextId++, channelInformation, clientId, client);
                 writes.Add(result);
@@ -44,7 +44,7 @@ namespace GatewayLogic.Services
 
         public WriteNotifyInformationDetail GetByGatewayId(uint id)
         {
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 writes.RemoveAll(row => (DateTime.UtcNow - row.When).TotalSeconds > 10);
 
@@ -56,7 +56,7 @@ namespace GatewayLogic.Services
 
         public void Dispose()
         {
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 writes.Clear();
             }
@@ -65,7 +65,7 @@ namespace GatewayLogic.Services
 
         internal void Remove(WriteNotifyInformationDetail write)
         {
-            using (dictionaryLock.Lock)
+            using (dictionaryLock.Aquire())
             {
                 writes.Remove(write);
             }

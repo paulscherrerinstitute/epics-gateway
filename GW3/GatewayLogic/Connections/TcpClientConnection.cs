@@ -83,7 +83,7 @@ namespace GatewayLogic.Connections
 
             try
             {
-                using (socketLock.Lock)
+                using (socketLock.Aquire())
                 {
                     socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
                 }
@@ -224,7 +224,7 @@ namespace GatewayLogic.Connections
 
         public override void Dispose()
         {
-            using (socketLock.Lock)
+            using (socketLock.Aquire())
             {
                 if (disposed)
                     return;
