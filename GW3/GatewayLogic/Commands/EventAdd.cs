@@ -11,14 +11,14 @@ namespace GatewayLogic.Commands
 {
     class EventAdd : CommandHandler
     {
-        object lockObject = new object();
+        SafeLock lockObject = new SafeLock();
 
         public override void DoRequest(GatewayConnection connection, DataPacket packet)
         {
             DataPacket newPacket = null;
             ChannelInformation.ChannelInformationDetails channel;
 
-            lock (lockObject)
+            using (lockObject.Lock)
             {
                 channel = connection.Gateway.ChannelInformation.Get(packet.Parameter1);
                 if (channel == null)
@@ -99,7 +99,7 @@ namespace GatewayLogic.Commands
             if (packet.PayloadSize == 0 || packet.DataCount == 0)
                 return;
 
-            lock (lockObject)
+            using (lockObject.Lock)
             {
                 monitor = connection.Gateway.MonitorInformation.GetByGatewayId(packet.Parameter2);
                 if (monitor == null)

@@ -44,6 +44,7 @@ namespace GatewayLogic.Connections
         public override void Dispose()
         {
             receiver.Dispose();
+            splitter.Dispose();
         }
 
         public override void Send(DataPacket packet)

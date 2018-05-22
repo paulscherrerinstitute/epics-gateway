@@ -15,7 +15,7 @@ namespace GatewayLogic.Services
         Critical = 4
     }
 
-    public class TextLogger
+    public class TextLogger : IDisposable
     {
         public delegate void LogHandler(LogLevel level, string source, string message);
         public delegate bool LogFilter(LogLevel level);
@@ -24,7 +24,7 @@ namespace GatewayLogic.Services
         //public event LogHandler Handler = TextLogger.DefaultHandler;
         public event LogHandler Handler;
         public LogFilter Filter = TextLogger.ShowAll;
-        private object lockObject = new object();
+        private SafeLock lockObject = new SafeLock();
 
         internal TextLogger()
         {
@@ -59,7 +59,7 @@ namespace GatewayLogic.Services
         {
             if (this.Filter != null && !this.Filter(level))
                 return;
-            lock (lockObject)
+            using (lockObject.Lock)
             {
                 Handler?.Invoke(level, sourceFilePath.Split(new char[] { '\\' }).Last().Split(new char[] { '.' }).First() + "." + memberName + ":" + sourceLineNumber, message);
             }
@@ -68,6 +68,11 @@ namespace GatewayLogic.Services
         public void ClearHandlers()
         {
             Handler = null;
+        }
+
+        public void Dispose()
+        {
+            lockObject.Dispose();
         }
     }
 }

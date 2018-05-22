@@ -9,7 +9,7 @@ namespace GatewayLogic.Services
 {
     class WriteNotifyInformation : IDisposable
     {
-        readonly object dictionaryLock = new object();
+        readonly SafeLock dictionaryLock = new SafeLock();
         readonly List<WriteNotifyInformationDetail> writes = new List<WriteNotifyInformationDetail>();
 
         private uint nextId = 1;
@@ -34,7 +34,7 @@ namespace GatewayLogic.Services
 
         public WriteNotifyInformationDetail Get(ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
         {
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 var result = new WriteNotifyInformationDetail(nextId++, channelInformation, clientId, client);
                 writes.Add(result);
@@ -44,7 +44,7 @@ namespace GatewayLogic.Services
 
         public WriteNotifyInformationDetail GetByGatewayId(uint id)
         {
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 writes.RemoveAll(row => (DateTime.UtcNow - row.When).TotalSeconds > 10);
 
@@ -56,15 +56,16 @@ namespace GatewayLogic.Services
 
         public void Dispose()
         {
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 writes.Clear();
             }
+            dictionaryLock.Dispose();
         }
 
         internal void Remove(WriteNotifyInformationDetail write)
         {
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 writes.Remove(write);
             }

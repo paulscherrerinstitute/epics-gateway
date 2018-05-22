@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic
 {
-    class Splitter
+    class Splitter :IDisposable
     {
         DataPacket remainingPacket = null;
         uint dataMissing = 0;
         int currentPos = 0;
-        SemaphoreSlim lockSplitter = new SemaphoreSlim(1);
+        SafeLock lockSplitter = new SafeLock();
 
         public IEnumerable<DataPacket> Split(DataPacket packet)
         {
@@ -159,6 +159,11 @@ namespace GatewayLogic
             remainingPacket = null;
             dataMissing = 0;
             currentPos = 0;
+        }
+
+        public void Dispose()
+        {
+            lockSplitter.Dispose();
         }
     }
 }

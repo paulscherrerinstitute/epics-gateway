@@ -10,7 +10,7 @@ namespace GatewayLogic.Services
 {
     class ReadNotifyInformation : IDisposable
     {
-        readonly object dictionaryLock = new object();
+        readonly SafeLock dictionaryLock = new SafeLock();
         readonly List<ReadNotifyInformationDetail> reads = new List<ReadNotifyInformationDetail>();
 
         private uint nextId = 1;
@@ -38,7 +38,7 @@ namespace GatewayLogic.Services
 
         public ReadNotifyInformationDetail Get(ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
         {
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 var result = new ReadNotifyInformationDetail(nextId++, channelInformation, clientId, client);
                 reads.Add(result);
@@ -48,7 +48,7 @@ namespace GatewayLogic.Services
 
         public ReadNotifyInformationDetail GetByGatewayId(uint id)
         {
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 reads.RemoveAll(row => (DateTime.UtcNow - row.When).TotalSeconds > 10);
 
@@ -60,15 +60,16 @@ namespace GatewayLogic.Services
 
         public void Dispose()
         {
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 reads.Clear();
             }
+            dictionaryLock.Dispose();
         }
 
         internal void Remove(ReadNotifyInformationDetail read)
         {
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 reads.Remove(read);
             }

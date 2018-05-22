@@ -80,6 +80,7 @@ namespace GatewayLogic.Services
         public void Dispose()
         {
             LogFileWriter?.Dispose();
+            TextLogger?.Dispose();
         }
     }
 }

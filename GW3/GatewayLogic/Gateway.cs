@@ -43,9 +43,9 @@ namespace GatewayLogic
         {
             get
             {
-                if(MessageLogger == null)
+                if (MessageLogger == null)
                     MessageLogger = new MessageLogger(Configuration.GatewayName);
-                return  MessageLogger.MessageConverter.TextLogger;
+                return MessageLogger.MessageConverter.TextLogger;
             }
         }
         //public TextLogger Log { get; private set; }
@@ -59,6 +59,7 @@ namespace GatewayLogic
         internal event EventHandler OneSecUpdate;
         internal event EventHandler TenSecUpdate;
 
+        private SafeLock searchLock = new SafeLock();
         private Dictionary<string, int> searches = new Dictionary<string, int>();
         private Dictionary<string, int> searchers = new Dictionary<string, int>();
 
@@ -125,7 +126,7 @@ namespace GatewayLogic
 
         public void LoadConfig(string configUrl, string gatewayName)
         {
-            if(MessageLogger == null)
+            if (MessageLogger == null)
                 MessageLogger = new MessageLogger(gatewayName);
 
             bool freshConfig = false;
@@ -228,6 +229,7 @@ namespace GatewayLogic
             MonitorInformation.Dispose();
             ReadNotifyInformation.Dispose();
             SearchInformation.Dispose();
+            searchLock.Dispose();
 
             ClientConnection.Dispose();
             ServerConnection.Dispose();
@@ -253,7 +255,7 @@ namespace GatewayLogic
 
         internal void Search(string channelName, string endpoint)
         {
-            lock (searches)
+            using (searchLock.Lock)
             {
                 if (!searches.ContainsKey(channelName))
                     searches.Add(channelName, 0);
@@ -268,7 +270,7 @@ namespace GatewayLogic
         private void UpdateSearchInformation(object sender, EventArgs e)
         {
             GotUpdateSearch();
-            lock (searches)
+            using (searchLock.Lock)
             {
                 searches.Clear();
                 searchers.Clear();
@@ -279,7 +281,7 @@ namespace GatewayLogic
         {
             get
             {
-                lock (searches)
+                using (searchLock.Lock)
                 {
                     return searches.Select(row => new KeyValuePair<string, int>(row.Key, row.Value)).ToList();
                 }
@@ -290,7 +292,7 @@ namespace GatewayLogic
         {
             get
             {
-                lock (searches)
+                using (searchLock.Lock)
                 {
                     return searchers.Select(row => new KeyValuePair<string, int>(row.Key, row.Value)).ToList();
                 }

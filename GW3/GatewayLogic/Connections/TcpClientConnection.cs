@@ -35,7 +35,7 @@ namespace GatewayLogic.Connections
             //gateway.Log.Write(LogLevel.Connection, "Start TCP client connection on " + endPoint);
         }
 
-
+        SafeLock socketLock = new SafeLock();
         Socket socket;
         /// <summary>
         /// Defines the socket linked on the receiver.
@@ -83,7 +83,7 @@ namespace GatewayLogic.Connections
 
             try
             {
-                lock (socket)
+                using (socketLock.Lock)
                 {
                     socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
                 }
@@ -224,12 +224,13 @@ namespace GatewayLogic.Connections
 
         public override void Dispose()
         {
-            lock (disposedLock)
+            using (socketLock.Lock)
             {
                 if (disposed)
                     return;
                 disposed = true;
             }
+            splitter.Dispose();
             //Gateway.Log.Write(LogLevel.Connection, "Client " + this.Name + " disconnect");
             Gateway.MessageLogger.Write(this.RemoteEndPoint.ToString(), LogMessageType.ClientDisconnect);
 

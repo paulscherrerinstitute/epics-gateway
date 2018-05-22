@@ -15,14 +15,15 @@ namespace GatewayLogic.Connections
         //public Gateway Gateway { get; private set; }
 
         Socket socket;
-        object lockObject = new object();
+        SafeLock lockObject = new SafeLock();
+        SafeLock socketLock = new SafeLock();
         bool isConnected = false;
         List<Action> toCallWhenReady = new List<Action>();
         readonly byte[] buffer = new byte[Gateway.BUFFER_SIZE];
         Splitter splitter = new Splitter();
-        object disposedLock = new object();
         bool disposed = false;
 
+        SafeLock channelsLock = new SafeLock();
         readonly List<ChannelInformation.ChannelInformationDetails> channels = new List<ChannelInformation.ChannelInformationDetails>();
 
         public TcpServerConnection(Gateway gateway, IPEndPoint destination) : base(gateway)
@@ -45,7 +46,7 @@ namespace GatewayLogic.Connections
                     {
                         return;
                     }
-                    lock (lockObject)
+                    using (lockObject.Lock)
                     {
                         isConnected = true;
 
@@ -78,7 +79,7 @@ namespace GatewayLogic.Connections
 
         private void ConnectionBuilt(IAsyncResult ar)
         {
-            lock (lockObject)
+            using (lockObject.Lock)
             {
                 isConnected = true;
 
@@ -100,7 +101,7 @@ namespace GatewayLogic.Connections
 
         internal void WhenConnected(Action whenDone)
         {
-            lock (lockObject)
+            using (lockObject.Lock)
             {
                 if (isConnected)
                 {
@@ -163,7 +164,7 @@ namespace GatewayLogic.Connections
 
         public void LinkChannel(ChannelInformation.ChannelInformationDetails channel)
         {
-            lock (channels)
+            using (channelsLock.Lock)
             {
                 channels.Add(channel);
             }
@@ -173,7 +174,7 @@ namespace GatewayLogic.Connections
         {
             get
             {
-                lock (channels)
+                using (channelsLock.Lock)
                 {
                     return channels.Select(row => row.ChannelName).ToList();
                 }
@@ -189,7 +190,7 @@ namespace GatewayLogic.Connections
             {*/
             try
             {
-                lock (socket)
+                using (socketLock.Lock)
                 {
                     socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
                 }
@@ -204,12 +205,12 @@ namespace GatewayLogic.Connections
 
         public override void Dispose()
         {
-            lock (disposedLock)
-            {
-                if (disposed)
-                    return;
-                disposed = true;
-            }
+            if (disposed)
+                return;
+            disposed = true;
+            lockObject.Dispose();
+            socketLock.Dispose();
+            splitter.Dispose();
             socket?.Dispose();
             if (Gateway == null)
                 return;
@@ -220,18 +221,13 @@ namespace GatewayLogic.Connections
             Gateway.GotDropedIoc(Name);
 
             List<ChannelInformation.ChannelInformationDetails> channelsCopy;
-            lock (channels)
-            {
+            using (channelsLock.Lock)
+            { 
                 channelsCopy = channels.ToList();
             }
+            channelsLock.Dispose();
             var newPacket = DataPacket.Create(0);
             newPacket.Command = 27;
-            foreach (var channel in channelsCopy)
-            {
-                Gateway.ChannelInformation.Remove(Gateway, channel);
-                //Gateway.SearchInformation.Remove(channel.ChannelName);
-                //Gateway.MonitorInformation.Drop(channel.GatewayId);
-            }
 
             foreach (var channel in channelsCopy)
             {
@@ -244,6 +240,9 @@ namespace GatewayLogic.Connections
                     client.Connection.Send(newPacket);
                 }
             }
+
+            foreach (var channel in channelsCopy)
+                Gateway.ChannelInformation.Remove(Gateway, channel);
         }
 
         public override string Name => RemoteEndPoint.ToString();

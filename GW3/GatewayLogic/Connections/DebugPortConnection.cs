@@ -30,6 +30,7 @@ namespace GatewayLogic.Connections
     class DebugPortConnection : GatewayTcpConnection
     {
         readonly Socket socket;
+        SafeLock streamLock = new SafeLock();
         readonly BufferedStream sendStream;
         bool firstMessage = true;
         Socket forwarder = null;
@@ -76,7 +77,7 @@ namespace GatewayLogic.Connections
             sendStream = new BufferedStream(new NetworkStream(socket));
             try
             {
-                lock (sendStream)
+                using (streamLock.Lock)
                 {
                     Send((int)DebugDataType.GW_NAME);
                     Send(gateway.Configuration.GatewayName);
@@ -213,7 +214,7 @@ namespace GatewayLogic.Connections
         {
             try
             {
-                lock (sendStream)
+                using (streamLock.Lock)
                 {
                     var searches = Gateway.Searches;
                     Send((int)DebugDataType.SEARCH_STATS);
@@ -246,7 +247,7 @@ namespace GatewayLogic.Connections
         {
             try
             {
-                lock (sendStream)
+                using (streamLock.Lock)
                 {
                     /*if (PBCaGw.Services.DebugTraceListener.TraceAll)
                         Send((int)DebugDataType.FULL_LOGS);
@@ -265,7 +266,7 @@ namespace GatewayLogic.Connections
         {
             try
             {
-                lock (sendStream)
+                using (streamLock.Lock)
                 {
                     Send((int)DebugDataType.LOG);
                     Send(source);
@@ -285,7 +286,7 @@ namespace GatewayLogic.Connections
         {
             try
             {
-                lock (sendStream)
+                using (streamLock.Lock)
                 {
                     Send((int)DebugDataType.DROP_CLIENT);
                     Send(client);
@@ -302,7 +303,7 @@ namespace GatewayLogic.Connections
         {
             try
             {
-                lock (sendStream)
+                using (streamLock.Lock)
                 {
                     Send((int)DebugDataType.CLIENT_NEW_CHANNEL);
                     Send(client);
@@ -325,7 +326,7 @@ namespace GatewayLogic.Connections
         {
             try
             {
-                lock (sendStream)
+                using (streamLock.Lock)
                 {
                     Send((int)DebugDataType.DROP_IOC);
                     Send(ioc);
@@ -342,7 +343,7 @@ namespace GatewayLogic.Connections
         {
             try
             {
-                lock (sendStream)
+                using (streamLock.Lock)
                 {
                     Send((int)DebugDataType.IOC_NEW_CHANNEL);
                     Send(ioc);
@@ -412,6 +413,7 @@ namespace GatewayLogic.Connections
         public override void Dispose()
         {
             disposed = true;
+            streamLock.Dispose();
             try
             {
                 sendStream.Dispose();

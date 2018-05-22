@@ -11,7 +11,7 @@ namespace GatewayLogic.Commands
 {
     class CreateChannel : CommandHandler
     {
-        SemaphoreSlim locker = new SemaphoreSlim(1);
+        SafeLock locker = new SafeLock();
 
         public override void DoRequest(GatewayConnection connection, DataPacket packet)
         {

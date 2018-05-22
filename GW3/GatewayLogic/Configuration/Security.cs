@@ -23,6 +23,7 @@ namespace GatewayLogic.Configuration
         [XmlArrayItem(ElementName = "Rule")]
         public List<SecurityRule> RulesSideB = new List<SecurityRule>();
 
+        SafeLock lookupLock = new SafeLock();
         Dictionary<string, string> ReverseIpLookup = new Dictionary<string, string>();
 
         public SecurityAccess EvaluateSideA(string channel, string username, string hostname, string ip)
@@ -53,7 +54,7 @@ namespace GatewayLogic.Configuration
         {
             if (string.IsNullOrEmpty(ip)) return ip;
 
-            lock (ReverseIpLookup)
+            using (lookupLock.Lock)
             {
                 if (!ReverseIpLookup.ContainsKey(ip))
                 {

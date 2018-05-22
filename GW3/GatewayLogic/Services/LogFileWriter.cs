@@ -14,6 +14,7 @@ namespace GatewayLogic.Services
     {
         Thread flusher;
         bool shouldStop = false;
+        SafeLock bufferLock = new SafeLock();
         MemoryStream buffer = new MemoryStream();
         string path = null;
         Regex sourceFilter = null;
@@ -57,7 +58,7 @@ namespace GatewayLogic.Services
             {
                 Thread.Sleep(1000);
                 byte[] bytes;
-                lock (buffer)
+                using (bufferLock.Lock)
                 {
                     bufferWriter.Flush();
                     bytes = buffer.ToArray();
@@ -103,7 +104,7 @@ namespace GatewayLogic.Services
                     var iLogDate = DateTime.UtcNow.AddDays(-logKeepDays).ToString("yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
 
                     var logs = Directory.GetFiles(dir, "*." + filename);
-                    foreach (var f in logs.Where(row =>  Path.GetFileName(row).Substring(0, 8).CompareTo(iLogDate) < 0))
+                    foreach (var f in logs.Where(row => Path.GetFileName(row).Substring(0, 8).CompareTo(iLogDate) < 0))
                         File.Delete(f);
                 }
 
@@ -119,7 +120,7 @@ namespace GatewayLogic.Services
         {
             if (sourceFilter != null && !sourceFilter.IsMatch(source))
                 return;
-            lock (buffer)
+            using (bufferLock.Lock)
             {
                 bufferWriter.Write(DateTime.UtcNow.ToString("yyyy\\/MM\\/dd HH:mm:ss.fff", System.Globalization.CultureInfo.InvariantCulture));
                 bufferWriter.Write("\t");
@@ -132,6 +133,7 @@ namespace GatewayLogic.Services
         public void Dispose()
         {
             shouldStop = true;
+            bufferLock.Dispose();
         }
     }
 }

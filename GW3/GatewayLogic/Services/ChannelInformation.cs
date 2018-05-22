@@ -9,7 +9,7 @@ namespace GatewayLogic.Services
 {
     class ChannelInformation : IDisposable
     {
-        readonly object dictionaryLock = new object();
+        readonly SafeLock dictionaryLock = new SafeLock();
         readonly Dictionary<string, ChannelInformationDetails> dictionary = new Dictionary<string, ChannelInformationDetails>();
 
         private uint nextId = 1;
@@ -22,7 +22,7 @@ namespace GatewayLogic.Services
             Gateway = gateway;
             gateway.TenSecUpdate += (sender, evt) =>
               {
-                  lock (dictionaryLock)
+                  using (dictionaryLock.Lock)
                   {
                       var toDrop = new List<string>();
                       foreach (var channel in dictionary.Values)
@@ -31,6 +31,7 @@ namespace GatewayLogic.Services
                           {
                               toDrop.Add(channel.ChannelName);
                               channel.Drop(gateway);
+                              channel.Dispose();
                           }
                       }
                       toDrop.ForEach(row => dictionary.Remove(row));
@@ -38,9 +39,9 @@ namespace GatewayLogic.Services
               };
         }
 
-        public class ChannelInformationDetails
+        public class ChannelInformationDetails : IDisposable
         {
-            public object LockObject { get; } = new object();
+            public SafeLock LockObject { get; } = new SafeLock();
 
             public SearchInformation.SearchInformationDetail SearchInformation { get; }
             public string ChannelName { get; }
@@ -49,6 +50,7 @@ namespace GatewayLogic.Services
             public uint? ServerId { get; set; }
             public bool ConnectionIsBuilding { get; internal set; }
 
+            SafeLock clientsLock = new SafeLock();
             public List<ClientId> clients = new List<ClientId>();
             public List<Client> connectedClients = new List<Client>();
 
@@ -63,7 +65,7 @@ namespace GatewayLogic.Services
 
             internal void RegisterClient(uint clientId, TcpClientConnection connection)
             {
-                lock (clients)
+                using (clientsLock.Lock)
                 {
                     this.LastUse = DateTime.UtcNow;
                     connectedClients.Add(new Client { Id = clientId, Connection = connection });
@@ -72,7 +74,7 @@ namespace GatewayLogic.Services
 
             internal IEnumerable<Client> GetClientConnections()
             {
-                lock (clients)
+                using (clientsLock.Lock)
                 {
                     return connectedClients.ToList();
                 }
@@ -80,7 +82,7 @@ namespace GatewayLogic.Services
 
             internal void AddClient(ClientId clientId)
             {
-                lock (clients)
+                using (clientsLock.Lock)
                 {
                     if (!clients.Any(row => row.Client == clientId.Client && row.Id == row.Id))
                         clients.Add(clientId);
@@ -89,7 +91,7 @@ namespace GatewayLogic.Services
 
             internal IEnumerable<ClientId> GetClients()
             {
-                lock (clients)
+                using (clientsLock.Lock)
                 {
                     var result = clients.ToList();
                     clients.Clear();
@@ -100,13 +102,10 @@ namespace GatewayLogic.Services
             internal void DisconnectClient(TcpClientConnection connection)
             {
                 List<Client> toDrop;
-                lock (clients)
+                using (clientsLock.Lock)
                 {
                     toDrop = connectedClients.Where(row => row.Connection == connection).ToList();
-                }
 
-                lock (clients)
-                {
                     foreach (var i in toDrop)
                         connection.Gateway.MonitorInformation.GetByClientId(i.Connection.RemoteEndPoint, i.Id)?.RemoveClient(connection.Gateway, i.Connection.RemoteEndPoint, i.Id);
                     connectedClients.RemoveAll(row => row.Connection == connection);
@@ -133,7 +132,7 @@ namespace GatewayLogic.Services
             {
                 get
                 {
-                    lock (clients)
+                    using (clientsLock.Lock)
                     {
                         //return (connectedClients.Count == 0 && (DateTime.UtcNow - this.LastUse).TotalMinutes > 30);
                         return (connectedClients.Count == 0 && (DateTime.UtcNow - this.LastUse).TotalMinutes > 30) || (this.ConnectionIsBuilding == true && (DateTime.UtcNow - this.StartBuilding).TotalSeconds > 2);
@@ -145,7 +144,7 @@ namespace GatewayLogic.Services
             {
                 get
                 {
-                    lock (clients)
+                    using (clientsLock.Lock)
                     {
                         return connectedClients.Count;
                     }
@@ -155,11 +154,17 @@ namespace GatewayLogic.Services
             public uint DataCount { get; set; }
             public ushort DataType { get; set; }
             public DateTime StartBuilding { get; internal set; }
+
+            public void Dispose()
+            {
+                LockObject.Dispose();
+                clientsLock.Dispose();
+            }
         }
 
         public ChannelInformationDetails Get(uint id)
         {
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 return dictionary.Values.FirstOrDefault(row => row.GatewayId == id);
             }
@@ -167,7 +172,7 @@ namespace GatewayLogic.Services
 
         public ChannelInformationDetails Get(string channelName, SearchInformation.SearchInformationDetail search)
         {
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 if (!dictionary.ContainsKey(channelName))
                 {
@@ -180,7 +185,7 @@ namespace GatewayLogic.Services
 
         internal bool HasChannelInformation(string channelName)
         {
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 return dictionary.ContainsKey(channelName);
             }
@@ -188,7 +193,7 @@ namespace GatewayLogic.Services
 
         internal void DisconnectClient(TcpClientConnection connection)
         {
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 foreach (var i in dictionary.Values)
                     i.DisconnectClient(connection);
@@ -196,17 +201,21 @@ namespace GatewayLogic.Services
         }
 
         public void Dispose()
-        {
-            lock (dictionaryLock)
+        {            
+            using (dictionaryLock.Lock)
             {
+                foreach (var i in dictionary.Values)
+                    i.Dispose();
                 dictionary.Clear();
             }
+            dictionaryLock.Dispose();
         }
 
         internal void Remove(Gateway gateway, ChannelInformationDetails channel)
         {
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
+                channel.Dispose();
                 dictionary.Remove(channel.ChannelName);
             }
             gateway.SearchInformation.Remove(channel.ChannelName);
@@ -216,14 +225,18 @@ namespace GatewayLogic.Services
         internal void ForceDropUnused()
         {
             List<ChannelInformationDetails> toDrop;
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 toDrop = dictionary.Values.Where(row => row.NBConnected == 0).ToList();
             }
 
-            toDrop.ForEach(channel => channel.Drop(Gateway));
+            toDrop.ForEach(channel =>
+            {
+                channel.Drop(Gateway);
+                channel.Dispose();
+            });
 
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 toDrop.ForEach(row => dictionary.Remove(row.ChannelName));
             }
@@ -232,7 +245,7 @@ namespace GatewayLogic.Services
         internal void ServerDrop(uint gatewayId)
         {
             IEnumerable<Client> clients;
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 var channel = dictionary.Values.FirstOrDefault(row => row.GatewayId == gatewayId);
                 if (channel == null)
@@ -256,7 +269,7 @@ namespace GatewayLogic.Services
             get
             {
                 Dictionary<string, List<Client>> data;
-                lock (dictionaryLock)
+                using (dictionaryLock.Lock)
                 {
                     data = dictionary.Values.ToDictionary(key => key.ChannelName, val => val.GetClientConnections().ToList());
                 }
@@ -278,7 +291,7 @@ namespace GatewayLogic.Services
         {
             get
             {
-                lock (dictionaryLock)
+                using (dictionaryLock.Lock)
                 {
                     return dictionary.Count;
                 }

@@ -10,13 +10,13 @@ namespace GatewayLogic.Services
     class SearchInformation : IDisposable
     {
         private uint nextId = 1;
-        object counterLock = new object();
-        object dictionaryLock = new object();
+        SafeLock dictionaryLock = new SafeLock();
         Dictionary<string, SearchInformationDetail> dictionary = new Dictionary<string, SearchInformationDetail>();
 
-        public class SearchInformationDetail
+        public class SearchInformationDetail : IDisposable
         {
             public uint GatewayId { get; }
+            SafeLock clientsLock = new SafeLock();
             public List<ClientId> clients = new List<ClientId>();
             public string Channel { get; internal set; }
             public IPEndPoint Server { get; internal set; }
@@ -30,7 +30,7 @@ namespace GatewayLogic.Services
 
             internal void AddClient(ClientId clientId)
             {
-                lock (clients)
+                using (clientsLock.Lock)
                 {
                     clients.RemoveAll(row => (DateTime.UtcNow - row.When).TotalSeconds > 1);
                     if (!clients.Any(row => row.Client == clientId.Client && row.Id == row.Id))
@@ -40,7 +40,7 @@ namespace GatewayLogic.Services
 
             internal IEnumerable<ClientId> GetClients()
             {
-                lock (clients)
+                using (clientsLock.Lock)
                 {
                     clients.RemoveAll(row => (DateTime.UtcNow - row.When).TotalSeconds > 1);
 
@@ -49,11 +49,16 @@ namespace GatewayLogic.Services
                     return result;
                 }
             }
+
+            public void Dispose()
+            {
+                clientsLock.Dispose();
+            }
         }
 
         internal SearchInformationDetail Get(string channelName)
         {
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 if (!dictionary.ContainsKey(channelName))
                 {
@@ -68,7 +73,7 @@ namespace GatewayLogic.Services
 
         internal bool HasChannelServerInformation(string channelName)
         {
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 return dictionary.ContainsKey(channelName) && dictionary[channelName].Server != null;
             }
@@ -76,7 +81,7 @@ namespace GatewayLogic.Services
 
         internal SearchInformationDetail Get(uint gatewayId)
         {
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 var result = dictionary.Values.FirstOrDefault(row => row.GatewayId == gatewayId);
                 return result;
@@ -85,18 +90,24 @@ namespace GatewayLogic.Services
 
         public void Dispose()
         {
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
+                foreach (var i in dictionary.Values)
+                    i.Dispose();
                 dictionary.Clear();
             }
+            dictionaryLock.Dispose();
         }
 
         public void Remove(string channelName)
         {
-            lock (dictionaryLock)
+            using (dictionaryLock.Lock)
             {
                 if (dictionary.ContainsKey(channelName))
+                {
+                    dictionary[channelName].Dispose();
                     dictionary.Remove(channelName);
+                }
             }
         }
     }

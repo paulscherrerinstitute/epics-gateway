@@ -54,7 +54,7 @@ namespace GatewayLogic.Connections
             }
         }
 
-        protected readonly SemaphoreSlim lockDictionary = new SemaphoreSlim(1);
+        protected readonly SafeLock lockDictionary = new SafeLock();
         protected readonly Dictionary<IPEndPoint, TType> dictionary = new Dictionary<IPEndPoint, TType>();
 
         public void Dispose()
