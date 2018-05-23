@@ -66,7 +66,7 @@ namespace GatewayLogic
             try
             {
                 lockLockers.Wait();
-                return lockers.Where(row => row.OpenLocks.Any() && row.Holder != null && (now - row.Holder.LockRequestedOn) > span)
+                return lockers.Where(row => row.OpenLocks.Any() && row.Holder != null && (now - (row.Holder?.LockRequestedOn ?? now)) > span)
                     .Select(row => row.Holder).ToList();
             }
             finally

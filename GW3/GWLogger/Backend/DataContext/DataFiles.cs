@@ -6,6 +6,12 @@ namespace GWLogger.Backend.DataContext
     internal class DataFiles : IDisposable
     {
         Dictionary<string, DataFile> dataFiles = new Dictionary<string, DataFile>();
+        private readonly Context Context;
+
+        public DataFiles(Context context)
+        {
+            this.Context = context;
+        }
 
         public DataFile this[string gateway]
         {
@@ -14,7 +20,7 @@ namespace GWLogger.Backend.DataContext
                 lock (dataFiles)
                 {
                     if (!dataFiles.ContainsKey(gateway.ToLower()))
-                        dataFiles.Add(gateway.ToLower(), new DataFile(gateway.ToLower()));
+                        dataFiles.Add(gateway.ToLower(), new DataFile(Context, gateway.ToLower()));
                     return dataFiles[gateway.ToLower()];
                 }
             }
@@ -22,7 +28,7 @@ namespace GWLogger.Backend.DataContext
 
         internal void Flush()
         {
-            lock(dataFiles)
+            lock (dataFiles)
             {
                 foreach (var i in dataFiles)
                     i.Value.Flush();

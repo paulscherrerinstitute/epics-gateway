@@ -9,6 +9,9 @@ namespace GWLogger.Backend.Controllers
     public static class LogController
     {
         static Thread cleanupThread;
+        public static int NBDaysToKeep => int.Parse(System.Configuration.ConfigurationManager.AppSettings["storageKeepDays"] ?? "5");
+
+
 
         static LogController()
         {
@@ -32,7 +35,7 @@ namespace GWLogger.Backend.Controllers
 
         internal static void CleanLogs()
         {
-            Global.DataContext.CleanOlderThan(10);
+            Global.DataContext.CleanOlderThan(NBDaysToKeep);
         }
 
         public static void LogEntry(string gateway, string remoteIpPoint, int messageType, List<DTOs.LogEntryDetail> details)

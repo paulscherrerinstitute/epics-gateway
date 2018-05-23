@@ -74,9 +74,16 @@ namespace GatewayLogic.Services
 
             internal IEnumerable<Client> GetClientConnections()
             {
-                using (clientsLock.Aquire())
+                try
                 {
-                    return connectedClients.ToList();
+                    using (clientsLock.Aquire())
+                    {
+                        return connectedClients.ToList();
+                    }
+                }
+                catch
+                {
+                    return new Client[] { };
                 }
             }
 
@@ -164,9 +171,16 @@ namespace GatewayLogic.Services
 
         public ChannelInformationDetails Get(uint id)
         {
-            using (dictionaryLock.Aquire())
+            try
             {
-                return dictionary.Values.FirstOrDefault(row => row.GatewayId == id);
+                using (dictionaryLock.Aquire())
+                {
+                    return dictionary.Values.FirstOrDefault(row => row.GatewayId == id);
+                }
+            }
+            catch
+            {
+                return null;
             }
         }
 
@@ -201,7 +215,7 @@ namespace GatewayLogic.Services
         }
 
         public void Dispose()
-        {            
+        {
             using (dictionaryLock.Aquire())
             {
                 foreach (var i in dictionary.Values)

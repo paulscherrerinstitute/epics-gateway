@@ -12,11 +12,13 @@ namespace GWLogger.Backend.DataContext
 {
     public class Context : IDisposable
     {
-        DataFiles files = new DataFiles();
+        DataFiles files;
         Thread autoFlusher;
 
         public Context()
         {
+            files = new DataFiles(this);
+
             try
             {
                 using (var stream = File.OpenRead(DataFile.StorageDirectory + "\\MessageTypes.xml"))

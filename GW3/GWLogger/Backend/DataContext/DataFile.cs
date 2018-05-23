@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Xml.Serialization;
 
 namespace GWLogger.Backend.DataContext
 {
@@ -27,6 +28,15 @@ namespace GWLogger.Backend.DataContext
         string currentServerSession;
         Dictionary<string, SessionLocation> openServerSessions = new Dictionary<string, SessionLocation>();
 
+        static Dictionary<string, int> memberNames = new Dictionary<string, int>();
+        static Dictionary<string, int> filePaths = new Dictionary<string, int>();
+
+        // SourceMemberName
+        static int sourceMemberNameId = -1;
+        // SourceFilePath
+        static int sourceFilePathId = -1;
+
+
         FileStream searches;
         string currentSearches;
 
@@ -34,6 +44,36 @@ namespace GWLogger.Backend.DataContext
         private bool mustFlush = false;
 
         public static string StorageDirectory => System.Configuration.ConfigurationManager.AppSettings["storageDirectory"];
+
+        static DataFile()
+        {
+            try
+            {
+                using (var stream = File.OpenRead(StorageDirectory + "\\MemberNames.xml"))
+                {
+                    var ser = new XmlSerializer(typeof(List<IdValue>));
+                    var data = (List<IdValue>)ser.Deserialize(stream);
+                    memberNames = data.ToDictionary(key => key.Value, val => val.Id);
+                }
+            }
+            catch
+            {
+                memberNames = new Dictionary<string, int>();
+            }
+            try
+            {
+                using (var stream = File.OpenRead(StorageDirectory + "\\FilePaths.xml"))
+                {
+                    var ser = new XmlSerializer(typeof(List<IdValue>));
+                    var data = (List<IdValue>)ser.Deserialize(stream);
+                    filePaths = data.ToDictionary(key => key.Value, val => val.Id);
+                }
+            }
+            catch
+            {
+                filePaths = new Dictionary<string, int>();
+            }
+        }
 
         public static List<string> Gateways
         {
@@ -48,6 +88,8 @@ namespace GWLogger.Backend.DataContext
         }
 
         static HashSet<string> knownFiles = new HashSet<string>();
+        private readonly Context Context;
+
         public static bool Exists(string gatewayName)
         {
             lock (knownFiles)
@@ -134,8 +176,9 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        public DataFile(string gateway)
+        public DataFile(Context context, string gateway)
         {
+            this.Context = context;
             try
             {
                 LockObject.Wait();
@@ -297,7 +340,9 @@ namespace GWLogger.Backend.DataContext
                     }
                 }
 
-                DataWriter.Write(entry.EntryDate.ToBinary());
+                WriteEntry(DataWriter, entry);
+
+                /*DataWriter.Write(entry.EntryDate.ToBinary());
                 DataWriter.Write((byte)entry.MessageTypeId);
                 DataWriter.Write(entry.RemoteIpPoint ?? "");
 
@@ -306,7 +351,7 @@ namespace GWLogger.Backend.DataContext
                 {
                     DataWriter.Write((byte)i.DetailTypeId);
                     DataWriter.Write(i.Value);
-                }
+                }*/
 
                 Stats[idxPos, 0]++;
                 if (isAnError)
@@ -694,7 +739,128 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
+        void WriteEntry(BinaryWriter stream, LogEntry entry)
+        {
+            if (sourceMemberNameId == -1)
+                sourceMemberNameId = Context.MessageDetailTypes.First(row => row.Value == "SourceMemberName").Id;
+            if (sourceFilePathId == -1)
+                sourceFilePathId = Context.MessageDetailTypes.First(row => row.Value == "SourceFilePath").Id;
+
+            stream.Write(entry.EntryDate.ToBinary());
+            stream.Write((byte)entry.MessageTypeId);
+            if (string.IsNullOrWhiteSpace(entry.RemoteIpPoint))
+                stream.Write(new byte[] { 0, 0, 0, 0, 0, 0 });
+            else
+            {
+                var p = entry.RemoteIpPoint.Split(':');
+                stream.Write(System.Net.IPAddress.Parse(p[0]).GetAddressBytes());
+                stream.Write(ushort.Parse(p[1]));
+            }
+
+            stream.Write((byte)entry.LogEntryDetails.Count);
+            foreach (var i in entry.LogEntryDetails)
+            {
+                stream.Write((byte)i.DetailTypeId);
+                if (i.DetailTypeId == sourceMemberNameId)
+                {
+                    lock (memberNames)
+                    {
+                        if (!memberNames.ContainsKey(i.Value))
+                        {
+                            memberNames.Add(i.Value, memberNames.Count == 0 ? 1 : memberNames.Values.Max() + 1);
+                            StoreMemberNames();
+                        }
+                        stream.Write((ushort)memberNames[i.Value]);
+                    }
+                }
+                else if (i.DetailTypeId == sourceFilePathId)
+                {
+                    lock (filePaths)
+                    {
+                        if (!filePaths.ContainsKey(i.Value))
+                        {
+                            filePaths.Add(i.Value, filePaths.Count == 0 ? 1 : filePaths.Values.Max() + 1);
+                            StoreFilePaths();
+                        }
+                        stream.Write((ushort)filePaths[i.Value]);
+                    }
+                }
+                else
+                    stream.Write(i.Value);
+            }
+        }
+
+        private void StoreFilePaths()
+        {
+            using (var stream = File.OpenWrite(StorageDirectory + "\\FilePaths.xml"))
+            {
+                var ser = new XmlSerializer(typeof(List<IdValue>));
+                ser.Serialize(stream, filePaths.Select(row => new IdValue { Id = row.Value, Value = row.Key }).ToList());
+            }
+        }
+
+        private void StoreMemberNames()
+        {
+            using (var stream = File.OpenWrite(StorageDirectory + "\\MemberNames.xml"))
+            {
+                var ser = new XmlSerializer(typeof(List<IdValue>));
+                ser.Serialize(stream, memberNames.Select(row => new IdValue { Id = row.Value, Value = row.Key }).ToList());
+            }
+        }
+
         LogEntry ReadEntry(BinaryReader stream)
+        {
+            var result = new LogEntry
+            {
+                EntryDate = DateTime.FromBinary(stream.ReadInt64()).ToUniversalTime(),
+                MessageTypeId = stream.ReadByte(),
+                LogEntryDetails = new List<LogEntryDetail>()
+            };
+
+            var bytes = stream.ReadBytes(4);
+            if (bytes[0] == 0)
+            {
+                stream.ReadUInt16();
+                result.RemoteIpPoint = "";
+            }
+            else
+            {
+                var ip = new System.Net.IPAddress(bytes);
+                result.RemoteIpPoint = ip.ToString() + ":" + stream.ReadUInt16();
+            }
+
+            var nbDetails = (int)stream.ReadByte();
+            for (var i = 0; i < nbDetails; i++)
+            {
+                var detail = new LogEntryDetail
+                {
+                    DetailTypeId = (int)stream.ReadByte(),
+                };
+                if (detail.DetailTypeId == sourceFilePathId)
+                {
+                    var n = stream.ReadUInt16();
+                    lock (filePaths)
+                    {
+                        detail.Value = filePaths.First(row => row.Value == n).Key;
+                    }
+                }
+                else if (detail.DetailTypeId == sourceMemberNameId)
+                {
+                    var n = stream.ReadUInt16();
+                    lock (filePaths)
+                    {
+                        detail.Value = memberNames.First(row => row.Value == n).Key;
+                    }
+                }
+                else
+                    detail.Value = stream.ReadString();
+                result.LogEntryDetails.Add(detail);
+            }
+
+            return result;
+        }
+
+        /*LogEntry ReadEntry(BinaryReader stream)
         {
             var result = new LogEntry
             {
@@ -715,7 +881,7 @@ namespace GWLogger.Backend.DataContext
             }
 
             return result;
-        }
+        }*/
 
         public List<LogSession> ReadClientSessions(DateTime start, DateTime end)
         {
