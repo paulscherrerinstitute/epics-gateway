@@ -17,10 +17,10 @@ namespace StressTest
     class Program
     {
         const int NB_SERVERS = 20;
-        const int NB_CLIENTS = 50;
-        const int NB_CHANNELS = 10;
+        const int NB_CLIENTS = 30;
+        const int NB_CHANNELS = 20;
         const int NB_LOOPS = 1;
-        const int NB_CHECKED = 20;
+        const int NB_CHECKED = 40;
         const int WAIT_TIMEOUT = 10000;
 
         static void Main(string[] args)
@@ -164,7 +164,7 @@ namespace StressTest
                   {
                       while (true)
                       {
-                          Thread.Sleep(rnd.Next(100, 3000));
+                          Thread.Sleep(rnd.Next(1000, 6000));
                           if (NB_CLIENTS < 10 && rnd.Next(0, 100) > 80)
                           {
                               var p = rnd.Next(0, clients.Count);

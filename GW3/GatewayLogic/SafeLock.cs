@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -37,13 +38,48 @@ namespace GatewayLogic
     {
         static SemaphoreSlim lockLockers = new SemaphoreSlim(1);
         static List<SafeLock> lockers = new List<SafeLock>();
+        static List<SafeLockCleanInfo> needToCleanup = new List<SafeLockCleanInfo>();
+        static Thread cleanupThread;
 
         SemaphoreSlim openLockLocker = new SemaphoreSlim(1);
-        List<LockInfo> openLocks = new List<LockInfo>();
+
+        SynchronizedCollection<LockInfo> openLocks = new SynchronizedCollection<LockInfo>();
+        //List<LockInfo> openLocks = new List<LockInfo>();
         public LockInfo Holder { get; private set; }
 
         SemaphoreSlim semaphore = new SemaphoreSlim(1);
         private bool disposed = false;
+
+        static SafeLock()
+        {
+            cleanupThread = new Thread(obj =>
+              {
+                  while (true)
+                  {
+                      Thread.Sleep(200);
+                      List<SafeLockCleanInfo> list;
+                      try
+                      {
+                          lockLockers.Wait();
+                          var now = DateTime.UtcNow;
+                          list = needToCleanup.Where(row => row.When >= now).ToList();
+                          needToCleanup.RemoveAll(row => row.When >= now);
+                      }
+                      finally
+                      {
+                          lockLockers.Release();
+                      }
+
+                      foreach (var i in list)
+                      {
+                          i.Object.semaphore.Dispose();
+                          i.Object.openLockLocker.Dispose();
+                      }
+                  }
+              });
+            cleanupThread.IsBackground = true;
+            cleanupThread.Start();
+        }
 
         public SafeLock()
         {
@@ -159,13 +195,21 @@ namespace GatewayLogic
             {
                 lockLockers.Wait();
                 lockers.Remove(this);
+                needToCleanup.Add(new SafeLockCleanInfo { When = DateTime.UtcNow.AddSeconds(2), Object = this });
             }
             finally
             {
                 lockLockers.Release();
             }
-            semaphore.Dispose();
-            openLockLocker.Dispose();
+
+            /*semaphore.Dispose();
+            openLockLocker.Dispose();*/
+        }
+
+        private class SafeLockCleanInfo
+        {
+            public DateTime When { get; set; }
+            public SafeLock Object { get; set; }
         }
     }
 }

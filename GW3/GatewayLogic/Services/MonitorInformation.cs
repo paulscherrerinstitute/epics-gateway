@@ -51,26 +51,38 @@ namespace GatewayLogic.Services
 
             internal void RemoveClient(Gateway gateway, IPEndPoint endPoint, uint clientId)
             {
-                using (gateway.MonitorInformation.dictionaryLock.Aquire())
+                var needToDeleteThis = false;
+
+                using (clientsLock.Aquire())
                 {
-                    using (clientsLock.Aquire())
+                    clients.RemoveAll(row => row.Id == clientId && row.Client == endPoint);
+                    // No more clients, we should cancel the monitor
+                    if (clients.Count == 0)
+                        needToDeleteThis = true;
+                }
+
+                if (needToDeleteThis)
+                {
+                    using (gateway.MonitorInformation.dictionaryLock.Aquire())
                     {
-                        clients.RemoveAll(row => row.Id == clientId && row.Client == endPoint);
-                        // No more clients, we should cancel the monitor
-                        if (clients.Count == 0)
-                        {
-                            this.Drop();
-                            gateway.MonitorInformation.monitors.Remove(this);
-                        }
+                        gateway.MonitorInformation.monitors.Remove(this);
                     }
+                    this.Drop();
                 }
             }
 
             internal IEnumerable<ClientId> GetClients()
             {
-                using (clientsLock.Aquire())
+                try
                 {
-                    return clients.ToList();
+                    using (clientsLock.Aquire())
+                    {
+                        return clients.ToList();
+                    }
+                }
+                catch
+                {
+                    return new ClientId[] { };
                 }
             }
 

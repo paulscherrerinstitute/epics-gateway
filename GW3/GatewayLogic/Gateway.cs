@@ -89,7 +89,8 @@ namespace GatewayLogic
                       foreach (var i in SafeLock.DeadLockCheck(span))
                       {
                           MessageLogger.Write(null, LogMessageType.DeadLock, null, i.MemberName, i.SourceFilePath, i.SourceLineNumber);
-                          throw new DeadLockException();
+                          MessageLogger.Dispose();
+                          throw new DeadLockException("Locked by " + i.SourceFilePath + " " + i.MemberName + ":" + i.SourceLineNumber);
                       }
                   }
               });

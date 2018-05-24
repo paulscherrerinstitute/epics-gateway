@@ -112,9 +112,11 @@ namespace GatewayLogic.Services
                 using (clientsLock.Aquire())
                 {
                     toDrop = connectedClients.Where(row => row.Connection == connection).ToList();
-
-                    foreach (var i in toDrop)
-                        connection.Gateway.MonitorInformation.GetByClientId(i.Connection.RemoteEndPoint, i.Id)?.RemoveClient(connection.Gateway, i.Connection.RemoteEndPoint, i.Id);
+                }
+                foreach (var i in toDrop)
+                    connection.Gateway.MonitorInformation.GetByClientId(i.Connection.RemoteEndPoint, i.Id)?.RemoveClient(connection.Gateway, i.Connection.RemoteEndPoint, i.Id);
+                using (clientsLock.Aquire())
+                {
                     connectedClients.RemoveAll(row => row.Connection == connection);
                     this.LastUse = DateTime.UtcNow;
                 }
@@ -207,11 +209,11 @@ namespace GatewayLogic.Services
 
         internal void DisconnectClient(TcpClientConnection connection)
         {
+            List<ChannelInformationDetails> list;
             using (dictionaryLock.Aquire())
-            {
-                foreach (var i in dictionary.Values)
-                    i.DisconnectClient(connection);
-            }
+                list = dictionary.Values.ToList();
+            foreach (var i in list)
+                i.DisconnectClient(connection);
         }
 
         public void Dispose()
