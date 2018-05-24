@@ -78,8 +78,15 @@ namespace GatewayLogic
             if (!span.HasValue)
                 span = TimeSpan.FromSeconds(10);
             var now = DateTime.UtcNow;
-            return lockers.ToList().Where(row => row.OpenLocks.Any() && row.Holder != null && (now - (row.Holder?.LockRequestedOn ?? now)) > span)
-                .Select(row => row.Holder).ToList();
+            try
+            {
+                return lockers.ToList().Where(row => row.openLocks.Any() && row.Holder != null && (now - (row.Holder?.LockRequestedOn ?? now)) > span)
+                    .Select(row => row.Holder).ToList();
+            }
+            catch
+            {
+                return new List<LockInfo>();
+            }
         }
 
         public UsableLock Aquire([System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
@@ -117,14 +124,6 @@ namespace GatewayLogic
             Holder = null;
 
             semaphore.Release();
-        }
-
-        public List<LockInfo> OpenLocks
-        {
-            get
-            {
-                return openLocks.ToList();
-            }
         }
 
         public void Dispose()
