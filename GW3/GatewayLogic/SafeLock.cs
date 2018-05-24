@@ -36,62 +36,41 @@ namespace GatewayLogic
 
     class SafeLock : IDisposable
     {
-        static SemaphoreSlim lockLockers = new SemaphoreSlim(1);
-        static List<SafeLock> lockers = new List<SafeLock>();
-        static List<SafeLockCleanInfo> needToCleanup = new List<SafeLockCleanInfo>();
-        static Thread cleanupThread;
-
-        SemaphoreSlim openLockLocker = new SemaphoreSlim(1);
+        static SynchronizedCollection<SafeLock> lockers = new SynchronizedCollection<SafeLock>();
 
         SynchronizedCollection<LockInfo> openLocks = new SynchronizedCollection<LockInfo>();
-        //List<LockInfo> openLocks = new List<LockInfo>();
         public LockInfo Holder { get; private set; }
 
         SemaphoreSlim semaphore = new SemaphoreSlim(1);
         private bool disposed = false;
 
+        static SynchronizedCollection<SafeLockCleanInfo> needToCleanup = new SynchronizedCollection<SafeLockCleanInfo>();
+        static Thread cleanupThread;
+
         static SafeLock()
         {
             cleanupThread = new Thread(obj =>
-              {
-                  while (true)
-                  {
-                      Thread.Sleep(200);
-                      List<SafeLockCleanInfo> list;
-                      try
-                      {
-                          lockLockers.Wait();
-                          var now = DateTime.UtcNow;
-                          list = needToCleanup.Where(row => row.When >= now).ToList();
-                          needToCleanup.RemoveAll(row => row.When >= now);
-                      }
-                      finally
-                      {
-                          lockLockers.Release();
-                      }
+            {
+                while (true)
+                {
+                    Thread.Sleep(200);
+                    var now = DateTime.UtcNow;
+                    var list = needToCleanup.ToList().Where(row => row.When >= now).ToList();
 
-                      foreach (var i in list)
-                      {
-                          i.Object.semaphore.Dispose();
-                          i.Object.openLockLocker.Dispose();
-                      }
-                  }
-              });
+                    foreach (var i in list)
+                    { 
+                        i.Object.semaphore.Dispose();
+                        needToCleanup.Remove(i);
+                    }
+                }
+            });
             cleanupThread.IsBackground = true;
             cleanupThread.Start();
         }
 
         public SafeLock()
         {
-            try
-            {
-                lockLockers.Wait();
-                lockers.Add(this);
-            }
-            finally
-            {
-                lockLockers.Release();
-            }
+            lockers.Add(this);
         }
 
         public static List<LockInfo> DeadLockCheck(TimeSpan? span = null)
@@ -99,16 +78,8 @@ namespace GatewayLogic
             if (!span.HasValue)
                 span = TimeSpan.FromSeconds(10);
             var now = DateTime.UtcNow;
-            try
-            {
-                lockLockers.Wait();
-                return lockers.Where(row => row.OpenLocks.Any() && row.Holder != null && (now - (row.Holder?.LockRequestedOn ?? now)) > span)
-                    .Select(row => row.Holder).ToList();
-            }
-            finally
-            {
-                lockLockers.Release();
-            }
+            return lockers.ToList().Where(row => row.OpenLocks.Any() && row.Holder != null && (now - (row.Holder?.LockRequestedOn ?? now)) > span)
+                .Select(row => row.Holder).ToList();
         }
 
         public UsableLock Aquire([System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
@@ -129,28 +100,12 @@ namespace GatewayLogic
                 SourceFilePath = sourceFilePath,
                 SourceLineNumber = sourceLineNumber
             };
-            try
-            {
-                openLockLocker.Wait();
-                openLocks.Add(info);
-            }
-            finally
-            {
-                openLockLocker.Release();
-            }
+            openLocks.Add(info);
+
             semaphore.Wait();
-            if (disposed)
-                return;
-            try
-            {
-                openLockLocker.Wait();
-                openLocks.Remove(info);
-                Holder = info;
-            }
-            finally
-            {
-                openLockLocker.Release();
-            }
+
+            openLocks.Remove(info);
+            Holder = info;
         }
 
         public void Release([System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
@@ -159,15 +114,7 @@ namespace GatewayLogic
         {
             if (disposed)
                 return;
-            try
-            {
-                openLockLocker.Wait();
-                Holder = null;
-            }
-            finally
-            {
-                openLockLocker.Release();
-            }
+            Holder = null;
 
             semaphore.Release();
         }
@@ -176,34 +123,17 @@ namespace GatewayLogic
         {
             get
             {
-                try
-                {
-                    openLockLocker.Wait();
-                    return openLocks.ToList();
-                }
-                finally
-                {
-                    openLockLocker.Release();
-                }
+                return openLocks.ToList();
             }
         }
 
         public void Dispose()
         {
             disposed = true;
-            try
-            {
-                lockLockers.Wait();
-                lockers.Remove(this);
-                needToCleanup.Add(new SafeLockCleanInfo { When = DateTime.UtcNow.AddSeconds(2), Object = this });
-            }
-            finally
-            {
-                lockLockers.Release();
-            }
+            lockers.Remove(this);
+            //semaphore.Dispose();
 
-            /*semaphore.Dispose();
-            openLockLocker.Dispose();*/
+            needToCleanup.Add(new SafeLockCleanInfo { When = DateTime.UtcNow.AddSeconds(2), Object = this });
         }
 
         private class SafeLockCleanInfo
