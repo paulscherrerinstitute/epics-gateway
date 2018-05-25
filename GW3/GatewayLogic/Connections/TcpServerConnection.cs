@@ -35,6 +35,7 @@ namespace GatewayLogic.Connections
             RemoteEndPoint = destination;
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+            socket.SendTimeout = 3000;
             var evt = new AutoResetEvent(false);
             IAsyncResult result = socket.BeginConnect(destination, (IAsyncResult ar) =>
                 {

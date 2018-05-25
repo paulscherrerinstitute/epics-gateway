@@ -50,7 +50,7 @@ namespace GatewayLogic.Connections
             set
             {
                 socket = value;
-                socket.SendTimeout = 30000;
+                socket.SendTimeout = 3000;
 
                 RemoteEndPoint = (IPEndPoint)socket.RemoteEndPoint;
                 //netStream = new NetworkStream(socket);

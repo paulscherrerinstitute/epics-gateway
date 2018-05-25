@@ -36,15 +36,15 @@ namespace GatewayLogic
 
     class SafeLock : IDisposable
     {
-        static SynchronizedCollection<SafeLock> lockers = new SynchronizedCollection<SafeLock>();
+        static List<SafeLock> lockers = new List<SafeLock>();
 
-        SynchronizedCollection<LockInfo> openLocks = new SynchronizedCollection<LockInfo>();
+        List<LockInfo> openLocks = new List<LockInfo>();
         public LockInfo Holder { get; private set; }
 
         SemaphoreSlim semaphore = new SemaphoreSlim(1);
         private bool disposed = false;
 
-        static SynchronizedCollection<SafeLockCleanInfo> needToCleanup = new SynchronizedCollection<SafeLockCleanInfo>();
+        static List<SafeLockCleanInfo> needToCleanup = new List<SafeLockCleanInfo>();
         static Thread cleanupThread;
 
         static SafeLock()
@@ -55,12 +55,12 @@ namespace GatewayLogic
                 {
                     Thread.Sleep(200);
                     var now = DateTime.UtcNow;
-                    var list = needToCleanup.ToList().Where(row => row.When >= now).ToList();
 
-                    foreach (var i in list)
-                    { 
-                        i.Object.semaphore.Dispose();
-                        needToCleanup.Remove(i);
+                    lock (needToCleanup)
+                    {
+                        foreach (var i in needToCleanup.Where(row => row.When >= now))
+                            i.Object.semaphore.Dispose();
+                        needToCleanup.RemoveAll(row => row.When >= now);
                     }
                 }
             });
@@ -70,7 +70,8 @@ namespace GatewayLogic
 
         public SafeLock()
         {
-            lockers.Add(this);
+            lock (lockers)
+                lockers.Add(this);
         }
 
         public static List<LockInfo> DeadLockCheck(TimeSpan? span = null)
@@ -78,15 +79,18 @@ namespace GatewayLogic
             if (!span.HasValue)
                 span = TimeSpan.FromSeconds(10);
             var now = DateTime.UtcNow;
-            try
+            List<SafeLock> copy;
+            lock (lockers)
+                copy = lockers.ToList();
+            return copy.Where((row) =>
             {
-                return lockers.ToList().Where(row => row.openLocks.Any() && row.Holder != null && (now - (row.Holder?.LockRequestedOn ?? now)) > span)
-                    .Select(row => row.Holder).ToList();
-            }
-            catch
-            {
-                return new List<LockInfo>();
-            }
+                List<LockInfo> lockCopy;
+                lock (row.openLocks)
+                    lockCopy = row.openLocks.ToList();
+
+                return lockCopy.Count > 0 && (now - (row.Holder?.LockRequestedOn ?? now)) > span;
+            })
+                .Select(row => row.Holder).ToList();
         }
 
         public UsableLock Aquire([System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
@@ -107,11 +111,13 @@ namespace GatewayLogic
                 SourceFilePath = sourceFilePath,
                 SourceLineNumber = sourceLineNumber
             };
-            openLocks.Add(info);
+            lock (openLocks)
+                openLocks.Add(info);
 
             semaphore.Wait();
 
-            openLocks.Remove(info);
+            lock (openLocks)
+                openLocks.Remove(info);
             Holder = info;
         }
 
@@ -129,10 +135,12 @@ namespace GatewayLogic
         public void Dispose()
         {
             disposed = true;
-            lockers.Remove(this);
+            lock (lockers)
+                lockers.Remove(this);
             //semaphore.Dispose();
 
-            needToCleanup.Add(new SafeLockCleanInfo { When = DateTime.UtcNow.AddSeconds(2), Object = this });
+            lock (needToCleanup)
+                needToCleanup.Add(new SafeLockCleanInfo { When = DateTime.UtcNow.AddSeconds(2), Object = this });
         }
 
         private class SafeLockCleanInfo
