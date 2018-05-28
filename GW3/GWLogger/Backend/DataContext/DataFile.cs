@@ -903,8 +903,9 @@ namespace GWLogger.Backend.DataContext
                 }
 
                 var dayStart = new DateTime(start.Year, start.Month, start.Day);
-                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.clientSessions").OrderBy(row => row)
-                    .Where(row => DateOfFile(row) >= dayStart && DateOfFile(row) <= end))
+                /*foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.clientSessions").OrderBy(row => row)                 
+                .Where(row => DateOfFile(row) >= dayStart && DateOfFile(row) <= end))*/
+                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.clientSessions").OrderBy(row => row))
                 {
                     using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read), System.Text.Encoding.UTF8))
                     {
@@ -958,8 +959,9 @@ namespace GWLogger.Backend.DataContext
                 }
 
                 var dayStart = new DateTime(start.Year, start.Month, start.Day);
-                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.serverSessions").OrderBy(row => row)
-                    .Where(row => DateOfFile(row) >= dayStart && DateOfFile(row) <= end))
+                /*foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.serverSessions").OrderBy(row => row)
+                    .Where(row => DateOfFile(row) >= dayStart && DateOfFile(row) <= end))*/
+                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.serverSessions").OrderBy(row => row))
                 {
                     using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read), System.Text.Encoding.UTF8))
                     {

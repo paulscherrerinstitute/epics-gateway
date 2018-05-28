@@ -93,15 +93,23 @@ namespace GatewayLogic
                 .Select(row => row.Holder).ToList();
         }
 
+        public UsableLock Aquire(int timeout, [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
+                    [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
+                    [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
+        {
+            Wait(timeout, memberName, sourceFilePath, sourceLineNumber);
+            return new UsableLock(this);
+        }
+
         public UsableLock Aquire([System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
                             [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
                             [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
         {
-            Wait(memberName, sourceFilePath, sourceLineNumber);
+            Wait(0, memberName, sourceFilePath, sourceLineNumber);
             return new UsableLock(this);
         }
 
-        public void Wait([System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
+        public void Wait(int timeout = 0, [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
                             [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
                             [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
         {
@@ -114,7 +122,20 @@ namespace GatewayLogic
             lock (openLocks)
                 openLocks.Add(info);
 
-            semaphore.Wait();
+            if (timeout != 0)
+            {
+                try
+                {
+                    semaphore.Wait(timeout);
+                }
+                catch
+                {
+                    openLocks.Remove(info);
+                    throw;
+                }
+            }
+            else
+                semaphore.Wait();
 
             lock (openLocks)
                 openLocks.Remove(info);
@@ -125,16 +146,16 @@ namespace GatewayLogic
                             [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
                             [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
         {
-            if (disposed)
-                return;
-            Holder = null;
-
+            if (!disposed)
+                Holder = null;
             semaphore.Release();
         }
 
         public void Dispose()
         {
             disposed = true;
+            if (disposed)
+                return;
             lock (lockers)
                 lockers.Remove(this);
             //semaphore.Dispose();

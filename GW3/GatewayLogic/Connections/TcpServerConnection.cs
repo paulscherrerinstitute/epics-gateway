@@ -197,7 +197,7 @@ namespace GatewayLogic.Connections
             {*/
             try
             {
-                using (socketLock.Aquire())
+                using (socketLock.Aquire(3000))
                 {
                     socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
                 }
