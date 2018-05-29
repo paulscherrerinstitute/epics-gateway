@@ -109,16 +109,22 @@ namespace GatewayLogic.Services
             internal void DisconnectClient(TcpClientConnection connection)
             {
                 List<Client> toDrop;
-                using (clientsLock.Aquire())
+                try
                 {
-                    toDrop = connectedClients.Where(row => row.Connection == connection).ToList();
+                    using (clientsLock.Aquire())
+                    {
+                        toDrop = connectedClients.Where(row => row.Connection == connection).ToList();
+                    }
+                    foreach (var i in toDrop)
+                        connection.Gateway.MonitorInformation.GetByClientId(i.Connection.RemoteEndPoint, i.Id)?.RemoveClient(connection.Gateway, i.Connection.RemoteEndPoint, i.Id);
+                    using (clientsLock.Aquire())
+                    {
+                        connectedClients.RemoveAll(row => row.Connection == connection);
+                        this.LastUse = DateTime.UtcNow;
+                    }
                 }
-                foreach (var i in toDrop)
-                    connection.Gateway.MonitorInformation.GetByClientId(i.Connection.RemoteEndPoint, i.Id)?.RemoveClient(connection.Gateway, i.Connection.RemoteEndPoint, i.Id);
-                using (clientsLock.Aquire())
+                catch
                 {
-                    connectedClients.RemoveAll(row => row.Connection == connection);
-                    this.LastUse = DateTime.UtcNow;
                 }
             }
 
@@ -166,6 +172,19 @@ namespace GatewayLogic.Services
 
             public void Dispose()
             {
+                List<Client> toDrop;
+                using (clientsLock.Aquire())
+                {
+                    toDrop = connectedClients.ToList();
+                }
+                foreach (var i in toDrop)
+                    i.Connection.Gateway.MonitorInformation.GetByClientId(i.Connection.RemoteEndPoint, i.Id)?.RemoveClient(i.Connection.Gateway, i.Connection.RemoteEndPoint, i.Id);
+                using (clientsLock.Aquire())
+                {
+                    connectedClients.Clear();
+                    this.LastUse = DateTime.UtcNow;
+                }
+
                 //LockObject.Dispose();
                 clientsLock.Dispose();
             }
