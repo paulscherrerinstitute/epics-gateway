@@ -110,5 +110,15 @@ namespace GatewayLogic.Services
                 }
             }
         }
+
+        public void Cleanup()
+        {
+            using (dictionaryLock.Aquire())
+            {
+                foreach (var i in dictionary.Values)
+                    i.Dispose();
+                dictionary.Clear();
+            }
+        }
     }
 }

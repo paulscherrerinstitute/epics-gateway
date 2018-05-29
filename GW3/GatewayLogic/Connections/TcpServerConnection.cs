@@ -220,7 +220,10 @@ namespace GatewayLogic.Connections
             splitter.Dispose();
             socket?.Dispose();
             if (Gateway == null)
+            {
+                channelsLock.Dispose();
                 return;
+            }
             Gateway.MessageLogger.Write(this.RemoteEndPoint.ToString(), Services.LogMessageType.DiposeTcpServerConnection);
             //Gateway.Log.Write(LogLevel.Connection, "Server " + this.Name + " disconnect");
 

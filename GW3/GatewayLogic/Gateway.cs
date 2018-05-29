@@ -235,6 +235,7 @@ namespace GatewayLogic
         public void Cleanup()
         {
             ChannelInformation.ForceDropUnused();
+            SearchInformation.Cleanup();
         }
 
         public void Dispose()

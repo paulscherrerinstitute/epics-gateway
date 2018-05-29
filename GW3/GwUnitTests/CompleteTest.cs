@@ -16,6 +16,12 @@ namespace GwUnitTests
     [ExcludeFromCodeCoverage]
     public class CompleteTest
     {
+        /*[TestCleanup]
+        public void CleanupSafeLock()
+        {
+            GatewayLogic.SafeLock.Clean();
+        }*/
+
         [TestMethod]
         [Timeout(5000)]
         public void CheckMonitor()
@@ -1084,6 +1090,92 @@ namespace GwUnitTests
                 }
             }
         }
+
+        /*[TestMethod]
+        [Timeout(10000)]
+        public void ReconnectAndLocksServer()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.SearchPreventionTimeout = 0;
+                gateway.Start();
+
+                // Call command handlers to init the structure
+                GatewayLogic.Commands.CommandHandler.IsAllowed(1);
+
+                var nbLocksActives = SafeLock.TotalLocks;
+                // Client
+                using (var client = new CAClient())
+                {
+                    client.Configuration.WaitTimeout = 1000;
+                    client.Configuration.SearchAddress = "127.0.0.1:5432";
+                    var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                    clientChannel.MonitorChanged += (channel, newValue) =>
+                    {
+                    };
+
+                    using (var autoReset = new AutoResetEvent(false))
+                    {
+
+                        ChannelStatusDelegate disconnectFunction = (sender, newStatus) =>
+                        {
+                            if (newStatus == EpicsSharp.ChannelAccess.Constants.ChannelStatus.DISCONNECTED)
+                                autoReset.Set();
+                        };
+                        clientChannel.StatusChanged += disconnectFunction;
+
+
+                        // Serverside
+                        using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                        {
+                            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                            serverChannel.Value = "Works fine!";
+                            server.Start();
+
+                            Assert.AreEqual("Works fine!", clientChannel.Get());
+                        }
+
+                        // Need to do something with the channel to trigger the server and see the disconnection
+                        try
+                        {
+                            clientChannel.Get();
+                        }
+                        catch
+                        {
+                        }
+                        autoReset.WaitOne();
+
+                        clientChannel.StatusChanged -= disconnectFunction;
+                        ChannelStatusDelegate connectFunction = (sender, newStatus) =>
+                        {
+                            if (newStatus == EpicsSharp.ChannelAccess.Constants.ChannelStatus.CONNECTED)
+                                autoReset.Set();
+                        };
+
+                        clientChannel.StatusChanged += connectFunction;
+                        // Serverside
+                        using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                        {
+                            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                            serverChannel.Value = "Works fine!";
+                            server.Start();
+                            autoReset.WaitOne();
+
+                        }
+                    }
+                }
+
+                gateway.Cleanup();
+                SafeLock.Clean();
+                Assert.AreEqual(nbLocksActives, SafeLock.TotalLocks);
+            }
+        }*/
+
 
         /*[TestMethod]
         [Timeout(14000)]

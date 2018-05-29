@@ -41,7 +41,7 @@ namespace GatewayLogic.Services
 
         public class ChannelInformationDetails : IDisposable
         {
-            public SafeLock LockObject { get; } = new SafeLock();
+            //public SafeLock LockObject { get; } = new SafeLock();
 
             public SearchInformation.SearchInformationDetail SearchInformation { get; }
             public string ChannelName { get; }
@@ -166,7 +166,7 @@ namespace GatewayLogic.Services
 
             public void Dispose()
             {
-                LockObject.Dispose();
+                //LockObject.Dispose();
                 clientsLock.Dispose();
             }
         }

@@ -40,12 +40,25 @@ namespace GatewayLogic
 
         List<LockInfo> openLocks = new List<LockInfo>();
         public LockInfo Holder { get; private set; }
+        public static int TotalLocks
+        {
+            get
+            {
+                lock (lockers)
+                    return lockers.Count;
+            }
+        }
 
         SemaphoreSlim semaphore = new SemaphoreSlim(1);
         private bool disposed = false;
 
         static List<SafeLockCleanInfo> needToCleanup = new List<SafeLockCleanInfo>();
         static Thread cleanupThread;
+        private readonly string memberName;
+
+        public string sourceFilePath { get; }
+
+        private readonly int sourceLineNumber;
 
         static SafeLock()
         {
@@ -68,8 +81,14 @@ namespace GatewayLogic
             cleanupThread.Start();
         }
 
-        public SafeLock()
+        public SafeLock([System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
+                    [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
+                    [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
         {
+            this.memberName = memberName;
+            this.sourceFilePath = sourceFilePath;
+            this.sourceLineNumber = sourceLineNumber;
+
             lock (lockers)
                 lockers.Add(this);
         }
@@ -153,9 +172,9 @@ namespace GatewayLogic
 
         public void Dispose()
         {
-            disposed = true;
             if (disposed)
                 return;
+            disposed = true;
             lock (lockers)
                 lockers.Remove(this);
             //semaphore.Dispose();
@@ -168,6 +187,36 @@ namespace GatewayLogic
         {
             public DateTime When { get; set; }
             public SafeLock Object { get; set; }
+        }
+
+        public static void Clean()
+        {
+            lock (needToCleanup)
+            {
+                foreach (var i in needToCleanup)
+                    i.Object.semaphore.Dispose();
+                needToCleanup.Clear();
+            }
+        }
+
+        public static string[] LocksCreatedBy
+        {
+            get
+            {
+                lock (lockers)
+                {
+                    return lockers.Select(row => row.sourceFilePath + "." + row.memberName + ":" + row.sourceLineNumber).ToArray();
+                }
+            }
+        }
+
+        public static void Reset()
+        {
+            lock(needToCleanup)
+                needToCleanup.Clear();
+
+            lock (lockers)
+                lockers.Clear();
         }
     }
 }

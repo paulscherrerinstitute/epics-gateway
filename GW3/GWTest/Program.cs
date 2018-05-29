@@ -17,9 +17,9 @@ namespace GWTest
         static void Main(string[] args)
         {
             //Console.WriteLine("Some change");
-            TestDiagnosticServer();
+            //TestDiagnosticServer();
             //Test();
-            //S1();
+            S1();
             Console.ReadKey();
         }
 
@@ -37,37 +37,59 @@ namespace GWTest
             serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
             serverChannel.Value = "Works fine!";
 
+            var serverChannel2 = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CADoubleRecord>("TEST-DOUBLE");
+            serverChannel2.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.ON_CHANGE;
+            serverChannel2.Value = 5;
+
+            var t = new Thread((obj) =>
+              {
+                  var rnd = new Random();
+                  while (true)
+                  {
+                      Thread.Sleep(10);
+                      serverChannel2.Value = rnd.NextDouble();
+                  }
+              });
+            t.IsBackground = true;
+            t.Start();
+
             // Client
 
             var client = new CAClient();
             client.Configuration.WaitTimeout = 200;
             client.Configuration.SearchAddress = "127.0.0.1:5432";
             var clientChannel = client.CreateChannel<string>("TEST-DATE");
+            var clientChannel2 = client.CreateChannel<string>("TEST-DOUBLE");
+
             server.Start();
 
-            Console.WriteLine(clientChannel.Get());
+            //Console.WriteLine(clientChannel.Get());
 
             //Assert.AreEqual("Works fine!", clientChannel.Get());
 
-            var autoReset = new AutoResetEvent(false);
             clientChannel.StatusChanged += (sender, newStatus) =>
             {
-                Console.WriteLine("=== " + newStatus);
-                if (newStatus == EpicsSharp.ChannelAccess.Constants.ChannelStatus.DISCONNECTED)
-                    autoReset.Set();
+                Console.WriteLine(sender.ChannelName + " === " + newStatus);
             };
-            server.Dispose();
-            try
-            {
-                clientChannel.Get();
-            }
-            catch
-            {
-            }
-            autoReset.WaitOne();
 
-            gateway.Dispose();
+            clientChannel2.StatusChanged += (sender, newStatus) =>
+            {
+                Console.WriteLine(sender.ChannelName + " === " + newStatus);
+            };
+
+            clientChannel.MonitorChanged += (sender, newval) =>
+            {
+            };
+
+            clientChannel2.MonitorChanged += (sender, newval) =>
+            {
+            };
+
+            Console.WriteLine("Press any key to stop");
+            Console.ReadKey();
+            server.Dispose();
             client.Dispose();
+            Environment.Exit(0);
         }
 
         static void Test()

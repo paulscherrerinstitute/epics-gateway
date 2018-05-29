@@ -224,12 +224,11 @@ namespace GatewayLogic.Connections
 
         public override void Dispose()
         {
-            using (socketLock.Aquire())
-            {
-                if (disposed)
-                    return;
-                disposed = true;
-            }
+            if (disposed)
+                return;
+            disposed = true;
+
+            socketLock.Dispose();
             splitter.Dispose();
             //Gateway.Log.Write(LogLevel.Connection, "Client " + this.Name + " disconnect");
             Gateway.MessageLogger.Write(this.RemoteEndPoint.ToString(), LogMessageType.ClientDisconnect);
