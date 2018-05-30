@@ -33,8 +33,8 @@ namespace GWTest
             gw1.Configuration.SideB = "127.0.0.1:5055";
             gw1.Log.Handler += (level, source, message) =>
             {
-                if (message.StartsWith("Echo"))
-                    return;
+                /*if (message.StartsWith("Echo"))
+                    return;*/
                 Console.WriteLine("GW1: " + message);
             };
             gw1.Start();

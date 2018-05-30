@@ -134,6 +134,12 @@ namespace GatewayLogic.Connections
                 // Stop receiving
                 return;
             }
+            //  End of the stream
+            if (size == 0)
+            {
+                this.Dispose();
+                return;
+            }
             //Console.WriteLine("Server received " + size + " bytes from " + this.RemoteEndPoint);
 
             this.LastMessage = DateTime.UtcNow;
@@ -232,7 +238,7 @@ namespace GatewayLogic.Connections
 
             List<ChannelInformation.ChannelInformationDetails> channelsCopy;
             using (channelsLock.Aquire())
-            { 
+            {
                 channelsCopy = channels.ToList();
             }
             channelsLock.Dispose();

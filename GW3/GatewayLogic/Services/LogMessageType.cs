@@ -46,9 +46,9 @@ namespace GatewayLogic.Services
         CreateChannelAnswer,
         [MessageDisplay("Sending answer to {endpoint} GWID {gwid}", LogLevel.Detail)]
         CreateChannelSendingAnswer,
-        [MessageDisplay("Echo answer received from {endpoint}", LogLevel.Detail)]
+        [MessageDisplay("Echo answer received from {endpoint} / {origin}", LogLevel.Detail)]
         EchoAnswerReceived,
-        [MessageDisplay("Echo request received from {endpoint}", LogLevel.Detail)]
+        [MessageDisplay("Echo request received from {endpoint} / {origin}", LogLevel.Detail)]
         EchoRequestReceived,
         [MessageDisplay("Event add on wrong channel.", LogLevel.Error)]
         EventAddWrongChannel,

@@ -29,6 +29,7 @@ namespace GatewayLogic.Connections
             // Dispose old one
             List<TType> toDelete;
             List<TType> toCheck;
+
             try
             {
                 lockDictionary.Wait();
@@ -53,7 +54,7 @@ namespace GatewayLogic.Connections
                 {
                     conn.Send(echoPacket);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                 }
             }

@@ -15,13 +15,13 @@ namespace GatewayLogic.Commands
             packet.Destination = packet.Sender;
             if (((GatewayTcpConnection)connection).HasSentEcho)
             {
-                connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EchoAnswerReceived);
+                connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EchoAnswerReceived, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Origin, Value = connection.GetType().Name } });
                 //connection.Gateway.Log.Write(LogLevel.Detail, "Echo answer received from " + packet.Sender);
                 ((GatewayTcpConnection)connection).HasSentEcho = false;
                 ((GatewayTcpConnection)connection).LastEcho = DateTime.UtcNow;
                 return;
             }
-            connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EchoRequestReceived);
+            connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EchoRequestReceived, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Origin, Value = connection.GetType().Name } });
             //connection.Gateway.Log.Write(LogLevel.Detail, "Echo request received from " + packet.Sender);
             if (((DateTime.UtcNow - ((GatewayTcpConnection)connection).LastEcho)).TotalSeconds > 0.3)
             {

@@ -24,6 +24,7 @@ namespace GatewayLogic.Services
         GatewayMonitorId,
         ClientIoId,
         Version,
-        ClientCounts
+        ClientCounts,
+        Origin
     }
 }
