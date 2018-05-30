@@ -110,6 +110,12 @@ namespace GatewayLogic.Services
             {
                 //clientsLock.Dispose();
             }
+
+            internal bool Any(Func<ClientId, bool> condition)
+            {
+                using (clientsLock.Aquire())
+                    return clients.Any(condition);
+            }
         }
 
         public MonitorInformationDetail Get(ChannelInformation.ChannelInformationDetails channelInformation, ushort dataType, uint dataCount, UInt16 monitorMask)
@@ -141,14 +147,12 @@ namespace GatewayLogic.Services
 
         public MonitorInformationDetail GetByClientId(IPEndPoint clientEndPoint, uint clientId)
         {
+            List<MonitorInformationDetail> copy;
+
             using (dictionaryLock.Aquire())
-            {
-                return monitors.FirstOrDefault((row) =>
-                {
-                    using (row.clientsLock.Aquire())
-                        return row.clients.Any(r2 => r2.Client == clientEndPoint && r2.Id == clientId);
-                });
-            }
+                copy = monitors.ToList();
+
+            return copy.FirstOrDefault(row => row.Any(r2 => r2.Client == clientEndPoint && r2.Id == clientId));
         }
 
         public void Dispose()
