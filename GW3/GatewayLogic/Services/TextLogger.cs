@@ -70,9 +70,14 @@ namespace GatewayLogic.Services
             Handler = null;
         }
 
-        public void Dispose()
+        ~TextLogger()
         {
             lockObject.Dispose();
+        }
+
+        public void Dispose()
+        {
+
         }
     }
 }

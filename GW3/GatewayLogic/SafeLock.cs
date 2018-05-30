@@ -60,7 +60,7 @@ namespace GatewayLogic
 
         private readonly int sourceLineNumber;
 
-        static SafeLock()
+        /*static SafeLock()
         {
             cleanupThread = new Thread(obj =>
             {
@@ -79,7 +79,7 @@ namespace GatewayLogic
             });
             cleanupThread.IsBackground = true;
             cleanupThread.Start();
-        }
+        }*/
 
         public SafeLock([System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
                     [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
@@ -179,8 +179,10 @@ namespace GatewayLogic
                 lockers.Remove(this);
             //semaphore.Dispose();
 
-            lock (needToCleanup)
-                needToCleanup.Add(new SafeLockCleanInfo { When = DateTime.UtcNow.AddSeconds(2), Object = this });
+            semaphore.Dispose();
+
+            /*lock (needToCleanup)
+                needToCleanup.Add(new SafeLockCleanInfo { When = DateTime.UtcNow.AddSeconds(2), Object = this });*/
         }
 
         private class SafeLockCleanInfo
@@ -210,9 +212,11 @@ namespace GatewayLogic
             }
         }
 
+        public bool IsDisposed => disposed;
+
         public static void Reset()
         {
-            lock(needToCleanup)
+            lock (needToCleanup)
                 needToCleanup.Clear();
 
             lock (lockers)

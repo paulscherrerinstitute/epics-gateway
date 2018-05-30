@@ -210,26 +210,30 @@ namespace GatewayLogic
             updaterThread.Start();
 
             DiagnosticServer = new DiagnosticServer(this, Configuration.SideBEndPoint.Address);
+            Configuration.Security.Init();
 
-            if (this.Configuration.ConfigurationType == GatewayLogic.Configuration.ConfigurationType.UNIDIRECTIONAL)
+            /*ThreadPool.QueueUserWorkItem((obj) =>
             {
-                tcpSideA = new TcpClientListener(this, this.Configuration.SideAEndPoint);
-                tcpSideB = new TcpClientListener(this, this.Configuration.SideBEndPoint);
+                Thread.Sleep(10);*/
+                if (this.Configuration.ConfigurationType == GatewayLogic.Configuration.ConfigurationType.UNIDIRECTIONAL)
+                {
+                    tcpSideA = new TcpClientListener(this, this.Configuration.SideAEndPoint);
+                    tcpSideB = new TcpClientListener(this, this.Configuration.SideBEndPoint);
 
-                udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
-                udpSideB = new UdpResponseReceiver(this, this.Configuration.SideBEndPoint);
-            }
-            else
-            {
-                tcpSideA = new TcpClientListener(this, this.Configuration.SideAEndPoint);
-                tcpSideB = new TcpClientListener(this, this.Configuration.SideBEndPoint);
+                    udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
+                    udpSideB = new UdpResponseReceiver(this, this.Configuration.SideBEndPoint);
+                }
+                else
+                {
+                    tcpSideA = new TcpClientListener(this, this.Configuration.SideAEndPoint);
+                    tcpSideB = new TcpClientListener(this, this.Configuration.SideBEndPoint);
 
-                udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
-                udpSideB = new UdpReceiver(this, this.Configuration.SideBEndPoint);
-            }
+                    udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
+                    udpSideB = new UdpReceiver(this, this.Configuration.SideBEndPoint);
+                }
+            //});
 
             this.TenSecUpdate += UpdateSearchInformation;
-            Configuration.Security.Init();
         }
 
         public void Cleanup()
@@ -240,6 +244,8 @@ namespace GatewayLogic
 
         public void Dispose()
         {
+            isDiposed = true;
+
             tcpSideA.Dispose();
             tcpSideB.Dispose();
 

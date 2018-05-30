@@ -133,5 +133,7 @@ namespace GatewayLogic.Configuration
                 }
             }
         }
+
+        public int DiagnosticPort { get; set; } = 4890;
     }
 }

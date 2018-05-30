@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic
 {
-    class Splitter :IDisposable
+    class Splitter : IDisposable
     {
         DataPacket remainingPacket = null;
         uint dataMissing = 0;
@@ -30,15 +30,19 @@ namespace GatewayLogic
                     {
                         dataMissing -= (uint)packet.BufferSize;
                         packet.Kind = DataPacketKind.BODY;
-
-                        yield return packet;
+                        var result = (DataPacket)packet.Clone();
                         lockSplitter.Release();
+                        yield return result;
                         yield break;
                     }
                     // The new packet is bigger or equal than the missing piece
                     DataPacket p = DataPacket.Create(packet, dataMissing);
                     p.Kind = DataPacketKind.TAIL;
+                    lockSplitter.Release();
                     yield return p;
+                    if (lockSplitter.IsDisposed)
+                        yield break;
+                    lockSplitter.Wait();
                     DataPacket newPacket = packet.SkipSize(dataMissing);
                     //packet.Dispose();
                     packet = newPacket;
@@ -58,10 +62,15 @@ namespace GatewayLogic
                             int s = remainingPacket.BufferSize - currentPos;
                             Buffer.BlockCopy(packet.Data, 0, remainingPacket.Data, currentPos, s);
                             remainingPacket.Kind = DataPacketKind.COMPLETE;
-                            yield return remainingPacket;
-
+                            var result = (DataPacket)remainingPacket.Clone();
                             remainingPacket = null;
                             currentPos = 0;
+
+                            lockSplitter.Release();
+                            yield return result;
+                            if (lockSplitter.IsDisposed)
+                                yield break;
+                            lockSplitter.Wait();
 
                             // Got all.
                             if (s == packet.BufferSize)
@@ -107,10 +116,11 @@ namespace GatewayLogic
                 {
                     //Log.Write("Complete packet...");
                     packet.Kind = DataPacketKind.COMPLETE;
-                    yield return packet;
+                    var result = (DataPacket)packet.Clone();
+                    lockSplitter.Release();
+                    yield return result;
                     /*DataPacket p = DataPacket.Create(packet, (uint)packet.BufferSize);
                     this.SendData(p);*/
-                    lockSplitter.Release();
                     yield break;
                 }
 
@@ -120,7 +130,11 @@ namespace GatewayLogic
                     //Log.Write("Splitting...");
                     DataPacket p = DataPacket.Create(packet, packet.MessageSize, false);
                     p.Kind = DataPacketKind.COMPLETE;
+                    lockSplitter.Release();
                     yield return p;
+                    if (lockSplitter.IsDisposed)
+                        yield break;
+                    lockSplitter.Wait();
                     if (packet.Offset >= packet.BufferSize)
                     {
                         lockSplitter.Release();

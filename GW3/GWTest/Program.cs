@@ -19,8 +19,120 @@ namespace GWTest
             //Console.WriteLine("Some change");
             //TestDiagnosticServer();
             //Test();
-            S1();
+            //S1();
+            S2();
+            //Console.ReadKey();
+        }
+
+        private static void S2()
+        {
+            var gw1 = new Gateway();
+            gw1.Configuration.DiagnosticPort = 1234;
+            gw1.Configuration.SideA = "127.0.0.1:5432";
+            gw1.Configuration.RemoteSideB = "127.0.0.1:5056";
+            gw1.Configuration.SideB = "127.0.0.1:5055";
+            gw1.Log.Handler += (level, source, message) =>
+            {
+                if (message.StartsWith("Echo"))
+                    return;
+                Console.WriteLine("GW1: " + message);
+            };
+            gw1.Start();
+
+            var gw2 = new Gateway();
+            gw2.Configuration.DiagnosticPort = 1236;
+            gw2.Configuration.SideA = "127.0.0.1:5056";
+            gw2.Configuration.RemoteSideB = "127.0.0.1:6058";
+            gw2.Configuration.SideB = "127.0.0.1:5057";
+            gw2.Log.Handler += (level, source, message) =>
+            {
+                if (message.StartsWith("Echo"))
+                    return;
+                Console.WriteLine("GW2: " + message);
+            };
+            gw2.Start();
+
+
+            var server = new CAServer(IPAddress.Parse("127.0.0.1"), 6058, 6058);
+            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+            serverChannel.PrepareRecord += (handler, obj) =>
+              {
+                  serverChannel.Value = DateTime.UtcNow.ToString();
+              };
+            serverChannel.Value = "Works fine!";
+            server.Start();
+
+            var client = new CAClient();
+            client.Configuration.WaitTimeout = 2000;
+            client.Configuration.SearchAddress = "127.0.0.1:5432";
+            var clientChannel = client.CreateChannel<string>("TEST-DATE");
+
+            clientChannel.MonitorChanged += (chann, val) =>
+            {
+                Console.WriteLine("New value: " + val);
+            };
+            clientChannel.StatusChanged += (chann, newStatus) =>
+            {
+                Console.WriteLine("!!! New status: " + newStatus.ToString());
+            };
+
+            Thread.Sleep(2000);
+
+            /*Console.WriteLine("Kill gw1");
+            gw1.Dispose();
+
+            Console.WriteLine("Starting again gw1");
+            gw1 = new Gateway();
+            gw1.Configuration.DiagnosticPort = 1234;
+            gw1.Configuration.SideA = "127.0.0.1:5432";
+            gw1.Configuration.RemoteSideB = "127.0.0.1:5056";
+            gw1.Configuration.SideB = "127.0.0.1:5055";
+            gw1.Log.Handler += (level, source, message) =>
+            {
+                if (message.StartsWith("Echo"))
+                    return;
+                Console.WriteLine("GW1: " + message);
+            };
+            gw1.Start();*/
+
+            Console.WriteLine("Kill gw2");
+            gw2.Dispose();
+
+            Console.WriteLine("Starting again gw2");
+            gw2 = new Gateway();
+            gw2.Configuration.DiagnosticPort = 1236;
+            gw2.Configuration.SideA = "127.0.0.1:5056";
+            gw2.Configuration.RemoteSideB = "127.0.0.1:6058";
+            gw2.Configuration.SideB = "127.0.0.1:5057";
+            gw2.Log.Handler += (level, source, message) =>
+            {
+                if (message.StartsWith("Echo"))
+                    return;
+                Console.WriteLine("GW2: " + message);
+            };
+            gw2.Start();
+
+            /*client.Dispose();
+            client = new CAClient();
+            client.Configuration.WaitTimeout = 2000;
+            client.Configuration.SearchAddress = "127.0.0.1:5432";
+            clientChannel = client.CreateChannel<string>("TEST-DATE");
+
+            clientChannel.MonitorChanged += (chann, val) =>
+            {
+                Console.WriteLine("New value: " + val);
+            };
+            clientChannel.StatusChanged += (chann, newStatus) =>
+            {
+                Console.WriteLine("!!! New status: " + newStatus.ToString());
+            };*/
+
             Console.ReadKey();
+            gw1.Dispose();
+            gw2.Dispose();
+            server.Dispose();
+            client.Dispose();
         }
 
         static void S1()
@@ -156,7 +268,7 @@ namespace GWTest
             client.Configuration.SearchAddress = "129.129.130.45:5436";
             var cpuChannel = client.CreateChannel<double>("TESTGW-DIAG:CPU");
             var memChannel = client.CreateChannel<double>("TESTGW-DIAG:MEM-FREE");
-           
+
             ChannelValueDelegate<double> handler = (sender, newValue)=>
             {
                 Console.WriteLine(sender.ChannelName + ": " + newValue);

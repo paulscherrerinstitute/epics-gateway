@@ -13,6 +13,11 @@ namespace GatewayLogic.Services
         SafeLock dictionaryLock = new SafeLock();
         Dictionary<string, SearchInformationDetail> dictionary = new Dictionary<string, SearchInformationDetail>();
 
+        ~SearchInformation()
+        {
+            dictionaryLock.Dispose();
+        }
+
         public class SearchInformationDetail : IDisposable
         {
             public uint GatewayId { get; }
@@ -26,6 +31,11 @@ namespace GatewayLogic.Services
             public SearchInformationDetail(uint id)
             {
                 GatewayId = id;
+            }
+
+            ~SearchInformationDetail()
+            {
+                clientsLock.Dispose();
             }
 
             internal void AddClient(ClientId clientId)
@@ -52,7 +62,7 @@ namespace GatewayLogic.Services
 
             public void Dispose()
             {
-                clientsLock.Dispose();
+                //clientsLock.Dispose();
             }
         }
 
@@ -96,7 +106,7 @@ namespace GatewayLogic.Services
                     i.Dispose();
                 dictionary.Clear();
             }
-            dictionaryLock.Dispose();
+            //dictionaryLock.Dispose();
         }
 
         public void Remove(string channelName)

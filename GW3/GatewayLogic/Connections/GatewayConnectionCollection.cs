@@ -19,6 +19,11 @@ namespace GatewayLogic.Connections
             Gateway.OneSecUpdate += Gateway_OneSecUpdate;
         }
 
+        ~GatewayConnectionCollection()
+        {
+            lockDictionary.Dispose();
+        }
+
         private void Gateway_OneSecUpdate(object sender, EventArgs e)
         {
             // Dispose old one
@@ -48,7 +53,7 @@ namespace GatewayLogic.Connections
                 {
                     conn.Send(echoPacket);
                 }
-                catch
+                catch(Exception ex)
                 {
                 }
             }
@@ -60,8 +65,12 @@ namespace GatewayLogic.Connections
         public void Dispose()
         {
             lockDictionary.Wait();
+            var toClean = dictionary.Values.ToList();
             dictionary.Clear();
             lockDictionary.Release();
+
+            foreach (var i in toClean)
+                i.Dispose();
 
             //lockDictionary.Dispose();
         }

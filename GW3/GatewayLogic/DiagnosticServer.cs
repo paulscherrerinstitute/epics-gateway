@@ -16,8 +16,6 @@ namespace GatewayLogic
 {
     public class DiagnosticServer : IDisposable
     {
-        public const int DEBUG_PORT = 4890;
-
         readonly CADoubleRecord channelCpu;
         readonly CADoubleRecord channelMem;
         readonly CADoubleRecord channelAverageCpu;
@@ -59,7 +57,7 @@ namespace GatewayLogic
                 new Services.LogMessageDetail
                 {
                     TypeId=Services.MessageDetail.Port,
-                    Value=DEBUG_PORT.ToString()
+                    Value=gateway.Configuration.DiagnosticPort.ToString()
                 },
                 new Services.LogMessageDetail
                 {
@@ -68,7 +66,7 @@ namespace GatewayLogic
                 }
             });
             //gateway.Log.Write(Services.LogLevel.Connection, "Starting debug server on " + DEBUG_PORT + " ip " + address);
-            diagServer = new CAServer(address, DEBUG_PORT, DEBUG_PORT);
+            diagServer = new CAServer(address, gateway.Configuration.DiagnosticPort, gateway.Configuration.DiagnosticPort);
             // CPU usage
             channelCpu = diagServer.CreateRecord<CADoubleRecord>(gateway.Configuration.GatewayName + ":CPU");
             channelCpu.EngineeringUnits = "%";
@@ -278,6 +276,7 @@ namespace GatewayLogic
             }
             catch
             {
+                channelMem.Value = -1;
             }
         }
 
@@ -289,6 +288,7 @@ namespace GatewayLogic
             }
             catch
             {
+                channelCpu.Value = -1;
             }
         }
         // ReSharper restore InconsistentNaming

@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,6 +29,7 @@ namespace StressTest
             if (args.Length > 0 && args[0] == "server")
             {
                 //Console.WriteLine("Start server " + args[1]);
+                Console.Title = "Stress Test IOC";
                 Server(int.Parse(args[1]));
                 return;
             }
@@ -35,6 +37,7 @@ namespace StressTest
             if (args.Length > 0 && args[0] == "client")
             {
                 //Console.WriteLine("Start client " + args[1]);
+                Console.Title = "Stress Test Client";
                 Environment.Exit(Client());
                 return;
             }
@@ -136,7 +139,7 @@ namespace StressTest
                         var p = new Process();
                         p.StartInfo = new ProcessStartInfo(current.ProcessName, "server " + i)
                         {
-                            UseShellExecute = false
+                            UseShellExecute = false,
                         };
                         p.EnableRaisingEvents = true;
                         p.Exited += serverExit;
@@ -217,6 +220,7 @@ namespace StressTest
                  };
 
                 AppDomain.CurrentDomain.ProcessExit += quitStressTest;
+                Console.Title = "Gateway Stress Test";
                 Console.WriteLine("All started...");
 
                 using (var client = new CAClient())

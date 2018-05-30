@@ -39,6 +39,11 @@ namespace GatewayLogic.Services
               };
         }
 
+        ~ChannelInformation()
+        {
+            dictionaryLock.Dispose();
+        }
+
         public class ChannelInformationDetails : IDisposable
         {
             //public SafeLock LockObject { get; } = new SafeLock();
@@ -63,6 +68,11 @@ namespace GatewayLogic.Services
                 ChannelName = channelName;
             }
 
+            ~ChannelInformationDetails()
+            {
+                clientsLock.Dispose();
+            }
+
             internal void RegisterClient(uint clientId, TcpClientConnection connection)
             {
                 using (clientsLock.Aquire())
@@ -74,16 +84,9 @@ namespace GatewayLogic.Services
 
             internal IEnumerable<Client> GetClientConnections()
             {
-                try
+                using (clientsLock.Aquire())
                 {
-                    using (clientsLock.Aquire())
-                    {
-                        return connectedClients.ToList();
-                    }
-                }
-                catch
-                {
-                    return new Client[] { };
+                    return connectedClients.ToList();
                 }
             }
 
@@ -109,22 +112,16 @@ namespace GatewayLogic.Services
             internal void DisconnectClient(TcpClientConnection connection)
             {
                 List<Client> toDrop;
-                try
+                using (clientsLock.Aquire())
                 {
-                    using (clientsLock.Aquire())
-                    {
-                        toDrop = connectedClients.Where(row => row.Connection == connection).ToList();
-                    }
-                    foreach (var i in toDrop)
-                        connection.Gateway.MonitorInformation.GetByClientId(i.Connection.RemoteEndPoint, i.Id)?.RemoveClient(connection.Gateway, i.Connection.RemoteEndPoint, i.Id);
-                    using (clientsLock.Aquire())
-                    {
-                        connectedClients.RemoveAll(row => row.Connection == connection);
-                        this.LastUse = DateTime.UtcNow;
-                    }
+                    toDrop = connectedClients.Where(row => row.Connection == connection).ToList();
                 }
-                catch
+                foreach (var i in toDrop)
+                    connection.Gateway.MonitorInformation.GetByClientId(i.Connection.RemoteEndPoint, i.Id)?.RemoveClient(connection.Gateway, i.Connection.RemoteEndPoint, i.Id);
+                using (clientsLock.Aquire())
                 {
+                    connectedClients.RemoveAll(row => row.Connection == connection);
+                    this.LastUse = DateTime.UtcNow;
                 }
             }
 
@@ -185,23 +182,15 @@ namespace GatewayLogic.Services
                     this.LastUse = DateTime.UtcNow;
                 }
 
-                //LockObject.Dispose();
-                clientsLock.Dispose();
+                //clientsLock.Dispose();
             }
         }
 
         public ChannelInformationDetails Get(uint id)
         {
-            try
+            using (dictionaryLock.Aquire())
             {
-                using (dictionaryLock.Aquire())
-                {
-                    return dictionary.Values.FirstOrDefault(row => row.GatewayId == id);
-                }
-            }
-            catch
-            {
-                return null;
+                return dictionary.Values.FirstOrDefault(row => row.GatewayId == id);
             }
         }
 
@@ -243,14 +232,14 @@ namespace GatewayLogic.Services
                     i.Dispose();
                 dictionary.Clear();
             }
-            dictionaryLock.Dispose();
+            //dictionaryLock.Dispose();
         }
 
         internal void Remove(Gateway gateway, ChannelInformationDetails channel)
         {
+            channel.Dispose();
             using (dictionaryLock.Aquire())
             {
-                channel.Dispose();
                 dictionary.Remove(channel.ChannelName);
             }
             gateway.SearchInformation.Remove(channel.ChannelName);
