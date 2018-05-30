@@ -33,7 +33,7 @@ namespace GatewayLogic.Services
             public bool HasReceivedFirstResult { get; set; } = false;
             public ushort MonitorMask { get; internal set; }
 
-            SafeLock clientsLock = new SafeLock();
+            internal SafeLock clientsLock = new SafeLock();
             public List<ClientId> clients = new List<ClientId>();
 
             public MonitorInformationDetail(uint id, ChannelInformation.ChannelInformationDetails channelInformation, ushort dataType, uint dataCount, UInt16 monitorMask)
@@ -143,7 +143,11 @@ namespace GatewayLogic.Services
         {
             using (dictionaryLock.Aquire())
             {
-                return monitors.FirstOrDefault(row => row.clients.Any(r2 => r2.Client == clientEndPoint && r2.Id == clientId));
+                return monitors.FirstOrDefault((row) =>
+                {
+                    using (row.clientsLock.Aquire())
+                        return row.clients.Any(r2 => r2.Client == clientEndPoint && r2.Id == clientId);
+                });
             }
         }
 
