@@ -144,83 +144,91 @@ namespace GWWatchdog
 
             while (!shouldStop)
             {
-                if (Environment.UserInteractive)
-                    Console.WriteLine("Checking...");
-                bool isOk = false;
-                for (int i = 0; i < 30; i++)
+                try
                 {
                     if (Environment.UserInteractive)
-                        Console.WriteLine("Trial " + i);
-                    isOk = false;
-                    using (var client = new CAClient())
+                        Console.WriteLine("Checking...");
+                    bool isOk = false;
+                    for (int i = 0; i < 30; i++)
                     {
-                        client.Configuration.WaitTimeout = 3000;
-                        var cpuInfo = client.CreateChannel<double>(ConfigurationManager.AppSettings["gatewayName"] + ":CPU");
-                        try
+                        if (Environment.UserInteractive)
+                            Console.WriteLine("Trial " + i);
+                        isOk = false;
+                        using (var client = new CAClient())
                         {
-                            double v = cpuInfo.Get();
-                            lastCPUVals.Add(v);
-                            while (lastCPUVals.Count > nbCPUAvg)
-                                lastCPUVals.RemoveAt(0);
-
-                            currentAVG = lastCPUVals.Average();
-                            if (lastCPUVals.Count < nbCPUAvg * 0.8 || currentAVG < 95.0)
+                            client.Configuration.WaitTimeout = 3000;
+                            var cpuInfo = client.CreateChannel<double>(ConfigurationManager.AppSettings["gatewayName"] + ":CPU");
+                            try
                             {
-                                isOk = true;
-                                status = GWStatus.ALL_OK;
-                            }
-                            else
-                                status = GWStatus.HIGH_CPU;
-                            //isOk = true;
-                        }
-                        catch
-                        {
-                        }
-                    }
+                                double v = cpuInfo.Get();
+                                lastCPUVals.Add(v);
+                                while (lastCPUVals.Count > nbCPUAvg)
+                                    lastCPUVals.RemoveAt(0);
 
-                    if (isOk && additionalChannels != null)
-                    {
-                        foreach (string gw in additionalChannels.AllKeys)
-                        {
-                            using (CAClient client = new CAClient())
-                            {
-                                client.Configuration.SearchAddress = gw;
-                                client.Configuration.WaitTimeout = 2000;
-                                var channel = client.CreateChannel<string>(additionalChannels[gw]);
-                                try
+                                currentAVG = lastCPUVals.Average();
+                                if (lastCPUVals.Count < nbCPUAvg * 0.8 || currentAVG < 95.0)
                                 {
-                                    string s = channel.Get();
-                                    if (Environment.UserInteractive)
-                                        Console.WriteLine("Read " + s);
                                     isOk = true;
                                     status = GWStatus.ALL_OK;
                                 }
-                                catch
+                                else
+                                    status = GWStatus.HIGH_CPU;
+                                //isOk = true;
+                            }
+                            catch
+                            {
+                            }
+                        }
+
+                        if (isOk && additionalChannels != null)
+                        {
+                            foreach (string gw in additionalChannels.AllKeys)
+                            {
+                                using (CAClient client = new CAClient())
                                 {
-                                    isOk = false;
-                                    status = GWStatus.NOT_ANSWERING;
+                                    client.Configuration.SearchAddress = gw;
+                                    client.Configuration.WaitTimeout = 2000;
+                                    var channel = client.CreateChannel<string>(additionalChannels[gw]);
+                                    try
+                                    {
+                                        string s = channel.Get();
+                                        if (Environment.UserInteractive)
+                                            Console.WriteLine("Read " + s);
+                                        isOk = true;
+                                        status = GWStatus.ALL_OK;
+                                    }
+                                    catch
+                                    {
+                                        isOk = false;
+                                        status = GWStatus.NOT_ANSWERING;
+                                    }
                                 }
                             }
                         }
+
+                        if (isOk == true)
+                            break;
+
+                        Thread.Sleep(1000);
                     }
 
-                    if (isOk == true)
-                        break;
-
-                    Thread.Sleep(1000);
+                    if (!isOk)
+                    {
+                        if (Environment.UserInteractive)
+                            Console.WriteLine("Not ok!!!");
+                        RestartGW();
+                        Thread.Sleep(40000);
+                    }
+                    else
+                    {
+                        if (Environment.UserInteractive)
+                            Console.WriteLine("All ok");
+                    }
                 }
-
-                if (!isOk)
+                catch(Exception ex)
                 {
                     if (Environment.UserInteractive)
-                        Console.WriteLine("Not ok!!!");
-                    RestartGW();
-                    Thread.Sleep(40000);
-                }
-                else
-                {
-                    if (Environment.UserInteractive)
-                        Console.WriteLine("All ok");
+                        Console.WriteLine(ex.ToString());
                 }
                 Thread.Sleep(10000);
             }

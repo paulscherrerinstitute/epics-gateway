@@ -216,13 +216,20 @@ namespace GatewayLogic.Connections
             //}
         }
 
+        ~TcpServerConnection()
+        {
+            lockObject.Dispose();
+            socketLock.Dispose();
+            channelsLock.Dispose();
+        }
+
         public override void Dispose()
         {
             if (disposed)
                 return;
             disposed = true;
-            lockObject.Dispose();
-            socketLock.Dispose();
+            //lockObject.Dispose();
+            //socketLock.Dispose();
             splitter.Dispose();
             socket?.Dispose();
             if (Gateway == null)
@@ -241,7 +248,6 @@ namespace GatewayLogic.Connections
             {
                 channelsCopy = channels.ToList();
             }
-            channelsLock.Dispose();
             var newPacket = DataPacket.Create(0);
             newPacket.Command = 27;
 

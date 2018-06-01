@@ -34,7 +34,7 @@ namespace GatewayLogic
         internal ReadNotifyInformation ReadNotifyInformation { get; private set; } = new ReadNotifyInformation();
         internal WriteNotifyInformation WriteNotifyInformation { get; private set; } = new WriteNotifyInformation();
 
-        internal SearchInformation SearchInformation { get; private set; } = new SearchInformation();
+        internal SearchInformation SearchInformation { get; private set; }
         internal ClientConnection ClientConnection { get; }
         internal ServerConnection ServerConnection { get; }
         internal DiagnosticServer DiagnosticServer { get; private set; }
@@ -74,6 +74,7 @@ namespace GatewayLogic
             //Log = new TextLogger();
 
             ChannelInformation = new ChannelInformation(this);
+            SearchInformation = new SearchInformation(this);
 
             ClientConnection = new ClientConnection(this);
             ServerConnection = new ServerConnection(this);
@@ -212,26 +213,22 @@ namespace GatewayLogic
             DiagnosticServer = new DiagnosticServer(this, Configuration.SideBEndPoint.Address);
             Configuration.Security.Init();
 
-            /*ThreadPool.QueueUserWorkItem((obj) =>
+            if (this.Configuration.ConfigurationType == GatewayLogic.Configuration.ConfigurationType.UNIDIRECTIONAL)
             {
-                Thread.Sleep(10);*/
-                if (this.Configuration.ConfigurationType == GatewayLogic.Configuration.ConfigurationType.UNIDIRECTIONAL)
-                {
-                    tcpSideA = new TcpClientListener(this, this.Configuration.SideAEndPoint);
-                    tcpSideB = new TcpClientListener(this, this.Configuration.SideBEndPoint);
+                tcpSideA = new TcpClientListener(this, this.Configuration.SideAEndPoint);
+                tcpSideB = new TcpClientListener(this, this.Configuration.SideBEndPoint);
 
-                    udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
-                    udpSideB = new UdpResponseReceiver(this, this.Configuration.SideBEndPoint);
-                }
-                else
-                {
-                    tcpSideA = new TcpClientListener(this, this.Configuration.SideAEndPoint);
-                    tcpSideB = new TcpClientListener(this, this.Configuration.SideBEndPoint);
+                udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
+                udpSideB = new UdpResponseReceiver(this, this.Configuration.SideBEndPoint);
+            }
+            else
+            {
+                tcpSideA = new TcpClientListener(this, this.Configuration.SideAEndPoint);
+                tcpSideB = new TcpClientListener(this, this.Configuration.SideBEndPoint);
 
-                    udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
-                    udpSideB = new UdpReceiver(this, this.Configuration.SideBEndPoint);
-                }
-            //});
+                udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
+                udpSideB = new UdpReceiver(this, this.Configuration.SideBEndPoint);
+            }
 
             this.TenSecUpdate += UpdateSearchInformation;
         }

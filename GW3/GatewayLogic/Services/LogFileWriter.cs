@@ -130,10 +130,14 @@ namespace GatewayLogic.Services
             }
         }
 
+        ~LogFileWriter()
+        {
+            bufferLock.Dispose();
+        }
+
         public void Dispose()
         {
             shouldStop = true;
-            bufferLock.Dispose();
         }
     }
 }

@@ -176,9 +176,13 @@ namespace GatewayLogic
             currentPos = 0;
         }
 
-        public void Dispose()
+        ~Splitter()
         {
             lockSplitter.Dispose();
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

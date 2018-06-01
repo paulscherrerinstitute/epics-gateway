@@ -222,13 +222,17 @@ namespace GatewayLogic.Connections
                 Dispose();
         }
 
+        ~TcpClientConnection()
+        {
+            socketLock.Dispose();
+        }
+
         public override void Dispose()
         {
             if (disposed)
                 return;
             disposed = true;
 
-            socketLock.Dispose();
             splitter.Dispose();
             //Gateway.Log.Write(LogLevel.Connection, "Client " + this.Name + " disconnect");
             Gateway.MessageLogger.Write(this.RemoteEndPoint.ToString(), LogMessageType.ClientDisconnect);

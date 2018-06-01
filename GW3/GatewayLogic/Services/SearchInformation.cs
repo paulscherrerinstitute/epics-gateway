@@ -12,6 +12,12 @@ namespace GatewayLogic.Services
         private uint nextId = 1;
         SafeLock dictionaryLock = new SafeLock();
         Dictionary<string, SearchInformationDetail> dictionary = new Dictionary<string, SearchInformationDetail>();
+        Gateway gateway;
+
+        public SearchInformation(Gateway gateway)
+        {
+            this.gateway = gateway;
+        }
 
         ~SearchInformation()
         {
@@ -72,10 +78,13 @@ namespace GatewayLogic.Services
             {
                 if (!dictionary.ContainsKey(channelName))
                 {
+                    gateway.MessageLogger.Write(null, LogMessageType.CreatedSearchInfo, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
                     var result = new SearchInformationDetail(nextId++);
                     result.Channel = channelName;
                     dictionary.Add(channelName, result);
                 }
+                else
+                    gateway.MessageLogger.Write(null, LogMessageType.RecoverSearchInfo, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
 
                 return dictionary[channelName];
             }
@@ -111,6 +120,8 @@ namespace GatewayLogic.Services
 
         public void Remove(string channelName)
         {
+            gateway.MessageLogger.Write(null, LogMessageType.RemoveSearchInfo, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName} });
+
             using (dictionaryLock.Aquire())
             {
                 if (dictionary.ContainsKey(channelName))

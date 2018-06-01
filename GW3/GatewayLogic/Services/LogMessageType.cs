@@ -121,6 +121,14 @@ namespace GatewayLogic.Services
         [MessageDisplay("Server {endpoint} created.", LogLevel.Connection)]
         StartTcpServerConnection,
         [MessageDisplay("Deadlock detected.", LogLevel.Critical)]
-        DeadLock
+        DeadLock,
+        [MessageDisplay("Remove ChannelInformation {channelName}.", LogLevel.Detail)]
+        RemoveChannelInfo,
+        [MessageDisplay("Remove SearchInformation {channelName}.", LogLevel.Detail)]
+        RemoveSearchInfo,
+        [MessageDisplay("Created SearchInformation {channelName}.", LogLevel.Detail)]
+        CreatedSearchInfo,
+        [MessageDisplay("Recover SearchInformation {channelName}.", LogLevel.Detail)]
+        RecoverSearchInfo
     }
 }
