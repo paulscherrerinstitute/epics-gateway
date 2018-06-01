@@ -31,6 +31,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 using (var autoReset = new AutoResetEvent(false))
@@ -74,6 +75,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // Serverside
@@ -106,6 +108,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // Serverside
@@ -143,7 +146,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(5000)]
+        [Timeout(10000)]
         public void CheckCascadeGet()
         {
             using (var gateway = new Gateway())
@@ -151,6 +154,8 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.2:5045";
                 gateway.Configuration.SideB = "127.0.0.1:5044";
+                gateway.Configuration.DelayStartup = 0;
+                gateway.Configuration.DiagnosticPort = 1234;
                 gateway.Start();
 
                 using (var gateway2 = new Gateway())
@@ -158,6 +163,8 @@ namespace GwUnitTests
                     gateway2.Configuration.SideA = "127.0.0.2:5045";
                     gateway2.Configuration.RemoteSideB = "127.0.0.1:5056";
                     gateway2.Configuration.SideB = "127.0.0.2:5055";
+                    gateway2.Configuration.DelayStartup = 0;
+                    gateway2.Configuration.DiagnosticPort = 1236;
                     gateway2.Start();
 
                     // Serverside
@@ -191,6 +198,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // Serverside
@@ -242,6 +250,7 @@ namespace GwUnitTests
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
                 gateway.Configuration.SearchPreventionTimeout = 0;
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
 
@@ -320,6 +329,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // Serverside
@@ -367,6 +377,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // Serverside
@@ -428,6 +439,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // Serverside
@@ -498,6 +510,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // Serverside
@@ -570,6 +583,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // Serverside
@@ -663,6 +677,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // Serverside
@@ -725,6 +740,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // Serverside
@@ -759,6 +775,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056;127.0.0.1:5057";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // Client
@@ -816,6 +833,7 @@ namespace GwUnitTests
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
                 gateway.Configuration.Security.RulesSideA.Add(new GatewayLogic.Configuration.SecurityRule { ChannelPattern = "T*", Access = GatewayLogic.Configuration.SecurityAccess.NONE });
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // Serverside
@@ -859,6 +877,7 @@ namespace GwUnitTests
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
                 gateway.Configuration.Security.RulesSideA.Add(new GatewayLogic.Configuration.SecurityRule { ChannelPattern = "T*", Access = GatewayLogic.Configuration.SecurityAccess.READ });
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // Serverside
@@ -895,6 +914,7 @@ namespace GwUnitTests
                 gateway.Configuration.GatewayName = "TESTGW";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // Serverside
@@ -926,6 +946,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // Serverside
@@ -961,6 +982,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
@@ -1011,6 +1033,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
@@ -1061,6 +1084,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // Serverside

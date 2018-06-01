@@ -248,6 +248,14 @@ namespace GatewayLogic.Connections
             {
                 channelsCopy = channels.ToList();
             }
+
+            Dictionary<ChannelInformation.ChannelInformationDetails, IEnumerable<Client>> clientsCopy = new Dictionary<ChannelInformation.ChannelInformationDetails, IEnumerable<Client>>();
+            foreach (var channel in channelsCopy)
+                clientsCopy.Add(channel, channel.GetClientConnections());
+
+            foreach (var channel in channelsCopy)
+                Gateway.ChannelInformation.Remove(Gateway, channel);
+
             var newPacket = DataPacket.Create(0);
             newPacket.Command = 27;
 
@@ -255,16 +263,13 @@ namespace GatewayLogic.Connections
             {
                 Gateway.MessageLogger.Write(this.RemoteEndPoint.ToString(), Services.LogMessageType.ChannelDispose, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channel.ChannelName } });
                 //Gateway.Log.Write(LogLevel.Detail, "Disposing channel " + channel.ChannelName);
-                foreach (var client in channel.GetClientConnections())
+                foreach (var client in clientsCopy[channel])
                 {
                     newPacket.Parameter1 = client.Id;
                     newPacket.Destination = client.Connection.RemoteEndPoint;
                     client.Connection.Send(newPacket);
                 }
             }
-
-            foreach (var channel in channelsCopy)
-                Gateway.ChannelInformation.Remove(Gateway, channel);
         }
 
         public override string Name => RemoteEndPoint.ToString();

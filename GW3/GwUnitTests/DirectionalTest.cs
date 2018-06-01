@@ -25,6 +25,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideB = "127.0.0.1:5055";
                 gateway.Configuration.RemoteSideA = "127.0.0.1:5057";
                 gateway.Configuration.ConfigurationType = ConfigurationType.UNIDIRECTIONAL;
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // A to B
@@ -75,6 +76,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideB = "127.0.0.1:5055";
                 gateway.Configuration.RemoteSideA = "127.0.0.1:5057";
                 gateway.Configuration.ConfigurationType = ConfigurationType.BIDIRECTIONAL;
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // A to B
@@ -124,6 +126,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideB = "127.0.0.1:5055";
                 gateway.Configuration.RemoteSideA = "127.0.0.1:5057";
                 gateway.Configuration.ConfigurationType = ConfigurationType.UNIDIRECTIONAL;
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // A
@@ -161,6 +164,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideB = "127.0.0.1:5055";
                 gateway.Configuration.RemoteSideA = "127.0.0.1:5057";
                 gateway.Configuration.ConfigurationType = ConfigurationType.BIDIRECTIONAL;
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // A

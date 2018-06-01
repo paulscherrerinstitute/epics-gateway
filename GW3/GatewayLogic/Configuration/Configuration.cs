@@ -135,5 +135,6 @@ namespace GatewayLogic.Configuration
         }
 
         public int DiagnosticPort { get; set; } = 4890;
+        public int DelayStartup { get; set; } = 5000;
     }
 }
