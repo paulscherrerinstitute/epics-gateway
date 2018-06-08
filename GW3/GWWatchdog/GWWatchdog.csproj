@@ -78,10 +78,12 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if $(system.teamProject) == [] (
+    <PostBuildEvent>if DEFINED %25system_teamProject%25 GOTO DO_IT
+GOTO END
+:DO_IT
 copy /y "$(TargetDir)\*.exe" \\ait-iis\deploy\gw3
 copy /y "$(TargetDir)\*.pdb" \\ait-iis\deploy\gw3
 copy /y "$(TargetDir)\*.dll" \\ait-iis\deploy\gw3
-)</PostBuildEvent>
+:END</PostBuildEvent>
   </PropertyGroup>
 </Project>
