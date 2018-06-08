@@ -1,4 +1,6 @@
-﻿using EpicsSharp.ChannelAccess.Client;
+﻿//#define LOG
+
+using EpicsSharp.ChannelAccess.Client;
 using EpicsSharp.ChannelAccess.Server;
 using GatewayLogic;
 using System;
@@ -32,12 +34,15 @@ namespace GWTest
             gw1.Configuration.SideA = "127.0.0.1:5432";
             gw1.Configuration.RemoteSideB = "127.0.0.1:5056";
             gw1.Configuration.SideB = "127.0.0.1:5055";
+            gw1.Configuration.DelayStartup = 0;
+#if LOG
             gw1.Log.Handler += (level, source, message) =>
             {
                 if (message.StartsWith("Echo"))
                     return;
                 Console.WriteLine("GW1: " + message);
             };
+#endif
             gw1.Start();
 
             var gw2 = new Gateway();
@@ -45,12 +50,15 @@ namespace GWTest
             gw2.Configuration.SideA = "127.0.0.1:5056";
             gw2.Configuration.RemoteSideB = "127.0.0.1:6058";
             gw2.Configuration.SideB = "127.0.0.1:5057";
+            gw2.Configuration.DelayStartup = 0;
+#if LOG
             gw2.Log.Handler += (level, source, message) =>
             {
                 if (message.StartsWith("Echo"))
                     return;
                 Console.WriteLine("GW2: " + message);
             };
+#endif
             gw2.Start();
 
 
@@ -72,55 +80,93 @@ namespace GWTest
 
             server.Start();
 
-            var client = new CAClient();
-            client.Configuration.WaitTimeout = 2000;
-            client.Configuration.SearchAddress = "127.0.0.1:5432";
-            var clientChannel = client.CreateChannel<string>("TEST-DATE");
-            var clientChannel2 = client.CreateChannel<string>("TEST-GUID");
-            var debugChannel = client.CreateChannel<string>("GW1:BUILD");
+            var events = new AutoResetEvent[3 * 5];
+            for (var i = 0; i < events.Length; i++)
+                events[i] = new AutoResetEvent(false);
 
-            clientChannel.MonitorChanged += (chann, val) =>
-            {
-                Console.WriteLine(chann.ChannelName + ": " + val);
-            };
-            clientChannel.StatusChanged += (chann, newStatus) =>
-            {
-                Console.WriteLine("!!! " + chann.ChannelName + ": " + newStatus.ToString());
-            };
-            debugChannel.MonitorChanged += (chann, newStatus) =>
-            {
-                Console.WriteLine("GW1 BUILD: " + newStatus);
-            };
-            clientChannel2.MonitorChanged += (chann, val) =>
-            {
-                Console.WriteLine(chann.ChannelName + ": " + val);
-            };
-            clientChannel2.StatusChanged += (chann, newStatus) =>
-            {
-                Console.WriteLine("!!! " + chann.ChannelName + ": " + newStatus.ToString());
-            };
+            Action<int> d = (clientNumber) =>
+               {
+                   var client = new CAClient();
+                   client.Configuration.WaitTimeout = 2000;
+                   client.Configuration.SearchAddress = "127.0.0.1:5432";
+                   var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                   var clientChannel2 = client.CreateChannel<string>("TEST-GUID");
+                   var debugChannel = client.CreateChannel<string>("GW1:BUILD");
 
-            Thread.Sleep(5000);
+                   clientChannel.MonitorChanged += (chann, val) =>
+                   {
+#if LOG
+                       Console.WriteLine(chann.ChannelName + ": " + val);
+#endif
+                       events[clientNumber * 3].Set();
+                   };
+                   clientChannel.StatusChanged += (chann, newStatus) =>
+                   {
+#if LOG
+                       Console.WriteLine($"!!! {clientNumber} {chann.ChannelName}: " + newStatus.ToString());
+#endif
+                   };
+                   debugChannel.MonitorChanged += (chann, newStatus) =>
+                   {
+#if LOG
+                       Console.WriteLine("GW1 BUILD: " + newStatus);
+#endif
+                       events[clientNumber * 3 + 1].Set();
+                   };
+                   clientChannel2.MonitorChanged += (chann, val) =>
+                   {
+#if LOG
+                       Console.WriteLine($"{clientNumber} {chann.ChannelName}: {val}");
+#endif
+                       events[clientNumber * 3 + 2].Set();
+                   };
+                   clientChannel2.StatusChanged += (chann, newStatus) =>
+                   {
+#if LOG
+                       Console.WriteLine($"!!! {clientNumber} {chann.ChannelName}: " + newStatus.ToString());
+#endif
+                   };
+                   clientChannel2.Get();
+                   clientChannel.Put("toto");
+               };
+            for (var i = 0; i < events.Length / 3; i++)
+                d(i);
 
-            Console.WriteLine("Kill gw1");
-            gw1.Dispose();
-
-            //Thread.Sleep(10000);
-
-            Console.WriteLine("Starting again gw1");
-            gw1 = new Gateway();
-            gw1.Configuration.GatewayName = "GW1";
-            gw1.Configuration.DiagnosticPort = 1234;
-            gw1.Configuration.SideA = "127.0.0.1:5432";
-            gw1.Configuration.RemoteSideB = "127.0.0.1:5056";
-            gw1.Configuration.SideB = "127.0.0.1:5055";
-            gw1.Log.Handler += (level, source, message) =>
+#if LOG
+#else
+            Console.WriteLine("Starting...");
+#endif
+            while (true)
             {
-                if (message.StartsWith("Echo"))
-                    return;
-                Console.WriteLine("GW1: " + message);
-            };
-            gw1.Start();
+                //Thread.Sleep(5000);
+                WaitHandle.WaitAll(events, 1000);
+
+                Console.WriteLine("Kill gw1");
+                gw1.Dispose();
+
+                Thread.Sleep(500);
+
+#if LOG
+                Console.WriteLine("Starting again gw1");
+#endif
+                gw1 = new Gateway();
+                gw1.Configuration.GatewayName = "GW1";
+                gw1.Configuration.DiagnosticPort = 1234;
+                gw1.Configuration.SideA = "127.0.0.1:5432";
+                gw1.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gw1.Configuration.SideB = "127.0.0.1:5055";
+                gw1.Configuration.DelayStartup = 0;
+#if LOG
+                gw1.Log.Handler += (level, source, message) =>
+                {
+                    if (message.StartsWith("Echo"))
+                        return;
+                    Console.WriteLine("GW1: " + message);
+                };
+#endif
+                gw1.Start();
+                Console.WriteLine("Re-starting GW1");
+            }
 
             /*Console.WriteLine("Kill gw2");
             gw2.Dispose();
@@ -133,12 +179,15 @@ namespace GWTest
             gw2.Configuration.SideA = "127.0.0.1:5056";
             gw2.Configuration.RemoteSideB = "127.0.0.1:6058";
             gw2.Configuration.SideB = "127.0.0.1:5057";
+            gw2.Configuration.DelayStartup = 0;
+#if LOG
             gw2.Log.Handler += (level, source, message) =>
             {
                 if (message.StartsWith("Echo"))
                     return;
                 Console.WriteLine("GW2: " + message);
             };
+#endif
             gw2.Start();*/
 
             /*client.Dispose();
@@ -160,7 +209,6 @@ namespace GWTest
             gw1.Dispose();
             gw2.Dispose();
             server.Dispose();
-            client.Dispose();
         }
 
         static void S1()
@@ -284,9 +332,11 @@ namespace GWTest
 
             //gateway.Configuration.RemoteSideA = "127.0.0.1:5058";
             //gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
-            gateway.Configuration.RemoteSideA = "127.0.0.1:5058";
+            gateway.Configuration.RemoteSideA = "129.129.194.86:5432";
             //gateway.Configuration.RemoteSideB = "129.129.130.255:5064";
-            gateway.Configuration.RemoteSideB = "sls-cagw02.psi.ch:5062";
+            //gateway.Configuration.RemoteSideB = "sls-cagw02.psi.ch:5062";
+            gateway.Configuration.RemoteSideB = "129.129.194.86:5055";
+            gateway.Configuration.DelayStartup = 0;
             //gateway.Configuration.ConfigurationType = GatewayLogic.Configuration.ConfigurationType.BIDIRECTIONAL;
             gateway.Configuration.ConfigurationType = GatewayLogic.Configuration.ConfigurationType.UNIDIRECTIONAL;
             gateway.Log.Handler += GatewayLogic.Services.TextLogger.DefaultHandler;

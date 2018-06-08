@@ -14,7 +14,6 @@ namespace GatewayLogic.Services
         readonly List<ReadNotifyInformationDetail> reads = new List<ReadNotifyInformationDetail>();
 
         private uint nextId = 1;
-        object counterLock = new object();
 
         public class ReadNotifyInformationDetail
         {
@@ -58,13 +57,17 @@ namespace GatewayLogic.Services
             }
         }
 
+        ~ReadNotifyInformation()
+        {
+            dictionaryLock.Dispose();
+        }
+
         public void Dispose()
         {
             using (dictionaryLock.Aquire())
             {
                 reads.Clear();
             }
-            dictionaryLock.Dispose();
         }
 
         internal void Remove(ReadNotifyInformationDetail read)
