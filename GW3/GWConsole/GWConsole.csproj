@@ -63,8 +63,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /y "$(TargetDir)\*.exe" \\ait-iis\deploy\gw3
+    <PostBuildEvent>if $(system.teamProject) == [] (
+copy /y "$(TargetDir)\*.exe" \\ait-iis\deploy\gw3
 copy /y "$(TargetDir)\*.pdb" \\ait-iis\deploy\gw3
-copy /y "$(TargetDir)\*.dll" \\ait-iis\deploy\gw3</PostBuildEvent>
+copy /y "$(TargetDir)\*.dll" \\ait-iis\deploy\gw3
+)</PostBuildEvent>
   </PropertyGroup>
 </Project>
