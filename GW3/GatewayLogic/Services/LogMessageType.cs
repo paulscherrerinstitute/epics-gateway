@@ -129,6 +129,8 @@ namespace GatewayLogic.Services
         [MessageDisplay("Created SearchInformation {channelName}.", LogLevel.Detail)]
         CreatedSearchInfo,
         [MessageDisplay("Recover SearchInformation {channelName}.", LogLevel.Detail)]
-        RecoverSearchInfo
+        RecoverSearchInfo,
+        [MessageDisplay("Search answer for nothing.", LogLevel.Detail)]
+        SearchAnswerForNothing
     }
 }

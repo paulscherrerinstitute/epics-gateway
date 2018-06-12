@@ -249,24 +249,24 @@ namespace GatewayLogic
         {
             isDiposed = true;
 
-            tcpSideA.Dispose();
-            tcpSideB.Dispose();
+            tcpSideA?.Dispose();
+            tcpSideB?.Dispose();
 
-            udpSideA.Dispose();
-            udpSideB.Dispose();
+            udpSideA?.Dispose();
+            udpSideB?.Dispose();
 
-            ChannelInformation.Dispose();
-            MonitorInformation.Dispose();
-            ReadNotifyInformation.Dispose();
-            SearchInformation.Dispose();
-            searchLock.Dispose();
+            ChannelInformation?.Dispose();
+            MonitorInformation?.Dispose();
+            ReadNotifyInformation?.Dispose();
+            SearchInformation?.Dispose();
+            searchLock?.Dispose();
 
-            ClientConnection.Dispose();
-            ServerConnection.Dispose();
+            ClientConnection?.Dispose();
+            ServerConnection?.Dispose();
 
-            DiagnosticServer.Dispose();
+            DiagnosticServer?.Dispose();
 
-            MessageLogger.Dispose();
+            MessageLogger?.Dispose();
         }
 
         internal void DropClient(TcpClientConnection tcpClientConnection)

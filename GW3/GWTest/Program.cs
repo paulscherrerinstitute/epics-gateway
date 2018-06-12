@@ -30,6 +30,7 @@ namespace GWTest
         {
             var gw1 = new Gateway();
             gw1.Configuration.GatewayName = "GW1";
+            gw1.Configuration.ConfigurationType = GatewayLogic.Configuration.ConfigurationType.BIDIRECTIONAL;
             gw1.Configuration.DiagnosticPort = 1234;
             gw1.Configuration.SideA = "127.0.0.1:5432";
             gw1.Configuration.RemoteSideB = "127.0.0.1:5056";
@@ -46,6 +47,7 @@ namespace GWTest
             gw1.Start();
 
             var gw2 = new Gateway();
+            gw2.Configuration.ConfigurationType = GatewayLogic.Configuration.ConfigurationType.BIDIRECTIONAL;
             gw2.Configuration.DiagnosticPort = 1236;
             gw2.Configuration.SideA = "127.0.0.1:5056";
             gw2.Configuration.RemoteSideB = "127.0.0.1:6058";
@@ -150,6 +152,7 @@ namespace GWTest
                 Console.WriteLine("Starting again gw1");
 #endif
                 gw1 = new Gateway();
+                gw1.Configuration.ConfigurationType = GatewayLogic.Configuration.ConfigurationType.BIDIRECTIONAL;
                 gw1.Configuration.GatewayName = "GW1";
                 gw1.Configuration.DiagnosticPort = 1234;
                 gw1.Configuration.SideA = "127.0.0.1:5432";

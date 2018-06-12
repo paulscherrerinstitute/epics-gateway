@@ -1124,7 +1124,7 @@ namespace GwUnitTests
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
-                gateway.Configuration.SearchPreventionTimeout = 0;
+                gateway.Configuration.DelayStartup = 0;
                 gateway.Start();
 
                 // Call command handlers to init the structure
@@ -1195,7 +1195,10 @@ namespace GwUnitTests
                 }
 
                 gateway.Cleanup();
-                SafeLock.Clean();
+                //SafeLock.Clean();
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+
                 Assert.AreEqual(nbLocksActives, SafeLock.TotalLocks);
             }
         }*/

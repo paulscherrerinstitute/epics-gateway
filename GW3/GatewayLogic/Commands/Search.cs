@@ -14,6 +14,7 @@ namespace GatewayLogic.Commands
         public override void DoRequest(GatewayConnection connection, DataPacket packet)
         {
             // It's a response
+            //if (packet.PayloadSize == 8 && packet.DataCount == 0)
             if (packet.PayloadSize == 8)
             {
                 DoResponse(connection, packet);
@@ -35,7 +36,6 @@ namespace GatewayLogic.Commands
             connection.Gateway.DiagnosticServer.NbSearches++;
 
             connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.SearchRequest, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
-            //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search for: " + channelName + ", from client (" + packet.Sender.ToString() + ")");
             connection.Gateway.Search(channelName, packet.Sender.ToString());
 
             var record = connection.Gateway.SearchInformation.Get(channelName);
@@ -46,13 +46,15 @@ namespace GatewayLogic.Commands
             if (record.Server != null)
             {
                 connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.SearchRequestAnswerFromCache, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
-                //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search cached for: " + channelName + ", from client (" + packet.Sender.ToString() + ")");
-                newPacket = (DataPacket)packet.Clone();
+                //newPacket = (DataPacket)packet.Clone();
+                newPacket = DataPacket.Create(8);
 
+                newPacket.Command = 6;
                 if (connection == connection.Gateway.udpSideA)
                     newPacket.DataType = (UInt16)connection.Gateway.Configuration.SideAEndPoint.Port;
                 else
                     newPacket.DataType = (UInt16)connection.Gateway.Configuration.SideBEndPoint.Port;
+                newPacket.DataCount = 0;
                 newPacket.Parameter1 = 0xffffffff;
                 newPacket.Parameter2 = packet.Parameter1;
                 newPacket.Destination = packet.Sender;
@@ -65,16 +67,12 @@ namespace GatewayLogic.Commands
             if ((DateTime.UtcNow - record.LastSearch).TotalMilliseconds < connection.Gateway.Configuration.SearchPreventionTimeout)
             {
                 connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.SearchRequestTooNew, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
-                //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search is too new, we drop it, from client (" + packet.Sender.ToString() + ")");
                 return;
             }
 
             connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.SearchRequestTooNew, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
-            //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search sent for: " + channelName + ", from client (" + packet.Sender.ToString() + ")");
             record.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter1, When = DateTime.UtcNow });
-            // ReSharper disable PossibleInvalidOperationException
             uint gwcid = record.GatewayId;
-            // ReSharper restore PossibleInvalidOperationException
             record.Channel = channelName;
 
             // Diagnostic search
@@ -109,6 +107,7 @@ namespace GatewayLogic.Commands
             if (search == null)
             {
                 //connection.Gateway.Log.Write(Services.LogLevel.Error, "Search answer for nothing...");
+                connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.SearchAnswerForNothing);
                 return;
             }
 
