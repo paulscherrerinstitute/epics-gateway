@@ -14,8 +14,8 @@ namespace GatewayLogic.Commands
         public override void DoRequest(GatewayConnection connection, DataPacket packet)
         {
             // It's a response
-            //if (packet.PayloadSize == 8 && packet.DataCount == 0)
-            if (packet.PayloadSize == 8)
+            if (packet.PayloadSize == 8 && packet.DataCount == 0)
+            //if (packet.PayloadSize == 8)
             {
                 DoResponse(connection, packet);
                 return;
