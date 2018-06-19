@@ -13,6 +13,11 @@ namespace GatewayLogic.Commands
     {
         public override void DoRequest(GatewayConnection connection, DataPacket packet)
         {
+            // Skip ourselves
+            if (packet.Sender.ToString() == connection.Gateway.Configuration.SideAEndPoint?.ToString() ||
+                packet.Sender.ToString() == connection.Gateway.Configuration.SideBEndPoint?.ToString())
+                return;
+            
             // It's a response
             if (packet.PayloadSize == 8 && packet.DataCount == 0)
             //if (packet.PayloadSize == 8)
@@ -75,28 +80,34 @@ namespace GatewayLogic.Commands
             uint gwcid = record.GatewayId;
             record.Channel = channelName;
 
+            record.LastSearch = DateTime.UtcNow;
+
             // Diagnostic search
             newPacket = (DataPacket)packet.Clone();
             newPacket.Parameter1 = gwcid;
             newPacket.Parameter2 = gwcid;
-            newPacket.Destination = new IPEndPoint(connection.Gateway.Configuration.SideBEndPoint.Address, connection.Gateway.Configuration.DiagnosticPort);
-            if (connection == connection.Gateway.udpSideB)
+            if (channelName.StartsWith(connection.Gateway.Configuration.GatewayName + ":"))
             {
-                newPacket.ReverseAnswer = true;
-                connection.Send(newPacket);
+                newPacket.Destination = new IPEndPoint(connection.Gateway.Configuration.SideBEndPoint.Address, connection.Gateway.Configuration.DiagnosticPort);
+                if (connection == connection.Gateway.udpSideB)
+                {
+                    newPacket.ReverseAnswer = true;
+                    connection.Send(newPacket);
+                }
+                else
+                    connection.Send(newPacket);
             }
             else
-                connection.Send(newPacket);
-
-            record.LastSearch = DateTime.UtcNow;
-            // Send to all the destinations
-            foreach (IPEndPoint dest in connection.Destinations)
             {
-                newPacket = (DataPacket)packet.Clone();
-                newPacket.Parameter1 = gwcid;
-                newPacket.Parameter2 = gwcid;
-                newPacket.Destination = dest;
-                connection.Send(newPacket);
+                // Send to all the destinations
+                foreach (IPEndPoint dest in connection.Destinations)
+                {
+                    newPacket = (DataPacket)packet.Clone();
+                    newPacket.Parameter1 = gwcid;
+                    newPacket.Parameter2 = gwcid;
+                    newPacket.Destination = dest;
+                    connection.Send(newPacket);
+                }
             }
         }
 
