@@ -22,7 +22,7 @@ namespace GatewayLogic
         public const UInt16 CA_PROTO_VERSION = 13;
         //public const UInt16 CA_PROTO_VERSION = 11;
 
-        public Configuration.Configuration Configuration { get; private set; } = new GatewayLogic.Configuration.Configuration();
+        public Configuration.Configuration Configuration { get; internal set; } = new GatewayLogic.Configuration.Configuration();
 
         internal UdpReceiver udpSideA;
         internal UdpReceiver udpSideB;

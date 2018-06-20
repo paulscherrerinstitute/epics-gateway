@@ -131,6 +131,12 @@ namespace GatewayLogic.Services
         [MessageDisplay("Recover SearchInformation {channelName}.", LogLevel.Detail)]
         RecoverSearchInfo,
         [MessageDisplay("Search answer for nothing.", LogLevel.Detail)]
-        SearchAnswerForNothing
+        SearchAnswerForNothing,
+        [MessageDisplay("Blocked WriteNotify to {channelName}.", LogLevel.Detail)]
+        WriteNotifyRequestNoAccess,
+        [MessageDisplay("Blocked Write to {channelName}.", LogLevel.Detail)]
+        WriteRequestNoAccess,
+        [MessageDisplay("WriteNotify wrong answer {clientIoId}.", LogLevel.Error)]
+        WriteNotifyAnswerWrong
     }
 }

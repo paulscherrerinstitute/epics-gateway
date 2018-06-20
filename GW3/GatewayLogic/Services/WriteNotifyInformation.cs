@@ -46,10 +46,11 @@ namespace GatewayLogic.Services
         {
             using (dictionaryLock.Aquire())
             {
-                writes.RemoveAll(row => (DateTime.UtcNow - row.When).TotalSeconds > 10);
-
                 var result = writes.FirstOrDefault(row => row.GatewayId == id);
                 writes.Remove(result);
+
+                writes.RemoveAll(row => (DateTime.UtcNow - row.When).TotalSeconds > 3600);
+
                 return result;
             }
         }

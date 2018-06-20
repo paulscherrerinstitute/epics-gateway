@@ -9,6 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using GatewayDebugData;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 
 namespace GwUnitTests
 {
@@ -760,6 +761,290 @@ namespace GwUnitTests
 
                         Assert.AreEqual("Works fine!", clientChannel.Get());
                         clientChannel.Put("New value");
+                        Assert.AreEqual("New value", clientChannel.Get());
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        [Timeout(10000)]
+        public void CheckWriteNotifyDouble()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
+                gateway.Start();
+
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                    serverChannel.Value = "Works fine!";
+
+                    // Client
+
+                    using (var client = new CAClient())
+                    {
+                        client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                        server.Start();
+
+                        Assert.AreEqual("Works fine!", clientChannel.Get());
+                        clientChannel.Put("New value");
+                        Assert.AreEqual("New value", clientChannel.Get());
+                        clientChannel.Put("New value2");
+                        Assert.AreEqual("New value2", clientChannel.Get());
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        [Timeout(10000)]
+        public void CheckWriteNotifyBlocked()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
+                gateway.Configuration.Security.RulesSideA.Add(new GatewayLogic.Configuration.SecurityRule
+                {
+                    Access = GatewayLogic.Configuration.SecurityAccess.READ,
+                    ChannelPattern = "*",
+                    Filter = new GatewayLogic.Configuration.AllFilter(),
+                    Security = gateway.Configuration.Security
+                });
+                gateway.Start();
+
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                    serverChannel.Value = "Works fine!";
+
+                    // Client
+
+                    using (var client = new CAClient())
+                    {
+                        client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        client.Configuration.WaitTimeout = 500;
+                        var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                        server.Start();
+
+                        Assert.AreEqual("Works fine!", clientChannel.Get());
+                        try
+                        {
+                            clientChannel.Put("New value");
+                        }
+                        catch
+                        {
+                        }
+                        Assert.AreEqual("Works fine!", clientChannel.Get());
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        [Timeout(10000)]
+        public void CheckWriteNotifyRulesAllows()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
+                gateway.Configuration.Security.RulesSideA.Add(new GatewayLogic.Configuration.SecurityRule
+                {
+                    Access = GatewayLogic.Configuration.SecurityAccess.READ,
+                    ChannelPattern = "*",
+                    Filter = new GatewayLogic.Configuration.AllFilter(),
+                    Security = gateway.Configuration.Security
+                });
+                gateway.Configuration.Security.RulesSideA.Add(new GatewayLogic.Configuration.SecurityRule
+                {
+                    Access = GatewayLogic.Configuration.SecurityAccess.ALL,
+                    ChannelPattern = "TEST-DATE",
+                    Filter = new GatewayLogic.Configuration.IPFilter { IP = "127.0.0.1", Security = gateway.Configuration.Security },
+                    Security = gateway.Configuration.Security
+                });
+                gateway.Start();
+
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                    serverChannel.Value = "Works fine!";
+
+                    // Client
+
+                    using (var client = new CAClient())
+                    {
+                        client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        client.Configuration.WaitTimeout = 500;
+                        var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                        server.Start();
+
+                        Assert.AreEqual("Works fine!", clientChannel.Get());
+                        try
+                        {
+                            clientChannel.Put("New value");
+                        }
+                        catch
+                        {
+                        }
+                        Assert.AreEqual("New value", clientChannel.Get());
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        [Timeout(10000)]
+        public void CheckWriteNotifyRulesGroupAllows()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
+                gateway.Configuration.Security.Groups.Add(new GatewayLogic.Configuration.Group
+                {
+                    Name = "AdminHosts",
+                    Filters = new List<GatewayLogic.Configuration.SecurityFilter> { new GatewayLogic.Configuration.IPFilter { IP = "127.0.0.1", Security = gateway.Configuration.Security } }
+                });
+                gateway.Configuration.Security.RulesSideA.Add(new GatewayLogic.Configuration.SecurityRule
+                {
+                    Access = GatewayLogic.Configuration.SecurityAccess.READ,
+                    ChannelPattern = "*",
+                    Filter = new GatewayLogic.Configuration.AllFilter(),
+                    Security = gateway.Configuration.Security
+                });
+                gateway.Configuration.Security.RulesSideA.Add(new GatewayLogic.Configuration.SecurityRule
+                {
+                    Access = GatewayLogic.Configuration.SecurityAccess.ALL,
+                    ChannelPattern = "TEST-DATE",
+                    Filter = new GatewayLogic.Configuration.GroupFilter { Name = "AdminHosts", Security = gateway.Configuration.Security },
+                    Security = gateway.Configuration.Security
+                });
+                gateway.Start();
+
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                    serverChannel.Value = "Works fine!";
+
+                    // Client
+
+                    using (var client = new CAClient())
+                    {
+                        client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        client.Configuration.WaitTimeout = 500;
+                        var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                        server.Start();
+
+                        Assert.AreEqual("Works fine!", clientChannel.Get());
+                        try
+                        {
+                            clientChannel.Put("New value");
+                        }
+                        catch
+                        {
+                        }
+                        Assert.AreEqual("New value", clientChannel.Get());
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        [Timeout(10000)]
+        public void CheckWriteNotifyXmlRulesAllows()
+        {
+            using (var gateway = new Gateway())
+            {
+                var config = @"<Config xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+<Type>UNIDIRECTIONAL</Type>
+<Name>CRYO-CAGW02</Name>
+<LocalAddressSideA>127.0.0.1:5432</LocalAddressSideA>
+<RemoteAddressSideA>127.0.0.1:5062</RemoteAddressSideA>
+<LocalAddressSideB>127.0.0.1:5055</LocalAddressSideB>
+<RemoteAddressSideB>127.0.0.1:5056</RemoteAddressSideB>
+<DelayStartup>0</DelayStartup>
+<Security>
+<Groups>
+<Group Name=""CRYO Consoles"">
+<Filters>
+<Filter xsi:type=""IPFilter"">
+<IP>127.0.0.1</IP>
+</Filter>
+</Filters>
+</Group>
+</Groups>
+<RulesSideA>
+<Rule Channel=""*"" Access=""READ"">
+<Filter xsi:type=""AllFilter""></Filter>
+</Rule>
+<Rule Channel=""*"" Access=""ALL"">
+<Filter xsi:type=""GroupFilter"">
+<Name>CRYO Consoles</Name>
+</Filter>
+</Rule>
+</RulesSideA>
+<RulesSideB>
+<Rule Channel=""*"" Access=""NONE"">
+<Filter xsi:type=""AllFilter""></Filter>
+</Rule>
+</RulesSideB>
+</Security>
+</Config>
+";
+                using (var txtReader = new System.IO.StringReader(config))
+                {
+                    var serializer = new XmlSerializer(typeof(GatewayLogic.Configuration.Configuration));
+                    gateway.Configuration = (GatewayLogic.Configuration.Configuration)serializer.Deserialize(txtReader);
+                    txtReader.Close();
+                }
+
+                gateway.Start();
+
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                    serverChannel.Value = "Works fine!";
+
+                    // Client
+
+                    using (var client = new CAClient())
+                    {
+                        client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        client.Configuration.WaitTimeout = 500;
+                        var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                        server.Start();
+
+                        Assert.AreEqual("Works fine!", clientChannel.Get());
+                        try
+                        {
+                            clientChannel.Put("New value");
+                        }
+                        catch
+                        {
+                        }
                         Assert.AreEqual("New value", clientChannel.Get());
                     }
                 }

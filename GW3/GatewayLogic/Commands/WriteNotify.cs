@@ -14,6 +14,18 @@ namespace GatewayLogic.Commands
                 //connection.Gateway.Log.Write(Services.LogLevel.Error, "Write notify on wrong channel.");
                 return;
             }
+
+            Configuration.SecurityAccess access;
+            if (((TcpClientConnection)connection).Listener == connection.Gateway.tcpSideA)
+                access = connection.Gateway.Configuration.Security.EvaluateSideA(channel.ChannelName, "", "", packet.Sender.Address.ToString());
+            else
+                access = connection.Gateway.Configuration.Security.EvaluateSideB(channel.ChannelName, "", "", packet.Sender.Address.ToString());
+            if (!access.HasFlag(Configuration.SecurityAccess.WRITE))
+            {
+                connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.WriteNotifyRequestNoAccess, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channel.ChannelName } });
+                return;
+            }
+
             connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.WriteNotifyRequest, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channel.ChannelName } });
             //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Write notify on " + channel.ChannelName);
             var write = connection.Gateway.WriteNotifyInformation.Get(channel, packet.Parameter2, (TcpClientConnection)connection);
@@ -27,7 +39,10 @@ namespace GatewayLogic.Commands
         {
             var write = connection.Gateway.WriteNotifyInformation.GetByGatewayId(packet.Parameter2);
             if (write == null)
+            {
+                connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.WriteNotifyAnswerWrong, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ClientIoId, Value = packet.Parameter2.ToString() } });
                 return;
+            }
             connection.Gateway.MessageLogger.Write(write.Client.RemoteEndPoint.ToString(), Services.LogMessageType.WriteNotifyAnswer, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = write.ChannelInformation.ChannelName } });
             //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Write notify response on " + write.ChannelInformation.ChannelName);
             packet.Parameter2 = write.ClientId;
