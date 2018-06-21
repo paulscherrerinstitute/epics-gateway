@@ -11,7 +11,7 @@ namespace GatewayLogic.Commands
             if (channel == null)
             {
                 connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.WriteWrongChannel);
-                //connection.Gateway.Log.Write(Services.LogLevel.Error, "Write on wrong channel.");
+                connection.Dispose();
                 return;
             }
 

@@ -32,12 +32,10 @@ namespace GatewayLogic.Commands
             if (!connection.Gateway.ChannelInformation.HasChannelInformation(channelName) && !connection.Gateway.SearchInformation.HasChannelServerInformation(channelName))
             {
                 connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.ChannelUnknown, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
-                //connection.Gateway.Log.Write(Services.LogLevel.Error, "Channel is not known: " + channelName);
                 connection.Dispose();
                 return;
             }
             connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannel, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName }, new LogMessageDetail { TypeId = MessageDetail.CID, Value = packet.Parameter1.ToString() } });
-            //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel for " + channelName + "  from " + ((TcpClientConnection)connection).RemoteEndPoint + " CID " + packet.Parameter1);
             var locked = true;
             try
             {
@@ -47,9 +45,6 @@ namespace GatewayLogic.Commands
                 channelInfo.RegisterClient(packet.Parameter1, (TcpClientConnection)connection);
                 connection.Gateway.GotNewClientChannel(packet.Sender.ToString(), channelName);
 
-                /*lock (channelInfo.LockObject)
-                {*/
-                // We have all the info, we shall answer
                 if (channelInfo.ServerId.HasValue && searchInfo.Server != null)
                 {
                     locked = false;
@@ -81,28 +76,9 @@ namespace GatewayLogic.Commands
                     //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel for " + channelName + " info must be found.");
                     channelInfo.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter1 });
 
-                    // We already have a TcpConnection
-                    /*if (channelInfo.TcpConnection != null)
-                    {
-                        locked = false;
-                        locker.Release();
-
-                        connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection for " + channelName + " was already here...");
-                        connection.Gateway.GotNewIocChannel(channelInfo.TcpConnection.Name, channelInfo.ChannelName);
-                        channelInfo.TcpConnection.LinkChannel(channelInfo);
-                        var newPacket = (DataPacket)packet.Clone();
-                        newPacket.Parameter1 = channelInfo.GatewayId;
-                        newPacket.Parameter2 = Gateway.CA_PROTO_VERSION;
-                        //if(connection.Gateway.s)
-                        //newPacket.Sender
-                        newPacket.Destination = searchInfo.Server;
-                        channelInfo.TcpConnection.Send(newPacket);
-                    }
-                    else*/
                     if (!channelInfo.ConnectionIsBuilding)
                     {
                         connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannelConnectionRequired, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
-                        //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection for " + channelName + " must be made");
                         channelInfo.ConnectionIsBuilding = true;
                         channelInfo.StartBuilding = DateTime.UtcNow;
                         locked = false;
@@ -114,7 +90,6 @@ namespace GatewayLogic.Commands
                                 connection.Gateway.ServerConnection.CreateConnection(connection.Gateway, searchInfo.Server, (tcpConnection) =>
                                 {
                                     connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannelConnectionMade, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
-                                    //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Connection for " + channelName + " has been created");
                                     channelInfo.TcpConnection = tcpConnection;
                                     tcpConnection.Version = searchInfo.Version;
 
@@ -127,21 +102,12 @@ namespace GatewayLogic.Commands
                                     newPacket.Parameter1 = 0;
                                     newPacket.Parameter2 = 0;
                                     channelInfo.TcpConnection.Send(newPacket);
-                                    //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Sending version to " + tcpConnection.Name);
 
                                     connection.Gateway.GotNewIocChannel(tcpConnection.Name, channelInfo.ChannelName);
                                     tcpConnection.LinkChannel(channelInfo);
                                     newPacket = (DataPacket)packet.Clone();
 
-                                    /*for (var i = 0; i < 30; i++)
-                                    {
-                                        if (tcpConnection.Version != 0)
-                                            break;
-                                        Thread.Sleep(100);
-                                    }*/
-
                                     // Old EPICS version
-
                                     newPacket.Parameter1 = channelInfo.GatewayId;
                                     newPacket.Parameter2 = Gateway.CA_PROTO_VERSION;
                                     newPacket.Destination = searchInfo.Server;
@@ -150,22 +116,6 @@ namespace GatewayLogic.Commands
                             });
                         }
                     }
-                    /*else if(channelInfo.ServerId == null && channelInfo.TcpConnection != null && channelInfo.ConnectionIsBuilding == false)
-                    {
-                        channelInfo.ConnectionIsBuilding = true;
-                        channelInfo.StartBuilding = DateTime.UtcNow;
-
-                        connection.Gateway.Log.Write(Services.LogLevel.Detail, "Create channel for " + channelName + " has been sent");
-                        connection.Gateway.GotNewIocChannel(channelInfo.TcpConnection.Name, channelInfo.ChannelName);
-                        var newPacket = (DataPacket)packet.Clone();
-                        newPacket.Parameter1 = channelInfo.GatewayId;
-                        newPacket.Parameter2 = Gateway.CA_PROTO_VERSION;
-                        newPacket.Destination = searchInfo.Server;
-                        channelInfo.TcpConnection.Send(newPacket);
-
-                        locked = false;
-                        locker.Release();
-                    }*/
                     else
                     {
                         locked = false;
@@ -178,7 +128,6 @@ namespace GatewayLogic.Commands
                 if (locked)
                     locker.Release();
             }
-            //}
         }
 
         public override void DoResponse(GatewayConnection connection, DataPacket packet)
@@ -194,16 +143,12 @@ namespace GatewayLogic.Commands
                     locker.Release();
                     connection.Dispose();
                     connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannelAnswerForUnknown);
-                    //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Answer for unknown channel");
                     return;
                 }
 
                 connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannelAnswer, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelInfo?.ChannelName } });
-                //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Answer for create channel " + channelInfo?.ChannelName);
                 IEnumerable<ClientId> clients;
 
-                /*lock (channelInfo.LockObject)
-                {*/
                 channelInfo.DataCount = packet.DataCount;
                 channelInfo.DataType = packet.DataType;
 
@@ -215,7 +160,6 @@ namespace GatewayLogic.Commands
 
                 foreach (var client in clients)
                 {
-                    //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Sending answer to " + client.Client + " GWID " + channelInfo.GatewayId);
                     var destConn = connection.Gateway.ClientConnection.Get(client.Client);
                     if (destConn == null)
                         continue;

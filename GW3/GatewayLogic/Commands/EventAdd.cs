@@ -24,8 +24,7 @@ namespace GatewayLogic.Commands
                 if (channel == null)
                 {
                     connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EventAddWrongChannel);
-                    //connection.Gateway.Log.Write(Services.LogLevel.Error, "Event add on wrong channel.");
-                    //connection.Dispose();
+                    connection.Dispose();
                     return;
                 }
 
@@ -34,11 +33,9 @@ namespace GatewayLogic.Commands
                 {
                     dataCount = channel.DataCount;
                     connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EventAddDynOldIoc, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channel.ChannelName }, new LogMessageDetail { TypeId = MessageDetail.DataCount, Value = dataCount.ToString() } });
-                    //connection.Gateway.Log.Write(Services.LogLevel.Detail, "CA Version too old, must set the datacount for " + channel.ChannelName + " to " + dataCount);
                 }
 
                 connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EventAdd, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channel.ChannelName }, new LogMessageDetail { TypeId = MessageDetail.CID, Value = packet.Parameter2.ToString() } });
-                //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event add on " + channel.ChannelName + " client id " + packet.Parameter2);
 
                 // A monitor on datacount 0 will always be a new monitor
                 var monitorMask = packet.GetUInt16(12 + (int)packet.HeaderSize);
@@ -56,8 +53,6 @@ namespace GatewayLogic.Commands
                     newPacket.DataCount = dataCount;
                     newPacket.Destination = channel.TcpConnection.RemoteEndPoint;
                     connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EventAddFirstEvent, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channel.ChannelName }, new LogMessageDetail { TypeId = MessageDetail.CID, Value = packet.Parameter2.ToString() }, new LogMessageDetail { TypeId = MessageDetail.GatewayMonitorId, Value = monitor.GatewayId.ToString() } });
-                    //connection.Gateway.Log.Write(Services.LogLevel.Detail, "New channel monitor " + monitor.GatewayId);
-                    //channel.TcpConnection.Send(newPacket);
                 }
                 // We must send a Read Notify to get the first result
                 else if (monitor.HasReceivedFirstResult == true)
@@ -70,7 +65,6 @@ namespace GatewayLogic.Commands
                     read.Monitor = monitor;
 
                     connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EventAddNotFirst, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channel.ChannelName }, new LogMessageDetail { TypeId = MessageDetail.CID, Value = packet.Parameter2.ToString() }, new LogMessageDetail { TypeId = MessageDetail.GatewayMonitorId, Value = monitor.GatewayId.ToString() } });
-                    //connection.Gateway.Log.Write(Services.LogLevel.Detail, "First event result already sent. Sent ReadNotify (client id: " + packet.Parameter2 + " gw id: " + read.GatewayId + ").");
 
                     newPacket = DataPacket.Create(0);
                     newPacket.Command = 15;
@@ -78,12 +72,10 @@ namespace GatewayLogic.Commands
                     newPacket.DataCount = dataCount;
                     newPacket.Parameter1 = channel.ServerId.Value;
                     newPacket.Parameter2 = read.GatewayId;
-                    //channel.TcpConnection.Send(newPacket);
                 }
                 else
                 {
                     connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EventAddMonitorList, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channel.ChannelName }, new LogMessageDetail { TypeId = MessageDetail.CID, Value = packet.Parameter2.ToString() }, new LogMessageDetail { TypeId = MessageDetail.GatewayMonitorId, Value = monitor.GatewayId.ToString() } });
-                    //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Add client to the waiting list.");
                     monitor.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter2 });
                 }
             }
@@ -105,18 +97,11 @@ namespace GatewayLogic.Commands
                 if (monitor == null)
                 {
                     connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EventResponseOnUnknown, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.GatewayMonitorId, Value = packet.Parameter2.ToString() } });
-                    //connection.Gateway.Log.Write(Services.LogLevel.Error, "Event add response on unknown (" + packet.Parameter2 + ")");
-                    /*var newPacket = DataPacket.Create(0);
-                    newPacket.Command = 2;
-                    newPacket.DataType = 1;
-                    newPacket.DataCount = 1;*/
-                    //ThreadPool.QueueUserWorkItem((obj) => { connection.Dispose(); });
                     return;
                 }
                 monitor.HasReceivedFirstResult = true;
                 clients = monitor.GetClients();
                 connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EventAddResponse, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = monitor.ChannelInformation.ChannelName }, new LogMessageDetail { TypeId = MessageDetail.ClientCounts, Value = clients.Count().ToString() } });
-                //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event add response on " + monitor.ChannelInformation.ChannelName + " clients " + clients.Count());
             }
 
             foreach (var client in clients)
@@ -124,7 +109,6 @@ namespace GatewayLogic.Commands
                 if (client.WaitingReadyNotify)
                 {
                     connection.Gateway.MessageLogger.Write(client.Client.ToString(), Services.LogMessageType.EventAddResponseSkipForRead, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = monitor.ChannelInformation.ChannelName } });
-                    //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event waiting first response on " + monitor.ChannelInformation.ChannelName);
                     continue;
                 }
                 var newPacket = (DataPacket)packet.Clone();
@@ -132,7 +116,6 @@ namespace GatewayLogic.Commands
                 if (conn == null)
                 {
                     connection.Gateway.MessageLogger.Write(client.Client.ToString(), Services.LogMessageType.EventAddResponseClientDisappeared, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = monitor.ChannelInformation.ChannelName } });
-                    //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Event response for client which disappeared");
                     monitor.RemoveClient(connection.Gateway, client.Client, client.Id);
                     continue;
                 }
@@ -140,7 +123,6 @@ namespace GatewayLogic.Commands
                 newPacket.Parameter2 = client.Id;
                 conn.Send(newPacket);
                 connection.Gateway.MessageLogger.Write(client.Client.ToString(), Services.LogMessageType.EventAddResponseSending, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = monitor.ChannelInformation.ChannelName }, new LogMessageDetail { TypeId = MessageDetail.CID, Value = client.Id.ToString() } });
-                //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Sending event response on " + monitor.ChannelInformation.ChannelName + " client " + client.Id);
             }
         }
     }
