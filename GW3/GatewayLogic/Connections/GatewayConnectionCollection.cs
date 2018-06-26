@@ -54,7 +54,7 @@ namespace GatewayLogic.Connections
                 {
                     conn.Send(echoPacket);
                 }
-                catch (Exception ex)
+                catch
                 {
                 }
             }

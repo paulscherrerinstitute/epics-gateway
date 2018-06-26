@@ -53,33 +53,11 @@ namespace GatewayLogic
         private bool disposed = false;
 
         static List<SafeLockCleanInfo> needToCleanup = new List<SafeLockCleanInfo>();
-        static Thread cleanupThread;
         private readonly string memberName;
 
         public string sourceFilePath { get; }
 
         private readonly int sourceLineNumber;
-
-        /*static SafeLock()
-        {
-            cleanupThread = new Thread(obj =>
-            {
-                while (true)
-                {
-                    Thread.Sleep(200);
-                    var now = DateTime.UtcNow;
-
-                    lock (needToCleanup)
-                    {
-                        foreach (var i in needToCleanup.Where(row => row.When >= now))
-                            i.Object.semaphore.Dispose();
-                        needToCleanup.RemoveAll(row => row.When >= now);
-                    }
-                }
-            });
-            cleanupThread.IsBackground = true;
-            cleanupThread.Start();
-        }*/
 
         public SafeLock([System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
                     [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
