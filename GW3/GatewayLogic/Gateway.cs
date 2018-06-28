@@ -150,7 +150,7 @@ namespace GatewayLogic
             if (MessageLogger == null)
                 MessageLogger = new MessageLogger(gatewayName);
 
-            bool freshConfig = false;
+            var freshConfig = false;
             try
             {
                 using (var client = new System.Net.WebClient())
