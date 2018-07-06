@@ -122,6 +122,7 @@
     <Compile Include="Backend\Controllers\AnalyzeController.cs" />
     <Compile Include="Backend\Controllers\DiskController.cs" />
     <Compile Include="Backend\Controllers\LogController.cs" />
+    <Compile Include="Backend\DataContext\BinaryIndex.cs" />
     <Compile Include="Backend\DataContext\Context.cs" />
     <Compile Include="Backend\DataContext\DataFile.cs" />
     <Compile Include="Backend\DataContext\DataFiles.cs" />
