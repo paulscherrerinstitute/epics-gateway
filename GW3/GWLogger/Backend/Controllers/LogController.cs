@@ -11,8 +11,6 @@ namespace GWLogger.Backend.Controllers
         static Thread cleanupThread;
         public static int NBDaysToKeep => int.Parse(System.Configuration.ConfigurationManager.AppSettings["storageKeepDays"] ?? "5");
 
-
-
         static LogController()
         {
             // Every hours check if we changed day, if yes call the data cleanup

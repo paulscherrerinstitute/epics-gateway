@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using System.Xml.Serialization;
 using GWLogger.Backend.DTOs;
 
@@ -14,6 +15,11 @@ namespace GWLogger.Backend.DataContext
     {
         DataFiles files;
         Thread autoFlusher;
+        const int MaxBufferedEntries = 8000;
+        List<IdValue> messageDetailTypes = new List<IdValue>();
+        private bool isDisposed = false;
+        private Thread bufferConsumer;
+        BufferBlock<LogEntry> bufferedEntries = new BufferBlock<LogEntry>();
 
         public Context()
         {
@@ -67,7 +73,13 @@ namespace GWLogger.Backend.DataContext
 
             autoFlusher.IsBackground = true;
             autoFlusher.Start();
+
+            bufferConsumer = new Thread(BufferConsumer);
+            autoFlusher.IsBackground = true;
+            bufferConsumer.Start();
         }
+
+        public double BufferUsage => Math.Round(MaxBufferedEntries / bufferedEntries.Count * 10000.0) / 100;
 
         public GatewayStats GetStats(string gatewayName, DateTime start, DateTime end)
         {
@@ -78,11 +90,30 @@ namespace GWLogger.Backend.DataContext
 
         public void Save(LogEntry entry)
         {
-            bool isAnError = false;
-            lock (messageTypes)
-                isAnError = errorMessages.Contains(entry.MessageTypeId);
+            while (bufferedEntries.Count > MaxBufferedEntries)
+                Thread.Sleep(100);
+            bufferedEntries.Post(entry);
+        }
 
-            files[entry.Gateway].Save(entry, isAnError);
+        public void BufferConsumer()
+        {
+            while (!isDisposed)
+            {
+                LogEntry entry;
+                try
+                {
+                    entry = bufferedEntries.Receive(TimeSpan.FromMilliseconds(1000));
+                }
+                catch
+                {
+                    continue;
+                }
+                bool isAnError = false;
+                lock (messageTypes)
+                    isAnError = errorMessages.Contains(entry.MessageTypeId);
+
+                files[entry.Gateway].Save(entry, isAnError);
+            }
         }
 
         internal List<string> Gateways
@@ -125,9 +156,6 @@ namespace GWLogger.Backend.DataContext
                 }
             }
         }
-
-        List<IdValue> messageDetailTypes = new List<IdValue>();
-        private bool isDisposed = false;
 
         public List<IdValue> MessageDetailTypes
         {
@@ -210,6 +238,7 @@ namespace GWLogger.Backend.DataContext
                 return;
 
             isDisposed = true;
+            files.SaveStats();
             files.Dispose();
         }
     }
