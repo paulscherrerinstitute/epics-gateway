@@ -112,7 +112,8 @@ namespace GWLogger.Backend.DataContext
             {
                 LockObject.Wait();
                 // Delete all the data files
-                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.data").Where(row => DateOfFile(row) <= toDel))
+
+                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.*").Where(row => DateOfFile(row) <= toDel))
                 {
                     if (needToClose)
                     {
@@ -122,21 +123,6 @@ namespace GWLogger.Backend.DataContext
 
                     File.Delete(i);
                 }
-                // Delete all the index files
-                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.idx").Where(row => DateOfFile(row) <= toDel))
-                    File.Delete(i);
-                // Delete all the clientSessions files
-                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.clientSessions").Where(row => DateOfFile(row) <= toDel))
-                    File.Delete(i);
-                // Delete all the serverSessions files
-                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.serverSessions").Where(row => DateOfFile(row) <= toDel))
-                    File.Delete(i);
-                // Delete all the searches files
-                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.searches").Where(row => DateOfFile(row) <= toDel))
-                    File.Delete(i);
-                // Delete all the stats files
-                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.stats").Where(row => DateOfFile(row) <= toDel))
-                    File.Delete(i);
             }
             finally
             {
