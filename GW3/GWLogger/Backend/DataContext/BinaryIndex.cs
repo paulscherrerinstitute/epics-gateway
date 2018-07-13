@@ -26,6 +26,8 @@ namespace GWLogger.Backend.DataContext
             reader = new BinaryReader(stream, Encoding.UTF8, true);
         }
 
+        public string Filename => filename;
+
         public void AddEntry(TType key, long position)
         {
             if (((key as string)?.Length ?? 0) > maxStringSize)
@@ -42,6 +44,11 @@ namespace GWLogger.Backend.DataContext
             if (!Clusters.ContainsKey(key))
                 Clusters.Add(key, new BinaryIndexCluster(reader, writer, key));
             return Clusters[key].GetEntries();
+        }
+
+        public void Flush()
+        {
+            writer?.Flush();
         }
 
         public void Dispose()

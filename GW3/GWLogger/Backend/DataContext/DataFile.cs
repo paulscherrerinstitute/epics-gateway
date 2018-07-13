@@ -17,6 +17,7 @@ namespace GWLogger.Backend.DataContext
         public BinaryReader DataReader { get; private set; }
         public long[] Index = new long[24 * 6];
         string currentFile;
+        BinaryIndex<short> commandIndex = null;
 
         public long[,] Stats = new long[24 * 6, 3];
 
@@ -616,6 +617,7 @@ namespace GWLogger.Backend.DataContext
                 if (!mustFlush)
                     return;
                 mustFlush = false;
+                commandIndex.Flush();
                 DataWriter.Flush();
             }
             finally
@@ -731,6 +733,13 @@ namespace GWLogger.Backend.DataContext
                 sourceMemberNameId = Context.MessageDetailTypes.First(row => row.Value == "SourceMemberName").Id;
             if (sourceFilePathId == -1)
                 sourceFilePathId = Context.MessageDetailTypes.First(row => row.Value == "SourceFilePath").Id;
+
+            if (commandIndex == null || commandIndex.Filename != FileName(entry.EntryDate, ".cmd_idx"))
+            {
+                commandIndex?.Dispose();
+                commandIndex = new BinaryIndex<short>(FileName(entry.EntryDate, ".cmd_idx"));
+            }
+            commandIndex.AddEntry((short)entry.MessageTypeId, stream.BaseStream.Position);
 
             stream.Write(entry.EntryDate.ToBinary());
             stream.Write((byte)entry.MessageTypeId);
@@ -1132,6 +1141,8 @@ namespace GWLogger.Backend.DataContext
         {
             if (LockObject == null)
                 return;
+            commandIndex?.Dispose();
+            commandIndex = null;
             try
             {
                 LockObject.Wait();

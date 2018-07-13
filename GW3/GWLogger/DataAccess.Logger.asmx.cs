@@ -30,6 +30,12 @@ namespace GWLogger
         }
 
         [WebMethod]
+        public double GetBufferUsage()
+        {
+            return Global.DataContext.BufferUsage;
+        }
+
+        [WebMethod]
         public void LogEntry(string gateway, string remoteIpPoint, int messageType, List<Backend.DTOs.LogEntryDetail> details)
         {
             Backend.Controllers.LogController.LogEntry(gateway, remoteIpPoint, messageType, details);
