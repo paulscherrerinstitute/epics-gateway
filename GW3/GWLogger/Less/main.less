@@ -92,7 +92,7 @@ body
     left: 0px;
     top: 0px;
     width: @leftSidebar;
-    bottom: 80px + @borderSpacing * 3;
+    bottom: 120px + @borderSpacing * 4;
     padding: 5px;
     padding-top: 17px;
     overflow: hidden;
@@ -351,7 +351,7 @@ select
 #utcTime
 {
     .container;
-    bottom: @borderSpacing * 2 + 40px;
+    bottom: @borderSpacing * 3 + 80px;
     width: @leftSidebar;
     left: 0px;
     height: 40px;
@@ -379,5 +379,22 @@ select
     {
         .containterLabel;
         content: "Free DB Space";
+    }
+}
+
+#bufferSpace
+{
+    .container;
+    bottom: @borderSpacing * 2 + 40px;
+    width: @leftSidebar;
+    left: 0px;
+    height: 40px;
+    padding-top: 20px;
+    text-align: center;
+
+    &:after
+    {
+        .containterLabel;
+        content: "Buffer";
     }
 }

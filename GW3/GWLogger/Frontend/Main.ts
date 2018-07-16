@@ -446,6 +446,18 @@ class Main
             }
         });
 
+        $.ajax({
+            type: 'POST',
+            url: 'DataAccess.asmx/GetBufferUsage',
+            data: JSON.stringify({}),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (msg)
+            {
+                $("#bufferSpace").html("" + msg.d + "%");
+            }
+        });
+
         if (Main.CurrentGateway)
         {
             Main.LoadSessions();

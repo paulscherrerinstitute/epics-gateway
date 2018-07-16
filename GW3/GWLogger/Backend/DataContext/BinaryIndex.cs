@@ -21,6 +21,10 @@ namespace GWLogger.Backend.DataContext
         public BinaryIndex(string filename)
         {
             this.filename = filename;
+        }
+
+        private void Init()
+        {
             stream = File.Open(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             writer = new BinaryWriter(stream, Encoding.UTF8, true);
             reader = new BinaryReader(stream, Encoding.UTF8, true);
@@ -34,9 +38,21 @@ namespace GWLogger.Backend.DataContext
                 throw new Exception("String is too long for the index");
             if (key == null)
                 return;
-            if (!Clusters.ContainsKey(key))
-                Clusters.Add(key, new BinaryIndexCluster(reader, writer, key));
-            Clusters[key].AddEntry(position);
+            try
+            {
+                if (!Clusters.ContainsKey(key))
+                    Clusters.Add(key, new BinaryIndexCluster(reader, writer, key));
+                Clusters[key].AddEntry(position);
+            }
+            // Wrong index. Let's delete it, and create a new one.
+            catch
+            {
+                writer?.Dispose();
+                reader?.Dispose();
+                stream?.Dispose();
+                File.Delete(this.filename);
+                Init();
+            }
         }
 
         public IEnumerable<long> Elements(TType key)

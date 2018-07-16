@@ -79,7 +79,7 @@ namespace GWLogger.Backend.DataContext
             bufferConsumer.Start();
         }
 
-        public double BufferUsage => Math.Round(MaxBufferedEntries / bufferedEntries.Count * 10000.0) / 100;
+        public double BufferUsage => Math.Round(bufferedEntries.Count * 10000.0 / MaxBufferedEntries) / 100;
 
         public GatewayStats GetStats(string gatewayName, DateTime start, DateTime end)
         {
