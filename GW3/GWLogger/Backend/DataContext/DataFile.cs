@@ -139,22 +139,7 @@ namespace GWLogger.Backend.DataContext
         public static void DeleteFiles(string gateway)
         {
             // Delete all the data files
-            foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.data"))
-                File.Delete(i);
-            // Delete all the index files
-            foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.idx"))
-                File.Delete(i);
-            // Delete all the clientSessions files
-            foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.clientSessions"))
-                File.Delete(i);
-            // Delete all the serverSessions files
-            foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.serverSessions"))
-                File.Delete(i);
-            // Delete all the searches files
-            foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.searches"))
-                File.Delete(i);
-            // Delete all the stats files
-            foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.stats"))
+            foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.*"))
                 File.Delete(i);
 
             lock (knownFiles)
@@ -734,12 +719,12 @@ namespace GWLogger.Backend.DataContext
             if (sourceFilePathId == -1)
                 sourceFilePathId = Context.MessageDetailTypes.First(row => row.Value == "SourceFilePath").Id;
 
-            if (commandIndex == null || commandIndex.Filename != FileName(entry.EntryDate, ".cmd_idx"))
+            /*if (commandIndex == null || commandIndex.Filename != FileName(entry.EntryDate, ".cmd_idx"))
             {
                 commandIndex?.Dispose();
                 commandIndex = new BinaryIndex<short>(FileName(entry.EntryDate, ".cmd_idx"));
             }
-            commandIndex.AddEntry((short)entry.MessageTypeId, stream.BaseStream.Position);
+            commandIndex.AddEntry((short)entry.MessageTypeId, stream.BaseStream.Position);*/
 
             stream.Write(entry.EntryDate.ToBinary());
             stream.Write((byte)entry.MessageTypeId);
