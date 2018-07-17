@@ -17,6 +17,7 @@ namespace GWLogger.Backend.DataContext
         const int indexClusterSize = 200;
         const int maxStringSize = 125;
         const int indexItemNumbers = 1024 * 4;
+        const int batchSize = 20;
 
         public BinaryIndex(string filename)
         {
@@ -43,6 +44,9 @@ namespace GWLogger.Backend.DataContext
                 if (!Clusters.ContainsKey(key))
                     Clusters.Add(key, new BinaryIndexCluster(reader, writer, key));
                 Clusters[key].AddEntry(position);
+
+                foreach (var c in Clusters.Where(row => row.Value.BufferSize >= batchSize))
+                    c.Value.FlushBuffer();
             }
             // Wrong index. Let's delete it, and create a new one.
             catch
@@ -64,11 +68,17 @@ namespace GWLogger.Backend.DataContext
 
         public void Flush()
         {
+            foreach (var c in Clusters)
+                c.Value.FlushBuffer();
+
             writer?.Flush();
         }
 
         public void Dispose()
         {
+            foreach (var c in Clusters)
+                c.Value.FlushBuffer();
+
             reader?.Dispose();
             reader = null;
             writer?.Dispose();
@@ -87,7 +97,8 @@ namespace GWLogger.Backend.DataContext
             private long currentChunkPosition;
             private short currentChunkNumberOfItems;
             private long nextCunkItemsPosition;
-            private short currentItem;
+            List<long> positionBuffer = new List<long>();
+            public DateTime LastBufferFlush { get; set; } = DateTime.UtcNow;
 
             public BinaryIndexCluster(BinaryReader reader, BinaryWriter writer, TType key)
             {
@@ -253,29 +264,57 @@ namespace GWLogger.Backend.DataContext
 
             internal void AddEntry(long position)
             {
-                if (this.currentChunkNumberOfItems >= indexItemNumbers)
+                lock (positionBuffer)
                 {
-                    var next = writer.BaseStream.Length;
-                    Seek(currentChunkPosition + 2);
-                    writer.Write(next);
-
-                    Seek(next);
-                    writer.Write((short)0);
-                    writer.Write((long)0);
-                    writer.Write(new byte[indexItemNumbers * 8]); // A time stamp and a file position (long)
-
-                    this.currentChunkPosition = next;
-                    this.currentChunkNumberOfItems = 0;
+                    positionBuffer.Add(position);
                 }
+            }
 
-                // write the timestamp and index
-                Seek(this.currentChunkPosition + 2 + 8 + 8 * this.currentChunkNumberOfItems);
-                writer.Write(position);
+            internal long BufferSize
+            {
+                get
+                {
+                    lock (positionBuffer)
+                    {
+                        return positionBuffer.Count;
+                    }
+                }
+            }
 
-                // update the number of items in the chunk
-                Seek(this.currentChunkPosition);
-                this.currentChunkNumberOfItems++;
-                writer.Write(this.currentChunkNumberOfItems);
+            internal void FlushBuffer()
+            {
+                lock (positionBuffer)
+                {
+                    while (positionBuffer.Count > 0)
+                    {
+                        if (this.currentChunkNumberOfItems >= indexItemNumbers)
+                        {
+                            var next = writer.BaseStream.Length;
+                            Seek(currentChunkPosition + 2);
+                            writer.Write(next);
+
+                            Seek(next);
+                            writer.Write((short)0);
+                            writer.Write((long)0);
+                            writer.Write(new byte[indexItemNumbers * 8]); // A time stamp and a file position (long)
+
+                            this.currentChunkPosition = next;
+                            this.currentChunkNumberOfItems = 0;
+                        }
+
+                        var pos = positionBuffer.Take(indexItemNumbers - currentChunkNumberOfItems);
+                        Seek(this.currentChunkPosition + 2 + 8 + 8 * this.currentChunkNumberOfItems);
+                        foreach (var p in pos)
+                        {
+                            this.currentChunkNumberOfItems++;
+                            writer.Write(p);
+                        }
+                        Seek(this.currentChunkPosition);
+                        writer.Write(this.currentChunkNumberOfItems);
+                        positionBuffer.RemoveRange(0, pos.Count());
+                    }
+                    LastBufferFlush = DateTime.UtcNow;
+                }
             }
 
             void Seek(long position)
