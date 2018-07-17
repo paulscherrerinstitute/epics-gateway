@@ -719,6 +719,7 @@ namespace GWLogger.Backend.DataContext
             if (sourceFilePathId == -1)
                 sourceFilePathId = Context.MessageDetailTypes.First(row => row.Value == "SourceFilePath").Id;
 
+#warning Disabled due to poor performances
             /*if (commandIndex == null || commandIndex.Filename != FileName(entry.EntryDate, ".cmd_idx"))
             {
                 commandIndex?.Dispose();
