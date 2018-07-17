@@ -602,7 +602,7 @@ namespace GWLogger.Backend.DataContext
                 if (!mustFlush)
                     return;
                 mustFlush = false;
-                commandIndex.Flush();
+                commandIndex?.Flush();
                 DataWriter.Flush();
             }
             finally
