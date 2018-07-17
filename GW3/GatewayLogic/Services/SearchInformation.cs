@@ -33,6 +33,8 @@ namespace GatewayLogic.Services
             public IPEndPoint Server { get; internal set; }
             public DateTime LastSearch { get; internal set; }
             public ushort Version { get; internal set; }
+            public bool FromSideA { get; internal set; } = false;
+            public bool FromSideB { get; internal set; } = false;
 
             public SearchInformationDetail(uint id)
             {
@@ -120,7 +122,7 @@ namespace GatewayLogic.Services
 
         public void Remove(string channelName)
         {
-            gateway.MessageLogger.Write(null, LogMessageType.RemoveSearchInfo, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName} });
+            gateway.MessageLogger.Write(null, LogMessageType.RemoveSearchInfo, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
 
             using (dictionaryLock.Aquire())
             {

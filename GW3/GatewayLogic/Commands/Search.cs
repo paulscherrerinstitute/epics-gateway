@@ -17,7 +17,7 @@ namespace GatewayLogic.Commands
             if (packet.Sender.ToString() == connection.Gateway.Configuration.SideAEndPoint?.ToString() ||
                 packet.Sender.ToString() == connection.Gateway.Configuration.SideBEndPoint?.ToString())
                 return;
-            
+
             // It's a response
             if (packet.PayloadSize == 8 && packet.DataCount == 0)
             //if (packet.PayloadSize == 8)
@@ -48,8 +48,10 @@ namespace GatewayLogic.Commands
             DataPacket newPacket;
 
             // Connection known, we answer we knows it
-            if (record.Server != null)
+            if (record.Server != null && ((record.FromSideB && connection == connection.Gateway.udpSideA) || (record.FromSideA && connection == connection.Gateway.udpSideB)))
             {
+                //if(record.Fr)
+
                 connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.SearchRequestAnswerFromCache, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
                 //newPacket = (DataPacket)packet.Clone();
                 newPacket = DataPacket.Create(8);
@@ -132,6 +134,10 @@ namespace GatewayLogic.Commands
             //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search answer for " + search.Channel + " from " + packet.Sender + " version " + version);
             //if(packet.Parameter2 == 0xffffffff)
             search.Server = new IPEndPoint(packet.Sender.Address, packet.DataType);
+            if((connection == connection.Gateway.udpSideA))
+                search.FromSideA =  true;
+            if ((connection == connection.Gateway.udpSideB))
+                search.FromSideB = true;
             search.Version = version;
             /*else
                 search.Server = new IPEndPoint(packet.Parameter2, packet.DataType);*/
