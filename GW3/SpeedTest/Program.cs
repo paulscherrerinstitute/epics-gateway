@@ -5,6 +5,7 @@ using GatewayLogic;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -19,6 +20,43 @@ namespace SpeedTest
         delegate CAClient CATest(int i, ParallelLoopState loop, CAClient client);
 
         static void Main(string[] args)
+        {
+            Log();
+        }
+
+        static void Log()
+        {
+            foreach (var i in Directory.EnumerateFiles(GWLogger.Backend.DataContext.DataFile.StorageDirectory, "*.*.*"))
+            {
+                if (i.Split('\\').Last().Split('.').Length != 3 || i.Split('\\').Last().Split('.')[1].Length != 8)
+                    continue;
+                File.Delete(i);
+            }
+
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            using (var ctx = new GWLogger.Backend.DataContext.Context())
+            {
+                // Remove all
+                ctx.CleanOlderThan(-1);
+                var startDate = new DateTime(2000, 1, 1);
+
+
+                for (var i = 0; i < 1000000; i++)
+                    ctx.Save(new GWLogger.Backend.DataContext.LogEntry { Gateway = "GW" + i % 20, EntryDate = startDate.AddSeconds(i), MessageTypeId = i % 59, LogEntryDetails = new List<GWLogger.Backend.DataContext.LogEntryDetail>(), RemoteIpPoint = "127.0.0.1:5050" });
+                ctx.Flush();
+            }
+            sw.Stop();
+            Console.WriteLine("Total time: " + sw.Elapsed.ToString());
+            if (Debugger.IsAttached)
+            {
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
+            }
+        }
+
+        static void Routing()
         {
             using (var gateway = new Gateway())
             {

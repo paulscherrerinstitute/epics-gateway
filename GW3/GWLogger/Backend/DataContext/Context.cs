@@ -20,6 +20,7 @@ namespace GWLogger.Backend.DataContext
         private bool isDisposed = false;
         private Thread bufferConsumer;
         BufferBlock<LogEntry> bufferedEntries = new BufferBlock<LogEntry>();
+        private CancellationTokenSource cancelOperation = new CancellationTokenSource();
 
         public Context()
         {
@@ -99,20 +100,18 @@ namespace GWLogger.Backend.DataContext
         {
             while (!isDisposed)
             {
-                LogEntry entry;
-                try
+                List<LogEntry> entries = new List<LogEntry>();
+                entries.Add(bufferedEntries.Receive(cancelOperation.Token));
+                while(bufferedEntries.Count > 0)
+                    entries.Add(bufferedEntries.Receive(cancelOperation.Token));
+                foreach (var entry in entries.OrderBy(row => row.Gateway))
                 {
-                    entry = bufferedEntries.Receive(TimeSpan.FromMilliseconds(1000));
-                }
-                catch
-                {
-                    continue;
-                }
-                bool isAnError = false;
-                lock (messageTypes)
-                    isAnError = errorMessages.Contains(entry.MessageTypeId);
+                    bool isAnError = false;
+                    lock (messageTypes)
+                        isAnError = errorMessages.Contains(entry.MessageTypeId);
 
-                files[entry.Gateway].Save(entry, isAnError);
+                    files[entry.Gateway].Save(entry, isAnError);
+                }
             }
         }
 
@@ -236,7 +235,7 @@ namespace GWLogger.Backend.DataContext
         {
             if (isDisposed)
                 return;
-
+            cancelOperation.Cancel();
             isDisposed = true;
             files.SaveStats();
             files.Dispose();

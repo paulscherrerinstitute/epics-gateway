@@ -17,7 +17,7 @@ namespace GWLogger.Backend.DataContext
         const int indexClusterSize = 200;
         const int maxStringSize = 125;
         const int indexItemNumbers = 1024 * 4;
-        const int batchSize = 60;
+        const int batchSize = 80;
 
         public BinaryIndex(string filename)
         {
