@@ -21,7 +21,8 @@ namespace GatewayLogic.Services
 
     class LogMessageConverter : IDisposable
     {
-        public static Dictionary<LogMessageType, string> Convertion { get; private set; }
+        public static Dictionary<LogMessageType, string> Convertion { get; }
+        public static Dictionary<MessageDetail, string> Details { get; }
 
         public TextLogger TextLogger { get; private set; }
 
@@ -33,6 +34,11 @@ namespace GatewayLogic.Services
                 .AsQueryable()
                 .OfType<LogMessageType>()
                 .ToDictionary(key => key, val => ((MessageDisplayAttribute)(typeof(LogMessageType).GetMember(val.ToString())[0].GetCustomAttributes(typeof(MessageDisplayAttribute), false)).FirstOrDefault())?.LogDisplay);
+
+            Details = Enum.GetValues(typeof(MessageDetail))
+                .AsQueryable()
+                .OfType<MessageDetail>()
+                .ToDictionary(key => key, val => val.ToString());
         }
 
         internal LogMessageConverter(MessageLogger messageLogger)
@@ -69,10 +75,12 @@ namespace GatewayLogic.Services
                 if (details != null)
                 {
                     foreach (var i in details)
-                        line = Regex.Replace(line, "\\{" + i.TypeId.ToString() + "\\}", i.Value, RegexOptions.IgnoreCase);
+                        line = line.Replace("{" + Details[i.TypeId] + "}", i.Value);
+                        //line = Regex.Replace(line, "\\{" + i.TypeId.ToString() + "\\}", i.Value, RegexOptions.IgnoreCase);
                 }
                 if (remoteIpPoint != null)
-                    line = Regex.Replace(line, "\\{endpoint\\}", remoteIpPoint, RegexOptions.IgnoreCase);
+                    line = line.Replace("{Endpoint}", remoteIpPoint);
+                    //line = Regex.Replace(line, "\\{endpoint\\}", remoteIpPoint, RegexOptions.IgnoreCase);
                 this.TextLogger.Write(LogLevel.Detail, line, memberName, sourceFilePath, sourceLineNumber);
             }
         }

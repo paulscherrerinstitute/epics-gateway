@@ -51,6 +51,7 @@ namespace GatewayLogic.Connections
             {
                 socket = value;
                 socket.SendTimeout = 3000;
+                socket.SendBufferSize = 64 * 1024;
 
                 RemoteEndPoint = (IPEndPoint)socket.RemoteEndPoint;
                 //netStream = new NetworkStream(socket);
@@ -78,7 +79,7 @@ namespace GatewayLogic.Connections
 
         public override void Send(DataPacket packet)
         {
-            Gateway.DiagnosticServer.NbNewData++;
+            Interlocked.Increment(ref Gateway.DiagnosticServer.NbNewData);
             this.LastMessage = DateTime.UtcNow;
 
             try

@@ -37,11 +37,15 @@ var tsMain = typescript.createProject({
 
 gulp.task("default", function ()
 {
-    //process.chdir(__dirname);
-    //console.log("I will watch for you all the TS and LESS files and compile them as needed.");
-    //console.log(" ");
-    //gulp.watch("Frontend/**/*.ts", ["compile:frontend"]);
-    //gulp.watch("**/*.less", ["compile:less"]);
+});
+
+gulp.task("watcher", function ()
+{
+    process.chdir(__dirname);
+    console.log("I will watch for you all the TS and LESS files and compile them as needed.");
+    console.log(" ");
+    gulp.watch("Frontend/**/*.ts", ["compile:frontend"]);
+    gulp.watch("**/*.less", ["compile:less"]);
 });
 
 gulp.task("compile:less", function ()

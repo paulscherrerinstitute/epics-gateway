@@ -29,6 +29,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GWLogger", "GWLogger\GWLogger.csproj", "{B8FD6239-E447-4DC5-A97A-9E65A29C459E}"
 EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x86 = Debug|x86
@@ -120,41 +123,5 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {68B36B5E-C4FC-4605-A5E1-8A59433EA06F}
-	EndGlobalSection
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 11
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://tfs.psi.ch/defaultcollection
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = GatewayLogic\\GatewayLogic.csproj
-		SccProjectName1 = GatewayLogic
-		SccLocalPath1 = GatewayLogic
-		SccProjectUniqueName2 = GWConsole\\GWConsole.csproj
-		SccProjectName2 = GWConsole
-		SccLocalPath2 = GWConsole
-		SccProjectUniqueName3 = GWTest\\GWTest.csproj
-		SccProjectName3 = GWTest
-		SccLocalPath3 = GWTest
-		SccProjectUniqueName4 = GwUnitTests\\GwUnitTests.csproj
-		SccProjectName4 = GwUnitTests
-		SccLocalPath4 = GwUnitTests
-		SccProjectUniqueName5 = SpeedTest\\SpeedTest.csproj
-		SccProjectName5 = SpeedTest
-		SccLocalPath5 = SpeedTest
-		SccProjectUniqueName6 = GatewayDebugData\\GatewayDebugData.csproj
-		SccProjectName6 = GatewayDebugData
-		SccLocalPath6 = GatewayDebugData
-		SccProjectUniqueName7 = StressTest\\StressTest.csproj
-		SccProjectName7 = StressTest
-		SccLocalPath7 = StressTest
-		SccProjectUniqueName8 = GWService\\GWService.csproj
-		SccProjectName8 = GWService
-		SccLocalPath8 = GWService
-		SccProjectUniqueName9 = GWWatchdog\\GWWatchdog.csproj
-		SccProjectName9 = GWWatchdog
-		SccLocalPath9 = GWWatchdog
-		SccProjectUniqueName10 = GWLogger\\GWLogger.csproj
-		SccProjectName10 = GWLogger
-		SccLocalPath10 = GWLogger
 	EndGlobalSection
 EndGlobal

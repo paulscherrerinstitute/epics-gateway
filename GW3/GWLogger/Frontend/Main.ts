@@ -5,7 +5,8 @@ class Main
     static CurrentGateway: string;
     static Sessions: GatewaySession[];
     static Stats: GatewayStats;
-    static EndDate: Date;
+    static StartDate: Date = null;
+    static EndDate: Date = null;
     static CurrentTime: Date;
     static Levels: string;
 
@@ -64,8 +65,8 @@ class Main
     static LoadLogStats(refresh: boolean = false): void
     {
         var resetEndDate = refresh && ((Main.CurrentTime && Main.Stats && Main.CurrentTime == Main.Stats.Logs[Main.Stats.Logs.length - 1].Date) || !(Main.CurrentTime && Main.Stats))
-
-        var start = new Date((new Date()).getTime() - (24 * 3600 * 1000));
+        if (Main.StartDate === null)
+            Main.StartDate = new Date((new Date()).getTime() - (24 * 3600 * 1000));
         //var start = new Date(2018, 2, 12);
         var end = new Date();
         $.ajax({
@@ -73,7 +74,7 @@ class Main
             url: 'DataAccess.asmx/GetStats',
             data: JSON.stringify({
                 "gatewayName": Main.CurrentGateway,
-                start: Utils.FullUtcDateFormat(start),
+                start: Utils.FullUtcDateFormat(Main.StartDate),
                 end: Utils.FullUtcDateFormat(end)
             }),
             contentType: 'application/json; charset=utf-8',
@@ -82,12 +83,14 @@ class Main
             {
                 Main.Stats = GatewayStats.CreateFromObject(msg.d);
 
-                if (!Main.EndDate)
+                if (Main.EndDate === null)
                 {
                     if (Main.Stats.Logs && Main.Stats.Logs.length > 0)
                         Main.EndDate = Main.Stats.Logs[Main.Stats.Logs.length - 1].Date;
                     else
                         Main.EndDate = new Date();
+                    $("#startDate").val(Utils.FullUtcDateFormat(Main.StartDate));
+                    $("#endDate").val(Utils.FullUtcDateFormat(Main.EndDate));
                 }
 
                 if (resetEndDate)
@@ -116,7 +119,7 @@ class Main
 
         var canvas = (<HTMLCanvasElement>$("#timeRangeCanvas")[0]);
         var ctx = canvas.getContext("2d");
-        var width = $("#timeRange").width();
+        var width = $("#timeRange").width() - 40;
         var height = $("#timeRange").height() - 18;
 
         canvas.width = width;
@@ -571,6 +574,21 @@ class Main
         $(window).bind('popstate', Main.PopState);
         $("#clientsTabs li:nth-child(1)").click(Main.ShowStats);
         $("#clientsTabs li:nth-child(2)").click(Main.ShowSearches);
+        $("#prevDay").click(() =>
+        {
+            Main.StartDate = new Date(Main.StartDate.getTime() - 24 * 3600 * 1000);
+            Main.EndDate = new Date(Main.StartDate.getTime() + 24 * 3600 * 1000);
+            $("#startDate").val(Utils.FullUtcDateFormat(Main.StartDate));
+            $("#endDate").val(Utils.FullUtcDateFormat(Main.EndDate));
+            console.log(Utils.FullUtcDateFormat(Main.StartDate));
+        });
+        $("#nextDay").click(() =>
+        {
+            Main.StartDate = new Date(Main.StartDate.getTime() + 24 * 3600 * 1000);
+            Main.EndDate = new Date(Main.StartDate.getTime() + 24 * 3600 * 1000);
+            $("#startDate").val(Utils.FullUtcDateFormat(Main.StartDate));
+            $("#endDate").val(Utils.FullUtcDateFormat(Main.EndDate));
+        });
 
         $("#logFilter li").click(Main.LogFilter);
 

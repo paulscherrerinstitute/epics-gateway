@@ -13,7 +13,14 @@
         <span class="title">Sessions:</span>
         <div id="gatewaySessions"></div>
     </div>
-    <div id="timeRange"><canvas id="timeRangeCanvas"></canvas></div>
+    <div id="timeRange"><span id="prevDay">&lt;</span><canvas id="timeRangeCanvas"></canvas><span id="nextDay">&gt;</span></div>
+    <div id="fields">
+        <span id="">Start time:</span>
+        <input type="text" id="startDate" />
+        <span id="">End time:</span>
+        <input type="text" id="endDate" />
+    </div>
+    <input type="text" id="queryField" placeholder="Type your query here..." />
     <div id="help">
         <div id="closeHelp">X</div>
         <h1>Welcome to the EPICS Gateway Log Analyzer</h1>

@@ -102,16 +102,14 @@ namespace GWLogger.Backend.DataContext
             {
                 List<LogEntry> entries = new List<LogEntry>();
                 entries.Add(bufferedEntries.Receive(cancelOperation.Token));
-                while(bufferedEntries.Count > 0)
+                while (bufferedEntries.Count > 0)
                     entries.Add(bufferedEntries.Receive(cancelOperation.Token));
-                foreach (var entry in entries.OrderBy(row => row.Gateway))
-                {
-                    bool isAnError = false;
-                    lock (messageTypes)
-                        isAnError = errorMessages.Contains(entry.MessageTypeId);
-
-                    files[entry.Gateway].Save(entry, isAnError);
-                }
+                List<int> knownErrors;
+                lock (messageTypes)
+                    knownErrors = errorMessages.ToList();
+                //foreach (var entry in entries.OrderBy(row => row.Gateway))
+                foreach (var entry in entries)
+                    files[entry.Gateway].Save(entry, knownErrors.Contains(entry.MessageTypeId));
             }
         }
 
@@ -222,7 +220,9 @@ namespace GWLogger.Backend.DataContext
 
         public void CleanOlderThan(int nbDays = 10)
         {
-            files.CleanOlderThan(nbDays);
+#warning remove while debug
+            if (!System.Diagnostics.Debugger.IsAttached)
+                files.CleanOlderThan(nbDays);
         }
 
         public void Flush()

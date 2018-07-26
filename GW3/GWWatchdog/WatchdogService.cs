@@ -166,7 +166,7 @@ namespace GWWatchdog
                                     lastCPUVals.RemoveAt(0);
 
                                 currentAVG = lastCPUVals.Average();
-                                if (lastCPUVals.Count < nbCPUAvg * 0.8 || currentAVG < 95.0)
+                                if (lastCPUVals.Count < nbCPUAvg * 0.8 || currentAVG < 75.0)
                                 {
                                     isOk = true;
                                     status = GWStatus.ALL_OK;

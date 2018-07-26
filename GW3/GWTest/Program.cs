@@ -21,8 +21,8 @@ namespace GWTest
             //Console.WriteLine("Some change");
             //TestDiagnosticServer();
             //Test();
-            //S1();
-            S2();
+            S1();
+            //S2();
             //Console.ReadKey();
         }
 
@@ -222,64 +222,101 @@ namespace GWTest
             gateway.Configuration.SideB = "127.0.0.1:5055";
             gateway.Start();
 
-            // Serverside
-            var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056);
-            var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
-            serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
-            serverChannel.Value = "Works fine!";
+            int nbChannels = 30;
+            var waiter = new EventWaitHandle(false, EventResetMode.ManualReset);
+            var rnd = new Random();
 
-            var serverChannel2 = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CADoubleRecord>("TEST-DOUBLE");
-            serverChannel2.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.ON_CHANGE;
-            serverChannel2.Value = 5;
-
-            var t = new Thread((obj) =>
+            ThreadStart serverThread = () =>
               {
-                  var rnd = new Random();
-                  while (true)
+                  var mustStop = false;
+                  while (!mustStop)
                   {
-                      Thread.Sleep(10);
-                      serverChannel2.Value = rnd.NextDouble();
+                      // Serverside
+                      using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                      {
+                          var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                          serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                          serverChannel.Value = "Works fine!";
+
+                          var serverChannels = new List<EpicsSharp.ChannelAccess.Server.RecordTypes.CADoubleRecord>();
+                          for (var i = 0; i < nbChannels; i++)
+                          {
+                              var sc = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CADoubleRecord>("TEST-DOUBLE-" + i);
+                              sc.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.HZ10;
+                              sc.Value = 5;
+                              sc.PrepareRecord += (obj, evt) =>
+                                {
+                                    sc.Value = rnd.NextDouble();
+                                };
+                              serverChannels.Add(sc);
+                          }
+                          server.Start();
+
+                          mustStop = waiter.WaitOne(rnd.Next(5000, 10000));
+                      }
                   }
-              });
-            t.IsBackground = true;
-            t.Start();
+              };
 
-            // Client
+            var s = new Thread(serverThread);
+            s.Start();
 
-            var client = new CAClient();
-            client.Configuration.WaitTimeout = 200;
-            client.Configuration.SearchAddress = "127.0.0.1:5432";
-            var clientChannel = client.CreateChannel<string>("TEST-DATE");
-            var clientChannel2 = client.CreateChannel<string>("TEST-DOUBLE");
+            ParameterizedThreadStart clientFunction = (objState) =>
+              {
+                  var threadId = (int)objState;
+                  // Client
+                  var mustStop = false;
+                  while (!mustStop)
+                  {
+                      using (var client = new CAClient())
+                      {
+                          client.Configuration.WaitTimeout = 200;
+                          client.Configuration.SearchAddress = "127.0.0.1:5432";
+                          var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                          //Console.WriteLine("Started client " + threadId);
 
-            server.Start();
+                          clientChannel.StatusChanged += (sender, newStatus) =>
+                          {
+                              //Console.WriteLine("Thread: " + threadId + ", " + sender.ChannelName + " === " + newStatus);
+                          };
 
-            //Console.WriteLine(clientChannel.Get());
+                          clientChannel.MonitorChanged += (sender, newval) =>
+                          {
+                          };
 
-            //Assert.AreEqual("Works fine!", clientChannel.Get());
+                          var clientChannels = new List<Channel<string>>();
 
-            clientChannel.StatusChanged += (sender, newStatus) =>
+                          for (var i = 0; i < nbChannels; i++)
+                          {
+                              var c = client.CreateChannel<string>("TEST-DOUBLE-" + i);
+
+                              c.StatusChanged += (sender, newStatus) =>
+                              {
+                                  //Console.WriteLine("Thread: " + threadId + ", " + sender.ChannelName + " === " + newStatus);
+                              };
+
+                              c.MonitorChanged += (sender, newval) =>
+                              {
+                              };
+                              clientChannels.Add(c);
+                          }
+
+                          mustStop = waiter.WaitOne(rnd.Next(5000, 10000));
+                          /*if (!mustStop)
+                              Console.WriteLine("Client stopped " + threadId);*/
+                      }
+                  }
+              };
+
+            var threads = new Thread[30];
+            for (var i = 0; i < threads.Length; i++)
             {
-                Console.WriteLine(sender.ChannelName + " === " + newStatus);
-            };
-
-            clientChannel2.StatusChanged += (sender, newStatus) =>
-            {
-                Console.WriteLine(sender.ChannelName + " === " + newStatus);
-            };
-
-            clientChannel.MonitorChanged += (sender, newval) =>
-            {
-            };
-
-            clientChannel2.MonitorChanged += (sender, newval) =>
-            {
-            };
+                threads[i] = new Thread(clientFunction);
+                threads[i].Start(i);
+            }
 
             Console.WriteLine("Press any key to stop");
             Console.ReadKey();
-            server.Dispose();
-            client.Dispose();
+            waiter.Set();
             Environment.Exit(0);
         }
 
