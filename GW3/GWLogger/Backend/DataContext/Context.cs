@@ -220,7 +220,6 @@ namespace GWLogger.Backend.DataContext
 
         public void CleanOlderThan(int nbDays = 10)
         {
-#warning remove while debug
             if (!System.Diagnostics.Debugger.IsAttached)
                 files.CleanOlderThan(nbDays);
         }

@@ -15,6 +15,7 @@ namespace GatewayLogic.Services
         private static DataAccessSoapClient soapLogger;
         private bool shouldStop;
         private CancellationTokenSource cancelOperation = new CancellationTokenSource();
+        static Thread reconnecter;
 
         BufferBlock<LogMessage> buffer = new BufferBlock<LogMessage>();
         private string gatewayName;
@@ -27,40 +28,56 @@ namespace GatewayLogic.Services
             if (System.Configuration.ConfigurationManager.AppSettings["soapLogger"]?.ToLower() != "true")
                 return;
 
-            // Build SOAP connection
-            try
-            {
-                if (System.Configuration.ConfigurationManager.AppSettings["soapURL"] != null)
-                    soapLogger = new GWLoggerSoap.DataAccessSoapClient(new System.ServiceModel.BasicHttpBinding(), new EndpointAddress(System.Configuration.ConfigurationManager.AppSettings["soapURL"]));
-                else
-                    soapLogger = new GWLoggerSoap.DataAccessSoapClient();
-            }
-            catch
-            {
-                soapLogger = new GWLoggerSoap.DataAccessSoapClient(new System.ServiceModel.BasicHttpBinding(), new EndpointAddress("http://epics-gw-logger.psi.ch/DataAccess.asmx"));
-            }
+            reconnecter = new Thread(() =>
+              {
+                  while (true)
+                  {
+                      if(soapLogger != null)
+                      {
+                          Thread.Sleep(30000);
+                          continue;
+                      }
 
-            // Sends all message types to the server
-            soapLogger.RegisterLogMessageType(Enum.GetValues(typeof(LogMessageType))
-                .AsQueryable()
-                .OfType<LogMessageType>()
-                .Select(row => new MessageType
-                {
-                    Id = (int)row,
-                    Name = row.ToString(),
-                    DisplayMask = ((MessageDisplayAttribute)(typeof(LogMessageType).GetMember(row.ToString())[0].GetCustomAttributes(typeof(MessageDisplayAttribute), false)).FirstOrDefault()).LogDisplay,
-                    LogLevel = (int)((MessageDisplayAttribute)(typeof(LogMessageType).GetMember(row.ToString())[0].GetCustomAttributes(typeof(MessageDisplayAttribute), false)).FirstOrDefault()).LogLevel
-                }).ToArray());
+                      // Build SOAP connection
+                      try
+                      {
+                          if (System.Configuration.ConfigurationManager.AppSettings["soapURL"] != null)
+                              soapLogger = new GWLoggerSoap.DataAccessSoapClient(new System.ServiceModel.BasicHttpBinding(), new EndpointAddress(System.Configuration.ConfigurationManager.AppSettings["soapURL"]));
+                          else
+                              soapLogger = new GWLoggerSoap.DataAccessSoapClient();
+                      }
+                      catch
+                      {
+                          soapLogger = new GWLoggerSoap.DataAccessSoapClient(new System.ServiceModel.BasicHttpBinding(), new EndpointAddress("http://epics-gw-logger.psi.ch/DataAccess.asmx"));
+                      }
 
-            // Sends all message type details to the server
-            soapLogger.RegisterLogMessageDetailType(Enum.GetValues(typeof(MessageDetail))
-                .AsQueryable()
-                .OfType<MessageDetail>()
-                .Select(row => new IdValue
-                {
-                    Id = (int)row,
-                    Value = row.ToString()
-                }).ToArray());
+                      // Sends all message types to the server
+                      soapLogger.RegisterLogMessageType(Enum.GetValues(typeof(LogMessageType))
+                          .AsQueryable()
+                          .OfType<LogMessageType>()
+                          .Select(row => new MessageType
+                          {
+                              Id = (int)row,
+                              Name = row.ToString(),
+                              DisplayMask = ((MessageDisplayAttribute)(typeof(LogMessageType).GetMember(row.ToString())[0].GetCustomAttributes(typeof(MessageDisplayAttribute), false)).FirstOrDefault()).LogDisplay,
+                              LogLevel = (int)((MessageDisplayAttribute)(typeof(LogMessageType).GetMember(row.ToString())[0].GetCustomAttributes(typeof(MessageDisplayAttribute), false)).FirstOrDefault()).LogLevel
+                          }).ToArray());
+
+                      // Sends all message type details to the server
+                      soapLogger.RegisterLogMessageDetailType(Enum.GetValues(typeof(MessageDetail))
+                          .AsQueryable()
+                          .OfType<MessageDetail>()
+                          .Select(row => new IdValue
+                          {
+                              Id = (int)row,
+                              Value = row.ToString()
+                          }).ToArray());
+
+                      Thread.Sleep(30000);
+                  }
+              });
+            reconnecter.IsBackground = true;
+            reconnecter.Start();
         }
 
 
@@ -132,6 +149,13 @@ namespace GatewayLogic.Services
 
             while (!shouldStop)
             {
+                // Not connected, we wait
+                if(soapLogger == null)
+                {
+                    Thread.Sleep(1000);
+                    continue;
+                }
+
                 // Send bunch if there is multiple entries waiting
                 if (buffer.Count > 1)
                 {
@@ -170,6 +194,7 @@ namespace GatewayLogic.Services
                     }
                     catch
                     {
+                        soapLogger = null;
                     }
                 }
                 else
@@ -199,6 +224,7 @@ namespace GatewayLogic.Services
                     }
                     catch
                     {
+                        soapLogger = null;
                     }
                 }
             }
