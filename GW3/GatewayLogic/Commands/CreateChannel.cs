@@ -154,9 +154,9 @@ namespace GatewayLogic.Commands
 
                 channelInfo.ServerId = packet.Parameter2;
                 clients = channelInfo.GetClients();
+                channelInfo.ConnectionIsBuilding = false;
                 locked = false;
                 locker.Release();
-                channelInfo.ConnectionIsBuilding = false;
 
                 foreach (var client in clients)
                 {

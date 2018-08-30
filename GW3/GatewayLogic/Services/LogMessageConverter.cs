@@ -76,11 +76,9 @@ namespace GatewayLogic.Services
                 {
                     foreach (var i in details)
                         line = line.Replace("{" + Details[i.TypeId] + "}", i.Value);
-                        //line = Regex.Replace(line, "\\{" + i.TypeId.ToString() + "\\}", i.Value, RegexOptions.IgnoreCase);
                 }
                 if (remoteIpPoint != null)
                     line = line.Replace("{Endpoint}", remoteIpPoint);
-                    //line = Regex.Replace(line, "\\{endpoint\\}", remoteIpPoint, RegexOptions.IgnoreCase);
                 this.TextLogger.Write(LogLevel.Detail, line, memberName, sourceFilePath, sourceLineNumber);
             }
         }

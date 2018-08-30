@@ -1,14 +1,13 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using GatewayLogic;
+﻿using EpicsSharp.ChannelAccess.Client;
 using EpicsSharp.ChannelAccess.Server;
-using System.Net;
-using EpicsSharp.ChannelAccess.Client;
-using System.Threading;
+using GatewayLogic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using GatewayDebugData;
-using System.Collections.Generic;
+using System.Net;
+using System.Threading;
 using System.Xml.Serialization;
 
 namespace GwUnitTests
@@ -66,6 +65,64 @@ namespace GwUnitTests
                 }
             }
         }
+
+        [TestMethod]
+        [Timeout(5000)]
+        public void CheckGetInexistent()
+        {
+            using (var gateway = new Gateway())
+            {
+                gateway.Configuration.SideA = "127.0.0.1:5432";
+                gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
+                gateway.Configuration.SideB = "127.0.0.1:5055";
+                gateway.Configuration.DelayStartup = 0;
+                gateway.Configuration.Security.RulesSideA.Add(new GatewayLogic.Configuration.SecurityRule { Access = GatewayLogic.Configuration.SecurityAccess.NONE, ChannelPattern = "*", Filter = new GatewayLogic.Configuration.AllFilter() });
+                gateway.Configuration.Security.RulesSideA.Add(new GatewayLogic.Configuration.SecurityRule { Access = GatewayLogic.Configuration.SecurityAccess.READ, ChannelPattern = "TEST-*", Filter = new GatewayLogic.Configuration.AllFilter() });
+                gateway.Configuration.Security.Init();
+                gateway.Start();
+
+                // Serverside
+                using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
+                {
+                    var serverChannel = server.CreateRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAStringRecord>("TEST-DATE");
+                    serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+                    serverChannel.Value = "Works fine!";
+                    server.Start();
+
+                    // Client
+
+                    using (var client = new CAClient())
+                    {
+                        client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        var clientChannel = client.CreateChannel<string>("TEST-DATE");
+                        client.Configuration.WaitTimeout = 500;
+                        client.Configuration.DebugTiming = true;
+                        try
+                        {
+                            clientChannel.Get();
+                        }
+                        catch
+                        {
+                        }
+                        var a = clientChannel.ElapsedTimings;
+                        Assert.AreEqual(6, a.Count);
+
+                        var clientChannel2 = client.CreateChannel<string>("TEST-DATE2");
+                        try
+                        {
+                            clientChannel2.Get();
+                        }
+                        catch
+                        {
+                        }
+                        var a2 = clientChannel2.ElapsedTimings;
+                        Assert.AreEqual(0, a2.Count);
+                        //Assert.AreEqual("Works fine!", clientChannel.Get());
+                    }
+                }
+            }
+        }
+
 
         [TestMethod]
         [Timeout(5000)]

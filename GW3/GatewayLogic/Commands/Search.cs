@@ -115,10 +115,10 @@ namespace GatewayLogic.Commands
 
         public override void DoResponse(GatewayConnection connection, DataPacket packet)
         {
-            /*// Skip ourselves
+            // Skip ourselves
             if (packet.Sender.ToString() == connection.Gateway.Configuration.SideAEndPoint?.ToString() ||
                 packet.Sender.ToString() == connection.Gateway.Configuration.SideBEndPoint?.ToString())
-                return;*/
+                return;
 
             var search = connection.Gateway.SearchInformation.Get(packet.Parameter2);
 

@@ -2,18 +2,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GatewayLogic.Services
 {
-    class ChannelInformation : IDisposable
+    internal class ChannelInformation : IDisposable
     {
-        readonly SafeLock dictionaryLock = new SafeLock();
-        readonly Dictionary<string, ChannelInformationDetails> dictionary = new Dictionary<string, ChannelInformationDetails>();
+        private readonly SafeLock dictionaryLock = new SafeLock();
+        private readonly Dictionary<string, ChannelInformationDetails> dictionary = new Dictionary<string, ChannelInformationDetails>();
 
         private uint nextId = 1;
-        object counterLock = new object();
+        private object counterLock = new object();
 
         public Gateway Gateway { get; }
 
@@ -24,17 +22,14 @@ namespace GatewayLogic.Services
               {
                   using (dictionaryLock.Aquire())
                   {
-                      var toDrop = new List<string>();
-                      foreach (var channel in dictionary.Values)
-                      {
-                          if (channel.ShouldDrop)
+                      var toDrop = dictionary.Select(row=>row.Value).Where(row => (row.ConnectionIsBuilding && (DateTime.UtcNow - row.StartBuilding).TotalSeconds > 60) || row.ShouldDrop).ToList();
+
+                      toDrop.ForEach(row =>
                           {
-                              toDrop.Add(channel.ChannelName);
-                              channel.Drop(gateway);
-                              channel.Dispose();
-                          }
-                      }
-                      toDrop.ForEach(row => dictionary.Remove(row));
+                              row.Drop(Gateway);
+                              row.Dispose();
+                              dictionary.Remove(row.ChannelName);
+                          });
                   }
               };
         }
@@ -55,7 +50,7 @@ namespace GatewayLogic.Services
             public uint? ServerId { get; set; }
             public bool ConnectionIsBuilding { get; internal set; }
 
-            SafeLock clientsLock = new SafeLock();
+            private SafeLock clientsLock = new SafeLock();
             public List<ClientId> clients = new List<ClientId>();
             public List<Client> connectedClients = new List<Client>();
 
@@ -127,7 +122,7 @@ namespace GatewayLogic.Services
 
             internal void Drop(Gateway gateway)
             {
-                if (ServerId.HasValue)
+                if (ServerId.HasValue && ConnectionIsBuilding == false)
                 {
                     gateway.MonitorInformation.Drop(GatewayId);
 
@@ -137,6 +132,44 @@ namespace GatewayLogic.Services
                     newPacket.Parameter1 = GatewayId;
                     newPacket.Parameter2 = ServerId.Value;
                     TcpConnection.Send(newPacket);
+                }
+                else
+                {
+                    // Drop the search information as well as it was certainly wrong
+                    gateway.SearchInformation.Remove(this.ChannelName);
+
+                    List<Client> clients;
+                    using (clientsLock.Aquire())
+                    {
+                        clients = connectedClients.ToList();
+                    }
+
+                    // Send channel disconnected
+                    var newPacket = DataPacket.Create(0);
+                    newPacket.Command = 27;
+                    foreach (var client in clients)
+                    {
+                        newPacket.Parameter1 = client.Id;
+                        client.Connection.Send(newPacket);
+                    }
+
+                    /*// Drop client connection
+                    try
+                    {
+                        toDrop.ForEach(row => row.Connection.Dispose());
+                    }
+                    catch
+                    {
+                    }*/
+                    // Drop server connection
+                    try
+                    {
+                        TcpConnection?.Dispose();
+                        TcpConnection = null;
+                    }
+                    catch
+                    {
+                    }
                 }
             }
 

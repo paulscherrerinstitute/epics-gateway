@@ -21,7 +21,8 @@ namespace SpeedTest
 
         static void Main(string[] args)
         {
-            Log();
+            //Log();
+            Routing();
         }
 
         static void Log()
@@ -63,7 +64,8 @@ namespace SpeedTest
                 gateway.Configuration.SideA = "127.0.0.1:5432";
                 gateway.Configuration.RemoteSideB = "127.0.0.1:5056";
                 gateway.Configuration.SideB = "127.0.0.1:5055";
-                gateway.Log.Filter = (level) => { return level >= GatewayLogic.Services.LogLevel.Error; };
+                gateway.Log.Handler += Log_Handler;
+                //gateway.Log.Filter = (level) => { return level >= GatewayLogic.Services.LogLevel.Error; };
                 gateway.Start();
 
                 // Serverside
@@ -85,10 +87,10 @@ namespace SpeedTest
                     sw.Start();
                     // Client
                     //Enumerable.Range(0, 3000).AsParallel().ForAll(i =>
-                    Parallel.ForEach<int, CAClient>(Enumerable.Range(0, 3000), () =>
+                    Parallel.ForEach<int, CAClient>(Enumerable.Range(0, 300), () =>
                     {
                         var client = new CAClient(); client.Configuration.SearchAddress = "127.0.0.1:5432";
-                        client.Configuration.WaitTimeout = 10000;
+                        client.Configuration.WaitTimeout = 1000;
                         return client;
                     },
                     (i, loop, client) => testToRun(i, loop, client)
@@ -101,6 +103,11 @@ namespace SpeedTest
             Console.ReadKey();
         }
 
+        private static void Log_Handler(GatewayLogic.Services.LogLevel level, string source, string message)
+        {
+
+        }
+
         static CAClient MonitorTest(int i, ParallelLoopState loop, CAClient client)
         {
             using (var clientChannel = client.CreateChannel<string>("SPEED-TEST-" + i))
@@ -109,9 +116,10 @@ namespace SpeedTest
                 {
                     clientChannel.MonitorChanged += (sender, val) =>
                       {
+                          //Console.WriteLine(i);
                           autoEvt.Set();
                       };
-                    autoEvt.WaitOne(10000);
+                    autoEvt.WaitOne(1000);
                 }
             }
             return client;
