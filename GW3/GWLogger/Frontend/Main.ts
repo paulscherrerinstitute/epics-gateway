@@ -285,9 +285,9 @@ class Main
 
     static TimeLineMouse(evt: JQueryMouseEventObject): void
     {
-        var width = $("#timeRange").width();
+        var width = $("#timeRangeCanvas").width();
         var w = width / 145;
-        var x = evt.pageX - $("#timeRange").position().left;
+        var x = evt.pageX - ($("#timeRange").position().left + $("#timeRange span").width());
 
         var tx = Math.floor((width - x) / w);
         if (tx < 0)

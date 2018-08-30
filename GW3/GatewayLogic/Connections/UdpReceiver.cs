@@ -1,21 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace GatewayLogic.Connections
 {
-    class UdpReceiver : GatewayConnection
+    internal class UdpReceiver : GatewayConnection
     {
-        const int SioUdpConnReset = -1744830452;
-        readonly IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
-        readonly Splitter splitter;
-
-        Socket receiver;
-        readonly byte[] buff = new byte[Gateway.BUFFER_SIZE];
+        private const int SioUdpConnReset = -1744830452;
+        private readonly IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
+        private readonly Splitter splitter;
+        private bool disposed = false;
+        private Socket receiver;
+        private readonly byte[] buff = new byte[Gateway.BUFFER_SIZE];
+        private Dictionary<IPEndPoint, MemoryStream> normalSendBuffer = new Dictionary<IPEndPoint, MemoryStream>();
+        private Dictionary<IPEndPoint, MemoryStream> reverseSendBuffer = new Dictionary<IPEndPoint, MemoryStream>();
+        private Thread flusher;
 
         public IPEndPoint EndPoint { get; }
 
@@ -39,39 +41,115 @@ namespace GatewayLogic.Connections
 
             EndPoint tempRemoteEp = sender;
             receiver.BeginReceiveFrom(buff, 0, buff.Length, SocketFlags.None, ref tempRemoteEp, GotUdpMessage, tempRemoteEp);
+
+            flusher = new Thread(() =>
+              {
+                  while (!disposed)
+                  {
+                      FlushBufferSend();
+                      Thread.Sleep(50);
+                  }
+              });
+            flusher.Start();
         }
 
         public override void Dispose()
         {
+            disposed = true;
             receiver.Dispose();
             splitter.Dispose();
         }
 
         public override void Send(DataPacket packet)
         {
-            try
+            lock (normalSendBuffer)
             {
-                if (packet.ReverseAnswer)
+                var sendBuffer = (packet.ReverseAnswer ? reverseSendBuffer : normalSendBuffer);
+
+                if (!sendBuffer.ContainsKey(packet.Destination))
+                    sendBuffer.Add(packet.Destination, new MemoryStream());
+
+                var stream = sendBuffer[packet.Destination];
+                if (stream.Position + packet.BufferSize > Gateway.MAX_UDP_PACKET_SIZE && stream.Position > 0)
                 {
-                    if (this == Gateway.udpSideA)
-                        Gateway.udpSideA.receiver.SendTo(packet.Data, packet.BufferSize, SocketFlags.None, packet.Destination);
-                    else
-                        Gateway.udpSideB.receiver.SendTo(packet.Data, packet.BufferSize, SocketFlags.None, packet.Destination);
+                    var bytes = stream.ToArray();
+                    stream.Position = 0;
+                    stream.SetLength(0); // Reset
+
+                    try
+                    {
+                        if (sendBuffer == reverseSendBuffer)
+                        {
+                            if (this == Gateway.udpSideA)
+                                Gateway.udpSideA.receiver.SendTo(bytes, bytes.Length, SocketFlags.None, packet.Destination);
+                            else
+                                Gateway.udpSideB.receiver.SendTo(bytes, bytes.Length, SocketFlags.None, packet.Destination);
+                        }
+                        else
+                        {
+                            if (this == Gateway.udpSideA)
+                                Gateway.udpSideB.receiver.SendTo(bytes, bytes.Length, SocketFlags.None, packet.Destination);
+                            else
+                                Gateway.udpSideA.receiver.SendTo(bytes, bytes.Length, SocketFlags.None, packet.Destination);
+                        }
+                    }
+                    catch
+                    {
+                    }
                 }
-                else
-                {
-                    if (this == Gateway.udpSideA)
-                        Gateway.udpSideB.receiver.SendTo(packet.Data, packet.BufferSize, SocketFlags.None, packet.Destination);
-                    else
-                        Gateway.udpSideA.receiver.SendTo(packet.Data, packet.BufferSize, SocketFlags.None, packet.Destination);
-                }
-            }
-            catch
-            {
+                stream.Write(packet.Data, 0, packet.BufferSize);
             }
         }
 
-        void GotUdpMessage(IAsyncResult ar)
+        private void FlushBufferSend()
+        {
+            lock (normalSendBuffer)
+            {
+                foreach (var i in normalSendBuffer)
+                {
+                    if (i.Value.Position == 0)
+                        continue;
+
+                    var bytes = i.Value.ToArray();
+                    i.Value.Position = 0;
+                    i.Value.SetLength(0); // Reset
+
+                    try
+                    {
+                        if (this == Gateway.udpSideA)
+                            Gateway.udpSideB.receiver.SendTo(bytes, bytes.Length, SocketFlags.None, i.Key);
+                        else
+                            Gateway.udpSideA.receiver.SendTo(bytes, bytes.Length, SocketFlags.None, i.Key);
+                    }
+                    catch
+                    {
+                    }
+                }
+
+                foreach (var i in reverseSendBuffer)
+                {
+                    if (i.Value.Position == 0)
+                        continue;
+
+                    var bytes = i.Value.ToArray();
+                    i.Value.Position = 0;
+                    i.Value.SetLength(0); // Reset
+
+                    try
+                    {
+                        if (this == Gateway.udpSideA)
+                            Gateway.udpSideA.receiver.SendTo(bytes, bytes.Length, SocketFlags.None, i.Key);
+                        else
+                            Gateway.udpSideB.receiver.SendTo(bytes, bytes.Length, SocketFlags.None, i.Key);
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+        }
+
+        private void GotUdpMessage(IAsyncResult ar)
         {
             IPEndPoint ipeSender = new IPEndPoint(IPAddress.Any, 0);
             EndPoint epSender = ipeSender;

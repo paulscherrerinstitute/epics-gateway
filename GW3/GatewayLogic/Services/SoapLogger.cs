@@ -48,30 +48,50 @@ namespace GatewayLogic.Services
                       }
                       catch
                       {
-                          soapLogger = new GWLoggerSoap.DataAccessSoapClient(new System.ServiceModel.BasicHttpBinding(), new EndpointAddress("http://epics-gw-logger.psi.ch/DataAccess.asmx"));
+                          try
+                          {
+                              soapLogger = new GWLoggerSoap.DataAccessSoapClient(new System.ServiceModel.BasicHttpBinding(), new EndpointAddress("http://epics-gw-logger.psi.ch/DataAccess.asmx"));
+                          }
+                          catch
+                          {
+                              soapLogger = null;
+                          }
+                      }
+                      if(soapLogger == null)
+                      {
+                          Thread.Sleep(30000);
+                          continue;
                       }
 
-                      // Sends all message types to the server
-                      soapLogger.RegisterLogMessageType(Enum.GetValues(typeof(LogMessageType))
-                          .AsQueryable()
-                          .OfType<LogMessageType>()
-                          .Select(row => new MessageType
-                          {
-                              Id = (int)row,
-                              Name = row.ToString(),
-                              DisplayMask = ((MessageDisplayAttribute)(typeof(LogMessageType).GetMember(row.ToString())[0].GetCustomAttributes(typeof(MessageDisplayAttribute), false)).FirstOrDefault()).LogDisplay,
-                              LogLevel = (int)((MessageDisplayAttribute)(typeof(LogMessageType).GetMember(row.ToString())[0].GetCustomAttributes(typeof(MessageDisplayAttribute), false)).FirstOrDefault()).LogLevel
-                          }).ToArray());
 
-                      // Sends all message type details to the server
-                      soapLogger.RegisterLogMessageDetailType(Enum.GetValues(typeof(MessageDetail))
-                          .AsQueryable()
-                          .OfType<MessageDetail>()
-                          .Select(row => new IdValue
-                          {
-                              Id = (int)row,
-                              Value = row.ToString()
-                          }).ToArray());
+                      try
+                      {
+                          // Sends all message types to the server
+                          soapLogger.RegisterLogMessageType(Enum.GetValues(typeof(LogMessageType))
+                              .AsQueryable()
+                              .OfType<LogMessageType>()
+                              .Select(row => new MessageType
+                              {
+                                  Id = (int)row,
+                                  Name = row.ToString(),
+                                  DisplayMask = ((MessageDisplayAttribute)(typeof(LogMessageType).GetMember(row.ToString())[0].GetCustomAttributes(typeof(MessageDisplayAttribute), false)).FirstOrDefault()).LogDisplay,
+                                  LogLevel = (int)((MessageDisplayAttribute)(typeof(LogMessageType).GetMember(row.ToString())[0].GetCustomAttributes(typeof(MessageDisplayAttribute), false)).FirstOrDefault()).LogLevel
+                              }).ToArray());
+
+                          // Sends all message type details to the server
+                          soapLogger.RegisterLogMessageDetailType(Enum.GetValues(typeof(MessageDetail))
+                              .AsQueryable()
+                              .OfType<MessageDetail>()
+                              .Select(row => new IdValue
+                              {
+                                  Id = (int)row,
+                                  Value = row.ToString()
+                              }).ToArray());
+                      }
+                      catch
+                      {
+                          soapLogger = null;
+                      }
 
                       Thread.Sleep(30000);
                   }

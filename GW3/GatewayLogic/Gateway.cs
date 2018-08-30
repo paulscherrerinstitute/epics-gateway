@@ -19,6 +19,7 @@ namespace GatewayLogic
     public class Gateway : IDisposable
     {
         public const int BUFFER_SIZE = 8192 * 30;
+        public const int MAX_UDP_PACKET_SIZE = 1503 * 10;
         public const UInt16 CA_PROTO_VERSION = 13;
         //public const UInt16 CA_PROTO_VERSION = 11;
 

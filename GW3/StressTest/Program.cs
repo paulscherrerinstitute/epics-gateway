@@ -17,10 +17,10 @@ namespace StressTest
 {
     class Program
     {
-        const int NB_SERVERS = 20;
-        const int NB_CLIENTS = 30;
-        const int NB_CHANNELS = 20;
-        const int NB_LOOPS = 1;
+        const int NB_SERVERS = 30;
+        const int NB_CLIENTS = 40;
+        const int NB_CHANNELS = 30;
+        const int NB_LOOPS = 2;
         const int NB_CHECKED = 40;
         const int WAIT_TIMEOUT = 10000;
 
