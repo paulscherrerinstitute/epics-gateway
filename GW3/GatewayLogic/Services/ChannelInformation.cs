@@ -22,7 +22,7 @@ namespace GatewayLogic.Services
               {
                   using (dictionaryLock.Aquire())
                   {
-                      var toDrop = dictionary.Select(row=>row.Value).Where(row => (row.ConnectionIsBuilding && (DateTime.UtcNow - row.StartBuilding).TotalSeconds > 60) || row.ShouldDrop).ToList();
+                      var toDrop = dictionary.Select(row=>row.Value).Where(row => (row.ConnectionIsBuilding && (DateTime.UtcNow - row.StartBuilding).TotalSeconds > 5) || row.ShouldDrop).ToList();
 
                       toDrop.ForEach(row =>
                           {

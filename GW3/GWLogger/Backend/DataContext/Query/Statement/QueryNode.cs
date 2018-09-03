@@ -1,14 +1,8 @@
-﻿using GWLogger.Backend.DataContext.Query.Statement;
-using GWLogger.Backend.DataContext.Query.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using GWLogger.Backend.DataContext.Query.Tokens;
 
 namespace GWLogger.Backend.DataContext.Query.Statement
 {
-    abstract class QueryNode
+    internal abstract class QueryNode
     {
         internal static QueryNode Get(QueryParser parser)
         {
@@ -36,7 +30,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
             if (parser.Tokens.Peek() is TokenOr)
             {
                 parser.Tokens.Next();
-                return new AndNode(node, Get(parser));
+                return new OrNode(node, Get(parser));
             }
             return node;
         }
@@ -74,8 +68,8 @@ namespace GWLogger.Backend.DataContext.Query.Statement
             }
         }
 
-        internal abstract bool CheckCondition();
+        internal abstract bool CheckCondition(Context context, LogEntry entry);
 
-        internal abstract string Value();
+        internal abstract string Value(Context context, LogEntry entry);
     }
 }

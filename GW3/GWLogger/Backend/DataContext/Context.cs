@@ -1,25 +1,23 @@
-﻿using System;
+﻿using GWLogger.Backend.DTOs;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Xml.Serialization;
-using GWLogger.Backend.DTOs;
 
 namespace GWLogger.Backend.DataContext
 {
     public class Context : IDisposable
     {
-        DataFiles files;
-        Thread autoFlusher;
-        const int MaxBufferedEntries = 8000;
-        List<IdValue> messageDetailTypes = new List<IdValue>();
+        private DataFiles files;
+        private Thread autoFlusher;
+        private const int MaxBufferedEntries = 8000;
+        private List<IdValue> messageDetailTypes = new List<IdValue>();
         private bool isDisposed = false;
         private Thread bufferConsumer;
-        BufferBlock<LogEntry> bufferedEntries = new BufferBlock<LogEntry>();
+        private BufferBlock<LogEntry> bufferedEntries = new BufferBlock<LogEntry>();
         private CancellationTokenSource cancelOperation = new CancellationTokenSource();
 
         public Context()
@@ -76,7 +74,7 @@ namespace GWLogger.Backend.DataContext
             autoFlusher.Start();
 
             bufferConsumer = new Thread(BufferConsumer);
-            autoFlusher.IsBackground = true;
+            bufferConsumer.IsBackground = true;
             bufferConsumer.Start();
         }
 
@@ -101,9 +99,18 @@ namespace GWLogger.Backend.DataContext
             while (!isDisposed)
             {
                 List<LogEntry> entries = new List<LogEntry>();
-                entries.Add(bufferedEntries.Receive(cancelOperation.Token));
+                try
+                {
+                    entries.Add(bufferedEntries.Receive(cancelOperation.Token));
+                }
+                catch
+                {
+                    break;
+                }
                 while (bufferedEntries.Count > 0)
                     entries.Add(bufferedEntries.Receive(cancelOperation.Token));
+                if (entries.Count == 0)
+                    break;
                 List<int> knownErrors;
                 lock (messageTypes)
                     knownErrors = errorMessages.ToList();
@@ -121,7 +128,7 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        List<DTOs.MessageType> messageTypes = new List<DTOs.MessageType>();
+        private List<DTOs.MessageType> messageTypes = new List<DTOs.MessageType>();
         public List<DTOs.MessageType> MessageTypes
         {
             get
@@ -194,8 +201,19 @@ namespace GWLogger.Backend.DataContext
         {
             if (!files.Exists(gatewayName))
                 return null;
-            return files[gatewayName].ReadLog(start, end, nbMaxEntries, messageTypes);
+            return files[gatewayName].ReadLog(start, end, null, nbMaxEntries, messageTypes);
         }
+
+        public List<LogEntry> ReadLog(string gatewayName, DateTime start, DateTime end, string query, int nbMaxEntries = -1)
+        {
+            if (!files.Exists(gatewayName))
+                return null;
+            Query.Statement.QueryNode node = null;
+            if (!string.IsNullOrWhiteSpace(query))
+                node = Query.QueryParser.Parse(query.Trim());
+            return files[gatewayName].ReadLog(start, end, node, nbMaxEntries);
+        }
+
 
         public List<LogSession> ReadClientSessions(string gatewayName, DateTime start, DateTime end)
         {

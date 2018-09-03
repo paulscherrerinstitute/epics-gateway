@@ -17,12 +17,12 @@ namespace GWLogger.Backend.DataContext.Query.Statement
             StatementB = statementB;
         }
 
-        internal override bool CheckCondition()
+        internal override bool CheckCondition(Context context, LogEntry entry)
         {
-            return StatementA.CheckCondition() || StatementB.CheckCondition();
+            return StatementA.CheckCondition(context, entry) || StatementB.CheckCondition(context, entry);
         }
 
-        internal override string Value()
+        internal override string Value(Context context, LogEntry entry)
         {
             throw new NotImplementedException();
         }

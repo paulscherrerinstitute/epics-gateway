@@ -158,14 +158,33 @@ class Utils
         if (source.charAt(source.length - 1) == "Z")
             return new Date(source);
         source = source.replace(/\./g, "/").replace(/\-/g, "/");
-        if (source.charAt(2) == "/")
+
+        var parts = source.trim().split(' ');
+
+        if (parts.length > 1)
         {
-            return new Date(parseInt(source.substr(6, 4)), parseInt(source.substr(3, 2)) - 1, parseInt(source.substr(0, 2)));
+            var time = parts[1].split(":");
+            if (source.charAt(2) == "/")
+            {
+                return new Date(parseInt(source.substr(6, 4)), parseInt(source.substr(3, 2)) - 1, parseInt(source.substr(0, 2)), parseInt(time[0]), parseInt(time[1]), parseInt(time[2]));
+            }
+            else if (source.charAt(4) == "/")
+            {
+                return new Date(parseInt(source.substr(0, 4)), parseInt(source.substr(5, 2)) - 1, parseInt(source.substr(8, 2)), parseInt(time[0]), parseInt(time[1]), parseInt(time[2]));
+            }
         }
-        else if (source.charAt(4) == "/")
+        else
         {
-            return new Date(parseInt(source.substr(0, 4)), parseInt(source.substr(5, 2)) - 1, parseInt(source.substr(8, 2)));
+            if (source.charAt(2) == "/")
+            {
+                return new Date(parseInt(source.substr(6, 4)), parseInt(source.substr(3, 2)) - 1, parseInt(source.substr(0, 2)));
+            }
+            else if (source.charAt(4) == "/")
+            {
+                return new Date(parseInt(source.substr(0, 4)), parseInt(source.substr(5, 2)) - 1, parseInt(source.substr(8, 2)));
+            }
         }
+
         return new Date(parseInt(source));
     }
 

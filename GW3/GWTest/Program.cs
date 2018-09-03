@@ -5,25 +5,34 @@ using EpicsSharp.ChannelAccess.Server;
 using GatewayLogic;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace GWTest
 {
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             //Console.WriteLine("Some change");
             //TestDiagnosticServer();
             //Test();
-            S1();
+            //S1();
             //S2();
             //Console.ReadKey();
+
+            ReadBrokenLogs();
+        }
+
+        private static void ReadBrokenLogs()
+        {
+            using (var ctx = new GWLogger.Backend.DataContext.Context())
+            {
+                //var logs = ctx.ReadLog("cryo-cagw02", new DateTime(2018, 08, 31, 18, 08, 00), new DateTime(2018, 08, 31, 18, 40, 00), "class contains \"search\"", 100);
+                var logs = ctx.ReadLog("cryo-cagw02", new DateTime(2018, 08, 31, 18, 08, 00), new DateTime(2018, 08, 31, 18, 40, 00), "", 100);
+            }
+            Console.WriteLine("Done");
         }
 
         private static void S2()
@@ -214,7 +223,7 @@ namespace GWTest
             server.Dispose();
         }
 
-        static void S1()
+        private static void S1()
         {
             var gateway = new Gateway();
             gateway.Configuration.SideA = "127.0.0.1:5432";
@@ -320,7 +329,7 @@ namespace GWTest
             Environment.Exit(0);
         }
 
-        static void Test()
+        private static void Test()
         {
             var gateway = new Gateway();
             //gateway.Configuration.SideA = "129.129.130.45:5054";
@@ -360,7 +369,8 @@ namespace GWTest
             server.Dispose();
             client.Dispose();
         }
-        static void TestDiagnosticServer()
+
+        private static void TestDiagnosticServer()
         {
             var gateway = new Gateway();
             gateway.Configuration.GatewayName = "TESTGW-DIAG";

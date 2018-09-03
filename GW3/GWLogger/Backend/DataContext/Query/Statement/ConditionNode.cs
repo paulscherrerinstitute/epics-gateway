@@ -19,33 +19,33 @@ namespace GWLogger.Backend.DataContext.Query.Statement
             Right = right;
         }
 
-        internal override bool CheckCondition()
+        internal override bool CheckCondition(Context context, LogEntry entry)
         {
             switch (Condition)
             {
                 case "!=":
-                    return Left.Value() != Right.Value();
+                    return Left.Value(context, entry) != Right.Value(context, entry);
                 case "=":
-                    return Left.Value() == Right.Value();
+                    return Left.Value(context, entry) == Right.Value(context, entry);
                 case ">":
-                    return int.Parse(Left.Value()) > int.Parse(Right.Value());
+                    return int.Parse(Left.Value(context, entry)) > int.Parse(Right.Value(context, entry));
                 case "<":
-                    return int.Parse(Left.Value()) < int.Parse(Right.Value());
+                    return int.Parse(Left.Value(context, entry)) < int.Parse(Right.Value(context, entry));
                 case ">=":
-                    return int.Parse(Left.Value()) >= int.Parse(Right.Value());
+                    return int.Parse(Left.Value(context, entry)) >= int.Parse(Right.Value(context, entry));
                 case "<=":
-                    return int.Parse(Left.Value()) <= int.Parse(Right.Value());
+                    return int.Parse(Left.Value(context, entry)) <= int.Parse(Right.Value(context, entry));
                 case "contains":
-                    return Left.Value().ToLower().Contains(Right.Value().ToLower());
+                    return Left.Value(context, entry).ToLower().Contains(Right.Value(context, entry).ToLower());
                 case "starts":
-                    return Left.Value().ToLower().StartsWith(Right.Value().ToLower());
+                    return Left.Value(context, entry).ToLower().StartsWith(Right.Value(context, entry).ToLower());
                 case "ends":
-                    return Left.Value().ToLower().EndsWith(Right.Value().ToLower());
+                    return Left.Value(context, entry).ToLower().EndsWith(Right.Value(context, entry).ToLower());
             }
             throw new UnknownConditionException("Unknown condition '" + Condition + "'");
         }
 
-        internal override string Value()
+        internal override string Value(Context context, LogEntry entry)
         {
             throw new NotImplementedException();
         }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Serialization;
 
@@ -12,34 +13,32 @@ namespace GWLogger.Backend.DataContext
     {
         private string gateway;
         public SemaphoreSlim LockObject { get; private set; } = new SemaphoreSlim(1);
-        FileStream file;
+
+        private FileStream file;
         private BinaryWriter DataWriter { get; set; }
         public BinaryReader DataReader { get; private set; }
         public long[] Index = new long[24 * 6];
-        string currentFile;
-        BinaryIndex<short> commandIndex = null;
+        private string currentFile;
+        private BinaryIndex<short> commandIndex = null;
 
         public long[,] Stats = new long[24 * 6, 3];
-
-        FileStream clientSession;
-        string currentClientSession;
-        Dictionary<string, SessionLocation> openClientSessions = new Dictionary<string, SessionLocation>();
-
-        FileStream serverSession;
-        string currentServerSession;
-        Dictionary<string, SessionLocation> openServerSessions = new Dictionary<string, SessionLocation>();
-
-        static Dictionary<string, int> memberNames = new Dictionary<string, int>();
-        static Dictionary<string, int> filePaths = new Dictionary<string, int>();
+        private FileStream clientSession;
+        private string currentClientSession;
+        private Dictionary<string, SessionLocation> openClientSessions = new Dictionary<string, SessionLocation>();
+        private FileStream serverSession;
+        private string currentServerSession;
+        private Dictionary<string, SessionLocation> openServerSessions = new Dictionary<string, SessionLocation>();
+        private static Dictionary<string, int> memberNames = new Dictionary<string, int>();
+        private static Dictionary<string, int> filePaths = new Dictionary<string, int>();
+        private static Regex specialChars = new Regex(@"^[a-zA-Z0-9\.,\-\+ \:_\\/\?\*]+$");
 
         // SourceMemberName
-        static int sourceMemberNameId = -1;
+        private static int sourceMemberNameId = -1;
+
         // SourceFilePath
-        static int sourceFilePathId = -1;
-
-
-        FileStream searches;
-        string currentSearches;
+        private static int sourceFilePathId = -1;
+        private FileStream searches;
+        private string currentSearches;
 
         private bool isAtEnd = true;
         private bool mustFlush = false;
@@ -88,7 +87,7 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        static HashSet<string> knownFiles = new HashSet<string>();
+        private static HashSet<string> knownFiles = new HashSet<string>();
         private readonly Context Context;
 
         public static bool Exists(string gatewayName)
@@ -279,7 +278,7 @@ namespace GWLogger.Backend.DataContext
 
         }
 
-        int IndexPosition(DateTime date)
+        private int IndexPosition(DateTime date)
         {
             return date.Minute / 10 + date.Hour * 6;
         }
@@ -570,7 +569,7 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        static int SerializedStringLength(int length)
+        private static int SerializedStringLength(int length)
         {
             var nbBits = (Math.Log(length) / Math.Log(2)) / 7.0;
             var sizePrefix = (int)Math.Ceiling(Math.Max(1, nbBits));
@@ -611,7 +610,7 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        public List<LogEntry> ReadLog(DateTime start, DateTime end, int nbMaxEntries = -1, List<int> messageTypes = null)
+        internal List<LogEntry> ReadLog(DateTime start, DateTime end, Query.Statement.QueryNode query = null, int nbMaxEntries = -1, List<int> messageTypes = null)
         {
             try
             {
@@ -637,9 +636,9 @@ namespace GWLogger.Backend.DataContext
 
                         while (DataReader.BaseStream.Position < DataReader.BaseStream.Length && (nbMaxEntries < 1 || result.Count < nbMaxEntries))
                         {
-                            var entry = ReadEntry(DataReader);
+                            var entry = ReadEntry(DataReader, start.Year * 365 + start.DayOfYear);
 
-                            if (entry != null && entry.EntryDate >= start && entry.EntryDate <= end && (messageTypes == null || messageTypes.Contains(entry.MessageTypeId)))
+                            if (entry != null && entry.EntryDate >= start && entry.EntryDate <= end && (query == null || query.CheckCondition(Context, entry)) && (messageTypes == null || messageTypes.Contains(entry.MessageTypeId)))
                             {
                                 entry.Gateway = gateway;
                                 result.Add(entry);
@@ -695,7 +694,13 @@ namespace GWLogger.Backend.DataContext
                         {
                             if (pos < Index.Length - 1 && DataReader.BaseStream.Position >= Index[pos + 1])
                                 break;
-                            chunk.Add(ReadEntry(DataReader));
+                            try
+                            {
+                                chunk.Add(ReadEntry(DataReader, this.CurrentDate.Year * 365 + this.CurrentDate.DayOfYear));
+                            }
+                            catch
+                            {
+                            }
                         }
                         result.InsertRange(0, chunk);
                         pos--;
@@ -712,7 +717,7 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        void WriteEntry(BinaryWriter stream, LogEntry entry)
+        private void WriteEntry(BinaryWriter stream, LogEntry entry)
         {
             if (sourceMemberNameId == -1)
                 sourceMemberNameId = Context.MessageDetailTypes.First(row => row.Value == "SourceMemberName").Id;
@@ -789,12 +794,47 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        LogEntry ReadEntry(BinaryReader stream)
+        private LogEntry ReadEntry(BinaryReader stream, int approxiateDay)
         {
+            if (sourceMemberNameId == -1)
+                sourceMemberNameId = Context.MessageDetailTypes.First(row => row.Value == "SourceMemberName").Id;
+            if (sourceFilePathId == -1)
+                sourceFilePathId = Context.MessageDetailTypes.First(row => row.Value == "SourceFilePath").Id;
+
+            var max = DateTime.UtcNow.Ticks;
+            var pos = stream.BaseStream.Position;
+            int cmd = 0;
+            DateTime dt = DateTime.UtcNow;
+            bool found = false;
+            for (var i = 0; i < 64000 && pos + i < stream.BaseStream.Length; i++)
+            {
+                stream.BaseStream.Seek(pos + i, SeekOrigin.Begin);
+                try
+                {
+                    var l = stream.ReadInt64();
+                    dt = DateTime.FromBinary(l).ToUniversalTime();
+                }
+                catch
+                {
+                    continue;
+                }
+                if (Math.Abs((dt.Year * 365 + dt.DayOfYear) - approxiateDay) <= 2)
+                {
+                    cmd = stream.ReadByte();
+                    if (cmd <= Global.DataContext.MessageTypes.Max(row => row.Id))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if (!found)
+                throw new Exception("Cannot find data");
+
             var result = new LogEntry
             {
-                EntryDate = DateTime.FromBinary(stream.ReadInt64()).ToUniversalTime(),
-                MessageTypeId = stream.ReadByte(),
+                EntryDate = dt,
+                MessageTypeId = cmd,
                 LogEntryDetails = new List<LogEntryDetail>()
             };
 
@@ -811,6 +851,8 @@ namespace GWLogger.Backend.DataContext
             }
 
             var nbDetails = (int)stream.ReadByte();
+            if (nbDetails > 20)
+                return result;
             for (var i = 0; i < nbDetails; i++)
             {
                 var detail = new LogEntryDetail
@@ -834,7 +876,24 @@ namespace GWLogger.Backend.DataContext
                     }
                 }
                 else
-                    detail.Value = stream.ReadString();
+                {
+                    pos = stream.BaseStream.Position;
+                    try
+                    {
+                        detail.Value = stream.ReadString();
+                        // oddies as string, we may have an issue with the record
+                        if (detail.Value.Length > 128 || !specialChars.IsMatch(detail.Value))
+                        {
+                            stream.BaseStream.Seek(pos, SeekOrigin.Begin);
+                            break;
+                        }
+                    }
+                    catch
+                    {
+                        stream.BaseStream.Seek(pos, SeekOrigin.Begin);
+                        break;
+                    }
+                }
                 result.LogEntryDetails.Add(detail);
             }
 

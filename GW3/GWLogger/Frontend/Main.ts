@@ -64,11 +64,11 @@ class Main
 
     static LoadLogStats(refresh: boolean = false): void
     {
-        var resetEndDate = refresh && ((Main.CurrentTime && Main.Stats && Main.CurrentTime == Main.Stats.Logs[Main.Stats.Logs.length - 1].Date) || !(Main.CurrentTime && Main.Stats))
+        var resetEndDate = refresh && ((Main.CurrentTime && Main.Stats && Main.Stats.Logs && Main.Stats.Logs.length > 0 && Main.CurrentTime == Main.Stats.Logs[Main.Stats.Logs.length - 1].Date) || !(Main.CurrentTime && Main.Stats))
         if (Main.StartDate === null)
             Main.StartDate = new Date((new Date()).getTime() - (24 * 3600 * 1000));
-        //var start = new Date(2018, 2, 12);
-        var end = new Date();
+        //var end = new Date();
+        var end = new Date(Main.StartDate.getTime() + 24 * 3600 * 1000);
         $.ajax({
             type: 'POST',
             url: 'DataAccess.asmx/GetStats',
@@ -117,6 +117,8 @@ class Main
         if (!Main.Stats || !Main.EndDate)
             return;
 
+        var end = new Date(Math.floor(Main.EndDate.getTime() / (10 * 60 * 1000)) * 10 * 60 * 1000);
+
         var canvas = (<HTMLCanvasElement>$("#timeRangeCanvas")[0]);
         var ctx = canvas.getContext("2d");
         var width = $("#timeRange").width() - 40;
@@ -146,7 +148,7 @@ class Main
 
         for (var i = 0; i < 145; i++)
         {
-            var dt = new Date(Main.EndDate.getTime() - i * 10 * 60 * 1000);
+            var dt = new Date(end.getTime() - i * 10 * 60 * 1000);
 
             var val = Main.GetStat('Logs', dt);
             ctx.fillStyle = "#80d680";
@@ -580,7 +582,7 @@ class Main
             Main.EndDate = new Date(Main.StartDate.getTime() + 24 * 3600 * 1000);
             $("#startDate").val(Utils.FullUtcDateFormat(Main.StartDate));
             $("#endDate").val(Utils.FullUtcDateFormat(Main.EndDate));
-            console.log(Utils.FullUtcDateFormat(Main.StartDate));
+            Main.LoadLogStats();
         });
         $("#nextDay").click(() =>
         {
@@ -588,6 +590,39 @@ class Main
             Main.EndDate = new Date(Main.StartDate.getTime() + 24 * 3600 * 1000);
             $("#startDate").val(Utils.FullUtcDateFormat(Main.StartDate));
             $("#endDate").val(Utils.FullUtcDateFormat(Main.EndDate));
+            Main.LoadLogStats();
+        });
+        $("#startDate").on("keyup", () =>
+        {
+            try
+            {
+                var dt = Utils.ParseDate($("#startDate").val());
+                if (isNaN(dt.getTime()) || dt.getFullYear() == 1970)
+                    return;
+                Main.StartDate = dt;
+                Main.EndDate = new Date(Main.StartDate.getTime() + 24 * 3600 * 1000);
+                $("#endDate").val(Utils.FullUtcDateFormat(Main.EndDate));
+                Main.LoadLogStats();
+            }
+            catch (ex)
+            {
+            }
+        });
+        $("#endDate").on("keyup", () =>
+        {
+            try
+            {
+                var dt = Utils.ParseDate($("#endDate").val());
+                if (isNaN(dt.getTime()) || dt.getFullYear() == 1970)
+                    return;
+                Main.EndDate = dt;
+                Main.StartDate = new Date(Main.EndDate.getTime() - 24 * 3600 * 1000);
+                $("#startDate").val(Utils.FullUtcDateFormat(Main.StartDate));
+                Main.LoadLogStats();
+            }
+            catch (ex)
+            {
+            }
         });
 
         $("#logFilter li").click(Main.LogFilter);

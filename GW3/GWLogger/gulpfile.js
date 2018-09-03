@@ -35,23 +35,23 @@ var tsMain = typescript.createProject({
     sourceMap: true
 });
 
-gulp.task("default", function ()
-{
-});
-
 gulp.task("watcher", function ()
 {
     process.chdir(__dirname);
     console.log("I will watch for you all the TS and LESS files and compile them as needed.");
     console.log(" ");
-    gulp.watch("Frontend/**/*.ts", ["compile:frontend"]);
-    gulp.watch("**/*.less", ["compile:less"]);
+    gulp.watch("Frontend/**/*.ts", gulp.series(["compile:frontend"]));
+    gulp.watch("**/*.less", gulp.series(["compile:less"]));
 });
+
+gulp.task("default", gulp.series(["watcher"], function ()
+{
+}));
 
 gulp.task("compile:less", function ()
 {
     process.chdir(__dirname);
-    gulp.src(['./Less/main.less']).on('error', swallowError).on('finish', function ()
+    return gulp.src(['./Less/main.less']).on('error', swallowError).on('finish', function ()
     {
         util.log(util.colors.cyan("Less compilation complete"));
     }).pipe(less({})).pipe(gulp.dest('Less'));
@@ -72,14 +72,11 @@ gulp.task("clean:js", function (cb)
     cb();
 });
 
-gulp.task("compile:all", ["compile:less", "compile:frontend"]);
-gulp.task("clean:all", ["clean:css", "clean:js"]);
-
 gulp.task('compile:frontend', function ()
 {
     process.chdir(__dirname);
 
-    gulp.src(['./Frontend/**/*.ts', './Scripts/typings/**/*.d.ts'])
+    return gulp.src(['./Frontend/**/*.ts', './Scripts/typings/**/*.d.ts'])
         .pipe(sourcemaps.init())
         .pipe(sourcemaps.identityMap())
         .pipe(tsMain())
@@ -93,3 +90,6 @@ gulp.task('compile:frontend', function ()
             util.log(util.colors.cyan("Frontend compilation complete"));
         });
 });
+
+gulp.task("compile:all", gulp.series(["compile:less", "compile:frontend"]));
+gulp.task("clean:all", gulp.series(["clean:css", "clean:js"]));

@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GWLogger.Backend.DataContext.Query.Statement
 {
-    class AndNode : QueryNode
+    internal class AndNode : QueryNode
     {
         public QueryNode StatementA { get; }
         public QueryNode StatementB { get; }
@@ -17,12 +13,12 @@ namespace GWLogger.Backend.DataContext.Query.Statement
             StatementB = statementB;
         }
 
-        internal override bool CheckCondition()
+        internal override bool CheckCondition(Context context, LogEntry entry)
         {
-            return StatementA.CheckCondition() && StatementB.CheckCondition();
+            return StatementA.CheckCondition(context, entry) && StatementB.CheckCondition(context, entry);
         }
 
-        internal override string Value()
+        internal override string Value(Context context, LogEntry entry)
         {
             throw new NotImplementedException();
         }
