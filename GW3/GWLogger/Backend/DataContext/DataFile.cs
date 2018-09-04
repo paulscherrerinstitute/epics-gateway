@@ -29,7 +29,9 @@ namespace GWLogger.Backend.DataContext
         private string currentServerSession;
         private Dictionary<string, SessionLocation> openServerSessions = new Dictionary<string, SessionLocation>();
         private static Dictionary<string, int> memberNames = new Dictionary<string, int>();
+        private static Dictionary<int, string> reverseMemberNames = new Dictionary<int, string>();
         private static Dictionary<string, int> filePaths = new Dictionary<string, int>();
+        private static Dictionary<int, string> reverseFilePaths = new Dictionary<int, string>();
         private static Regex specialChars = new Regex(@"^[a-zA-Z0-9\.,\-\+ \:_\\/\?\*]+$");
 
         // SourceMemberName
@@ -54,6 +56,7 @@ namespace GWLogger.Backend.DataContext
                     var ser = new XmlSerializer(typeof(List<IdValue>));
                     var data = (List<IdValue>)ser.Deserialize(stream);
                     memberNames = data.ToDictionary(key => key.Value, val => val.Id);
+                    reverseMemberNames = data.ToDictionary(key => key.Id, val => val.Value);
                 }
             }
             catch
@@ -67,6 +70,7 @@ namespace GWLogger.Backend.DataContext
                     var ser = new XmlSerializer(typeof(List<IdValue>));
                     var data = (List<IdValue>)ser.Deserialize(stream);
                     filePaths = data.ToDictionary(key => key.Value, val => val.Id);
+                    reverseFilePaths = data.ToDictionary(key => key.Id, val => val.Value);
                 }
             }
             catch
@@ -656,6 +660,7 @@ namespace GWLogger.Backend.DataContext
                                 entry.Gateway = gateway;
                                 result.Add(entry);
                             }
+                            firstItem = false;
                             if (entry != null && entry.EntryDate > end)
                                 break;
                         }
@@ -769,6 +774,7 @@ namespace GWLogger.Backend.DataContext
                         if (!memberNames.ContainsKey(i.Value))
                         {
                             memberNames.Add(i.Value, memberNames.Count == 0 ? 1 : memberNames.Values.Max() + 1);
+                            reverseMemberNames.Add(memberNames[i.Value], i.Value);
                             StoreMemberNames();
                         }
                         stream.Write((ushort)memberNames[i.Value]);
@@ -781,6 +787,7 @@ namespace GWLogger.Backend.DataContext
                         if (!filePaths.ContainsKey(i.Value))
                         {
                             filePaths.Add(i.Value, filePaths.Count == 0 ? 1 : filePaths.Values.Max() + 1);
+                            reverseFilePaths.Add(filePaths[i.Value], i.Value);
                             StoreFilePaths();
                         }
                         stream.Write((ushort)filePaths[i.Value]);
@@ -881,7 +888,8 @@ namespace GWLogger.Backend.DataContext
                     var n = stream.ReadUInt16();
                     lock (filePaths)
                     {
-                        detail.Value = filePaths.First(row => row.Value == n).Key;
+                        //detail.Value = filePaths.First(row => row.Value == n).Key;
+                        detail.Value = reverseFilePaths[n];
                     }
                 }
                 else if (detail.DetailTypeId == sourceMemberNameId)
@@ -889,7 +897,7 @@ namespace GWLogger.Backend.DataContext
                     var n = stream.ReadUInt16();
                     lock (filePaths)
                     {
-                        detail.Value = memberNames.First(row => row.Value == n).Key;
+                        detail.Value = reverseMemberNames[n];// memberNames.First(row => row.Value == n).Key;
                     }
                 }
                 else

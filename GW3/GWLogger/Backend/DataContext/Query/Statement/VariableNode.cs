@@ -56,10 +56,38 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                     if (detailId == -1)
                         detailId = context.MessageDetailTypes.First(row => row.Value == "CommandId").Id;
                     return entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == detailId)?.Value ?? "";
+                case "ip":
+                    if (detailId == -1)
+                        detailId = context.MessageDetailTypes.First(row => row.Value == "Ip").Id;
+                    return entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == detailId)?.Value ?? "";
+                case "exception":
+                    if (detailId == -1)
+                        detailId = context.MessageDetailTypes.First(row => row.Value == "Exception").Id;
+                    return entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == detailId)?.Value ?? "";
+                case "datacount":
+                    if (detailId == -1)
+                        detailId = context.MessageDetailTypes.First(row => row.Value == "DataCount").Id;
+                    return entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == detailId)?.Value ?? "";
+                case "gatewaymonitorid":
+                    if (detailId == -1)
+                        detailId = context.MessageDetailTypes.First(row => row.Value == "GatewayMonitorId").Id;
+                    return entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == detailId)?.Value ?? "";
+                case "clientioid":
+                    if (detailId == -1)
+                        detailId = context.MessageDetailTypes.First(row => row.Value == "ClientIoId").Id;
+                    return entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == detailId)?.Value ?? "";
+                case "version":
+                    if (detailId == -1)
+                        detailId = context.MessageDetailTypes.First(row => row.Value == "Version").Id;
+                    return entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == detailId)?.Value ?? "";
+                case "origin":
+                    if (detailId == -1)
+                        detailId = context.MessageDetailTypes.First(row => row.Value == "Origin").Id;
+                    return entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == detailId)?.Value ?? "";
                 case "type":
-                    return entry.MessageTypeId.ToString();
+                    return context.MessageTypes.First(row => row.Id == entry.MessageTypeId).Name;
                 default:
-                    throw new NotImplementedException();
+                    return Name;
             }
         }
     }

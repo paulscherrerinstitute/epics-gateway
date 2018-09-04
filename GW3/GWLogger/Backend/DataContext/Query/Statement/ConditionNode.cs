@@ -20,9 +20,10 @@ namespace GWLogger.Backend.DataContext.Query.Statement
             switch (Condition)
             {
                 case "!=":
-                    return Left.Value(context, entry) != Right.Value(context, entry);
+                    //return Left.Value(context, entry) != Right.Value(context, entry);
+                    return string.Compare(Left.Value(context, entry), Right.Value(context, entry), true) != 0;
                 case "=":
-                    return Left.Value(context, entry) == Right.Value(context, entry);
+                    return string.Compare(Left.Value(context, entry), Right.Value(context, entry), true) == 0;
                 case ">":
                     return int.Parse(Left.Value(context, entry)) > int.Parse(Right.Value(context, entry));
                 case "<":

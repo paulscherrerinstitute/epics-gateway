@@ -13,12 +13,15 @@ namespace GWLogger.Backend.DataContext
     {
         private DataFiles files;
         private Thread autoFlusher;
-        private const int MaxBufferedEntries = 8000;
+        private const int MaxBufferedEntries = 80000;
         private List<IdValue> messageDetailTypes = new List<IdValue>();
         private bool isDisposed = false;
         private Thread bufferConsumer;
         private BufferBlock<LogEntry> bufferedEntries = new BufferBlock<LogEntry>();
         private CancellationTokenSource cancelOperation = new CancellationTokenSource();
+
+        // will be used in reverse as we don't want to parallelize the read
+        private static ReaderWriterLockSlim readerLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
 
         public Context()
         {
@@ -115,8 +118,16 @@ namespace GWLogger.Backend.DataContext
                 lock (messageTypes)
                     knownErrors = errorMessages.ToList();
                 //foreach (var entry in entries.OrderBy(row => row.Gateway))
-                foreach (var entry in entries)
-                    files[entry.Gateway].Save(entry, knownErrors.Contains(entry.MessageTypeId));
+                try
+                {
+                    readerLock.EnterReadLock();
+                    foreach (var entry in entries)
+                        files[entry.Gateway].Save(entry, knownErrors.Contains(entry.MessageTypeId));
+                }
+                finally
+                {
+                    readerLock.ExitReadLock();
+                }
             }
         }
 
@@ -206,7 +217,15 @@ namespace GWLogger.Backend.DataContext
         {
             if (!files.Exists(gatewayName))
                 return null;
-            return files[gatewayName].ReadLastLogs(nbEntries);
+            try
+            {
+                readerLock.EnterWriteLock();
+                return files[gatewayName].ReadLastLogs(nbEntries);
+            }
+            finally
+            {
+                readerLock.ExitWriteLock();
+            }
         }
         /*
                 public List<LogEntry> ReadLog(string gatewayName, DateTime start, DateTime end, int nbMaxEntries = -1, List<int> messageTypes = null)
@@ -229,7 +248,15 @@ namespace GWLogger.Backend.DataContext
             catch
             {
             }
-            return files[gatewayName].ReadLog(start, end, node, nbMaxEntries, messageTypes);
+            try
+            {
+                readerLock.EnterWriteLock();
+                return files[gatewayName].ReadLog(start, end, node, nbMaxEntries, messageTypes);
+            }
+            finally
+            {
+                readerLock.ExitWriteLock();
+            }
         }
 
 
