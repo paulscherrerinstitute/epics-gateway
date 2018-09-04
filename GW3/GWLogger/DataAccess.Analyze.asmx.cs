@@ -62,5 +62,21 @@ namespace GWLogger
         {
             return AnalyzeController.GetSearchedChannels(gatewayName, datePoint);
         }
+
+        [WebMethod]
+        public bool CheckQuery(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return true;
+            try
+            {
+                Backend.DataContext.Query.QueryParser.Parse(query.Trim());
+                return true;
+            }
+            catch
+            {
+            }
+            return false;
+        }
     }
 }

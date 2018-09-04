@@ -85,6 +85,9 @@ namespace GWLogger
                 var levels = levelsRequested.Split(new char[] { ',' }).Select(row => int.Parse(row));
                 msgTypes = logLevels.Where(row => levels.Contains(row.Value)).Select(row => row.Key).ToList();
             }
+            string query = null;
+            if (!string.IsNullOrWhiteSpace(context.Request["query"]))
+                query = context.Request["query"];
 
             //context.Request;
             var path = context.Request.Path.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).ToArray();
@@ -103,10 +106,10 @@ namespace GWLogger
                 if (path.Length > 2)
                 {
                     var end = long.Parse(path[2]).ToNetDate().Trim();
-                    logs = Global.DataContext.ReadLog(gateway, start, end, 100, msgTypes);
+                    logs = Global.DataContext.ReadLog(gateway, start, end, query, 100, msgTypes);
                 }
                 else
-                    logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), 100, msgTypes);
+                    logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, 100, msgTypes);
             }
 
             context.Response.ContentType = "application/json";

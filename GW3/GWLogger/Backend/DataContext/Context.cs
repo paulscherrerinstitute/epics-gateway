@@ -182,6 +182,7 @@ namespace GWLogger.Backend.DataContext
                     }
                     messageDetailTypes.Clear();
                     messageDetailTypes.AddRange(value);
+                    maxMessageTypes = -1;
 
                     Logs.RefreshLookup();
                 }
@@ -190,28 +191,45 @@ namespace GWLogger.Backend.DataContext
 
         public List<int> errorMessages { get; private set; }
 
+        private int maxMessageTypes = -1;
+        public int MaxMessageTypes
+        {
+            get
+            {
+                if (maxMessageTypes == -1)
+                    maxMessageTypes = MessageTypes.Max(row => row.Id);
+                return maxMessageTypes;
+            }
+        }
+
         public List<LogEntry> ReadLastLogs(string gatewayName, int nbEntries = 100)
         {
             if (!files.Exists(gatewayName))
                 return null;
             return files[gatewayName].ReadLastLogs(nbEntries);
         }
+        /*
+                public List<LogEntry> ReadLog(string gatewayName, DateTime start, DateTime end, int nbMaxEntries = -1, List<int> messageTypes = null)
+                {
+                    if (!files.Exists(gatewayName))
+                        return null;
+                    return files[gatewayName].ReadLog(start, end, null, nbMaxEntries, messageTypes);
+                }*/
 
-        public List<LogEntry> ReadLog(string gatewayName, DateTime start, DateTime end, int nbMaxEntries = -1, List<int> messageTypes = null)
-        {
-            if (!files.Exists(gatewayName))
-                return null;
-            return files[gatewayName].ReadLog(start, end, null, nbMaxEntries, messageTypes);
-        }
-
-        public List<LogEntry> ReadLog(string gatewayName, DateTime start, DateTime end, string query, int nbMaxEntries = -1)
+        public List<LogEntry> ReadLog(string gatewayName, DateTime start, DateTime end, string query, int nbMaxEntries = -1, List<int> messageTypes = null)
         {
             if (!files.Exists(gatewayName))
                 return null;
             Query.Statement.QueryNode node = null;
-            if (!string.IsNullOrWhiteSpace(query))
-                node = Query.QueryParser.Parse(query.Trim());
-            return files[gatewayName].ReadLog(start, end, node, nbMaxEntries);
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(query))
+                    node = Query.QueryParser.Parse(query.Trim());
+            }
+            catch
+            {
+            }
+            return files[gatewayName].ReadLog(start, end, node, nbMaxEntries, messageTypes);
         }
 
 

@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GWLogger.Backend.DataContext.Query.Statement
 {
-    class ConditionNode : QueryNode
+    internal class ConditionNode : QueryNode
     {
         public QueryNode Left { get; }
         public string Condition { get; }
@@ -36,11 +32,16 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                 case "<=":
                     return int.Parse(Left.Value(context, entry)) <= int.Parse(Right.Value(context, entry));
                 case "contains":
-                    return Left.Value(context, entry).ToLower().Contains(Right.Value(context, entry).ToLower());
+                    return Left.Value(context, entry).IndexOf(Right.Value(context, entry), StringComparison.InvariantCultureIgnoreCase) != -1;
+                //return Left.Value(context, entry).ToLower().Contains(Right.Value(context, entry).ToLower());
                 case "starts":
-                    return Left.Value(context, entry).ToLower().StartsWith(Right.Value(context, entry).ToLower());
+                    return Left.Value(context, entry).IndexOf(Right.Value(context, entry), StringComparison.InvariantCultureIgnoreCase) == 0;
+                //return Left.Value(context, entry).ToLower().StartsWith(Right.Value(context, entry).ToLower());
                 case "ends":
-                    return Left.Value(context, entry).ToLower().EndsWith(Right.Value(context, entry).ToLower());
+                    var a = Left.Value(context, entry);
+                    var b = Right.Value(context, entry);
+                    return a.IndexOf(b, StringComparison.InvariantCultureIgnoreCase) == a.Length - b.Length;
+                    //return Left.Value(context, entry).ToLower().EndsWith(Right.Value(context, entry).ToLower());
             }
             throw new UnknownConditionException("Unknown condition '" + Condition + "'");
         }

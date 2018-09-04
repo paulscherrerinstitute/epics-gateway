@@ -9,6 +9,8 @@ class Main
     static EndDate: Date = null;
     static CurrentTime: Date;
     static Levels: string;
+    static IsLast: boolean = true;
+    static SearchTimeout: number = null;
 
     static loadingLogs: JQueryXHR;
 
@@ -67,6 +69,10 @@ class Main
         var resetEndDate = refresh && ((Main.CurrentTime && Main.Stats && Main.Stats.Logs && Main.Stats.Logs.length > 0 && Main.CurrentTime == Main.Stats.Logs[Main.Stats.Logs.length - 1].Date) || !(Main.CurrentTime && Main.Stats))
         if (Main.StartDate === null)
             Main.StartDate = new Date((new Date()).getTime() - (24 * 3600 * 1000));
+
+        if (refresh === true && (((new Date()).getTime() - Main.StartDate.getTime()) > (25 * 3600 * 1000)))
+            return;
+
         //var end = new Date();
         var end = new Date(Main.StartDate.getTime() + 24 * 3600 * 1000);
         $.ajax({
@@ -102,7 +108,7 @@ class Main
                 }
                 Main.DrawStats();
 
-                if (Main.CurrentTime)
+                if (Main.IsLast && Main.CurrentTime)
                     Main.LoadTimeInfo(refresh);
             },
             error: function (msg, textStatus)
@@ -297,6 +303,8 @@ class Main
         if (tx > 144)
             tx = 144;
         Main.CurrentTime = new Date(Main.EndDate.getTime() - tx * 10 * 60 * 1000);
+        if (tx == 144 && ((new Date()).getTime() - Main.CurrentTime.getTime()) < 24 * 3600 * 1000)
+            Main.IsLast = true;
         window.history.pushState(null, Main.BaseTitle + " - " + Main.CurrentGateway, '/GW/' + Main.CurrentGateway + "/" + Main.CurrentTime.getTime());
 
         Main.LoadTimeInfo();
@@ -394,7 +402,7 @@ class Main
             Main.loadingLogs.abort();
         Main.loadingLogs = $.ajax({
             type: 'GET',
-            url: '/Logs/' + Main.CurrentGateway + '/' + startDate.getTime() + '/' + endDate.getTime() + (Main.Levels ? "?levels=" + Main.Levels : ""),
+            url: '/Logs/' + Main.CurrentGateway + '/' + startDate.getTime() + '/' + endDate.getTime() + (Main.Levels ? "?levels=" + Main.Levels + "&query=" + $("#queryField").val() : "?query=" + $("#queryField").val()),
             success: function (data)
             {
                 Main.loadingLogs = null;
@@ -420,6 +428,8 @@ class Main
             },
             error: function (msg, textStatus)
             {
+                if (msg.statusText == "abort")
+                    return;
                 Main.loadingLogs = null;
                 console.log(msg.responseText);
             }
@@ -582,7 +592,7 @@ class Main
             Main.EndDate = new Date(Main.StartDate.getTime() + 24 * 3600 * 1000);
             $("#startDate").val(Utils.FullUtcDateFormat(Main.StartDate));
             $("#endDate").val(Utils.FullUtcDateFormat(Main.EndDate));
-            Main.LoadLogStats();
+            Main.DelayedSearch(Main.LoadLogStats);
         });
         $("#nextDay").click(() =>
         {
@@ -590,7 +600,7 @@ class Main
             Main.EndDate = new Date(Main.StartDate.getTime() + 24 * 3600 * 1000);
             $("#startDate").val(Utils.FullUtcDateFormat(Main.StartDate));
             $("#endDate").val(Utils.FullUtcDateFormat(Main.EndDate));
-            Main.LoadLogStats();
+            Main.DelayedSearch(Main.LoadLogStats);
         });
         $("#startDate").on("keyup", () =>
         {
@@ -602,7 +612,7 @@ class Main
                 Main.StartDate = dt;
                 Main.EndDate = new Date(Main.StartDate.getTime() + 24 * 3600 * 1000);
                 $("#endDate").val(Utils.FullUtcDateFormat(Main.EndDate));
-                Main.LoadLogStats();
+                Main.DelayedSearch(Main.LoadLogStats);
             }
             catch (ex)
             {
@@ -618,11 +628,29 @@ class Main
                 Main.EndDate = dt;
                 Main.StartDate = new Date(Main.EndDate.getTime() - 24 * 3600 * 1000);
                 $("#startDate").val(Utils.FullUtcDateFormat(Main.StartDate));
-                Main.LoadLogStats();
+                Main.DelayedSearch(Main.LoadLogStats);
             }
             catch (ex)
             {
             }
+        });
+        $("#queryField").on("keyup", () =>
+        {
+            $.ajax({
+                type: 'POST',
+                url: '/DataAccess.asmx/CheckQuery',
+                data: JSON.stringify({ "query": $("#queryField").val() }),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (msg)
+                {
+                    if (msg.d === false)
+                        $("#queryField").css("color", "red");
+                    else
+                        $("#queryField").css("color", "black");
+                }
+            });
+            Main.DelayedSearch(Main.LoadTimeInfo);
         });
 
         $("#logFilter li").click(Main.LogFilter);
@@ -631,6 +659,19 @@ class Main
         $("#closeHelp").click(Main.HideHelp);
 
         Main.PopState(null);
+    }
+
+    static DelayedSearch(cb)
+    {
+        if (Main.SearchTimeout !== null)
+            clearTimeout(Main.SearchTimeout);
+        Main.SearchTimeout = setTimeout(() =>
+        {
+            Main.SearchTimeout = null;
+            Main.IsLast = false;
+            if (cb)
+                cb();
+        }, 500);
     }
 }
 

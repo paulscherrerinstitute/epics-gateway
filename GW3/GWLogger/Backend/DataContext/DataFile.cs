@@ -619,6 +619,7 @@ namespace GWLogger.Backend.DataContext
 
                 var currentDate = new DateTime(start.Year, start.Month, start.Day);
                 var firstLoop = true;
+                var firstItem = true;
 
                 while (currentDate < end)
                 {
@@ -634,9 +635,21 @@ namespace GWLogger.Backend.DataContext
                             Seek(0);
                         isAtEnd = false;
 
-                        while (DataReader.BaseStream.Position < DataReader.BaseStream.Length && (nbMaxEntries < 1 || result.Count < nbMaxEntries))
+                        var streamLength = DataReader.BaseStream.Length;
+                        while (DataReader.BaseStream.Position < streamLength && (nbMaxEntries < 1 || result.Count < nbMaxEntries))
                         {
-                            var entry = ReadEntry(DataReader, start.Year * 365 + start.DayOfYear);
+                            var entry = ReadEntry(DataReader, start, streamLength);
+                            if (firstItem && query != null)
+                            {
+                                try
+                                {
+                                    query.CheckCondition(Context, entry);
+                                }
+                                catch
+                                {
+                                    query = null;
+                                }
+                            }
 
                             if (entry != null && entry.EntryDate >= start && entry.EntryDate <= end && (query == null || query.CheckCondition(Context, entry)) && (messageTypes == null || messageTypes.Contains(entry.MessageTypeId)))
                             {
@@ -686,17 +699,19 @@ namespace GWLogger.Backend.DataContext
                     }
                     isAtEnd = false;
 
+                    var streamLength = DataReader.BaseStream.Length;
+
                     while (pos >= 0 && result.Count < nbEntries && Index[pos] >= 0)
                     {
                         var chunk = new List<LogEntry>();
                         DataReader.BaseStream.Seek(Index[pos], SeekOrigin.Begin);
-                        while (DataReader.BaseStream.Position < DataReader.BaseStream.Length)
+                        while (DataReader.BaseStream.Position < streamLength)
                         {
                             if (pos < Index.Length - 1 && DataReader.BaseStream.Position >= Index[pos + 1])
                                 break;
                             try
                             {
-                                chunk.Add(ReadEntry(DataReader, this.CurrentDate.Year * 365 + this.CurrentDate.DayOfYear));
+                                chunk.Add(ReadEntry(DataReader, this.CurrentDate.Date, streamLength));
                             }
                             catch
                             {
@@ -794,7 +809,7 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        private LogEntry ReadEntry(BinaryReader stream, int approxiateDay)
+        private LogEntry ReadEntry(BinaryReader stream, DateTime approxiateDay, long streamLength)
         {
             if (sourceMemberNameId == -1)
                 sourceMemberNameId = Context.MessageDetailTypes.First(row => row.Value == "SourceMemberName").Id;
@@ -802,13 +817,14 @@ namespace GWLogger.Backend.DataContext
                 sourceFilePathId = Context.MessageDetailTypes.First(row => row.Value == "SourceFilePath").Id;
 
             var max = DateTime.UtcNow.Ticks;
-            var pos = stream.BaseStream.Position;
             int cmd = 0;
             DateTime dt = DateTime.UtcNow;
             bool found = false;
-            for (var i = 0; i < 64000 && pos + i < stream.BaseStream.Length; i++)
+            var pos = stream.BaseStream.Position;
+            for (var i = 0; i < 1024 && pos + i < streamLength; i++)
             {
-                stream.BaseStream.Seek(pos + i, SeekOrigin.Begin);
+                if(i != 0)
+                    stream.BaseStream.Seek(pos + i, SeekOrigin.Begin);
                 try
                 {
                     var l = stream.ReadInt64();
@@ -818,10 +834,11 @@ namespace GWLogger.Backend.DataContext
                 {
                     continue;
                 }
-                if (Math.Abs((dt.Year * 365 + dt.DayOfYear) - approxiateDay) <= 2)
+                // Still a possible date
+                if ((dt - approxiateDay).TotalDays <= 30)
                 {
                     cmd = stream.ReadByte();
-                    if (cmd <= Global.DataContext.MessageTypes.Max(row => row.Id))
+                    if (cmd <= Global.DataContext.MaxMessageTypes)
                     {
                         found = true;
                         break;
@@ -882,7 +899,8 @@ namespace GWLogger.Backend.DataContext
                     {
                         detail.Value = stream.ReadString();
                         // oddies as string, we may have an issue with the record
-                        if (detail.Value.Length > 128 || !specialChars.IsMatch(detail.Value))
+                        //if (detail.Value.Length > 128 || !specialChars.IsMatch(detail.Value))
+                        if (detail.Value.Length > 128)
                         {
                             stream.BaseStream.Seek(pos, SeekOrigin.Begin);
                             break;
