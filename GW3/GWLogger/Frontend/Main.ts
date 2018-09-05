@@ -1,4 +1,37 @@
-﻿// Main class...
+﻿var availableVariables = {
+    "class": "Source class, path & function call",
+    "line": "Source line number",
+    "channel": "EPICS Channel Name",
+    "sid": "Server ID (IOC ID)",
+    "cid": "Client ID (EPICS client)",
+    "gwid": "Gateway ID",
+    "remote": "Remote IP & port (either client or IOC)",
+    "cmd": "Command id",
+    "ip": "3rd party IP (&lt;&gt; remote)",
+    "exception": "Exception string",
+    "datacount": "Channel data count",
+    "gatewaymonitorid": "Gateway Monitor Id",
+    "clientioid": "Client I/O ID",
+    "version": "Channel Access protocol's version",
+    "origin": "Origin",
+    "type": "Log message type"
+};
+
+var availableConditions = {
+    "!=": "Not equal",
+    "=": "Equal",
+    "&gt;": "Bigger than",
+    "&lt;": "Smaller than",
+    "&gt;=": "Bigger or equal than",
+    "&lt;=": "Smaller or equal than",
+    "contains": "Contains",
+    "starts": "Starts with",
+    "ends": "Ends with"
+};
+
+var availableOperators = [{ "and": "and" }, { "or": "or" }];
+
+// Main class...
 class Main
 {
     static BaseTitle: string;
@@ -634,8 +667,31 @@ class Main
             {
             }
         });
-        $("#queryField").on("keyup", () =>
+        $("#queryField").on("focus", () =>
         {
+            $("#querySuggestions").show();
+            Main.ShowSuggestion();
+        });
+        $("#queryField").on("blur", () =>
+        {
+            $("#querySuggestions").hide();
+        });
+        $("#queryField").on("keyup", (evt: JQueryEventObject) =>
+        {
+            switch (evt.keyCode)
+            {
+                case 27:
+                    $("#queryField").blur();
+                    break;
+                case 13:
+                    $("#querySuggestions").hide();
+                    break;
+                default:
+                    $("#querySuggestions").show();
+                    Main.ShowSuggestion();
+                    break;
+            }
+
             $.ajax({
                 type: 'POST',
                 url: '/DataAccess.asmx/CheckQuery',
@@ -659,6 +715,41 @@ class Main
         $("#closeHelp").click(Main.HideHelp);
 
         Main.PopState(null);
+    }
+
+    static ShowSuggestion()
+    {
+        var html = "";
+        html += "<h1>Queries:</h1>";
+        html += "&lt;variable&gt; &lt;condition&gt; &lt;value&gt; [and/or &lt;...&gt;]";
+
+        html += "<h1>Variables:</h1><table>";
+        var n = 0;
+        for (var i in availableVariables)
+        {
+            if (n % 2 == 0 && n != 0)
+                html += "</tr><tr>";
+            else if (n % 2 == 0)
+                html += "<tr>";
+            html += "<td>" + i + "</td><td>" + availableVariables[i] + "</td>";
+            n++;
+        }
+        html += "</tr></table>";
+
+        html += "<h1>Conditions:</h1><table>";
+        n = 0;
+        for (var i in availableConditions)
+        {
+            if (n % 2 == 0 && n != 0)
+                html += "</tr><tr>";
+            else if (n % 2 == 0)
+                html += "<tr>";
+            html += "<td>" + i + "</td><td>" + availableConditions[i] + "</td>";
+            n++;
+        }
+        html += "</tr></table>";
+
+        $("#querySuggestions").html(html);
     }
 
     static DelayedSearch(cb)

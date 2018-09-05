@@ -463,3 +463,39 @@ select
 {
     width: ~"calc(50vw - 213px)";
 }
+
+#querySuggestions
+{
+    position: absolute;
+    box-sizing: border-box;
+    left: 305px;
+    right: 5px;
+    top: 190px;
+    //height: 200px;
+    background: #e8e6dc;
+    border: solid 1px #606060;
+    padding: 3px;
+    display: none;
+
+    h1
+    {
+        margin: 0px;
+        margin-top: 15px;
+        font-size: 18px;
+    }
+
+    h1:first-child
+    {
+        margin-top: 0px;
+    }
+
+    table
+    {
+        width: 100%;
+    }
+
+    table td:nth-child(1), table td:nth-child(3)
+    {
+        width: 40px;
+    }
+}
