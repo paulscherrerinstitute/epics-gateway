@@ -13,5 +13,6 @@ namespace GWLogger.Backend.DataContext
         public DateTime EntryDate { get; set; }
         public string RemoteIpPoint { get; set; }
         public List<LogEntryDetail> LogEntryDetails { get; set; }
+        public long Position { get; set; }
     }
 }

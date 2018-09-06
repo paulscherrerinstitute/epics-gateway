@@ -830,7 +830,7 @@ namespace GWLogger.Backend.DataContext
             var pos = stream.BaseStream.Position;
             for (var i = 0; i < 1024 && pos + i < streamLength; i++)
             {
-                if(i != 0)
+                if (i != 0)
                     stream.BaseStream.Seek(pos + i, SeekOrigin.Begin);
                 try
                 {
@@ -847,6 +847,7 @@ namespace GWLogger.Backend.DataContext
                     cmd = stream.ReadByte();
                     if (cmd <= Global.DataContext.MaxMessageTypes)
                     {
+                        pos += i;
                         found = true;
                         break;
                     }
@@ -859,7 +860,8 @@ namespace GWLogger.Backend.DataContext
             {
                 EntryDate = dt,
                 MessageTypeId = cmd,
-                LogEntryDetails = new List<LogEntryDetail>()
+                LogEntryDetails = new List<LogEntryDetail>(),
+                Position = pos
             };
 
             var bytes = stream.ReadBytes(4);

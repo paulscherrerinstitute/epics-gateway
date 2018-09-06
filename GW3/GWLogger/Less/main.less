@@ -499,3 +499,28 @@ select
         width: 40px;
     }
 }
+
+#detailInfo
+{
+    position: absolute;
+    box-sizing: border-box;
+    left: 305px;
+    right: 5px;
+    bottom: ~"calc(50% - @{borderSpacing} - @{borderSpacing} - 10px)";
+    height: 200px;
+    background: #e8e6dc;
+    border: solid 1px #606060;
+    padding: 3px;
+    display: none;
+
+    table
+    {
+        width: 100%;
+    }
+
+    table td:nth-child(1), table td:nth-child(3)
+    {
+        width: 40px;
+        font-weight: bold;
+    }
+}

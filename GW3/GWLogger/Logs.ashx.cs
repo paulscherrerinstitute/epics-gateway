@@ -1,7 +1,6 @@
 ﻿using GWLogger.Backend;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -15,10 +14,9 @@ namespace GWLogger
     /// </summary>
     public class Logs : IHttpHandler
     {
-        static Dictionary<int, string> Convertion;
-        static Dictionary<int, string> DetailTypes;
-
-        static ReaderWriterLockSlim changeLock = new ReaderWriterLockSlim();
+        private static Dictionary<int, string> Convertion;
+        private static Dictionary<int, string> DetailTypes;
+        private static ReaderWriterLockSlim changeLock = new ReaderWriterLockSlim();
 
         static Logs()
         {
@@ -117,6 +115,8 @@ namespace GWLogger
             context.Response.Expires = 0;
             context.Response.Write("[");
 
+            var messageDetails = Global.DataContext.MessageDetailTypes.ToDictionary(key => key.Id, val => val.Value);
+
             changeLock.EnterReadLock();
             try
             {
@@ -132,6 +132,10 @@ namespace GWLogger
                     context.Response.Write(i.EntryDate.ToUniversalTime().ToJsDate());
                     context.Response.Write(",");
 
+                    context.Response.Write("\"Remote\":\"");
+                    context.Response.Write(i.RemoteIpPoint);
+                    context.Response.Write("\",");
+
                     context.Response.Write("\"Type\":");
                     context.Response.Write(i.MessageTypeId);
                     context.Response.Write(",");
@@ -142,7 +146,15 @@ namespace GWLogger
 
                     context.Response.Write("\"Message\":\"");
                     context.Response.Write(Convert(i.RemoteIpPoint, i.MessageTypeId, i.LogEntryDetails).JsEscape());
-                    context.Response.Write("\"");
+                    context.Response.Write("\",");
+
+                    context.Response.Write("\"Position\":\"");
+                    context.Response.Write(i.Position);
+                    context.Response.Write("\",");
+
+                    context.Response.Write("\"Details\":{");
+                    context.Response.Write(string.Join(",", i.LogEntryDetails.Select(row => "\"" + messageDetails[row.DetailTypeId] + "\":\"" + row.Value.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"")));
+                    context.Response.Write("}");
 
                     context.Response.Write("}");
                 }

@@ -131,8 +131,8 @@ class Utils
     {
         if (!source)
             return "";
-        return ("" + (source.getMonth() + 1)).padLeft("0", 2) + "/" + ("" + source.getDate()).padLeft("0", 2) + " " +
-            ("" + source.getHours()).padLeft("0", 2) + ":" + ("" + source.getMinutes()).padLeft("0", 2);
+        return ("" + (source.getUTCMonth() + 1)).padLeft("0", 2) + "/" + ("" + source.getUTCDate()).padLeft("0", 2) + " " +
+            ("" + source.getUTCHours()).padLeft("0", 2) + ":" + ("" + source.getUTCMinutes()).padLeft("0", 2);
     }
 
     static FullDateFormat(source: Date)

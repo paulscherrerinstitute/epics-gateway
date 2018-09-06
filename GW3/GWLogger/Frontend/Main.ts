@@ -44,6 +44,7 @@ class Main
     static Levels: string;
     static IsLast: boolean = true;
     static SearchTimeout: number = null;
+    static Logs: LogEntry[] = null;
 
     static loadingLogs: JQueryXHR;
 
@@ -156,7 +157,7 @@ class Main
         if (!Main.Stats || !Main.EndDate)
             return;
 
-        var end = new Date(Math.floor(Main.EndDate.getTime() / (10 * 60 * 1000)) * 10 * 60 * 1000);
+        var end = new Date(Math.floor((Main.EndDate.getTime() + Main.EndDate.getTimezoneOffset() * 60000) / (10 * 60 * 1000)) * 10 * 60 * 1000);
 
         var canvas = (<HTMLCanvasElement>$("#timeRangeCanvas")[0]);
         var ctx = canvas.getContext("2d");
@@ -256,7 +257,7 @@ class Main
 
         if (Main.CurrentTime)
         {
-            var tdiff = Main.EndDate.getTime() - Main.CurrentTime.getTime();
+            var tdiff = (Main.EndDate.getTime() - Main.CurrentTime.getTime()) - Main.EndDate.getTimezoneOffset() * 60000;
             var t = tdiff / (10 * 60 * 1000);
             var x = width - Math.floor(t * w + w / 2);
 
@@ -335,7 +336,7 @@ class Main
             tx = 0;
         if (tx > 144)
             tx = 144;
-        Main.CurrentTime = new Date(Main.EndDate.getTime() - tx * 10 * 60 * 1000);
+        Main.CurrentTime = new Date((Main.EndDate.getTime() + Main.EndDate.getTimezoneOffset() * 60000) - tx * 10 * 60 * 1000);
         if (tx == 144 && ((new Date()).getTime() - Main.CurrentTime.getTime()) < 24 * 3600 * 1000)
             Main.IsLast = true;
         window.history.pushState(null, Main.BaseTitle + " - " + Main.CurrentGateway, '/GW/' + Main.CurrentGateway + "/" + Main.CurrentTime.getTime());
@@ -440,13 +441,15 @@ class Main
             {
                 Main.loadingLogs = null;
                 var logs: LogEntry[] = data;
+                Main.Logs = logs;
+
                 var html = "";
                 html += "<table>";
                 html += "<thead><tr><td>Date</td><td>Type</td><td>Level</td><td>Message</td></tr></thead>";
                 html + "<tbody>";
                 for (var i = 0; i < logs.length; i++)
                 {
-                    html += "<tr>";
+                    html += "<tr rowId=\"" + i + "\">";
                     html += "<td>" + Utils.GWDateFormatMilis(new Date(logs[i].Date)) + "</td>";
                     html += "<td>" + logs[i].Type + "</td>";
                     html += "<td>" + logs[i].Level + "</td>";
@@ -458,6 +461,29 @@ class Main
 
                 // Scroll to bottom
                 $("#logsContent").scrollTop($("#logsContent")[0].scrollHeight - $("#logsContent").height());
+
+                $("#logsContent tbody > tr").on("mouseover", (evt) =>
+                {
+                    var rowId = parseInt(evt.target.parentElement.attributes["rowId"].value);
+                    var html = "";
+                    html += "<table>";
+                    html += "<tr><td>Remote</td><td>" + Main.Logs[rowId].Remote + "</td></tr>";
+                    var n = 0;
+                    for (var i in Main.Logs[rowId].Details)
+                    {
+                        if (n == 0)
+                            html += "<tr>";
+                        else if (n % 2 == 0)
+                            html += "</tr><tr>";
+                        html += "<td>" + i + "</td><td>" + Main.Logs[rowId].Details[i] + "</td>";
+                        n++;
+                    }
+                    html += "</tr></table>";
+                    $("#detailInfo").html(html).show();
+                }).on("mouseout", () =>
+                {
+                    $("#detailInfo").hide();
+                });
             },
             error: function (msg, textStatus)
             {
