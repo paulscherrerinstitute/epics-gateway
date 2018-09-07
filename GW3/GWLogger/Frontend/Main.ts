@@ -45,6 +45,7 @@ class Main
     static IsLast: boolean = true;
     static SearchTimeout: number = null;
     static Logs: LogEntry[] = null;
+    static KeepOpenDetails: boolean = false;
 
     static loadingLogs: JQueryXHR;
 
@@ -464,25 +465,27 @@ class Main
 
                 $("#logsContent tbody > tr").on("mouseover", (evt) =>
                 {
-                    var rowId = parseInt(evt.target.parentElement.attributes["rowId"].value);
-                    var html = "";
-                    html += "<table>";
-                    html += "<tr><td>Remote</td><td>" + Main.Logs[rowId].Remote + "</td></tr>";
-                    var n = 0;
-                    for (var i in Main.Logs[rowId].Details)
-                    {
-                        if (n == 0)
-                            html += "<tr>";
-                        else if (n % 2 == 0)
-                            html += "</tr><tr>";
-                        html += "<td>" + i + "</td><td>" + Main.Logs[rowId].Details[i] + "</td>";
-                        n++;
-                    }
-                    html += "</tr></table>";
+                    if (Main.KeepOpenDetails)
+                        return;
+                    var html = Main.DetailInfo(parseInt(evt.target.parentElement.attributes["rowId"].value));
                     $("#detailInfo").html(html).show();
                 }).on("mouseout", () =>
                 {
+                    if (Main.KeepOpenDetails)
+                        return;
                     $("#detailInfo").hide();
+                }).on("click", (evt) =>
+                {
+                    var html = Main.DetailInfo(parseInt(evt.target.parentElement.attributes["rowId"].value));
+                    if (Main.KeepOpenDetails)
+                    {
+                        Main.KeepOpenDetails = false;
+                        $("#detailInfo").html(html);
+                        return;
+                    }
+                    Main.KeepOpenDetails = true;
+                    html += "<div class='closeDetails' onclick='Main.CloseDetails()'></div>";
+                    $("#detailInfo").html(html).show();
                 });
             },
             error: function (msg, textStatus)
@@ -500,6 +503,40 @@ class Main
             $("#serversContent").html("Loading...");
             $("#clientsContent").html("Loading...");
         }
+    }
+
+    static DetailInfo(rowId: number): string
+    {
+        var html = "";
+        html += "<table>";
+        html += "<tr><td>Remote</td><td><span class='pseudoLink' onclick='Main.AddFilter(event,\"remote\");'>" + Main.Logs[rowId].Remote + "</span></td></tr>";
+        var n = 0;
+        for (var i in Main.Logs[rowId].Details)
+        {
+            if (n == 0)
+                html += "<tr>";
+            else if (n % 2 == 0)
+                html += "</tr><tr>";
+            html += "<td>" + i + "</td><td><span class='pseudoLink' onclick='Main.AddFilter(event,\"" + i + "\");'>" + Main.Logs[rowId].Details[i] + "</span></td>";
+            n++;
+        }
+        html += "</tr></table>";
+        return html;
+    }
+
+    static AddFilter(evt: MouseEvent, prop: string)
+    {
+        var value = (<HTMLElement>evt.target).innerText;
+        if ($("#queryField").val().trim() != "")
+            $("#queryField").val($("#queryField").val() + " and ");
+        $("#queryField").val($("#queryField").val() + prop + " = \"" + value + "\"").trigger("keyup");
+        $("#queryField").blur();
+    }
+
+    static CloseDetails()
+    {
+        Main.KeepOpenDetails = false;
+        $("#detailInfo").hide();
     }
 
     static Refresh()
