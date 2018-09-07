@@ -30,11 +30,21 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                     if (secondId == -1)
                         secondId = context.MessageDetailTypes.First(row => row.Value == "SourceFilePath").Id;
                     return (entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == secondId)?.Value ?? "") + "@" + (entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == detailId)?.Value ?? "");
+                case "sourcefilepath":
+                    if (detailId == -1)
+                        detailId = context.MessageDetailTypes.First(row => row.Value == "SourceFilePath").Id;
+                    return entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == detailId)?.Value ?? "";
+                case "sourcemembername":
+                    if (detailId == -1)
+                        detailId = context.MessageDetailTypes.First(row => row.Value == "SourceMemberName").Id;
+                    return entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == detailId)?.Value ?? "";
                 case "line":
+                case "sourcelinenumber":
                     if (detailId == -1)
                         detailId = context.MessageDetailTypes.First(row => row.Value == "SourceLineNumber").Id;
                     return entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == detailId)?.Value ?? "";
                 case "channel":
+                case "channelname":
                     if (detailId == -1)
                         detailId = context.MessageDetailTypes.First(row => row.Value == "ChannelName").Id;
                     return entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == detailId)?.Value ?? "";
@@ -53,6 +63,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                 case "remote":
                     return entry.RemoteIpPoint;
                 case "cmd":
+                case "commandid":
                     if (detailId == -1)
                         detailId = context.MessageDetailTypes.First(row => row.Value == "CommandId").Id;
                     return entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == detailId)?.Value ?? "";
