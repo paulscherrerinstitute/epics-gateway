@@ -87,7 +87,7 @@ class Main
     static GatewayChanged(): void
     {
         Main.CurrentGateway = $('#gatewaySelector').val();
-        window.history.pushState(null, Main.BaseTitle + " - " + Main.CurrentGateway, '/GW/' + Main.CurrentGateway);
+        Main.SetState();
 
         Main.GatewaySelected();
     }
@@ -257,7 +257,7 @@ class Main
 
         if (Main.CurrentTime)
         {
-            var tdiff = (Main.EndDate.getTime() - Main.CurrentTime.getTime()) - Main.EndDate.getTimezoneOffset() * 60000;
+            var tdiff = (Main.EndDate.getTime() - Main.CurrentTime.getTime()) + Main.EndDate.getTimezoneOffset() * 60000;
             var t = tdiff / (10 * 60 * 1000);
             var x = width - Math.floor(t * w + w / 2);
 
@@ -339,7 +339,7 @@ class Main
         Main.CurrentTime = new Date((Main.EndDate.getTime() + Main.EndDate.getTimezoneOffset() * 60000) - tx * 10 * 60 * 1000);
         if (tx == 144 && ((new Date()).getTime() - Main.CurrentTime.getTime()) < 24 * 3600 * 1000)
             Main.IsLast = true;
-        window.history.pushState(null, Main.BaseTitle + " - " + Main.CurrentGateway, '/GW/' + Main.CurrentGateway + "/" + Main.CurrentTime.getTime());
+        Main.SetState();
 
         Main.LoadTimeInfo();
     }
@@ -557,11 +557,47 @@ class Main
         if (path.length > 2 && path[1] == "GW")
         {
             Main.CurrentGateway = path[2];
-            if (path.length > 3)
-                Main.CurrentTime = new Date(parseInt(path[3]));
         }
 
+        var url = "" + document.location;
+        if (url.indexOf("#") == -1)
+            url = "";
+        else
+            url = url.substr(url.indexOf("#") + 1);
+        var parts = url.split("&");
+        var queryString = {};
+        parts.forEach(row => queryString[row.split("=")[0]] = decodeURIComponent(row.split("=")[1]));
+
+        if (queryString["c"])
+            Main.CurrentTime = new Date(parseInt(queryString["c"]));
+        if (queryString["s"])
+        {
+            Main.StartDate = new Date(parseInt(queryString["s"]));
+            $("#startDate").val(Utils.FullUtcDateFormat(Main.StartDate));
+        }
+        if (queryString["e"])
+        {
+            Main.EndDate = new Date(parseInt(queryString["e"]));
+            $("#endDate").val(Utils.FullUtcDateFormat(Main.EndDate));
+        }
+        if (queryString["q"])
+            $("#queryField").val(queryString["q"])
+
         Main.LoadGateways();
+    }
+
+    static SetState()
+    {
+        var params = "";
+        if (Main.CurrentTime)
+            params += (params != "" ? "&" : "#") + "c=" + Main.CurrentTime.getTime();
+        if (Main.StartDate)
+            params += (params != "" ? "&" : "#") + "s=" + Main.StartDate.getTime();
+        if (Main.EndDate)
+            params += (params != "" ? "&" : "#") + "e=" + Main.EndDate.getTime();
+        if ($("#queryField").val())
+            params += (params != "" ? "&" : "#") + "q=" + encodeURIComponent($("#queryField").val());
+        window.history.pushState(null, Main.BaseTitle + " - " + Main.CurrentGateway, '/GW/' + Main.CurrentGateway + params);
     }
 
     static ShowSearches()
@@ -784,6 +820,7 @@ class Main
             clearTimeout(Main.SearchTimeout);
         Main.SearchTimeout = setTimeout(() =>
         {
+            Main.SetState();
             Main.SearchTimeout = null;
             Main.IsLast = false;
             if (cb)
