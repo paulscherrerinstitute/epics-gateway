@@ -614,7 +614,7 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        internal List<LogEntry> ReadLog(DateTime start, DateTime end, Query.Statement.QueryNode query = null, int nbMaxEntries = -1, List<int> messageTypes = null)
+        internal List<LogEntry> ReadLog(DateTime start, DateTime end, Query.Statement.QueryNode query = null, int nbMaxEntries = -1, List<int> messageTypes = null, string startFile = null, long offset = 0)
         {
             try
             {
@@ -628,12 +628,18 @@ namespace GWLogger.Backend.DataContext
                 while (currentDate < end)
                 {
                     var fileToUse = FileName(currentDate);
+
+                    if (startFile != null)
+                        fileToUse = Path.GetDirectoryName(fileToUse) + "\\" + Path.GetFileName(startFile) + ".data";
+
                     if (File.Exists(fileToUse))
                     {
                         if (fileToUse != currentFile)
                             SetFile(fileToUse);
 
-                        if (firstLoop && Index[IndexPosition(start)] != -1)
+                        if (firstLoop && currentFile != null && offset != 0)
+                            Seek(offset);
+                        else if (firstLoop && Index[IndexPosition(start)] != -1)
                             Seek(Index[IndexPosition(start)]);
                         else
                             Seek(0);
@@ -658,6 +664,7 @@ namespace GWLogger.Backend.DataContext
                             if (entry != null && entry.EntryDate >= start && entry.EntryDate <= end && (query == null || query.CheckCondition(Context, entry)) && (messageTypes == null || messageTypes.Contains(entry.MessageTypeId)))
                             {
                                 entry.Gateway = gateway;
+                                entry.CurrentFile = Path.GetFileName(fileToUse).Replace(".data", "");
                                 result.Add(entry);
                             }
                             firstItem = false;

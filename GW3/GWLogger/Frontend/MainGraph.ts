@@ -157,7 +157,11 @@
         Main.CurrentTime = new Date((Main.EndDate.getTime() + Main.EndDate.getTimezoneOffset() * 60000) - tx * 10 * 60 * 1000);
         if (tx == 144 && ((new Date()).getTime() - Main.CurrentTime.getTime()) < 24 * 3600 * 1000)
             Main.IsLast = true;
-        Main.SetState();
+        else
+            Main.IsLast = false;
+        State.Set();
+        Main.Offset = null;
+        Main.OffsetFile = null;
 
         Main.LoadTimeInfo();
     }

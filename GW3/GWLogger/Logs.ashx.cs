@@ -87,6 +87,13 @@ namespace GWLogger
             if (!string.IsNullOrWhiteSpace(context.Request["query"]))
                 query = context.Request["query"];
 
+            long offset = 0;
+            string startFile = null;
+            if (!string.IsNullOrWhiteSpace(context.Request["offset"]))
+                offset = long.Parse(context.Request["offset"]);
+            if (!string.IsNullOrWhiteSpace(context.Request["filename"]))
+                startFile = context.Request["filename"];
+
             //context.Request;
             var path = context.Request.Path.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).ToArray();
             IEnumerable<Backend.DataContext.LogEntry> logs = null;
@@ -104,10 +111,10 @@ namespace GWLogger
                 if (path.Length > 2)
                 {
                     var end = long.Parse(path[2]).ToNetDate().Trim();
-                    logs = Global.DataContext.ReadLog(gateway, start, end, query, 100, msgTypes);
+                    logs = Global.DataContext.ReadLog(gateway, start, end, query, 100, msgTypes, startFile, offset);
                 }
                 else
-                    logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, 100, msgTypes);
+                    logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, 100, msgTypes,startFile, offset);
             }
 
             context.Response.ContentType = "application/json";
@@ -148,8 +155,12 @@ namespace GWLogger
                     context.Response.Write(Convert(i.RemoteIpPoint, i.MessageTypeId, i.LogEntryDetails).JsEscape());
                     context.Response.Write("\",");
 
-                    context.Response.Write("\"Position\":\"");
+                    context.Response.Write("\"Position\":");
                     context.Response.Write(i.Position);
+                    context.Response.Write(",");
+
+                    context.Response.Write("\"CurrentFile\":\"");
+                    context.Response.Write(i.CurrentFile);
                     context.Response.Write("\",");
 
                     context.Response.Write("\"Details\":{");

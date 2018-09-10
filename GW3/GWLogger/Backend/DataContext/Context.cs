@@ -235,7 +235,7 @@ namespace GWLogger.Backend.DataContext
                     return files[gatewayName].ReadLog(start, end, null, nbMaxEntries, messageTypes);
                 }*/
 
-        public List<LogEntry> ReadLog(string gatewayName, DateTime start, DateTime end, string query, int nbMaxEntries = -1, List<int> messageTypes = null)
+        public List<LogEntry> ReadLog(string gatewayName, DateTime start, DateTime end, string query, int nbMaxEntries = -1, List<int> messageTypes = null, string startFile = null, long offset = 0)
         {
             if (!files.Exists(gatewayName))
                 return null;
@@ -251,7 +251,7 @@ namespace GWLogger.Backend.DataContext
             try
             {
                 readerLock.EnterWriteLock();
-                return files[gatewayName].ReadLog(start, end, node, nbMaxEntries, messageTypes);
+                return files[gatewayName].ReadLog(start, end, node, nbMaxEntries, messageTypes, startFile, offset);
             }
             finally
             {

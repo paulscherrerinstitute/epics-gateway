@@ -1,35 +1,4 @@
-﻿var availableVariables = {
-    "class": "Source class, path & function call",
-    "line": "Source line number",
-    "channel": "EPICS Channel Name",
-    "sid": "Server ID (IOC ID)",
-    "cid": "Client ID (EPICS client)",
-    "gwid": "Gateway ID",
-    "remote": "Remote IP & port (either client or IOC)",
-    "cmd": "Command id",
-    "ip": "3rd party IP (&lt;&gt; remote)",
-    "exception": "Exception string",
-    "datacount": "Channel data count",
-    "gatewaymonitorid": "Gateway Monitor Id",
-    "clientioid": "Client I/O ID",
-    "version": "Channel Access protocol's version",
-    "origin": "Origin",
-    "type": "Log message type"
-};
-
-var availableConditions = {
-    "!=": "Not equal",
-    "=": "Equal",
-    "&gt;": "Bigger than",
-    "&lt;": "Smaller than",
-    "&gt;=": "Bigger or equal than",
-    "&lt;=": "Smaller or equal than",
-    "contains": "Contains",
-    "starts": "Starts with",
-    "ends": "Ends with"
-};
-
-var availableOperators = [{ "and": "and" }, { "or": "or" }];
+﻿/// <reference path="query.ts" />
 
 // Main class...
 class Main
@@ -46,13 +15,11 @@ class Main
     static SearchTimeout: number = null;
     static Logs: LogEntry[] = null;
     static KeepOpenDetails: boolean = false;
+    static Offset: number = null;
+    static OffsetFile: string = null;
 
     static loadingLogs: JQueryXHR;
 
-    static Path(): string[]
-    {
-        return document.location.pathname.split('/');
-    }
 
     static LoadGateways(): void
     {
@@ -88,7 +55,7 @@ class Main
     static GatewayChanged(): void
     {
         Main.CurrentGateway = $('#gatewaySelector').val();
-        Main.SetState();
+        State.Set();
 
         Main.GatewaySelected();
     }
@@ -145,6 +112,8 @@ class Main
 
                 if (Main.IsLast && Main.CurrentTime)
                     Main.LoadTimeInfo(refresh);
+                else
+                    Main.LoadTimeInfo();
             },
             error: function (msg, textStatus)
             {
@@ -274,9 +243,21 @@ class Main
 
         if (Main.loadingLogs)
             Main.loadingLogs.abort();
+
+        var queryString = "";
+        if (Main.Levels)
+            queryString += (queryString != "" ? "&" : "?") + "levels=" + + Main.Levels;
+        if ($("#queryField").val())
+            queryString += (queryString != "" ? "&" : "?") + "query=" + $("#queryField").val();
+        if (Main.Offset !== null)
+            queryString += (queryString != "" ? "&" : "?") + "offset=" + this.Offset;
+        if (Main.OffsetFile !== null)
+            queryString += (queryString != "" ? "&" : "?") + "filename=" + this.OffsetFile;
+        //(Main.Levels ? "?levels=" + Main.Levels + "&query=" + $("#queryField").val() : "?query=" + $("#queryField").val()
+
         Main.loadingLogs = $.ajax({
             type: 'GET',
-            url: '/Logs/' + Main.CurrentGateway + '/' + startDate.getTime() + '/' + endDate.getTime() + (Main.Levels ? "?levels=" + Main.Levels + "&query=" + $("#queryField").val() : "?query=" + $("#queryField").val()),
+            url: '/Logs/' + Main.CurrentGateway + '/' + startDate.getTime() + '/' + endDate.getTime() + queryString,
             success: function (data)
             {
                 Main.loadingLogs = null;
@@ -296,17 +277,25 @@ class Main
                     html += "<td>" + logs[i].Message + "</td>";
                     html + "</tr>";
                 }
+
+                html += "<tr rowId=\"-1\"><td class='pseudoLink'>Next entries</td></tr>";
                 html += "</tbody></table>";
                 $("#logsContent").html(html);
 
                 // Scroll to bottom
-                $("#logsContent").scrollTop($("#logsContent")[0].scrollHeight - $("#logsContent").height());
+                if (Main.IsLast)
+                    $("#logsContent").scrollTop($("#logsContent")[0].scrollHeight - $("#logsContent").height());
+                else
+                    $("#logsContent").scrollTop(0);
 
                 $("#logsContent tbody > tr").on("mouseover", (evt) =>
                 {
                     if (Main.KeepOpenDetails)
                         return;
-                    var html = Main.DetailInfo(parseInt(evt.target.parentElement.attributes["rowId"].value));
+                    var rowId = parseInt(evt.target.parentElement.attributes["rowId"].value);
+                    if (rowId == -1)
+                        return;
+                    var html = Main.DetailInfo(rowId);
                     $("#detailInfo").html(html).show();
                 }).on("mouseout", () =>
                 {
@@ -315,7 +304,15 @@ class Main
                     $("#detailInfo").hide();
                 }).on("click", (evt) =>
                 {
-                    var html = Main.DetailInfo(parseInt(evt.target.parentElement.attributes["rowId"].value));
+                    var rowId = parseInt(evt.target.parentElement.attributes["rowId"].value);
+                    if (rowId == -1)
+                    {
+                        Main.Offset = Main.Logs[Main.Logs.length - 1].Position;
+                        Main.OffsetFile = Main.Logs[Main.Logs.length - 1].CurrentFile;
+                        Main.LoadTimeInfo();
+                        return;
+                    }
+                    var html = Main.DetailInfo(rowId);
                     if (Main.KeepOpenDetails)
                     {
                         Main.KeepOpenDetails = false;
@@ -420,76 +417,7 @@ class Main
         MainGraph.DrawStats();
     }
 
-    static PopState(jEvent: JQueryEventObject)
-    {
-        Main.CurrentGateway = null;
-        Main.CurrentTime = null;
-        Main.EndDate = null;
 
-        $("#help").show();
-        $("#clients, #servers, #logs").hide();
-
-        var path = Main.Path();
-        if (path.length > 2 && path[1] == "GW")
-            Main.CurrentGateway = path[2];
-        else
-            Main.CurrentGateway = null;
-
-        var url = "" + document.location;
-        if (url.indexOf("#") == -1)
-            url = "";
-        else
-            url = url.substr(url.indexOf("#") + 1);
-        var parts = url.split("&");
-        var queryString = {};
-        parts.forEach(row => queryString[row.split("=")[0]] = decodeURIComponent(row.split("=")[1]));
-
-        if (queryString["c"])
-            Main.CurrentTime = new Date(parseInt(queryString["c"]));
-        else
-            Main.CurrentTime = null;
-        if (queryString["s"])
-        {
-            Main.StartDate = new Date(parseInt(queryString["s"]));
-            $("#startDate").val(Utils.FullUtcDateFormat(Main.StartDate));
-        }
-        else
-        {
-            Main.StartDate = null;
-            $("#startDate").val("");
-        }
-        if (queryString["e"])
-        {
-            Main.EndDate = new Date(parseInt(queryString["e"]));
-            $("#endDate").val(Utils.FullUtcDateFormat(Main.EndDate));
-        }
-        else
-        {
-            Main.EndDate = null;
-            $("#endDate").val("");
-        }
-        if (queryString["q"])
-            $("#queryField").val(queryString["q"]);
-        else
-            $("#queryField").val("");
-
-        Main.LoadGateways();
-        //Main.DelayedSearch(Main.LoadLogStats, true);
-    }
-
-    static SetState()
-    {
-        var params = "";
-        if (Main.CurrentTime)
-            params += (params != "" ? "&" : "#") + "c=" + Main.CurrentTime.getTime();
-        if (Main.StartDate)
-            params += (params != "" ? "&" : "#") + "s=" + Main.StartDate.getTime();
-        if (Main.EndDate)
-            params += (params != "" ? "&" : "#") + "e=" + Main.EndDate.getTime();
-        if ($("#queryField").val())
-            params += (params != "" ? "&" : "#") + "q=" + encodeURIComponent($("#queryField").val());
-        window.history.pushState(null, Main.BaseTitle + " - " + Main.CurrentGateway, '/GW/' + Main.CurrentGateway + params);
-    }
 
     static ShowSearches()
     {
@@ -569,11 +497,13 @@ class Main
         $(window).on("resize", Main.Resize);
         $("#timeRangeCanvas").on("mousedown", MainGraph.TimeLineSelected);
         window.setInterval(Main.Refresh, 1000);
-        $(window).bind('popstate', Main.PopState);
+        $(window).bind('popstate', State.Pop);
         $("#clientsTabs li:nth-child(1)").click(Main.ShowStats);
         $("#clientsTabs li:nth-child(2)").click(Main.ShowSearches);
         $("#prevDay").click(() =>
         {
+            Main.Offset = null;
+            Main.OffsetFile = null;
             Main.StartDate = new Date(Main.StartDate.getTime() - 24 * 3600 * 1000);
             Main.EndDate = new Date(Main.StartDate.getTime() + 24 * 3600 * 1000);
             $("#startDate").val(Utils.FullUtcDateFormat(Main.StartDate));
@@ -582,6 +512,8 @@ class Main
         });
         $("#nextDay").click(() =>
         {
+            Main.Offset = null;
+            Main.OffsetFile = null;
             Main.StartDate = new Date(Main.StartDate.getTime() + 24 * 3600 * 1000);
             Main.EndDate = new Date(Main.StartDate.getTime() + 24 * 3600 * 1000);
             $("#startDate").val(Utils.FullUtcDateFormat(Main.StartDate));
@@ -598,6 +530,8 @@ class Main
                 Main.StartDate = dt;
                 Main.EndDate = new Date(Main.StartDate.getTime() + 24 * 3600 * 1000);
                 $("#endDate").val(Utils.FullUtcDateFormat(Main.EndDate));
+                Main.Offset = null;
+                Main.OffsetFile = null;
                 Main.DelayedSearch(Main.LoadLogStats);
             }
             catch (ex)
@@ -614,6 +548,8 @@ class Main
                 Main.EndDate = dt;
                 Main.StartDate = new Date(Main.EndDate.getTime() - 24 * 3600 * 1000);
                 $("#startDate").val(Utils.FullUtcDateFormat(Main.StartDate));
+                Main.Offset = null;
+                Main.OffsetFile = null;
                 Main.DelayedSearch(Main.LoadLogStats);
             }
             catch (ex)
@@ -659,6 +595,8 @@ class Main
                         $("#queryField").css("color", "black");
                 }
             });
+            Main.Offset = null;
+            Main.OffsetFile = null;
             Main.DelayedSearch(Main.LoadTimeInfo);
         });
 
@@ -667,7 +605,7 @@ class Main
         $("#logHelp").click(Main.ShowHelp);
         $("#closeHelp").click(Main.HideHelp);
 
-        Main.PopState(null);
+        State.Pop(null);
     }
 
     static ShowSuggestion()
@@ -705,14 +643,14 @@ class Main
         $("#querySuggestions").html(html);
     }
 
-    static DelayedSearch(cb, fromPop: boolean=false)
+    static DelayedSearch(cb, fromPop: boolean = false)
     {
         if (Main.SearchTimeout !== null)
             clearTimeout(Main.SearchTimeout);
         Main.SearchTimeout = setTimeout(() =>
         {
             if (!fromPop)
-                Main.SetState();
+                State.Set();
             Main.SearchTimeout = null;
             Main.IsLast = false;
             if (cb)
