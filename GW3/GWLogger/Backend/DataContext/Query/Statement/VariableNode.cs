@@ -97,6 +97,8 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                     return entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == detailId)?.Value ?? "";
                 case "type":
                     return context.MessageTypes.First(row => row.Id == entry.MessageTypeId).Name;
+                case "date":
+                    return entry.EntryDate.ToString(@"yyyy\/MM\/dd HH:mm:ss.fff");
                 default:
                     return Name;
             }

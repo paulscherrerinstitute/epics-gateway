@@ -74,6 +74,7 @@ namespace GWLogger
 
         public void ProcessRequest(HttpContext context)
         {
+            var cancel = context.Response.ClientDisconnectedToken;
             var logLevels = Global.DataContext.MessageTypes.ToDictionary(key => key.Id, val => val.LogLevel);
 
             List<int> msgTypes = null;
@@ -111,10 +112,10 @@ namespace GWLogger
                 if (path.Length > 2)
                 {
                     var end = long.Parse(path[2]).ToNetDate().Trim();
-                    logs = Global.DataContext.ReadLog(gateway, start, end, query, 100, msgTypes, startFile, offset);
+                    logs = Global.DataContext.ReadLog(gateway, start, end, query, 100, msgTypes, startFile, offset, cancel);
                 }
                 else
-                    logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, 100, msgTypes,startFile, offset);
+                    logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, 100, msgTypes, startFile, offset, cancel);
             }
 
             context.Response.ContentType = "application/json";

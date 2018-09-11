@@ -614,7 +614,7 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        internal List<LogEntry> ReadLog(DateTime start, DateTime end, Query.Statement.QueryNode query = null, int nbMaxEntries = -1, List<int> messageTypes = null, string startFile = null, long offset = 0)
+        internal List<LogEntry> ReadLog(DateTime start, DateTime end, Query.Statement.QueryNode query = null, int nbMaxEntries = -1, List<int> messageTypes = null, string startFile = null, long offset = 0, CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
@@ -625,7 +625,7 @@ namespace GWLogger.Backend.DataContext
                 var firstLoop = true;
                 var firstItem = true;
 
-                while (currentDate < end)
+                while (currentDate < end && (cancellationToken == CancellationToken.None || !cancellationToken.IsCancellationRequested))
                 {
                     var fileToUse = FileName(currentDate);
 
@@ -646,7 +646,7 @@ namespace GWLogger.Backend.DataContext
                         isAtEnd = false;
 
                         var streamLength = DataReader.BaseStream.Length;
-                        while (DataReader.BaseStream.Position < streamLength && (nbMaxEntries < 1 || result.Count < nbMaxEntries))
+                        while (DataReader.BaseStream.Position < streamLength && (nbMaxEntries < 1 || result.Count < nbMaxEntries) && (cancellationToken == CancellationToken.None || !cancellationToken.IsCancellationRequested))
                         {
                             var entry = ReadEntry(DataReader, start, streamLength);
                             if (firstItem && query != null)

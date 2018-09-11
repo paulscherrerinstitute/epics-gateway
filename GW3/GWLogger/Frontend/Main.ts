@@ -17,6 +17,7 @@ class Main
     static KeepOpenDetails: boolean = false;
     static Offset: number = null;
     static OffsetFile: string = null;
+    static MessageTypes: string[] = [];
 
     static loadingLogs: JQueryXHR;
 
@@ -345,7 +346,9 @@ class Main
     {
         var html = "";
         html += "<table>";
-        html += "<tr><td>Remote</td><td><span class='pseudoLink' onclick='Main.AddFilter(event,\"remote\");'>" + Main.Logs[rowId].Remote + "</span></td></tr>";
+        html += "<tr><td>Message&nbsp;Type</td><td><span class='pseudoLink' onclick='Main.AddFilter(event,\"type\");'>" + Main.MessageTypes[Main.Logs[0].Type] + "</span></td></tr>";
+        html += "<tr><td>Date</td><td><span class='pseudoLink' onclick='Main.AddFilter(event,\"date\");'>" + Utils.GWDateFormatMilis(new Date(Main.Logs[rowId].Date)) + "</span></td>";
+        html += "<td>Remote</td><td><span class='pseudoLink' onclick='Main.AddFilter(event,\"remote\");'>" + Main.Logs[rowId].Remote + "</span></td></tr>";
         var n = 0;
         for (var i in Main.Logs[rowId].Details)
         {
@@ -353,7 +356,7 @@ class Main
                 html += "<tr>";
             else if (n % 2 == 0)
                 html += "</tr><tr>";
-            html += "<td>" + i + "</td><td><span class='pseudoLink' onclick='Main.AddFilter(event,\"" + i + "\");'>" + Main.Logs[rowId].Details[i] + "</span></td>";
+            html += "<td>" + i.replace(/(\w)([A-Z][a-z])/g, "$1&nbsp;$2") + "</td><td><span class='pseudoLink' onclick='Main.AddFilter(event,\"" + i + "\");'>" + Main.Logs[rowId].Details[i] + "</span></td>";
             n++;
         }
         html += "</tr></table>";
@@ -365,7 +368,10 @@ class Main
         var value = (<HTMLElement>evt.target).innerText;
         if ($("#queryField").val().trim() != "")
             $("#queryField").val($("#queryField").val() + " and ");
-        $("#queryField").val($("#queryField").val() + prop + " = \"" + value + "\"").trigger("keyup");
+        if (prop == "date")
+            $("#queryField").val($("#queryField").val() + prop + " >= \"" + value + "\"").trigger("keyup");
+        else
+            $("#queryField").val($("#queryField").val() + prop + " = \"" + value + "\"").trigger("keyup");
         $("#queryField").blur();
     }
 
@@ -492,6 +498,20 @@ class Main
 
     static Init(): void
     {
+        $.ajax({
+            type: 'POST',
+            url: '/DataAccess.asmx/GetMessageTypes',
+            data: JSON.stringify({}),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (msg)
+            {
+                var vals = <KeyValuePair[]>msg.d;
+                for (var i = 0; i < vals.length; i++)
+                    Main.MessageTypes[vals[i].Key] = vals[i].Value;
+            }
+        });
+
         Main.BaseTitle = window.document.title;
         $("#gatewaySelector").on("change", Main.GatewayChanged);
         $(window).on("resize", Main.Resize);

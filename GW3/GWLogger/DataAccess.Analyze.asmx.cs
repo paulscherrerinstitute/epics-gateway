@@ -16,6 +16,12 @@ namespace GWLogger
         }
 
         [WebMethod]
+        public List<KeyValuePair<int,string>> GetMessageTypes()
+        {
+            return Global.DataContext.MessageTypes.Select(row => new KeyValuePair<int, string>(row.Id, row.Name)).ToList();
+        }
+
+        [WebMethod]
         public List<Backend.DTOs.GatewaySession> GetGatewaySessionsList(string gatewayName)
         {
             return AnalyzeController.GetGatewaySessionsList(gatewayName);

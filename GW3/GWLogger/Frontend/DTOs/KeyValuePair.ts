@@ -1,0 +1,5 @@
+﻿interface KeyValuePair
+{
+    Key,
+    Value
+}

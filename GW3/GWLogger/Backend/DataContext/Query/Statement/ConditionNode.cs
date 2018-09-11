@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 
 namespace GWLogger.Backend.DataContext.Query.Statement
 {
@@ -7,6 +8,9 @@ namespace GWLogger.Backend.DataContext.Query.Statement
         public QueryNode Left { get; }
         public string Condition { get; }
         public QueryNode Right { get; }
+
+        private static Regex numberCheck = new Regex(@"^[\-]{0,1}[0-9]+[\.]{0,1}[0-9]*$");
+        private static Regex dateCheck = new Regex(@"^([0-9]{4,4}\/)?([0-1][0-9]\/[0-3][0-9] )?([0-2][0-9]:[0-5][0-9]:[0-5][0-9])(\.[0-9]{1,3})?$");
 
         internal ConditionNode(QueryNode left, string condition, QueryNode right)
         {
@@ -17,34 +21,130 @@ namespace GWLogger.Backend.DataContext.Query.Statement
 
         internal override bool CheckCondition(Context context, LogEntry entry)
         {
-            switch (Condition)
+            var valA = Left.Value(context, entry);
+            var valB = Right.Value(context, entry);
+
+            if (IsNumber(valA) && IsNumber(valB))
             {
-                case "!=":
-                    //return Left.Value(context, entry) != Right.Value(context, entry);
-                    return string.Compare(Left.Value(context, entry), Right.Value(context, entry), true) != 0;
-                case "=":
-                    return string.Compare(Left.Value(context, entry), Right.Value(context, entry), true) == 0;
-                case ">":
-                    return int.Parse(Left.Value(context, entry)) > int.Parse(Right.Value(context, entry));
-                case "<":
-                    return int.Parse(Left.Value(context, entry)) < int.Parse(Right.Value(context, entry));
-                case ">=":
-                    return int.Parse(Left.Value(context, entry)) >= int.Parse(Right.Value(context, entry));
-                case "<=":
-                    return int.Parse(Left.Value(context, entry)) <= int.Parse(Right.Value(context, entry));
-                case "contains":
-                    return Left.Value(context, entry).IndexOf(Right.Value(context, entry), StringComparison.InvariantCultureIgnoreCase) != -1;
-                //return Left.Value(context, entry).ToLower().Contains(Right.Value(context, entry).ToLower());
-                case "starts":
-                    return Left.Value(context, entry).IndexOf(Right.Value(context, entry), StringComparison.InvariantCultureIgnoreCase) == 0;
-                //return Left.Value(context, entry).ToLower().StartsWith(Right.Value(context, entry).ToLower());
-                case "ends":
-                    var a = Left.Value(context, entry);
-                    var b = Right.Value(context, entry);
-                    return a.IndexOf(b, StringComparison.InvariantCultureIgnoreCase) == a.Length - b.Length;
-                    //return Left.Value(context, entry).ToLower().EndsWith(Right.Value(context, entry).ToLower());
+                var nValA = double.Parse(valA);
+                var nValB = double.Parse(valB);
+
+                switch (Condition)
+                {
+                    case "!=":
+                        return nValA != nValB;
+                    case "=":
+                        return nValA == nValB;
+                    case ">":
+                        return nValA > nValB;
+                    case "<":
+                        return nValA < nValB;
+                    case ">=":
+                        return nValA >= nValB;
+                    case "<=":
+                        return nValA <= nValB;
+                    case "contains":
+                        return valA.IndexOf(valB, StringComparison.InvariantCultureIgnoreCase) != -1;
+                    case "starts":
+                        return valA.IndexOf(valB, StringComparison.InvariantCultureIgnoreCase) == 0;
+                    case "ends":
+                        return valA.IndexOf(valB, StringComparison.InvariantCultureIgnoreCase) == valA.Length - valB.Length;
+                }
             }
+            if (IsDate(valA) && IsDate(valB))
+            {
+                var dValA = ToDate(valA);
+                var dValB = ToDate(valB);
+
+                switch (Condition)
+                {
+                    case "!=":
+                        return dValA != dValB;
+                    case "=":
+                        return dValA == dValB;
+                    case ">":
+                        return dValA > dValB;
+                    case "<":
+                        return dValA < dValB;
+                    case ">=":
+                        return dValA >= dValB;
+                    case "<=":
+                        return dValA <= dValB;
+                    case "contains":
+                        return valA.IndexOf(valB, StringComparison.InvariantCultureIgnoreCase) != -1;
+                    case "starts":
+                        return valA.IndexOf(valB, StringComparison.InvariantCultureIgnoreCase) == 0;
+                    case "ends":
+                        return valA.IndexOf(valB, StringComparison.InvariantCultureIgnoreCase) == valA.Length - valB.Length;
+                }
+            }
+            else switch (Condition)
+                {
+                    case "!=":
+                        return string.Compare(valA, valB, true) != 0;
+                    case "=":
+                        return string.Compare(valA, valB, true) == 0;
+                    case ">":
+                        return string.Compare(valA, valB, true) > 0;
+                    case "<":
+                        return string.Compare(valA, valB, true) < 0;
+                    case ">=":
+                        return string.Compare(valA, valB, true) >= 0;
+                    case "<=":
+                        return string.Compare(valA, valB, true) <= 0;
+                    case "contains":
+                        return valA.IndexOf(valB, StringComparison.InvariantCultureIgnoreCase) != -1;
+                    case "starts":
+                        return valA.IndexOf(valB, StringComparison.InvariantCultureIgnoreCase) == 0;
+                    case "ends":
+                        return valA.IndexOf(valB, StringComparison.InvariantCultureIgnoreCase) == valA.Length - valB.Length;
+                }
             throw new UnknownConditionException("Unknown condition '" + Condition + "'");
+        }
+
+        internal bool IsNumber(string value)
+        {
+            return numberCheck.IsMatch(value);
+        }
+
+        internal bool IsDate(string value)
+        {
+            return dateCheck.IsMatch(value);
+        }
+
+        internal DateTime ToDate(string value)
+        {
+            var m = dateCheck.Match(value);
+            var now = DateTime.UtcNow;
+            int year, month, day, hour, min, sec, mili;
+            if (string.IsNullOrWhiteSpace(m.Groups[1].Value))
+                year = now.Year;
+            else
+                year = int.Parse(m.Groups[1].Value.Replace("/", ""));
+
+            if (string.IsNullOrWhiteSpace(m.Groups[2].Value))
+            {
+                month = now.Month;
+                day = now.Day;
+            }
+            else
+            {
+                var d = m.Groups[2].Value.Split('/');
+                month = int.Parse(d[0]);
+                day = int.Parse(d[1]);
+            }
+
+            var h = m.Groups[3].Value.Trim().Split(':');
+            hour = int.Parse(h[0]);
+            min = int.Parse(h[1]);
+            sec = int.Parse(h[2]);
+
+            if (string.IsNullOrWhiteSpace(m.Groups[4].Value))
+                mili = 0;
+            else
+                mili = int.Parse(m.Groups[4].Value.Replace(".", "").PadRight(3, '0').Substring(0, 3));
+
+            return new DateTime(year, month, day, hour, min, sec, mili, DateTimeKind.Utc);
         }
 
         internal override string Value(Context context, LogEntry entry)

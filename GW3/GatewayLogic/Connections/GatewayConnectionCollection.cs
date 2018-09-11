@@ -35,7 +35,7 @@ namespace GatewayLogic.Connections
                 lockDictionary.Wait();
                 toDelete = dictionary.Values.Where(row => (DateTime.UtcNow - row.LastMessage).TotalSeconds > 90).ToList();
 
-                toCheck = dictionary.Values.Where(row => (DateTime.UtcNow - row.LastMessage).TotalSeconds > 5 && !toDelete.Contains(row)).ToList();
+                toCheck = dictionary.Values.Where(row => (DateTime.UtcNow - row.LastMessage).TotalSeconds > 35 && !toDelete.Contains(row)).ToList();
             }
             finally
             {
@@ -50,6 +50,7 @@ namespace GatewayLogic.Connections
             foreach (var conn in toCheck)
             {
                 conn.HasSentEcho = true;
+                conn.LastEcho = DateTime.UtcNow;
                 try
                 {
                     conn.Send(echoPacket);

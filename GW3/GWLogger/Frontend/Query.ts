@@ -1,4 +1,5 @@
 ﻿var availableVariables = {
+    "date": "Entry date",
     "class": "Source class, path & function call",
     "line": "Source line number",
     "channel": "EPICS Channel Name",
