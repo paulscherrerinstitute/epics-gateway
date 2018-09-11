@@ -58,6 +58,13 @@
             $("#queryField").val(queryString["q"]);
         else
             $("#queryField").val("");
+        if (queryString["t"])
+            Main.CurrentTab = parseInt(queryString["t"]);
+        else
+            Main.CurrentTab = 0;
+
+        $("#logFilter li").removeClass("activeTab");
+        $($("#logFilter li")[Main.CurrentTab]).addClass("activeTab");
 
         if (Main.CurrentTime)
         {
@@ -84,6 +91,8 @@
             params += (params != "" ? "&" : "#") + "e=" + Main.EndDate.getTime();
         if ($("#queryField").val())
             params += (params != "" ? "&" : "#") + "q=" + encodeURIComponent($("#queryField").val());
+        if (Main.CurrentTab != 0)
+            params += (params != "" ? "&" : "#") + "t=" + Main.CurrentTab;
         window.history.pushState(null, Main.BaseTitle + " - " + Main.CurrentGateway, '/GW/' + Main.CurrentGateway + params);
     }
 }

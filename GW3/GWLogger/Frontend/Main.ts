@@ -18,6 +18,7 @@ class Main
     static Offset: number = null;
     static OffsetFile: string = null;
     static MessageTypes: string[] = [];
+    static CurrentTab: number = 0;
 
     static loadingLogs: JQueryXHR;
 
@@ -245,9 +246,47 @@ class Main
         if (Main.loadingLogs)
             Main.loadingLogs.abort();
 
+        $("#logsContent").html("Loading...");
+
+        var tab = $("#logFilter li")[Main.CurrentTab];
+        if (tab.getAttribute("report"))
+        {
+            Main.loadingLogs = $.ajax({
+                type: 'POST',
+                url: '/DataAccess.asmx/' + tab.getAttribute("report"),
+                data: JSON.stringify({ "gatewayName": Main.CurrentGateway, "datePoint": Utils.FullDateFormat(Main.CurrentTime == null ? Main.StartDate : Main.CurrentTime) }),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (msg)
+                {
+                    Main.loadingLogs = null;
+                    var data = <KeyValuePair[]>msg.d;
+                    var html = "";
+                    html += "<table>";
+                    //html += "<thead><tr><td>Channel</td><td>Client</td><td>NB</td><td>Date</td></tr></thead>";
+                    html + "<tbody>";
+                    for (var i = 0; i < data.length; i++)
+                    {
+                        html += "<tr>";
+                        html += "<td>" + data[i].Key + "</td>";
+                        html += "<td>" + data[i].Value + "</td>";
+                        html + "</tr>";
+                    }
+                    html += "</tbody></table>";
+                    $("#logsContent").html(html);
+                },
+                error: function (msg, textStatus)
+                {
+                    console.log(msg.responseText);
+                }
+            });
+            return;
+        }
+        Main.Levels = tab.getAttribute("level");
+
         var queryString = "";
         if (Main.Levels)
-            queryString += (queryString != "" ? "&" : "?") + "levels=" + + Main.Levels;
+            queryString += (queryString != "" ? "&" : "?") + "levels=" + Main.Levels;
         if ($("#queryField").val())
             queryString += (queryString != "" ? "&" : "?") + "query=" + $("#queryField").val();
         if (Main.Offset !== null)
@@ -423,8 +462,6 @@ class Main
         MainGraph.DrawStats();
     }
 
-
-
     static ShowSearches()
     {
         var current = Main.CurrentTime.getTime();
@@ -491,8 +528,20 @@ class Main
     {
         $("#logFilter li").removeClass("activeTab");
         $(evt.target).addClass("activeTab");
-        Main.Levels = evt.target.getAttribute("level");
 
+        var tabs = $("#logFilter li");
+        for (var i = 0; i < tabs.length; i++)
+        {
+            if (tabs[i] == evt.target)
+            {
+                Main.CurrentTab = i;
+                console.log("Tab " + i);
+                break;
+            }
+        }
+
+        State.Set();
+        Main.Levels = evt.target.getAttribute("level");
         Main.LoadTimeInfo();
     }
 

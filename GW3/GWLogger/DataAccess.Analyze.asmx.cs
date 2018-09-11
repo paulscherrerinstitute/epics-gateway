@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Services;
 
 namespace GWLogger
@@ -16,7 +15,7 @@ namespace GWLogger
         }
 
         [WebMethod]
-        public List<KeyValuePair<int,string>> GetMessageTypes()
+        public List<KeyValuePair<int, string>> GetMessageTypes()
         {
             return Global.DataContext.MessageTypes.Select(row => new KeyValuePair<int, string>(row.Id, row.Name)).ToList();
         }
@@ -46,7 +45,7 @@ namespace GWLogger
         }
 
         [WebMethod]
-        public  List<Backend.DTOs.Connection> GetConnectedClients(string gatewayName, DateTime when)
+        public List<Backend.DTOs.Connection> GetConnectedClients(string gatewayName, DateTime when)
         {
             return AnalyzeController.GetConnectedClients(gatewayName, when);
         }
@@ -83,6 +82,34 @@ namespace GWLogger
             {
             }
             return false;
+        }
+
+        [WebMethod]
+        public List<KeyValuePair<string, int>> SearchesPerformed(string gatewayName, DateTime datePoint)
+        {
+            var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), "type = \"SearchRequest\"", -1, null, null, 0, Context.Response.ClientDisconnectedToken);
+            if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
+                return null;
+            var channelName = Global.DataContext.MessageDetailTypes.First(row => row.Value == "ChannelName").Id;
+            var searchesData = searches.Select(row => new { Remote = row.RemoteIpPoint, Channel = row.LogEntryDetails.First(r2 => r2.DetailTypeId == channelName).Value });
+            var hosts = searchesData.Select(row => row.Remote.Split(':')[0]).Distinct().ToDictionary(key => key, val => Hostname(val));
+            return searchesData.GroupBy(row => row.Remote).Select(row => new KeyValuePair<string, int>(row.Key + " (" + hosts[row.Key.Split(':')[0]] + ")", row.Count())).OrderByDescending(row => row.Value).ToList();
+        }
+
+        [WebMethod]
+        public List<KeyValuePair<string, int>> SearchesOnChannelsPerformed(string gatewayName, DateTime datePoint)
+        {
+            var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), "type = \"SearchRequest\"", -1, null, null, 0, Context.Response.ClientDisconnectedToken);
+            if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
+                return null;
+            var channelName = Global.DataContext.MessageDetailTypes.First(row => row.Value == "ChannelName").Id;
+            var searchesData = searches.Select(row => new { Remote = row.RemoteIpPoint, Channel = row.LogEntryDetails.First(r2 => r2.DetailTypeId == channelName).Value });
+            return searchesData.GroupBy(row => row.Channel).Select(row => new KeyValuePair<string, int>(row.Key, row.Count())).OrderByDescending(row => row.Value).ToList();
+        }
+
+        private static string Hostname(string ip)
+        {
+            return System.Net.Dns.GetHostEntry(ip).HostName;
         }
     }
 }
