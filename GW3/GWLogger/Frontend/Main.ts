@@ -249,7 +249,11 @@ class Main
         $("#logsContent").html("Loading...");
 
         var tab = $("#logFilter li")[Main.CurrentTab];
-        if (tab.getAttribute("report"))
+        if (tab.getAttribute("report") && refresh == true)
+        {
+            return;
+        }
+        else if (tab.getAttribute("report"))
         {
             Main.loadingLogs = $.ajax({
                 type: 'POST',
