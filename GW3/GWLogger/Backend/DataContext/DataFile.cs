@@ -19,6 +19,8 @@ namespace GWLogger.Backend.DataContext
         public BinaryReader DataReader { get; private set; }
         public long[] Index = new long[24 * 6];
         private string currentFile;
+        private DateTime? lastLogEntry = null;
+        private long nbLogEntries = 0;
         private BinaryIndex<short> commandIndex = null;
 
         public long[,] Stats = new long[24 * 6, 3];
@@ -235,11 +237,37 @@ namespace GWLogger.Backend.DataContext
                         for (var i = 0; i < Stats.GetLength(0); i++)
                             writer.Write(Stats[i, s]);
                 }
+
+                UpdateGatewaySessions();
             }
             finally
             {
                 if (mustLock)
                     LockObject.Release();
+            }
+        }
+
+        private void UpdateGatewaySessions(DateTime? startNewSession = null)
+        {
+            var sessionFile = StorageDirectory + "\\" + gateway.ToLower() + ".sessions";
+            using (var writer = new BinaryWriter(File.Open(sessionFile, FileMode.OpenOrCreate, FileAccess.Write)))
+            {
+                if (lastLogEntry.HasValue && nbLogEntries > 0)
+                {
+                    if (writer.BaseStream.Length == 0)
+                        writer.Write(0l); // Start date
+                    else
+                        writer.BaseStream.Seek(writer.BaseStream.Length - sizeof(long) * 2, SeekOrigin.Begin); // Move from the end
+                    writer.Write(lastLogEntry.HasValue ? lastLogEntry.Value.ToBinary() : 0l); // End date
+                    writer.Write(nbLogEntries);
+                }
+                if (startNewSession.HasValue)
+                {
+                    writer.BaseStream.Seek(writer.BaseStream.Length, SeekOrigin.Begin);
+                    writer.Write(startNewSession.Value.ToBinary());
+                    writer.Write(0l); // End date
+                    writer.Write(0l);
+                }
             }
         }
 
@@ -287,6 +315,47 @@ namespace GWLogger.Backend.DataContext
             return date.Minute / 10 + date.Hour * 6;
         }
 
+        public List<GatewaySession> GetGatewaySessions()
+        {
+            try
+            {
+                LockObject.Wait();
+
+                var result = new List<GatewaySession>();
+
+                var sessionFile = StorageDirectory + "\\" + gateway.ToLower() + ".sessions";
+                using (var reader = new BinaryReader(File.Open(sessionFile, FileMode.Open)))
+                {
+                    var start = Math.Max(reader.BaseStream.Length - 100 * sizeof(long) * 3, 0);
+
+                    reader.BaseStream.Seek(start, SeekOrigin.Begin);
+                    while (reader.BaseStream.Position < reader.BaseStream.Length)
+                    {
+                        var s = reader.ReadInt64();
+                        var e = reader.ReadInt64();
+                        var n = reader.ReadInt64();
+
+                        result.Add(new GatewaySession
+                        {
+                            StartDate = (s == 0 ? null : (DateTime?)DateTime.FromBinary(s)),
+                            EndDate = (e == 0 ? null : (DateTime?)DateTime.FromBinary(e)),
+                            NbEntries = n
+                        });
+                    }
+                }
+                result.Reverse();
+                return result;
+            }
+            catch
+            {
+                return new List<GatewaySession>();
+            }
+            finally
+            {
+                LockObject.Release();
+            }
+        }
+
         public void Save(LogEntry entry, bool isAnError)
         {
             try
@@ -315,6 +384,20 @@ namespace GWLogger.Backend.DataContext
                     }
                 }
 
+                if (entry.MessageTypeId < 2) // Skip starting info
+                {
+                }
+                else if (entry.MessageTypeId == 2) // Start new session
+                {
+                    UpdateGatewaySessions(DateTime.UtcNow);
+                    nbLogEntries = 1;
+                    lastLogEntry = DateTime.UtcNow;
+                }
+                else
+                {
+                    nbLogEntries++;
+                    lastLogEntry = DateTime.UtcNow;
+                }
                 WriteEntry(DataWriter, entry);
 
                 /*DataWriter.Write(entry.EntryDate.ToBinary());

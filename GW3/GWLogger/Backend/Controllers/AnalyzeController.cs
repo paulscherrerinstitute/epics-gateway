@@ -14,7 +14,8 @@ namespace GWLogger.Backend.Controllers
 
         public static List<DTOs.GatewaySession> GetGatewaySessionsList(string gatewayName)
         {
-            return new List<DTOs.GatewaySession>();
+            return Global.DataContext.GetGatewaySessions(gatewayName);
+            //return new List<DTOs.GatewaySession>();
             /*using (var ctx = new LoggerContext())
             {
                 return ctx.GatewaySessions.Where(row => row.Gateway == gatewayName).OrderByDescending(row => row.StartDate)

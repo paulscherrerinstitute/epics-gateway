@@ -15,6 +15,7 @@ namespace GWLogger.Backend.DataContext
         private Thread autoFlusher;
         private const int MaxBufferedEntries = 80000;
         private List<IdValue> messageDetailTypes = new List<IdValue>();
+
         private bool isDisposed = false;
         private Thread bufferConsumer;
         private BufferBlock<LogEntry> bufferedEntries = new BufferBlock<LogEntry>();
@@ -88,6 +89,13 @@ namespace GWLogger.Backend.DataContext
             if (!files.Exists(gatewayName))
                 return null;
             return files[gatewayName].GetStats(start, end);
+        }
+
+        public List<GatewaySession> GetGatewaySessions(string gatewayName)
+        {
+            if (!files.Exists(gatewayName))
+                return null;
+            return files[gatewayName].GetGatewaySessions();
         }
 
         public void Save(LogEntry entry)
