@@ -112,9 +112,9 @@ class Main
                 }
                 MainGraph.DrawStats();
 
-                if (Main.IsLast && Main.CurrentTime)
+                if (refresh && Main.IsLast)
                     Main.LoadTimeInfo(refresh);
-                else
+                else if (!refresh)
                     Main.LoadTimeInfo();
             },
             error: function (msg, textStatus)
@@ -167,7 +167,8 @@ class Main
             Utils.Preferences = prefs;
         }
 
-        var startDate = new Date(Main.CurrentTime.getTime() - 10 * 60 * 1000);
+        //var startDate = new Date(Main.CurrentTime.getTime() - 10 * 60 * 1000);
+        var startDate = (Main.CurrentTime ? new Date(Main.CurrentTime.getTime()) : new Date(Main.EndDate.getTime() - 20 * 60 * 1000));
         var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
 
         $.ajax({
@@ -226,7 +227,7 @@ class Main
     static LoadTimeInfo(refresh: boolean = false)
     {
         MainGraph.DrawStats();
-        var startDate = new Date(Main.CurrentTime.getTime());
+        var startDate = (Main.CurrentTime ? new Date(Main.CurrentTime.getTime()) : new Date(Main.EndDate.getTime() - 20 * 60 * 1000));
         var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
 
         if ($("#closeHelp").css("display") == "none")
@@ -243,10 +244,13 @@ class Main
         else
             Main.ShowStats();
 
-        if (Main.loadingLogs)
+        if (refresh && Main.loadingLogs)
+            return;
+        else if (Main.loadingLogs)
             Main.loadingLogs.abort();
 
-        $("#logsContent").html("Loading...");
+        if (!refresh)
+            $("#logsContent").html("Loading...");
 
         var tab = $("#logFilter li")[Main.CurrentTab];
         if (tab.getAttribute("report") && refresh == true)
