@@ -13,7 +13,7 @@ namespace GWLogger.Backend.DataContext
     {
         private DataFiles files;
         private Thread autoFlusher;
-        private const int MaxBufferedEntries = 80000;
+        private const int MaxBufferedEntries = 800000;
         private List<IdValue> messageDetailTypes = new List<IdValue>();
 
         private bool isDisposed = false;
