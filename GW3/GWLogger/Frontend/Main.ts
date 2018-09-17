@@ -45,6 +45,11 @@ class Main
 
                 if (Main.CurrentGateway)
                     Main.GatewayChanged();
+                else
+                {
+                    $("#gatewaySelector").data("kendoDropDownList").dataSource.add({ text: "-- Select Gateway --", value: "" });
+                    $("#gatewaySelector").data("kendoDropDownList").value("");
+                }
             },
             error: function (msg, textStatus)
             {
@@ -56,6 +61,14 @@ class Main
     static GatewayChanged(): void
     {
         Main.CurrentGateway = $('#gatewaySelector').val();
+        var dataSource = $("#gatewaySelector").data("kendoDropDownList").dataSource;
+        if (dataSource.data()[dataSource.data().length - 1].value === "")
+            dataSource.remove(dataSource.data()[dataSource.data().length - 1]);
+        if (Main.CurrentGateway === "")
+        {
+            $("#gatewaySelector").data("kendoDropDownList").value(Main.CurrentGateway);
+            return;
+        }
         State.Set();
 
         Main.GatewaySelected();
@@ -471,6 +484,10 @@ class Main
     static Resize(): void
     {
         MainGraph.DrawStats();
+        $(".k-grid").each((idx,elem) =>
+        {
+            $(elem).data("kendoGrid").resize(true);
+        });
     }
 
     static ShowSearches()
