@@ -34,18 +34,17 @@ class Main
             success: function (msg)
             {
                 var gateways: string[] = msg.d;
-                var options = "<option>" + gateways.join("</option><option>") + "</option>";
+                var data = gateways.map((c) => { return { text: c, value: c }; });
+
+                $("#gatewaySelector").kendoDropDownList({
+                    dataTextField: "text",
+                    dataValueField: "value",
+                    dataSource: data,
+                    value: Main.CurrentGateway
+                });
+
                 if (Main.CurrentGateway)
-                {
-                    $('#gatewaySelector').find('option').remove().end().append(options).val(Main.CurrentGateway);
-                    Main.GatewaySelected();
-                }
-                else
-                {
-                    options = "<option value=''>-- Select a gateway --</option>" + options;
-                    $('#gatewaySelector').find('option').remove().end().append(options).val("");
-                    //Main.GatewayChanged();
-                }
+                    Main.GatewayChanged();
             },
             error: function (msg, textStatus)
             {
@@ -135,18 +134,12 @@ class Main
             success: function (msg)
             {
                 Main.Sessions = (msg.d ? (<object[]>msg.d).map(function (c) { return GatewaySession.CreateFromObject(c); }) : []);
-                var html = "";
-                html += "<table>";
-                html += "<thead><tr><td>Start</td><td>End</td><td>NB&nbsp;Logs</td></tr></thead>";
-                html += "<tbody>";
-                for (var i = 0; i < Main.Sessions.length; i++)
-                {
-                    html += "<tr><td>" + Utils.GWDateFormat(Main.Sessions[i].StartDate) + "</td>";
-                    html += "<td>" + Utils.GWDateFormat(Main.Sessions[i].EndDate) + "</td>";
-                    html += "<td>" + Main.Sessions[i].NbEntries + "</td></tr>";
-                }
-                html += "</tbody></table>";
-                $("#gatewaySessions").html(html);
+                $("#gatewaySessions").kendoGrid({
+                    columns: [{ title: "Start", field: "StartDate", format: "{0:MM/dd HH:mm:ss}" },
+                    { title: "End", field: "EndDate", format: "{0:MM/dd HH:mm:ss}" },
+                    { title: "NB&nbsp;Logs", field: "NbEntries" }],
+                    dataSource: { data: Main.Sessions }
+                });
             },
             error: function (msg, textStatus)
             {
@@ -170,6 +163,7 @@ class Main
         //var startDate = new Date(Main.CurrentTime.getTime() - 10 * 60 * 1000);
         var startDate = (Main.CurrentTime ? new Date(Main.CurrentTime.getTime()) : new Date(Main.EndDate.getTime() - 20 * 60 * 1000));
         var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
+        var tz = (new Date()).getTimezoneOffset() * 60000;
 
         $.ajax({
             type: 'POST',
@@ -186,36 +180,46 @@ class Main
                 var connections = Connections.CreateFromObject(msg.d);
                 if (showClientConnections)
                 {
-                    var html = "";
-                    html += "<table>";
-                    html += "<thead><tr><td>Client</td><td>Start</td><td>End</td></tr></thead>";
-                    html + "<tbody>";
-                    for (var i = 0; i < connections.Clients.length; i++)
+                    var data: Connection[] = connections.Clients;
+                    data.forEach((r) =>
                     {
-                        html += "<tr>";
-                        html += "<td>" + connections.Clients[i].RemoteIpPoint + "</td>";
-                        html += "<td>" + Utils.FullDateFormat(connections.Clients[i].Start) + "</td>";
-                        html += "<td>" + (connections.Clients[i].End ? Utils.FullDateFormat(connections.Clients[i].End) : "&nbsp;") + "</td>";
-                        html + "</tr>";
-                    }
-                    html += "</tbody></table>";
-                    $("#clientsContent").html(html);
+                        if (r.Start)
+                            r.Start = new Date(r.Start.getTime() - tz);
+                        if (r.End)
+                            r.End = new Date(r.End.getTime() - tz);
+                    });
+
+                    $("#clientsContent").html("").kendoGrid({
+                        columns: [
+                            { title: "Client", field: "RemoteIpPoint" },
+                            { title: "Start", field: "Start", format: "{0:MM/dd HH:mm:ss.fff}" },
+                            { title: "End", field: "End", format: "{0:MM/dd HH:mm:ss.fff}" }],
+                        dataSource:
+                        {
+                            data: data
+                        }
+                    });
                 }
 
-                html = "<table>";
-                html += "<thead><tr><td>Server</td><td>Start</td><td>End</td></tr></thead>";
-                html + "<tbody>";
-                for (var i = 0; i < connections.Servers.length; i++)
+                data = connections.Servers;
+                data.forEach((r) =>
                 {
-                    html += "<tr>";
-                    html += "<td>" + connections.Servers[i].RemoteIpPoint + "</td>";
-                    html += "<td>" + Utils.FullDateFormat(connections.Servers[i].Start) + "</td>";
-                    html += "<td>" + (connections.Servers[i].End ? Utils.FullDateFormat(connections.Servers[i].End) : "&nbsp;") + "</td>";
-                    html + "</tr>";
-                }
-                html += "</table>";
-                html += "</tbody></table>";
-                $("#serversContent").html(html);
+                    if (r.Start)
+                        r.Start = new Date(r.Start.getTime() - tz);
+                    if (r.End)
+                        r.End = new Date(r.End.getTime() - tz);
+                });
+
+                $("#serversContent").html("").kendoGrid({
+                    columns: [
+                        { title: "Client", field: "RemoteIpPoint" },
+                        { title: "Start", field: "Start", format: "{0:MM/dd HH:mm:ss.fff}" },
+                        { title: "End", field: "End", format: "{0:MM/dd HH:mm:ss.fff}" }],
+                    dataSource:
+                    {
+                        data: data
+                    }
+                });
             },
             error: function (msg, textStatus)
             {
@@ -269,19 +273,16 @@ class Main
                 {
                     Main.loadingLogs = null;
                     var data = <KeyValuePair[]>msg.d;
-                    var html = "";
-                    html += "<table>";
-                    //html += "<thead><tr><td>Channel</td><td>Client</td><td>NB</td><td>Date</td></tr></thead>";
-                    html + "<tbody>";
-                    for (var i = 0; i < data.length; i++)
-                    {
-                        html += "<tr>";
-                        html += "<td>" + data[i].Key + "</td>";
-                        html += "<td>" + data[i].Value + "</td>";
-                        html + "</tr>";
-                    }
-                    html += "</tbody></table>";
-                    $("#logsContent").html(html);
+
+                    $("#logsContent").html("").kendoGrid({
+                        columns: [
+                            { title: (tab.getAttribute("report") == "SearchesPerformed" ? "Client" : "Channel"), field: "Key" },
+                            { title: "Searches", field: "Value", width: "80px" }],
+                        dataSource:
+                        {
+                            data: data
+                        }
+                    });
                 },
                 error: function (msg, textStatus)
                 {
@@ -311,66 +312,66 @@ class Main
                 Main.loadingLogs = null;
                 var logs: LogEntry[] = data;
                 Main.Logs = logs;
-
-                var html = "";
-                html += "<table>";
-                html += "<thead><tr><td>Date</td><td>Type</td><td>Level</td><td>Message</td></tr></thead>";
-                html + "<tbody>";
-                for (var i = 0; i < logs.length; i++)
+                var tz = (new Date()).getTimezoneOffset() * 60000;
+                Main.Logs.forEach((r) =>
                 {
-                    html += "<tr rowId=\"" + i + "\">";
-                    html += "<td>" + Utils.GWDateFormatMilis(new Date(logs[i].Date)) + "</td>";
-                    html += "<td>" + logs[i].Type + "</td>";
-                    html += "<td>" + logs[i].Level + "</td>";
-                    html += "<td>" + logs[i].Message + "</td>";
-                    html + "</tr>";
-                }
+                    r.Date = new Date(<number>r.Date + tz);
+                });
 
-                html += "<tr rowId=\"-1\"><td class='pseudoLink'>Next entries</td></tr>";
-                html += "</tbody></table>";
-                $("#logsContent").html(html);
+                $("#logsContent").html("").kendoGrid({
+                    columns: [
+                        { title: "Date", field: "Date", format: "{0:MM/dd HH:mm:ss.fff}", width: "160px" },
+                        { title: "Type", field: "Type", width: "80px" },
+                        { title: "Level", field: "Level", width: "80px" },
+                        { title: "Message", field: "Message" }],
+                    dataSource:
+                    {
+                        data: Main.Logs
+                    }
+                });
+
+                $("#logsContent").data("kendoGrid").table.on("mouseover",
+                    (evt) =>
+                    {
+                        if (Main.KeepOpenDetails)
+                            return;
+                        var row = <LogEntry>(<object>$("#logsContent").data("kendoGrid").dataItem($(evt.target).parent()));
+                        var html = Main.DetailInfo(row);
+                        $("#detailInfo").html(html).show();
+                    }).on("mouseout", () =>
+                    {
+                        if (Main.KeepOpenDetails)
+                            return;
+                        $("#detailInfo").hide();
+                    }).on("click", (evt) =>
+                    {
+                        var row = <LogEntry>(<object>$("#logsContent").data("kendoGrid").dataItem($(evt.target).parent()));
+                        var html = Main.DetailInfo(row);
+
+                        /*var rowId = parseInt(evt.target.parentElement.attributes["rowId"].value);
+                        if (rowId == -1)
+                        {
+                            Main.Offset = Main.Logs[Main.Logs.length - 1].Position;
+                            Main.OffsetFile = Main.Logs[Main.Logs.length - 1].CurrentFile;
+                            Main.LoadTimeInfo();
+                            return;
+                        }*/
+                        if (Main.KeepOpenDetails)
+                        {
+                            Main.KeepOpenDetails = false;
+                            $("#detailInfo").html(html);
+                            return;
+                        }
+                        Main.KeepOpenDetails = true;
+                        html += "<div class='closeDetails' onclick='Main.CloseDetails()'></div>";
+                        $("#detailInfo").html(html).show();
+                    });
 
                 // Scroll to bottom
                 if (Main.IsLast)
                     $("#logsContent").scrollTop($("#logsContent")[0].scrollHeight - $("#logsContent").height());
                 else
                     $("#logsContent").scrollTop(0);
-
-                $("#logsContent tbody > tr").on("mouseover", (evt) =>
-                {
-                    if (Main.KeepOpenDetails)
-                        return;
-                    var rowId = parseInt(evt.target.parentElement.attributes["rowId"].value);
-                    if (rowId == -1)
-                        return;
-                    var html = Main.DetailInfo(rowId);
-                    $("#detailInfo").html(html).show();
-                }).on("mouseout", () =>
-                {
-                    if (Main.KeepOpenDetails)
-                        return;
-                    $("#detailInfo").hide();
-                }).on("click", (evt) =>
-                {
-                    var rowId = parseInt(evt.target.parentElement.attributes["rowId"].value);
-                    if (rowId == -1)
-                    {
-                        Main.Offset = Main.Logs[Main.Logs.length - 1].Position;
-                        Main.OffsetFile = Main.Logs[Main.Logs.length - 1].CurrentFile;
-                        Main.LoadTimeInfo();
-                        return;
-                    }
-                    var html = Main.DetailInfo(rowId);
-                    if (Main.KeepOpenDetails)
-                    {
-                        Main.KeepOpenDetails = false;
-                        $("#detailInfo").html(html);
-                        return;
-                    }
-                    Main.KeepOpenDetails = true;
-                    html += "<div class='closeDetails' onclick='Main.CloseDetails()'></div>";
-                    $("#detailInfo").html(html).show();
-                });
             },
             error: function (msg, textStatus)
             {
@@ -389,21 +390,23 @@ class Main
         }
     }
 
-    static DetailInfo(rowId: number): string
+    static DetailInfo(row: LogEntry): string
     {
         var html = "";
         html += "<table>";
-        html += "<tr><td>Message&nbsp;Type</td><td><span class='pseudoLink' onclick='Main.AddFilter(event,\"type\");'>" + Main.MessageTypes[Main.Logs[0].Type] + "</span></td></tr>";
-        html += "<tr><td>Date</td><td><span class='pseudoLink' onclick='Main.AddFilter(event,\"date\");'>" + Utils.GWDateFormatMilis(new Date(Main.Logs[rowId].Date)) + "</span></td>";
-        html += "<td>Remote</td><td><span class='pseudoLink' onclick='Main.AddFilter(event,\"remote\");'>" + Main.Logs[rowId].Remote + "</span></td></tr>";
+        html += "<tr><td>Message&nbsp;Type</td><td><span class='pseudoLink' onclick='Main.AddFilter(event,\"type\");'>" + Main.MessageTypes[row.Type] + "</span></td></tr>";
+        html += "<tr><td>Date</td><td><span class='pseudoLink' onclick='Main.AddFilter(event,\"date\");'>" + Utils.GWDateFormatMilis(new Date(<number>row.Date)) + "</span></td>";
+        html += "<td>Remote</td><td><span class='pseudoLink' onclick='Main.AddFilter(event,\"remote\");'>" + row.Remote + "</span></td></tr>";
         var n = 0;
-        for (var i in Main.Logs[rowId].Details)
+        for (var i in row.Details)
         {
+            if (typeof row[i] === "function" || typeof row[i] === "object" || i == "uid")
+                continue;
             if (n == 0)
                 html += "<tr>";
             else if (n % 2 == 0)
                 html += "</tr><tr>";
-            html += "<td>" + i.replace(/(\w)([A-Z][a-z])/g, "$1&nbsp;$2") + "</td><td><span class='pseudoLink' onclick='Main.AddFilter(event,\"" + i + "\");'>" + Main.Logs[rowId].Details[i] + "</span></td>";
+            html += "<td>" + i.replace(/(\w)([A-Z][a-z])/g, "$1&nbsp;$2") + "</td><td><span class='pseudoLink' onclick='Main.AddFilter(event,\"" + i + "\");'>" + row.Details[i] + "</span></td>";
             n++;
         }
         html += "</tr></table>";
@@ -495,21 +498,18 @@ class Main
                     data = (<object[]>msg.d).map(c => SearchRequest.CreateFromObject(c));
                 else
                     data = [];
-                var html = "";
-                html += "<table>";
-                html += "<thead><tr><td>Channel</td><td>Client</td><td>NB</td><td>Date</td></tr></thead>";
-                html + "<tbody>";
-                for (var i = 0; i < data.length; i++)
-                {
-                    html += "<tr>";
-                    html += "<td>" + data[i].Channel + "</td>";
-                    html += "<td>" + data[i].Client + "</td>";
-                    html += "<td>" + data[i].NbSearches + "</td>";
-                    html += "<td>" + Utils.FullDateFormat(data[i].Date) + "</td>";
-                    html + "</tr>";
-                }
-                html += "</tbody></table>";
-                $("#clientsContent").html(html);
+
+                $("#clientsContent").html("").kendoGrid({
+                    columns: [
+                        { title: "Channel", field: "Channel" },
+                        { title: "Client", field: "Client" },
+                        { title: "Nb", field: "NbSearches" },
+                        { title: "Date", field: "Date", format: "{0:MM/dd HH:mm:ss.fff}" }],
+                    dataSource:
+                    {
+                        data: Main.Logs
+                    }
+                });
             },
             error: function (msg, textStatus)
             {
@@ -570,6 +570,7 @@ class Main
         });
 
         Main.BaseTitle = window.document.title;
+        //$("#gatewaySelector").kendoDropDownList();
         $("#gatewaySelector").on("change", Main.GatewayChanged);
         $(window).on("resize", Main.Resize);
         $("#timeRangeCanvas").on("mousedown", MainGraph.TimeLineSelected);
@@ -597,7 +598,7 @@ class Main
             $("#endDate").val(Utils.FullUtcDateFormat(Main.EndDate));
             Main.DelayedSearch(Main.LoadLogStats);
         });
-        $("#startDate").on("keyup", () =>
+        var startDateChange = () =>
         {
             try
             {
@@ -614,8 +615,9 @@ class Main
             catch (ex)
             {
             }
-        });
-        $("#endDate").on("keyup", () =>
+        };
+        $("#startDate").kendoDateTimePicker({ format: "yyyy/MM/dd HH:mm:ss", change: startDateChange }).on("keyup", startDateChange);
+        var endDateChange = () =>
         {
             try
             {
@@ -632,7 +634,8 @@ class Main
             catch (ex)
             {
             }
-        });
+        };
+        $("#endDate").kendoDateTimePicker({ format: "yyyy/MM/dd MM:mm:ss", change: endDateChange }).on("keyup", endDateChange);
         $("#queryField").on("focus", () =>
         {
             $("#querySuggestions").show();

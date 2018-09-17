@@ -4,23 +4,25 @@
     <base href="/" />
     <meta charset="utf-8" />
     <title>EPICS Gateway Logger</title>
+    <link href="styles/kendo.common.min.css" rel="stylesheet" />
+    <link href="styles/kendo.material.min.css" rel="stylesheet" />
     <link href="Less/main.css" rel="stylesheet" />
 </head>
 <body>
     <div id="sessionSelector">
         <span class="title">Gateway:</span>
-        <select id="gatewaySelector"></select>
+        <select id="gatewaySelector" class="gatewaySelector"></select>
         <span class="title">Sessions:</span>
         <div id="gatewaySessions"></div>
     </div>
     <div id="timeRange"><span id="prevDay">&lt;</span><canvas id="timeRangeCanvas"></canvas><span id="nextDay">&gt;</span></div>
     <div id="fields">
         <span id="">Start time:</span>
-        <input type="text" id="startDate" />
+        <input type="text" id="startDate" class="dateInputs" />
         <span id="">End time:</span>
-        <input type="text" id="endDate" />
+        <input type="text" id="endDate" class="dateInputs" />
     </div>
-    <input type="text" id="queryField" placeholder="Type your query here..." />
+    <input type="text" id="queryField" placeholder="Type your query here..." class="k-textbox" />
     <div id="help">
         <div id="closeHelp">X</div>
         <h1>Welcome to the EPICS Gateway Log Analyzer</h1>
@@ -61,6 +63,7 @@
     <div id="detailInfo"></div>
     <div id="mouseCapture"></div>
     <script src="Scripts/jquery-3.3.1.min.js"></script>
+    <script src="Scripts/kendo.all.min.js"></script>
     <script src="main.js"></script>
 </body>
 </html>

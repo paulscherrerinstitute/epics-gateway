@@ -1,12 +1,12 @@
 ﻿@backgroundColor: #e6e6e6;
 @boxShadow: #9d9d9d 1px 1px 2px;
-@labelBackgroundColor: #46393c;
+@labelBackgroundColor: #3f51b5;
 @labelColor: #FFFFFF;
 @leftSidebar: 300px;
 @timeRangeHeight: 100px;
 @borderSpacing: 5px;
 @tabTextColor: #e6dfdf;
-@containerBackground: #f8f8f2;
+@containerBackground: #FFFFFF;
 
 @middleSidebar: (@leftSidebar+5)/2;
 
@@ -75,7 +75,7 @@ body
     width: ~"calc(100% - 4px)";
     text-align: center;
     background-color: @labelBackgroundColor;
-    border-bottom: solid 1px darken(@labelBackgroundColor, 30%);
+    border-bottom: solid 1px @labelBackgroundColor;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     top: 0px;
@@ -104,10 +104,11 @@ body
     }
 }
 
-#gatewaySelector
+.gatewaySelector
 {
     display: block;
     width: 100%;
+    margin-bottom: 10px;
 }
 
 #timeRange
@@ -172,13 +173,13 @@ body
 #gatewaySessions
 {
     font-size: 12px;
-    top: 80px;
+    top: 90px;
     left: 0px;
     right: 0px;
     bottom: 0px;
     position: absolute;
-    overflow-y: auto;
     .scrollbarStyle;
+    height: ~"calc(100% - 90px)";
 
     & table
     {
@@ -193,42 +194,24 @@ body
     left: (@leftSidebar + @borderSpacing);
     right: @borderSpacing;
     font-size: 12px;
-
-    & input
-    {
-        border: 1px solid lighten(@labelBackgroundColor, 40%);
-        padding: 8px 5px 8px 5px;
-        outline: none;
-        box-sizing: border-box;
-        font-size: 16px;
-        font-weight: bold;
-        box-shadow: @boxShadow;
-    }
 }
 
 #queryField
 {
     position: absolute;
-    top: (@timeRangeHeight + @borderSpacing * 2 + 40);
+    top: (@timeRangeHeight + @borderSpacing * 2 + 25);
     left: (@leftSidebar + @borderSpacing);
     right: @borderSpacing;
     width: ~"calc(100vw - 310px)";
-    border: 1px solid lighten(@labelBackgroundColor, 40%);
-    padding: 8px 5px 8px 5px;
-    outline: none;
-    box-sizing: border-box;
-    font-size: 16px;
-    font-weight: bold;
-    box-shadow: @boxShadow;
 }
 
 #clients
 {
     .container;
-    top: (@timeRangeHeight + @borderSpacing * 3 + 80);
+    top: (@timeRangeHeight + @borderSpacing * 3 + 55);
     left: (@leftSidebar + @borderSpacing);
     width: ~"calc(50vw - @{middleSidebar} - @{borderSpacing})";
-    height: ~"calc(50% - @{timeRangeHeight} - @{borderSpacing} - 94px)";
+    height: ~"calc(50% - @{timeRangeHeight} - @{borderSpacing} - 69px)";
     display: none;
 
     &:after
@@ -246,10 +229,10 @@ body
 #servers
 {
     .container;
-    top: (@timeRangeHeight + @borderSpacing * 3 + 80);
+    top: (@timeRangeHeight + @borderSpacing * 3 + 55);
     right: @borderSpacing;
     width: ~"calc(50vw - @{middleSidebar} - @{borderSpacing})";
-    height: ~"calc(50% - @{timeRangeHeight} - @{borderSpacing} - 94px)";
+    height: ~"calc(50% - @{timeRangeHeight} - @{borderSpacing} - 69px)";
     display: none;
     padding-top: 16px;
 
@@ -280,6 +263,8 @@ body
 {
     top: 50px;
     padding-top: 0px;
+    overflow: hidden;
+    height: ~"calc(100% - 53px)";
 }
 
 #logsContent tbody
@@ -344,7 +329,7 @@ body
 .listContent
 {
     padding-top: 16px;
-    overflow-y: auto;
+    overflow-y: hidden;
     position: absolute;
     top: 0px;
     left: 0px;
@@ -375,32 +360,49 @@ select
     margin-top: 16px;
     padding: 0px;
     padding-top: 2px;
-    background-color: lighten(@labelBackgroundColor, 35%);
+    //background-color: lighten(@labelBackgroundColor, 35%);
+    background-color: #3f51b5;
 
     & li
     {
         display: inline-block;
-        border: solid 1px @labelBackgroundColor;
-        background-color: lighten(@labelBackgroundColor, 25%);
-        border-bottom: none;
+        //border: solid 1px @labelBackgroundColor;
+        //background-color: lighten(@labelBackgroundColor, 25%);
+        border-bottom: #3f51b5 3px solid;
         padding: 5px;
-        color: @tabTextColor;
+        color: white;
         cursor: pointer;
+        text-transform: uppercase;
+        padding-top: 7px;
+
+        &:hover
+        {
+            background-color: #707ece;
+        }
     }
+
 
     & .activeTab
     {
-        background-color: white;
-        color: black;
+        //background-color: white;
+        border-bottom: #44d9d9 3px solid;
         font-weight: bold;
-        padding-top: 10px;
     }
 }
 
 #clientsContent
 {
-    top: 55px;
+    top: 48px;
     padding-top: 0px;
+    height: ~"calc(100% - 49px)";
+    overflow: hidden;
+    position: absolute;
+}
+
+#serversContent
+{
+    height: ~"calc(100% - 23px)";
+    position: absolute;
 }
 
 #mouseCapture
@@ -465,7 +467,7 @@ select
     }
 }
 
-#startDate, #endDate
+.dateInputs
 {
     width: ~"calc(50vw - 213px)";
 }
@@ -478,7 +480,7 @@ select
     right: 5px;
     top: 190px;
     //height: 200px;
-    background: #e8e6dc;
+    background: #fffdf2;
     border: solid 1px #606060;
     padding: 3px;
     display: none;
@@ -514,7 +516,7 @@ select
     right: 5px;
     bottom: ~"calc(50% - @{borderSpacing} - @{borderSpacing} - 10px)";
     height: 200px;
-    background: #e8e6dc;
+    background: #fffdf2;
     border: solid 1px #606060;
     padding: 3px;
     display: none;

@@ -1,6 +1,6 @@
 ﻿interface LogEntry
 {
-    Date: number,
+    Date: Date | number,
     Type: number,
     Level: number,
     Message: string,

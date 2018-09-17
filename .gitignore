@@ -14,5 +14,6 @@
 # Final CSS output shall not be added
 **/GWLogger/Less/main.css
 # Skip nuget imported scripts
-**/GWLogger/Scripts/**
+**/GWLogger/Scripts/**/*.*
+**/GWLogger/styles/**/*.*
 /GW3/TestResults
