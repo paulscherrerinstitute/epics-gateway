@@ -150,7 +150,7 @@ class Main
                 $("#gatewaySessions").kendoGrid({
                     columns: [{ title: "Start", field: "StartDate", format: "{0:MM/dd HH:mm:ss}" },
                     { title: "End", field: "EndDate", format: "{0:MM/dd HH:mm:ss}" },
-                    { title: "NB&nbsp;Logs", field: "NbEntries" }],
+                    { title: "NB&nbsp;Logs", field: "NbEntries", format: "{0:n0}", attributes: { style: "text-align:right;" } }],
                     dataSource: { data: Main.Sessions }
                 });
             },
@@ -290,11 +290,23 @@ class Main
                     $("#logsContent").html("").kendoGrid({
                         columns: [
                             { title: (tab.getAttribute("report") == "SearchesPerformed" ? "Client" : "Channel"), field: "Key" },
-                            { title: "Searches", field: "Value", width: "80px" }],
+                            { title: "Searches", field: "Value", width: "80px", format: "{0:n0}", attributes: { style: "text-align:right;" } }],
                         dataSource:
                         {
                             data: data
                         }
+                    });
+
+                    $("#logsContent").data("kendoGrid").table.on("click", (evt) =>
+                    {
+                        var row = <KeyValuePair>(<object>$("#logsContent").data("kendoGrid").dataItem($(evt.target).parent()));
+                        if ($("#queryField").val().trim() != "")
+                            $("#queryField").val($("#queryField").val().trim() + " and ");
+                        if (tab.getAttribute("report") == "SearchesPerformed")
+                            $("#queryField").val($("#queryField").val() + "remote starts \"" + row.Key.split(':')[0] + ":\"");
+                        else
+                            $("#queryField").val($("#queryField").val() + "channel = \"" + row.Key + "\"");
+                        $("#logFilter > li")[0].click();
                     });
                 },
                 error: function (msg, textStatus)
@@ -334,8 +346,8 @@ class Main
                 $("#logsContent").html("").kendoGrid({
                     columns: [
                         { title: "Date", field: "Date", format: "{0:MM/dd HH:mm:ss.fff}", width: "160px" },
-                        { title: "Type", field: "Type", width: "80px" },
-                        { title: "Level", field: "Level", width: "80px" },
+                        { title: "Type", field: "Type", width: "80px", attributes: { style: "text-align:right;" } },
+                        { title: "Level", field: "Level", width: "80px", attributes: { style: "text-align:right;" } },
                         { title: "Message", field: "Message" }],
                     dataSource:
                     {
@@ -405,6 +417,8 @@ class Main
 
     static DetailInfo(row: LogEntry): string
     {
+        if (!row)
+            return "";
         var html = "";
         html += "<table>";
         html += "<tr><td>Message&nbsp;Type</td><td><span class='pseudoLink' onclick='Main.AddFilter(event,\"type\");'>" + Main.MessageTypes[row.Type] + "</span></td></tr>";
@@ -484,7 +498,7 @@ class Main
     static Resize(): void
     {
         MainGraph.DrawStats();
-        $(".k-grid").each((idx,elem) =>
+        $(".k-grid").each((idx, elem) =>
         {
             $(elem).data("kendoGrid").resize(true);
         });
@@ -520,7 +534,7 @@ class Main
                     columns: [
                         { title: "Channel", field: "Channel" },
                         { title: "Client", field: "Client" },
-                        { title: "Nb", field: "NbSearches" },
+                        { title: "Nb", field: "NbSearches", format: "{0:n0}", attributes: { style: "text-align:right;" } },
                         { title: "Date", field: "Date", format: "{0:MM/dd HH:mm:ss.fff}" }],
                     dataSource:
                     {
