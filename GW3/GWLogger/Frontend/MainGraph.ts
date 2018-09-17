@@ -147,7 +147,8 @@
     {
         var width = $("#timeRangeCanvas").width();
         var w = width / 145;
-        var x = evt.pageX - ($("#timeRange").position().left + $("#timeRange span").width());
+        //var x = evt.pageX - ($("#timeRange").position().left + $("#timeRange div").width());
+        var x = evt.pageX - ($("#timeRange").position().left + 15);
 
         var tx = Math.floor((width - x) / w);
         if (tx < 0)

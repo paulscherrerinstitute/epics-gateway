@@ -100,7 +100,7 @@ namespace GWLogger
             IEnumerable<Backend.DataContext.LogEntry> logs = null;
             //var t = ctx.LogEntries.ToList();
             var gateway = path[0];
-            if (path.Length == 1)
+            if (path.Length == 1 || path[1] == "NaN")
             {
                 logs = Global.DataContext.ReadLastLogs(gateway);
             }
