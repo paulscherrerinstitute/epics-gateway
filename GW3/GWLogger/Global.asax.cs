@@ -1,19 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Web;
-using System.Web.Security;
-using System.Web.SessionState;
 
 namespace GWLogger
 {
     public class Global : System.Web.HttpApplication
     {
         public static Backend.DataContext.Context DataContext { get; } = new Backend.DataContext.Context();
+        public static Live.LiveInformation LiveInformation { get; } = new Live.LiveInformation();
 
 
         protected void Application_Start(object sender, EventArgs e)
         {
+            var doc = new HtmlAgilityPack.HtmlDocument();
+            doc.LoadHtml(File.ReadAllText(Server.MapPath("/index.html")));
+            doc.DocumentNode.SelectNodes("//div")
+                .Where(row => row.Attributes["class"]?.Value == "GWDisplay")
+                .Select(row => row.Attributes["id"]?.Value).ToList()
+                .ForEach(row => Global.LiveInformation.Register(row));
             Backend.Controllers.LogController.CleanLogs();
         }
 
@@ -26,7 +30,7 @@ namespace GWLogger
         {
             string fullOrigionalpath = Request.Url.AbsolutePath;
 
-            if (fullOrigionalpath.StartsWith("/GW/"))
+            if (fullOrigionalpath.StartsWith("/GW/") || fullOrigionalpath.StartsWith("/Status/"))
                 Context.RewritePath("/index.html");
             else if (fullOrigionalpath.ToLower().StartsWith("/logs"))
                 //Context.RemapHandler("/Logs.ashx");

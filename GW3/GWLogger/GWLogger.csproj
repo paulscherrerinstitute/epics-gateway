@@ -63,6 +63,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ChannelAccess, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ChannelAccess.2018.9.12.3\lib\net45\ChannelAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="HtmlAgilityPack, Version=1.8.7.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlAgilityPack.1.8.7\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.7\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
@@ -266,6 +272,10 @@
       <DependentUpon>DataAccess.asmx</DependentUpon>
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="DataAccess.Live.asmx.cs">
+      <DependentUpon>DataAccess.asmx</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="DataAccess.Logger.asmx.cs">
       <SubType>Component</SubType>
       <DependentUpon>DataAccess.asmx</DependentUpon>
@@ -276,6 +286,11 @@
     <Compile Include="Introspection.ashx.cs">
       <DependentUpon>Introspection.ashx</DependentUpon>
     </Compile>
+    <Compile Include="Live\Gateway.cs" />
+    <Compile Include="Live\GatewayShortInformation.cs" />
+    <Compile Include="Live\GatewayNullableValue.cs" />
+    <Compile Include="Live\GatewayValue.cs" />
+    <Compile Include="Live\LiveInformation.cs" />
     <Compile Include="Logs.ashx.cs">
       <DependentUpon>Logs.ashx</DependentUpon>
     </Compile>
@@ -289,6 +304,7 @@
     <TypeScriptCompile Include="Frontend\DTOs\KeyValuePair.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\LogEntry.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\SearchRequest.ts" />
+    <TypeScriptCompile Include="Frontend\Live.ts" />
     <TypeScriptCompile Include="Frontend\Main.ts" />
     <TypeScriptCompile Include="Frontend\MainGraph.ts" />
     <TypeScriptCompile Include="Frontend\Query.ts" />

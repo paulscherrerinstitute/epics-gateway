@@ -15,9 +15,27 @@
         $("#clients, #servers, #logs").hide();
 
         var path = State.Path();
+
+        if (path.length > 1)
+        {
+            $("#mainTabs li").removeClass("activeTab");
+            if (path[1] == "GW")
+            {
+                $($("#mainTabs li")[1]).addClass("activeTab");
+                $("#gatewayView").hide();
+                $("#logView").show();
+            }
+            else
+            {
+                $($("#mainTabs li")[0]).addClass("activeTab");
+                $("#gatewayView").show();
+                $("#logView").hide();
+            }
+        }
+
         if (path.length > 2 && path[1] == "GW")
             Main.CurrentGateway = path[2];
-        else
+        else if (path.length > 1 && path[1] == "GW")
             Main.CurrentGateway = null;
 
         var url = "" + document.location;
@@ -93,6 +111,6 @@
             params += (params != "" ? "&" : "#") + "q=" + encodeURIComponent($("#queryField").val());
         if (Main.CurrentTab != 0)
             params += (params != "" ? "&" : "#") + "t=" + Main.CurrentTab;
-        window.history.pushState(null, Main.BaseTitle + " - " + Main.CurrentGateway, '/GW/' + Main.CurrentGateway + params);
+        window.history.pushState(null, Main.BaseTitle + " - " + Main.CurrentGateway, '/' + Main.Path + '/' + (Main.CurrentGateway ? Main.CurrentGateway : "") + params);
     }
 }

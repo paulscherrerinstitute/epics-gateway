@@ -9,59 +9,102 @@
     <link href="Less/main.css" rel="stylesheet" />
 </head>
 <body>
-    <div id="sessionSelector">
-        <span class="title">Gateway:</span>
-        <select id="gatewaySelector" class="gatewaySelector"></select>
-        <span class="title">Sessions:</span>
-        <div id="gatewaySessions"></div>
+    <ul class="tabs" id="mainTabs">
+        <li class="activeTab">Status</li>
+        <li>Logs</li>
+    </ul>
+    <div id="gatewayView">
+        <div class="GWDisplay" id="X01DC-CAGW02"></div>
+        <div class="GWDisplay" id="X02DA-CAGW02"></div>
+        <div class="GWDisplay" id="X03DA-CAGW02"></div>
+        <div class="GWDisplay" id="X03MA-CAGW02"></div>
+        <div class="GWDisplay" id="X04DB-CAGW02"></div>
+        <div class="GWDisplay" id="X04SA-CAGW02"></div>
+        <div class="GWDisplay" id="X05DA-CAGW02"></div>
+        <div class="GWDisplay" id="X05LA-CAGW02"></div>
+        <div class="GWDisplay" id="X06DA-CAGW02"></div>
+        <div class="GWDisplay" id="X06MX-CAGW"></div>
+        <div class="GWDisplay" id="X06SA-CAGW02"></div>
+        <div class="GWDisplay" id="X07DA-CAGW02"></div>
+        <div class="GWDisplay" id="X07MA-CAGW02"></div>
+        <div class="GWDisplay" id="X09LA-CAGW02"></div>
+        <div class="GWDisplay" id="X09LB-CAGW02"></div>
+        <div class="GWDisplay" id="X10DA-CAGW02"></div>
+        <div class="GWDisplay" id="X10SA-CAGW02"></div>
+        <div class="GWDisplay" id="X11MA-CAGW02"></div>
+        <div class="GWDisplay" id="X12SA-CAGW02"></div>
+
+        <div class="GWDisplay" id="SLS-CAGW02"></div>
+
+        <div class="GWDisplay" id="FIN-CAGW02"></div>
+        <div class="GWDisplay" id="SF-CAGW"></div>
+
+        <div class="GWDisplay" id="HIPA-CAGW02"></div>
+
+        <div class="GWDisplay" id="PROSCAN-CAGW02"></div>
+
+        <div class="GWDisplay" id="CRYO-CAGW02"></div>
+
+        <div class="GWDisplay" id="SFES-CAGW"></div>
+
+        <div class="GWDisplay" id="TESTCAGW01"></div>
+        <div class="GWDisplay" id="TESTCAGW02"></div>
     </div>
-    <div id="timeRange"><div id="prevDay"></div><canvas id="timeRangeCanvas"></canvas><div id="nextDay"></div></div>
-    <div id="fields">
-        <span id="">Start time:</span>
-        <input type="text" id="startDate" class="dateInputs" />
-        <span id="">End time:</span>
-        <input type="text" id="endDate" class="dateInputs" />
+    <div id="logView">
+        <div id="sessionSelector">
+            <span class="title">Gateway:</span>
+            <select id="gatewaySelector" class="gatewaySelector"></select>
+            <span class="title">Sessions:</span>
+            <div id="gatewaySessions"></div>
+        </div>
+        <div id="timeRange"><div id="prevDay"></div><canvas id="timeRangeCanvas"></canvas><div id="nextDay"></div></div>
+        <div id="fields">
+            <span id="">Start time:</span>
+            <input type="text" id="startDate" class="dateInputs" />
+            <span id="">End time:</span>
+            <input type="text" id="endDate" class="dateInputs" />
+        </div>
+        <input type="text" id="queryField" placeholder="Type your query here..." class="k-textbox" />
+        <div id="help">
+            <div id="closeHelp">X</div>
+            <h1>Welcome to the EPICS Gateway Log Analyzer</h1>
+            <h2>How to use it:</h2>
+            <ol>
+                <li>Select the gateway you want to check on the top left side. The gateway sessions are then loaded and displayed on the left bar, as well as the statistics are displayed on the time range widget.</li>
+                <li>You can click (and drag) the time range widget to check out more details on that time.</li>
+                <li>The time range shows 3 values: top light green bars are the number of event logs, bottom dark green bars are the number of searches, red lines are the number of errors. The graphs uses 3 different scales.</li>
+                <li>Logs uses UTC time (avoiding issue with day light saving time).</li>
+                <li>The current UTC time is displayed on the bottom left corner of the screen.</li>
+                <li>Each bar of the time range is a 10 min range.</li>
+            </ol>
+            <h2>Data retention:</h2>
+            Data is kept for a max. time of 10 days.
+        </div>
+        <div id="clients">
+            <ul class="tabs" id="clientsTabs">
+                <li class="activeTab">Active clients</li>
+                <li>Searches</li>
+            </ul>
+            <div id="clientsContent" class="listContent"></div>
+        </div>
+        <div id="servers"><div id="serversContent" class="listContent"></div></div>
+        <div id="logs">
+            <ul class="tabs" id="logFilter">
+                <li class="activeTab" level="0,1,2,3,4">All</li>
+                <li level="2">Connections</li>
+                <li level="3,4">Errors</li>
+                <li report="SearchesPerformed">Searches / Clients</li>
+                <li report="SearchesOnChannelsPerformed">Searches / Channels</li>
+            </ul>
+            <div id="logsContent" class="listContent"></div><div id="logHelp">?</div>
+        </div>
+        <div id="utcTime"></div>
+        <div id="bufferSpace"></div>
+        <div id="freeSpace"></div>
+        <div id="querySuggestions"></div>
+        <div id="detailInfo"></div>
+        <div id="mouseCapture"></div>
     </div>
-    <input type="text" id="queryField" placeholder="Type your query here..." class="k-textbox" />
-    <div id="help">
-        <div id="closeHelp">X</div>
-        <h1>Welcome to the EPICS Gateway Log Analyzer</h1>
-        <h2>How to use it:</h2>
-        <ol>
-            <li>Select the gateway you want to check on the top left side. The gateway sessions are then loaded and displayed on the left bar, as well as the statistics are displayed on the time range widget.</li>
-            <li>You can click (and drag) the time range widget to check out more details on that time.</li>
-            <li>The time range shows 3 values: top light green bars are the number of event logs, bottom dark green bars are the number of searches, red lines are the number of errors. The graphs uses 3 different scales.</li>
-            <li>Logs uses UTC time (avoiding issue with day light saving time).</li>
-            <li>The current UTC time is displayed on the bottom left corner of the screen.</li>
-            <li>Each bar of the time range is a 10 min range.</li>
-        </ol>
-        <h2>Data retention:</h2>
-        Data is kept for a max. time of 10 days.
-    </div>
-    <div id="clients">
-        <ul class="tabs" id="clientsTabs">
-            <li class="activeTab">Active clients</li>
-            <li>Searches</li>
-        </ul>
-        <div id="clientsContent" class="listContent"></div>
-    </div>
-    <div id="servers"><div id="serversContent" class="listContent"></div></div>
-    <div id="logs">
-        <ul class="tabs" id="logFilter">
-            <li class="activeTab" level="0,1,2,3,4">All</li>
-            <li level="2">Connections</li>
-            <li level="3,4">Errors</li>
-            <li report="SearchesPerformed">Searches / Clients</li>
-            <li report="SearchesOnChannelsPerformed">Searches / Channels</li>
-        </ul>
-        <div id="logsContent" class="listContent"></div><div id="logHelp">?</div>
-    </div>
-    <div id="utcTime"></div>
-    <div id="bufferSpace"></div>
-    <div id="freeSpace"></div>
-    <div id="querySuggestions"></div>
-    <div id="detailInfo"></div>
-    <div id="mouseCapture"></div>
     <script src="Scripts/jquery-3.3.1.min.js"></script>
     <script src="Scripts/kendo.all.min.js"></script>
     <script src="main.js"></script>

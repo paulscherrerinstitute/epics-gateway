@@ -19,6 +19,7 @@ class Main
     static OffsetFile: string = null;
     static MessageTypes: string[] = [];
     static CurrentTab: number = 0;
+    static Path: string = "Status";
 
     static loadingLogs: JQueryXHR;
 
@@ -460,6 +461,8 @@ class Main
 
     static Refresh()
     {
+        Live.RefreshShort();
+
         var now = new Date();
         $("#utcTime").html(("" + now.getUTCHours()).padLeft("0", 2) + ":" + ("" + now.getUTCMinutes()).padLeft("0", 2) + ":" + ("" + now.getUTCSeconds()).padLeft("0", 2));
 
@@ -586,6 +589,8 @@ class Main
 
     static Init(): void
     {
+        Live.InitShortDisplay();
+
         $.ajax({
             type: 'POST',
             url: '/DataAccess.asmx/GetMessageTypes',
@@ -598,6 +603,18 @@ class Main
                 for (var i = 0; i < vals.length; i++)
                     Main.MessageTypes[vals[i].Key] = vals[i].Value;
             }
+        });
+
+        $("#mainTabs li").click((evt) =>
+        {
+            var tab = evt.target.innerHTML;
+            if (tab == "Status")
+                Main.Path = "Status";
+            else
+                Main.Path = "GW";
+
+            State.Set();
+            State.Pop(null);
         });
 
         Main.BaseTitle = window.document.title;
