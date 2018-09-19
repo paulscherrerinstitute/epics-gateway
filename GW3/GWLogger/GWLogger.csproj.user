@@ -10,7 +10,7 @@
     <UseGlobalApplicationHostFile />
     <NameOfLastUsedPublishProfile>GFAEPICSLOG</NameOfLastUsedPublishProfile>
     <ProjectView>ProjectFiles</ProjectView>
-    <LastActiveSolutionConfig>Release|Any CPU</LastActiveSolutionConfig>
+    <LastActiveSolutionConfig>Debug|Any CPU</LastActiveSolutionConfig>
     <ToolsVersionPromptShown>2.5</ToolsVersionPromptShown>
   </PropertyGroup>
   <ProjectExtensions>

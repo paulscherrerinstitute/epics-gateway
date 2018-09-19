@@ -94,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Frontend\introspection.js" />
+    <Content Include="Frontend\tsconfig.json" />
     <Content Include="Less\introspect.css" />
     <Content Include="Less\main.css" />
     <Content Include="Less\main.less" />

@@ -98,6 +98,8 @@ namespace GWLogger.Backend.DataContext
 
         public static bool Exists(string gatewayName)
         {
+            if (string.IsNullOrWhiteSpace(gatewayName))
+                return false;
             lock (knownFiles)
             {
                 if (knownFiles.Contains(gatewayName.ToLower()))

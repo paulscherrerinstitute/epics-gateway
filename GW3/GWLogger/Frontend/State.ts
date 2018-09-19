@@ -33,7 +33,7 @@
             }
         }
 
-        if (path.length > 2 && path[1] == "GW")
+        if (path.length > 2 && (path[1] == "GW" || path[1] == "Status"))
             Main.CurrentGateway = path[2];
         else if (path.length > 1 && path[1] == "GW")
             Main.CurrentGateway = null;
@@ -101,16 +101,19 @@
     static Set()
     {
         var params = "";
-        if (Main.CurrentTime)
-            params += (params != "" ? "&" : "#") + "c=" + Main.CurrentTime.getTime();
-        if (Main.StartDate)
-            params += (params != "" ? "&" : "#") + "s=" + Main.StartDate.getTime();
-        if (Main.EndDate)
-            params += (params != "" ? "&" : "#") + "e=" + Main.EndDate.getTime();
-        if ($("#queryField").val())
-            params += (params != "" ? "&" : "#") + "q=" + encodeURIComponent($("#queryField").val());
-        if (Main.CurrentTab != 0)
-            params += (params != "" ? "&" : "#") + "t=" + Main.CurrentTab;
+        if (Main.Path == "GW")
+        {
+            if (Main.CurrentTime)
+                params += (params != "" ? "&" : "#") + "c=" + Main.CurrentTime.getTime();
+            if (Main.StartDate)
+                params += (params != "" ? "&" : "#") + "s=" + Main.StartDate.getTime();
+            if (Main.EndDate)
+                params += (params != "" ? "&" : "#") + "e=" + Main.EndDate.getTime();
+            if ($("#queryField").val())
+                params += (params != "" ? "&" : "#") + "q=" + encodeURIComponent($("#queryField").val());
+            if (Main.CurrentTab != 0)
+                params += (params != "" ? "&" : "#") + "t=" + Main.CurrentTab;
+        }
         window.history.pushState(null, Main.BaseTitle + " - " + Main.CurrentGateway, '/' + Main.Path + '/' + (Main.CurrentGateway ? Main.CurrentGateway : "") + params);
     }
 }

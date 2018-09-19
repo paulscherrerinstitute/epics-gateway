@@ -1,4 +1,4 @@
-﻿/// <binding BeforeBuild='compile:all' Clean='clean:all' ProjectOpened='default' />
+﻿/// <binding Clean='clean:all' ProjectOpened='default' />
 "use strict";
 /*
 This file is the main entry point for defining Gulp tasks and using Gulp plugins.
