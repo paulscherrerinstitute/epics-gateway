@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <base href="/" />
+    <meta charset="utf-8" />
+    <title>EPICS Gateway Logger</title>
+    <link href="styles/kendo.common.min.css" rel="stylesheet" />
+    <link href="styles/kendo.material.min.css" rel="stylesheet" />
+    <link href="Less/main.css" rel="stylesheet" />
+</head>
+<body>
+    <style>
+        #graph {
+            position: absolute;
+            left: 0px;
+            right: 0px;
+            top: 0px;
+            bottom: 10px;
+        }
+    </style>
+    <div id="graph"></div>
+    <script src="Scripts/jquery-3.3.1.min.js"></script>
+    <script src="Scripts/kendo.all.min.js"></script>
+    <script>
+        var startTime = 0;
+
+        function Init()
+        {
+            setInterval(Refresh, 1000);
+
+            var start = new Date(2018, 2, 25, 7, 25, 12);
+            var graphData = [];
+            for (var i = 0; i < 500; i++)
+                graphData.push({ date: new Date(start.getTime() + 5000 * i), value: Math.random() * 30 + 20 });
+            startTime += 500;
+
+            $("#graph").kendoChart({
+                //seriesDefaults: { type: "line" },
+                dataSource: { data: graphData },
+                series: [{
+                    type: "line",
+                    field: "value", categoryField: "date",
+                    markers: {
+                        visible: false
+                    }
+                }],
+                valueAxis: [{
+                    min: 0,
+                    max: 100
+                }]
+            });
+        }
+
+        function Refresh()
+        {
+            /*var start = new Date(2018, 2, 25, 7, 25, 12);
+            var graphData = [];
+            for (var i = 0; i < 500; i++)
+                graphData.push({ date: new Date(start.getTime() + 5000 * (i + startTime)), value: Math.random() * 30 + 20 });
+            startTime += 500;
+
+            $("#graph").kendoChart({
+                //seriesDefaults: { type: "line" },
+                dataSource: { data: graphData },
+                series: [{
+                    type: "line",
+                    field: "value", categoryField: "date",
+                    markers: {
+                        visible: false
+                    }
+                }],
+                valueAxis: [{
+                    min: 0,
+                    max: 100
+                }]
+            });*/
+
+            /*for (var i = length - 1; i >= 0; i--)
+                graph.dataSource.remove(raw[i]);
+            for (var i = 0; i < graphData.length; i++)
+                graph.dataSource.add(graphData[i]);*/
+            //$("#graph").data("kendoChart").setDataSource(new kendo.data.DataSource({ data: graphData }));            
+        }
+
+        $(Init);
+    </script>
+
+</body>
+</html>

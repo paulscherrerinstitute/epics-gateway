@@ -1,4 +1,4 @@
-﻿class MainGraph
+﻿class StatsBarGraph
 {
     static DrawStats(): void
     {
@@ -38,7 +38,7 @@
         {
             var dt = new Date(end.getTime() - i * 10 * 60 * 1000);
 
-            var val = MainGraph.GetStat('Logs', dt);
+            var val = StatsBarGraph.GetStat('Logs', dt);
             ctx.fillStyle = "#80d680";
             ctx.strokeStyle = "#528c52";
             var bv = b * val / maxValue;
@@ -49,7 +49,7 @@
             ctx.lineTo(Math.round(width - i * w) + 0.5, Math.round(b) + 0.5);
             ctx.stroke();
 
-            var val = MainGraph.GetStat('Errors', dt);
+            var val = StatsBarGraph.GetStat('Errors', dt);
             var bv = b * val / maxEValue;
             if (prevErrorValY != null)
             {
@@ -64,7 +64,7 @@
             prevErrorValY = bv;
 
 
-            val = MainGraph.GetStat('Searches', dt);
+            val = StatsBarGraph.GetStat('Searches', dt);
             ctx.fillStyle = "#68a568";
             var bv = bn * val / maxNValue;
             ctx.fillRect(Math.round(width - (i + 1) * w), Math.round(b), Math.ceil(w), Math.round(bv));
@@ -133,14 +133,14 @@
 
     static TimeLineSelected(evt: JQueryMouseEventObject): void
     {
-        MainGraph.TimeLineMouse(evt);
+        StatsBarGraph.TimeLineMouse(evt);
 
         var up = () =>
         {
-            $("#mouseCapture").hide().off("mousemove", MainGraph.TimeLineMouse).off("mouseup").off("mouseleave");
+            $("#mouseCapture").hide().off("mousemove", StatsBarGraph.TimeLineMouse).off("mouseup").off("mouseleave");
         }
 
-        $("#mouseCapture").show().on("mousemove", MainGraph.TimeLineMouse).on("mouseup", up).on("mouseleave", up);
+        $("#mouseCapture").show().on("mousemove", StatsBarGraph.TimeLineMouse).on("mouseup", up).on("mouseleave", up);
     }
 
     static TimeLineMouse(evt: JQueryMouseEventObject): void

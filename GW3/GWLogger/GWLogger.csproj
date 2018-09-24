@@ -95,6 +95,7 @@
   <ItemGroup>
     <Content Include="Frontend\introspection.js" />
     <Content Include="Frontend\tsconfig.json" />
+    <Content Include="graphtest.html" />
     <Content Include="Less\introspect.css" />
     <Content Include="Less\main.css" />
     <Content Include="Less\main.less" />
@@ -291,6 +292,7 @@
     <Compile Include="Live\GatewayShortInformation.cs" />
     <Compile Include="Live\GatewayNullableValue.cs" />
     <Compile Include="Live\GatewayValue.cs" />
+    <Compile Include="Live\HistoricData.cs" />
     <Compile Include="Live\LiveInformation.cs" />
     <Compile Include="Logs.ashx.cs">
       <DependentUpon>Logs.ashx</DependentUpon>
@@ -305,9 +307,10 @@
     <TypeScriptCompile Include="Frontend\DTOs\KeyValuePair.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\LogEntry.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\SearchRequest.ts" />
+    <TypeScriptCompile Include="Frontend\LineGraph.ts" />
     <TypeScriptCompile Include="Frontend\Live.ts" />
     <TypeScriptCompile Include="Frontend\Main.ts" />
-    <TypeScriptCompile Include="Frontend\MainGraph.ts" />
+    <TypeScriptCompile Include="Frontend\StatsBarGraph.ts" />
     <TypeScriptCompile Include="Frontend\Query.ts" />
     <TypeScriptCompile Include="Frontend\State.ts" />
     <TypeScriptCompile Include="Frontend\Utils.ts" />

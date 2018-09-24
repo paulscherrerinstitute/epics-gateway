@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace GWLogger.Live
 {
@@ -8,6 +9,25 @@ namespace GWLogger.Live
     {
         public List<Gateway> Gateways { get; } = new List<Gateway>();
         public EpicsSharp.ChannelAccess.Client.CAClient Client { get; } = new EpicsSharp.ChannelAccess.Client.CAClient();
+
+        Thread backgroundUpdater;
+
+        public LiveInformation()
+        {
+            backgroundUpdater = new Thread(UpdateGraphValues);
+            backgroundUpdater.IsBackground = true;
+            backgroundUpdater.Start();
+        }
+
+        private void UpdateGraphValues()
+        {
+            while(true)
+            {
+                Thread.Sleep(5000);
+                lock(Gateways)
+                    Gateways.ForEach(row => row.UpdateGraph());
+            }
+        }
 
         public void Register(string gatewayName)
         {
@@ -30,6 +50,24 @@ namespace GWLogger.Live
                     Build = row.BuildTime
                 }).ToList();
             }
+        }
+
+        public List<HistoricData> CpuHistory(string gatewayName)
+        {
+            lock (Gateways)
+                return Gateways.FirstOrDefault(row => row.Name == gatewayName)?.CpuHistory;
+        }
+
+        public List<HistoricData> SearchHistory(string gatewayName)
+        {
+            lock (Gateways)
+                return Gateways.FirstOrDefault(row => row.Name == gatewayName)?.SearchHistory;
+        }
+
+        public List<HistoricData> PVsHistory(string gatewayName)
+        {
+            lock (Gateways)
+                return Gateways.FirstOrDefault(row => row.Name == gatewayName)?.PvsHistory;
         }
 
         public void Dispose()

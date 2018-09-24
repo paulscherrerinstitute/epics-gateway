@@ -123,7 +123,7 @@ class Main
                     else
                         Main.EndDate = Main.CurrentTime = new Date();
                 }
-                MainGraph.DrawStats();
+                StatsBarGraph.DrawStats();
 
                 if (refresh && Main.IsLast)
                     Main.LoadTimeInfo(refresh);
@@ -244,7 +244,7 @@ class Main
 
     static LoadTimeInfo(refresh: boolean = false)
     {
-        MainGraph.DrawStats();
+        StatsBarGraph.DrawStats();
         var startDate = (Main.CurrentTime ? new Date(Main.CurrentTime.getTime()) : new Date(Main.EndDate.getTime() - 20 * 60 * 1000));
         var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
 
@@ -500,7 +500,7 @@ class Main
 
     static Resize(): void
     {
-        MainGraph.DrawStats();
+        StatsBarGraph.DrawStats();
         $(".k-grid").each((idx, elem) =>
         {
             $(elem).data("kendoGrid").resize(true);
@@ -612,6 +612,7 @@ class Main
                 Main.Path = "Status";
             else
                 Main.Path = "GW";
+            Live.Detail = null;
 
             State.Set();
             State.Pop(null);
@@ -621,7 +622,7 @@ class Main
         //$("#gatewaySelector").kendoDropDownList();
         $("#gatewaySelector").on("change", Main.GatewayChanged);
         $(window).on("resize", Main.Resize);
-        $("#timeRangeCanvas").on("mousedown", MainGraph.TimeLineSelected);
+        $("#timeRangeCanvas").on("mousedown", StatsBarGraph.TimeLineSelected);
         window.setInterval(Main.Refresh, 1000);
         $(window).bind('popstate', State.Pop);
         $("#clientsTabs li:nth-child(1)").click(Main.ShowStats);

@@ -7,36 +7,127 @@
     Build: string;
 }
 
+interface HistoricData
+{
+    Value: number;
+    Date: Date;
+}
+
 class Live
 {
+    static Detail: string = null;
     static shortInfo: GatewayShortInformation[] = [];
+    static cpuChart: LineGraph;
+    static searchesChart: LineGraph;
+    static pvsChart: LineGraph;
+    static mustUpdate: number = 0;
 
     static InitShortDisplay()
     {
         $(".GWDisplay").each((idx, elem) =>
         {
-            $(elem).html("<canvas id='canvas_" + elem.id + "' width='100' height='100'></canvas><br>" + elem.id);
+            $(elem).on("click", (evt) =>
+            {
+                var elem = evt.target;
+                while (elem.tagName != "div" && elem.className != "GWDisplay")
+                    elem = elem.parentElement;
+                var gwName = elem.id;
+                Live.ShowDetails(gwName);
+            }).html("<canvas id='canvas_" + elem.id + "' width='100' height='100'></canvas><br>" + elem.id);
         });
+
+        Live.cpuChart = new LineGraph("cpuGraph", { Values: [] }, { MinY: 0, MaxY: 100 });
+        Live.searchesChart = new LineGraph("searchesGraph", { Values: [] }, { MinY: 0 });
+        Live.pvsChart = new LineGraph("pvsGraph", { Values: [] }, { MinY: 0 });
+    }
+
+    static ShowDetails(gwName: string)
+    {
+        Live.Detail = gwName;
+        Live.RefreshShort();
+        $("#gatewayView").hide();
+        $("#gatewayDetails").show();
+        Live.mustUpdate = 0;
     }
 
     static RefreshShort()
     {
-        $.ajax({
-            type: 'POST',
-            url: 'DataAccess.asmx/GetShortInformation',
-            data: JSON.stringify({}),
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
-            success: function (msg)
-            {
-                Live.shortInfo = msg.d;
-                Live.DisplayShort();
-            },
-            error: function (msg, textStatus)
-            {
-                console.log(msg.responseText);
-            }
-        });
+        if (Live.Detail)
+        {
+            this.mustUpdate--;
+            if (this.mustUpdate >= 0)
+                return;
+            this.mustUpdate = 5;
+            $.ajax({
+                type: 'POST',
+                url: 'DataAccess.asmx/GetHistoricData',
+                data: JSON.stringify({ gatewayName: Live.Detail }),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (msg)
+                {
+                    var data: HistoricData[] = null;
+                    for (var i = 0; i < msg.d.length; i++)
+                    {
+                        switch (msg.d[i].Key)
+                        {
+                            case "CPU":
+                                data = msg.d[i].Value;
+                                Live.cpuChart.SetDataSource({
+                                    Values: data.map((c) =>
+                                    {
+                                        return { Label: Utils.ShortGWDateFormat(Utils.DateFromNet(c.Date)), Value: c.Value };
+                                    })
+                                });
+                                break;
+                            case "Searches":
+                                data = msg.d[i].Value;
+                                Live.searchesChart.SetDataSource({
+                                    Values: data.map((c) =>
+                                    {
+                                        return { Label: Utils.ShortGWDateFormat(Utils.DateFromNet(c.Date)), Value: c.Value };
+                                    })
+                                });
+                                break;
+                            case "PVs":
+                                data = msg.d[i].Value;
+                                Live.pvsChart.SetDataSource({
+                                    Values: data.map((c) =>
+                                    {
+                                        return { Label: Utils.ShortGWDateFormat(Utils.DateFromNet(c.Date)), Value: c.Value };
+                                    })
+                                });
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            });
+        }
+        else
+        {
+            $.ajax({
+                type: 'POST',
+                url: 'DataAccess.asmx/GetShortInformation',
+                data: JSON.stringify({}),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (msg)
+                {
+                    Live.shortInfo = msg.d;
+                    Live.DisplayShort();
+                },
+                error: function (msg, textStatus)
+                {
+                    console.log(msg.responseText);
+                }
+            });
+        }
+    }
+
+    static DisplayDetails()
+    {
     }
 
     static DisplayShort()

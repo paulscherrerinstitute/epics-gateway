@@ -242,6 +242,10 @@ namespace GWLogger.Backend.DataContext
 
                 UpdateGatewaySessions();
             }
+            catch // Wrong save?
+            {
+
+            }
             finally
             {
                 if (mustLock)

@@ -99,6 +99,11 @@ class Utils
         return dest;
     }
 
+    static DateFromNet(source)
+    {
+        return new Date(parseInt(source.substr(6, source.length - 8)));
+    }
+
     static NetDate(source: Date)
     {
         return "/Date(" + source.getTime() + ")/";

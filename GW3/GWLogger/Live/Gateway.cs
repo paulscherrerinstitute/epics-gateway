@@ -1,7 +1,12 @@
-﻿namespace GWLogger.Live
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace GWLogger.Live
 {
     public class Gateway
     {
+        private const int NbHistoricPoint = 500;
+
         private LiveInformation liveInformation;
 
         public string Name { get; }
@@ -13,6 +18,9 @@
         private GatewayNullableValue<int> nbMessages;
         private GatewayValue<string> runningTime;
         private GatewayValue<string> build;
+        private List<HistoricData> cpuHistory = new List<HistoricData>();
+        private List<HistoricData> searchHistory = new List<HistoricData>();
+        private List<HistoricData> pvsHistory = new List<HistoricData>();
 
         public Gateway(LiveInformation liveInformation, string gatewayName)
         {
@@ -25,6 +33,57 @@
             nbMessages = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":MESSAGES-SEC");
             runningTime = new GatewayValue<string>(this.liveInformation.Client, gatewayName + ":RUNNING-TIME");
             build = new GatewayValue<string>(this.liveInformation.Client, gatewayName + ":BUILD");
+        }
+
+        internal void UpdateGraph()
+        {
+            lock (cpuHistory)
+            {
+                cpuHistory.Add(new HistoricData(cpuChannel.Value));
+                while (cpuHistory.Count > NbHistoricPoint)
+                    cpuHistory.RemoveAt(0);
+            }
+
+            lock (searchHistory)
+            {
+                searchHistory.Add(new HistoricData(nbSearches.Value));
+                while (searchHistory.Count > NbHistoricPoint)
+                    searchHistory.RemoveAt(0);
+            }
+
+            lock (pvsHistory)
+            {
+                pvsHistory.Add(new HistoricData(nbPvs.Value));
+                while (pvsHistory.Count > NbHistoricPoint)
+                    pvsHistory.RemoveAt(0);
+            }
+        }
+
+        public List<HistoricData> CpuHistory
+        {
+            get
+            {
+                lock (cpuHistory)
+                    return cpuHistory.ToList();
+            }
+        }
+
+        public List<HistoricData> SearchHistory
+        {
+            get
+            {
+                lock (searchHistory)
+                    return searchHistory.ToList();
+            }
+        }
+
+        public List<HistoricData> PvsHistory
+        {
+            get
+            {
+                lock (pvsHistory)
+                    return pvsHistory.ToList();
+            }
         }
 
         public double? Cpu => cpuChannel.Value;
