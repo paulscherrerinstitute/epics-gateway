@@ -13,6 +13,12 @@ namespace GWLogger
         }
 
         [WebMethod]
+        public GatewayInformation GetGatewayInformation(string gatewayName)
+        {
+            return Global.LiveInformation.GetGatewayInformation(gatewayName);
+        }
+
+        [WebMethod]
         public List<HistoricData> CpuHistory(string gatewayName)
         {
             return Global.LiveInformation.CpuHistory(gatewayName);

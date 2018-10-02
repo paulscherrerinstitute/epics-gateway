@@ -289,6 +289,7 @@
       <DependentUpon>Introspection.ashx</DependentUpon>
     </Compile>
     <Compile Include="Live\Gateway.cs" />
+    <Compile Include="Live\GatewayInformation.cs" />
     <Compile Include="Live\GatewayShortInformation.cs" />
     <Compile Include="Live\GatewayNullableValue.cs" />
     <Compile Include="Live\GatewayValue.cs" />
@@ -302,6 +303,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="Frontend\DTOs\Connections.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\FreeSpace.ts" />
+    <TypeScriptCompile Include="Frontend\DTOs\GatewayInformation.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewaySession.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewayStats.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\KeyValuePair.ts" />

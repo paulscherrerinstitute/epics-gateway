@@ -50,6 +50,9 @@ class Live
         Live.mustUpdate = 0;
         Live.RefreshShort();
 
+        $("#currentGW").html("Loading...");
+        $("#gwInfos").html("");
+
         Live.cpuChart.SetDataSource({ Values: [] });
         Live.searchesChart.SetDataSource({ Values: [] });
         Live.pvsChart.SetDataSource({ Values: [] });
@@ -65,12 +68,35 @@ class Live
             this.mustUpdate = 5;
             $.ajax({
                 type: 'POST',
+                url: 'DataAccess.asmx/GetGatewayInformation',
+                data: JSON.stringify({ gatewayName: Main.CurrentGateway.toUpperCase() }),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (msg)
+                {
+                    var data: GatewayInformation = msg.d;
+
+                    var html = "";
+                    for (var i in data)
+                    {
+                        if (i == "__type" || i == "Name")
+                            continue;
+                        html += "<tr><td>" + i + "</td><td>" + data[i] + "</td></tr>";
+                    }
+                    $("#gwInfos").html(html);
+                }
+            });
+
+            $.ajax({
+                type: 'POST',
                 url: 'DataAccess.asmx/GetHistoricData',
                 data: JSON.stringify({ gatewayName: Main.CurrentGateway.toUpperCase() }),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 success: function (msg)
                 {
+                    $("#currentGW").html(Main.CurrentGateway.toUpperCase());
+
                     var data: HistoricData[] = null;
                     for (var i = 0; i < msg.d.length; i++)
                     {

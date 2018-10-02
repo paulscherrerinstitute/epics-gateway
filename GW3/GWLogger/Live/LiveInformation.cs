@@ -10,7 +10,7 @@ namespace GWLogger.Live
         public List<Gateway> Gateways { get; } = new List<Gateway>();
         public EpicsSharp.ChannelAccess.Client.CAClient Client { get; } = new EpicsSharp.ChannelAccess.Client.CAClient();
 
-        Thread backgroundUpdater;
+        private Thread backgroundUpdater;
 
         public LiveInformation()
         {
@@ -21,10 +21,10 @@ namespace GWLogger.Live
 
         private void UpdateGraphValues()
         {
-            while(true)
+            while (true)
             {
                 Thread.Sleep(5000);
-                lock(Gateways)
+                lock (Gateways)
                     Gateways.ForEach(row => row.UpdateGraph());
             }
         }
@@ -49,6 +49,24 @@ namespace GWLogger.Live
                     Searches = row.Searches,
                     Build = row.BuildTime
                 }).ToList();
+            }
+        }
+
+        public GatewayInformation GetGatewayInformation(string gatewayName)
+        {
+            lock (Gateways)
+            {
+                return Gateways.Select(row => new GatewayInformation
+                {
+                    Name = row.Name,
+                    Cpu = row.Cpu,
+                    Mem = row.Mem,
+                    Searches = row.Searches,
+                    Build = row.BuildTime,
+                    Messages = row.Messages,
+                    PVs = row.PVs,
+                    RunningTime = row.RunningTime
+                }).FirstOrDefault(row => row.Name.ToLower() == gatewayName.ToLower());
             }
         }
 
