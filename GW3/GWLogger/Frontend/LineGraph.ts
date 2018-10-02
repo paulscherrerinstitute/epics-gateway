@@ -15,6 +15,7 @@ interface GraphOptions
     MaxY?: number;
     FontSize?: number;
     PlotColor?: string;
+    XLabelWidth?: number;
 }
 
 interface Math
@@ -115,18 +116,27 @@ class LineGraph
 
         // Let's plot the X labels
         var nbXLabels = Math.floor((this.height - this.fontSize * 3) / (this.fontSize * 4));
-        var xLabelWidth = 0;
-        // Calculate the width needed for the labels
-        for (var i = 0; i <= nbXLabels; i++)
+        if (nbXLabels > 2 && nbXLabels % 2 != 0)
+            nbXLabels--;
+        var xLabelWidth = this.graphOptions.XLabelWidth ? this.graphOptions.XLabelWidth : 0;
+        if (!this.graphOptions.XLabelWidth)
         {
-            var xVal = Math.round((minY + (maxY - minY) * i / nbXLabels) * 100) / 100;
-            xLabelWidth = Math.max(xLabelWidth, ctx.measureText("" + xVal).width);
+            // Calculate the width needed for the labels
+            for (var i = 0; i <= nbXLabels; i++)
+            {
+                var xVal = Math.round((minY + (maxY - minY) * i / nbXLabels) * 100) / 100;
+                if ((maxY - minY) > 10)
+                    xVal = Math.round(xVal);
+                xLabelWidth = Math.max(xLabelWidth, ctx.measureText("" + xVal).width);
+            }
+            xLabelWidth += 3;
         }
-        xLabelWidth += 3;
         // Draw the X labels
         for (var i = 0; i <= nbXLabels; i++)
         {
             var xVal = Math.round((minY + (maxY - minY) * i / nbXLabels) * 100) / 100;
+            if ((maxY - minY) > 10)
+                xVal = Math.round(xVal);
             ctx.fillText("" + xVal, xLabelWidth - ctx.measureText("" + xVal).width, this.TransformY(xVal, minY, maxY) + (i == 0 ? 0 : 6));
         }
 

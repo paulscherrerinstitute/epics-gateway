@@ -104,6 +104,8 @@ class Main
             dataType: 'json',
             success: function (msg)
             {
+                if (!msg.d)
+                    return;
                 Main.Stats = GatewayStats.CreateFromObject(msg.d);
 
                 if (Main.EndDate === null)
@@ -609,10 +611,13 @@ class Main
         {
             var tab = evt.target.innerHTML;
             if (tab == "Status")
+            {
+                if (Main.Path == "Status")
+                    Main.CurrentGateway = null;
                 Main.Path = "Status";
+            }
             else
                 Main.Path = "GW";
-            Live.Detail = null;
 
             State.Set();
             State.Pop(null);

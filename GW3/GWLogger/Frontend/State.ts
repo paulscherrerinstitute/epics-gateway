@@ -42,6 +42,17 @@
         else if (path.length > 1 && path[1] == "GW")
             Main.CurrentGateway = null;
 
+        if (Main.Path == "Status" && Main.CurrentGateway)
+        {
+            $("#gatewayView").hide();
+            $("#gatewayDetails").show();
+        }
+        else if (Main.Path == "Status")
+        {
+            $("#gatewayView").show();
+            $("#gatewayDetails").hide();
+        }
+
         var url = "" + document.location;
         console.log(url);
         if (url.indexOf("#") == -1)

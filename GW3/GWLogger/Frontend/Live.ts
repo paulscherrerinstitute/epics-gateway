@@ -15,7 +15,6 @@ interface HistoricData
 
 class Live
 {
-    static Detail: string = null;
     static shortInfo: GatewayShortInformation[] = [];
     static cpuChart: LineGraph;
     static searchesChart: LineGraph;
@@ -36,23 +35,29 @@ class Live
             }).html("<canvas id='canvas_" + elem.id + "' width='100' height='100'></canvas><br>" + elem.id);
         });
 
-        Live.cpuChart = new LineGraph("cpuGraph", { Values: [] }, { MinY: 0, MaxY: 100 });
-        Live.searchesChart = new LineGraph("searchesGraph", { Values: [] }, { MinY: 0 });
-        Live.pvsChart = new LineGraph("pvsGraph", { Values: [] }, { MinY: 0 });
+        Live.cpuChart = new LineGraph("cpuGraph", { Values: [] }, { MinY: 0, MaxY: 100, XLabelWidth: 50, FontSize: 10, PlotColor: '#000080' });
+        Live.searchesChart = new LineGraph("searchesGraph", { Values: [] }, { MinY: 0, XLabelWidth: 50, FontSize: 10, PlotColor: '#000080' });
+        Live.pvsChart = new LineGraph("pvsGraph", { Values: [] }, { MinY: 0, XLabelWidth: 50, FontSize: 10, PlotColor: '#000080' });
     }
 
     static ShowDetails(gwName: string)
     {
-        Live.Detail = gwName;
+        Main.CurrentGateway = gwName.toLowerCase();
+        State.Set();
         Live.RefreshShort();
         $("#gatewayView").hide();
         $("#gatewayDetails").show();
         Live.mustUpdate = 0;
+        Live.RefreshShort();
+
+        Live.cpuChart.SetDataSource({ Values: [] });
+        Live.searchesChart.SetDataSource({ Values: [] });
+        Live.pvsChart.SetDataSource({ Values: [] });
     }
 
     static RefreshShort()
     {
-        if (Live.Detail)
+        if (Main.CurrentGateway)
         {
             this.mustUpdate--;
             if (this.mustUpdate >= 0)
@@ -61,7 +66,7 @@ class Live
             $.ajax({
                 type: 'POST',
                 url: 'DataAccess.asmx/GetHistoricData',
-                data: JSON.stringify({ gatewayName: Live.Detail }),
+                data: JSON.stringify({ gatewayName: Main.CurrentGateway.toUpperCase() }),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 success: function (msg)

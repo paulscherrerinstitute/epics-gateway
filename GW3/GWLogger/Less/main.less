@@ -1,5 +1,5 @@
 ﻿@backgroundColor: #e6e6e6;
-@boxShadow: #9d9d9d 1px 1px 2px;
+@boxShadow: #c8c8c8 1px 1px 2px;
 @labelBackgroundColor: #3f51b5;
 @labelColor: #FFFFFF;
 @leftSidebar: 300px;
@@ -608,7 +608,6 @@ select
     left: 0px;
     right: 0px;
     bottom: 0px;
-    overflow: auto;
 }
 
 #mainTabs
@@ -627,9 +626,75 @@ select
     margin: 3px;
     width: 140px;
     padding: 2px;
-    border: solid 1px #D0D0D0;
-    box-shadow: #C0C0C0 1px 1px 2px;
+    border: solid 1px #f3f3f3;
+    box-shadow: #eeeeee 1px 1px 2px;
     cursor: pointer;
+
+    &:hover
+    {
+        border: solid 1px #d3dae6;
+        box-shadow: #c3c3c3 1px 1px 2px;
+    }
+}
+
+#gatewayBeamlines
+{
+    float: left;
+    width: ~"calc(100vw - 325px)";
+    margin-right: 5px;
+    margin-left: 5px;
+    background-color: @containerBackground;
+    box-shadow: @boxShadow;
+    height: ~"calc(100% - 5px)";
+    overflow: hidden;
+    text-align: center;
+
+    & .GWDisplay
+    {
+        width: 100px;
+        font-size: 11px;
+    }
+
+    &:before
+    {
+        content: "Beamline Gateways";
+        display: block;
+        text-align: center;
+        background-color: #3f51b5;
+        border-bottom: solid 1px #3f51b5;
+        border-top-left-radius: 3px;
+        border-top-right-radius: 3px;
+        padding: 2px;
+        font-weight: bold;
+        font-size: 10px;
+        color: #FFFFFF;
+    }
+}
+
+#gatewayMains
+{
+    float: right;
+    margin-right: 5px;
+    width: 310px;
+    background-color: @containerBackground;
+    box-shadow: @boxShadow;
+    height: ~"calc(100% - 5px)";
+    overflow: hidden;
+
+    &:before
+    {
+        content: "Main Gateways";
+        display: block;
+        text-align: center;
+        background-color: #3f51b5;
+        border-bottom: solid 1px #3f51b5;
+        border-top-left-radius: 3px;
+        border-top-right-radius: 3px;
+        padding: 2px;
+        font-weight: bold;
+        font-size: 10px;
+        color: #FFFFFF;
+    }
 }
 
 #gatewayDetails
@@ -641,24 +706,50 @@ select
     bottom: 0px;
     overflow: hidden;
     display: none;
+
+    & h2
+    {
+        margin: 0px;
+    }
+}
+
+#cpuGraphTitle
+{
+    position: absolute;
+    top: 5px;
+    left: 5px;
+}
+
+#searchGraphTitle
+{
+    position: absolute;
+    top: ~"calc(33vh - 10px)";
+    left: 5px;
+}
+
+#pvsGraphTitle
+{
+    position: absolute;
+    bottom: ~"calc(33vh - 40px)";
+    left: 5px;
 }
 
 #cpuGraph
 {
     position: absolute;
-    top: 5px;
+    top: 30px;
     left: 5px;
     right: 200px;
-    height: ~"calc(33vh - 15px)";
+    height: ~"calc(33vh - 45px)";
 }
 
 #searchesGraph
 {
     position: absolute;
-    top: ~"calc(33vh - 10px)";
+    top: ~"calc(33vh + 15px)";
     left: 5px;
     right: 200px;
-    height: ~"calc(33vh - 15px)";
+    height: ~"calc(33vh - 45px)";
 }
 
 #pvsGraph
@@ -667,5 +758,5 @@ select
     bottom: 5px;
     left: 5px;
     right: 200px;
-    height: ~"calc(33vh - 15px)";
+    height: ~"calc(33vh - 45px)";
 }
