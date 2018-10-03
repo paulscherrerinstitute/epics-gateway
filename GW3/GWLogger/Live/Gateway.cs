@@ -39,21 +39,21 @@ namespace GWLogger.Live
         {
             lock (cpuHistory)
             {
-                cpuHistory.Add(new HistoricData(cpuChannel.Value));
+                cpuHistory.Add(new HistoricData { Value = cpuChannel.Value });
                 while (cpuHistory.Count > NbHistoricPoint)
                     cpuHistory.RemoveAt(0);
             }
 
             lock (searchHistory)
             {
-                searchHistory.Add(new HistoricData(nbSearches.Value));
+                searchHistory.Add(new HistoricData { Value = nbSearches.Value });
                 while (searchHistory.Count > NbHistoricPoint)
                     searchHistory.RemoveAt(0);
             }
 
             lock (pvsHistory)
             {
-                pvsHistory.Add(new HistoricData(nbPvs.Value));
+                pvsHistory.Add(new HistoricData { Value = nbPvs.Value });
                 while (pvsHistory.Count > NbHistoricPoint)
                     pvsHistory.RemoveAt(0);
             }
