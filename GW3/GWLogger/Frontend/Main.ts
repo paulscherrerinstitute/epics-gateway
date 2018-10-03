@@ -45,11 +45,15 @@ class Main
                 });
 
                 if (Main.CurrentGateway)
+                {
+                    $("#gatewaySelector").data("kendoDropDownList").select((c) => { return c.value == Main.CurrentGateway; });
                     Main.GatewayChanged();
+                }
                 else
                 {
                     $("#gatewaySelector").data("kendoDropDownList").dataSource.add({ text: "-- Select Gateway --", value: "" });
-                    $("#gatewaySelector").data("kendoDropDownList").value("");
+                    $("#gatewaySelector").data("kendoDropDownList").select((c) => { return c.value == ""; });
+                    //$("#gatewaySelector").data("kendoDropDownList").value("");
                 }
             },
             error: function (msg, textStatus)
@@ -61,6 +65,8 @@ class Main
 
     static GatewayChanged(): void
     {
+        if (Main.Path != "GW")
+            return;
         Main.CurrentGateway = $('#gatewaySelector').val();
         var dataSource = $("#gatewaySelector").data("kendoDropDownList").dataSource;
         if (dataSource.data()[dataSource.data().length - 1].value === "")
@@ -463,41 +469,44 @@ class Main
 
     static Refresh()
     {
-        Live.RefreshShort();
-
-        var now = new Date();
-        $("#utcTime").html(("" + now.getUTCHours()).padLeft("0", 2) + ":" + ("" + now.getUTCMinutes()).padLeft("0", 2) + ":" + ("" + now.getUTCSeconds()).padLeft("0", 2));
-
-        $.ajax({
-            type: 'POST',
-            url: 'DataAccess.asmx/GetFreeSpace',
-            data: JSON.stringify({}),
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
-            success: function (msg)
-            {
-                var free = <FreeSpace>msg.d;
-                $("#freeSpace").html("" + (Math.round(free.FreeMB * 1000 / free.TotMB) / 10) + "%");
-            }
-        });
-
-        $.ajax({
-            type: 'POST',
-            url: 'DataAccess.asmx/GetBufferUsage',
-            data: JSON.stringify({}),
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
-            success: function (msg)
-            {
-                $("#bufferSpace").html("" + msg.d + "%");
-            }
-        });
-
-        if (Main.CurrentGateway)
+        if (Main.Path == "GW")
         {
-            Main.LoadSessions();
-            Main.LoadLogStats(true);
+            var now = new Date();
+            $("#utcTime").html(("" + now.getUTCHours()).padLeft("0", 2) + ":" + ("" + now.getUTCMinutes()).padLeft("0", 2) + ":" + ("" + now.getUTCSeconds()).padLeft("0", 2));
+
+            $.ajax({
+                type: 'POST',
+                url: 'DataAccess.asmx/GetFreeSpace',
+                data: JSON.stringify({}),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (msg)
+                {
+                    var free = <FreeSpace>msg.d;
+                    $("#freeSpace").html("" + (Math.round(free.FreeMB * 1000 / free.TotMB) / 10) + "%");
+                }
+            });
+
+            $.ajax({
+                type: 'POST',
+                url: 'DataAccess.asmx/GetBufferUsage',
+                data: JSON.stringify({}),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (msg)
+                {
+                    $("#bufferSpace").html("" + msg.d + "%");
+                }
+            });
+
+            if (Main.CurrentGateway)
+            {
+                Main.LoadSessions();
+                Main.LoadLogStats(true);
+            }
         }
+        else
+            Live.RefreshShort();
     }
 
     static Resize(): void
