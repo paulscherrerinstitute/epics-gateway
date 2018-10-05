@@ -7,6 +7,6 @@ namespace GWLogger.Backend.DTOs
         public string Channel { get; set; }
         public DateTime Date { get; set; }
         public string Client { get; set; }
-        public int NbSearches { get; internal set; }
+        public int NbSearches { get; set; }
     }
 }
