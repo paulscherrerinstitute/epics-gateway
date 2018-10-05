@@ -2,10 +2,10 @@
 {
     static DrawStats(): void
     {
-        if (!Main.Stats || !Main.EndDate)
+        if (!Main.Stats)
             return;
 
-        var end = new Date(Math.floor((Main.EndDate.getTime() + Main.EndDate.getTimezoneOffset() * 60000) / (10 * 60 * 1000)) * 10 * 60 * 1000);
+        var end = Main.Stats.Logs[Main.Stats.Logs.length - 1].Date;
 
         var canvas = (<HTMLCanvasElement>$("#timeRangeCanvas")[0]);
         var ctx = canvas.getContext("2d");
@@ -86,14 +86,14 @@
         ctx.fillStyle = "#000000";
         ctx.fillText(dts, width - (tw + 5), b + 14);
 
-        var dts = Utils.ShortGWDateFormat(new Date(Main.EndDate.getTime() - 72 * 10 * 60 * 1000));
+        var dts = Utils.ShortGWDateFormat(new Date(end.getTime() - 72 * 10 * 60 * 1000));
         var tw = ctx.measureText(dts).width;
         ctx.fillStyle = "rgba(255,255,255,0.7)";
         ctx.fillRect(width / 2 - tw / 2, b + 2, tw + 2, 16);
         ctx.fillStyle = "#000000";
         ctx.fillText(dts, width / 2 - tw / 2, b + 14);
 
-        var dts = Utils.ShortGWDateFormat(new Date(Main.EndDate.getTime() - 144 * 10 * 60 * 1000));
+        var dts = Utils.ShortGWDateFormat(new Date(end.getTime() - 144 * 10 * 60 * 1000));
         var tw = ctx.measureText(dts).width;
         ctx.fillStyle = "rgba(255,255,255,0.7)";
         ctx.fillRect(5, b + 2, tw + 2, 16);
@@ -105,9 +105,11 @@
 
         if (Main.CurrentTime)
         {
-            var tdiff = (Main.EndDate.getTime() - Main.CurrentTime.getTime()) + Main.EndDate.getTimezoneOffset() * 60000;
+            //var tdiff = (end.getTime() - Main.CurrentTime.getTime()) + end.getTimezoneOffset() * 60000;
+            var tdiff = (end.getTime() + 10 * 60 * 1000 - Main.CurrentTime.getTime());
             var t = tdiff / (10 * 60 * 1000);
-            var x = width - Math.floor(t * w + w / 2);
+            //var x = width - Math.floor(t * w + w / 2);
+            var x = width - Math.floor(t * w);
 
             ctx.lineWidth = 1;
             ctx.strokeStyle = "rgba(0,0,255,0.7)";
@@ -156,6 +158,14 @@
         if (tx > 144)
             tx = 144;
         //console.log(tx);
+
+
+        if (!Main.EndDate)
+        {
+            Main.EndDate = new Date();
+            Main.StartDate = new Date(Main.EndDate.getTime() - 24 * 3600 * 1000);
+        }
+
         Main.CurrentTime = new Date((Main.EndDate.getTime() + Main.EndDate.getTimezoneOffset() * 60000) - tx * 10 * 60 * 1000);
         if (tx == 0 && ((new Date()).getTime() - Main.CurrentTime.getTime()) < 24 * 3600 * 1000)
             Main.IsLast = true;

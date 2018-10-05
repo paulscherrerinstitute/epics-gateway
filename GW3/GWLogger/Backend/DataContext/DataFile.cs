@@ -789,7 +789,7 @@ namespace GWLogger.Backend.DataContext
                     if (lastFile != currentFile)
                         SetFile(lastFile);
 
-                    long pos = 0;
+                    /*long pos = 0;
                     for (var i = Index.Length - 1; i > 0; i--)
                     {
                         if (Index[i] != -1)
@@ -797,19 +797,21 @@ namespace GWLogger.Backend.DataContext
                             pos = i;
                             break;
                         }
-                    }
+                    }*/
                     isAtEnd = false;
 
                     var streamLength = DataReader.BaseStream.Length;
 
-                    while (pos >= 0 && result.Count < nbEntries && Index[pos] >= 0)
-                    {
+                    //while (pos >= 0 && result.Count < nbEntries && Index[pos] >= 0)
+                    //{
                         var chunk = new List<LogEntry>();
-                        DataReader.BaseStream.Seek(Index[pos], SeekOrigin.Begin);
+                        //DataReader.BaseStream.Seek(Index[pos], SeekOrigin.Begin);
+                        // 48 being an average of bytes per entries
+                        DataReader.BaseStream.Seek(Math.Max(0, DataReader.BaseStream.Length - 48 * nbEntries), SeekOrigin.Begin);
                         while (DataReader.BaseStream.Position < streamLength)
                         {
-                            if (pos < Index.Length - 1 && DataReader.BaseStream.Position >= Index[pos + 1])
-                                break;
+                            /*if (pos < Index.Length - 1 && DataReader.BaseStream.Position >= Index[pos + 1])
+                                break;*/
                             try
                             {
                                 chunk.Add(ReadEntry(DataReader, this.CurrentDate.Date, streamLength));
@@ -819,8 +821,8 @@ namespace GWLogger.Backend.DataContext
                             }
                         }
                         result.InsertRange(0, chunk);
-                        pos--;
-                    }
+                        //pos--;
+                    //}
                 }
 
                 if (result.Count > nbEntries)
@@ -938,7 +940,7 @@ namespace GWLogger.Backend.DataContext
                     continue;
                 }
                 // Still a possible date
-                if ((dt - approxiateDay).TotalDays <= 30)
+                if ((dt - approxiateDay).TotalDays <= 30 && dt.ToJsDate() > 0)
                 {
                     cmd = stream.ReadByte();
                     if (cmd <= Global.DataContext.MaxMessageTypes)

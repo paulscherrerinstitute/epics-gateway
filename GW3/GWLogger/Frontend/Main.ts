@@ -46,7 +46,19 @@ class Main
 
                 if (Main.CurrentGateway)
                 {
-                    $("#gatewaySelector").data("kendoDropDownList").select((c) => { return c.value == Main.CurrentGateway; });
+                    /*var items: any[] = $("#gatewaySelector").data("kendoDropDownList").items();
+                    for (var i = 0; i < items[i].length; i++)
+                    {
+                        if (items[i].innerText == Main.CurrentGateway)
+                        {
+                            $("#gatewaySelector").data("kendoDropDownList").select(i);
+                            break;
+                        }
+                    }*/
+                    /*$("#gatewaySelector").data("kendoDropDownList").select((c) =>
+                    {
+                        return c.value == Main.CurrentGateway;
+                    });*/
                     Main.GatewayChanged();
                 }
                 else
@@ -97,13 +109,20 @@ class Main
             return;
 
         //var end = new Date();
-        var end = new Date(Main.StartDate.getTime() + 24 * 3600 * 1000);
+        var start = Main.StartDate;
+
+        var params = State.Parameters();
+        if (!params["c"] && !params["s"])
+            start = new Date((new Date()).getTime() - 24 * 3600 * 1000);
+
+        var end = new Date(start.getTime() + 24 * 3600 * 1000);
+
         $.ajax({
             type: 'POST',
             url: 'DataAccess.asmx/GetStats',
             data: JSON.stringify({
                 "gatewayName": Main.CurrentGateway,
-                start: Utils.FullUtcDateFormat(Main.StartDate),
+                start: Utils.FullUtcDateFormat(start),
                 end: Utils.FullUtcDateFormat(end)
             }),
             contentType: 'application/json; charset=utf-8',
@@ -116,24 +135,25 @@ class Main
 
                 if (Main.EndDate === null)
                 {
-                    if (Main.Stats.Logs && Main.Stats.Logs.length > 0)
+                    /*if (Main.Stats.Logs && Main.Stats.Logs.length > 0)
                         Main.EndDate = Main.Stats.Logs[Main.Stats.Logs.length - 1].Date;
                     else
-                        Main.EndDate = new Date();
-                    $("#startDate").val(Utils.FullUtcDateFormat(Main.StartDate));
-                    $("#endDate").val(Utils.FullUtcDateFormat(Main.EndDate));
+                        Main.EndDate = new Date();*/
+                    $("#startDate").val(Utils.FullUtcDateFormat(start));
+                    $("#endDate").val(Utils.FullUtcDateFormat(end));
                 }
 
-                if (resetEndDate)
+                /*if (resetEndDate)
                 {
                     if (Main.Stats.Logs && Main.Stats.Logs.length > 0)
                         Main.EndDate = Main.CurrentTime = Main.Stats.Logs[Main.Stats.Logs.length - 1].Date;
                     else
                         Main.EndDate = Main.CurrentTime = new Date();
-                }
+                }*/
                 StatsBarGraph.DrawStats();
 
-                if (refresh && Main.IsLast)
+                //if (refresh && Main.IsLast)
+                if (refresh && (!params["c"] && !params["s"]))
                     Main.LoadTimeInfo(refresh);
                 else if (!refresh)
                     Main.LoadTimeInfo();
@@ -183,7 +203,10 @@ class Main
         }
 
         //var startDate = new Date(Main.CurrentTime.getTime() - 10 * 60 * 1000);
-        var startDate = (Main.CurrentTime ? new Date(Main.CurrentTime.getTime()) : new Date(Main.EndDate.getTime() - 20 * 60 * 1000));
+        //var startDate = (Main.CurrentTime ? new Date(Main.CurrentTime.getTime()) : new Date(Main.EndDate.getTime() - 20 * 60 * 1000));
+        var startDate = new Date((new Date()).getTime() - 10 * 60 * 1000);
+        if (Main.CurrentTime)
+            startDate = Main.CurrentTime;
         var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
         var tz = (new Date()).getTimezoneOffset() * 60000;
 
@@ -253,8 +276,6 @@ class Main
     static LoadTimeInfo(refresh: boolean = false)
     {
         StatsBarGraph.DrawStats();
-        var startDate = (Main.CurrentTime ? new Date(Main.CurrentTime.getTime()) : new Date(Main.EndDate.getTime() - 20 * 60 * 1000));
-        var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
 
         if ($("#closeHelp").css("display") == "none")
         {
@@ -327,20 +348,33 @@ class Main
         }
         Main.Levels = tab.getAttribute("level");
 
-        var queryString = "";
-        if (Main.Levels)
-            queryString += (queryString != "" ? "&" : "?") + "levels=" + Main.Levels;
-        if ($("#queryField").val())
-            queryString += (queryString != "" ? "&" : "?") + "query=" + $("#queryField").val();
-        if (Main.Offset !== null)
-            queryString += (queryString != "" ? "&" : "?") + "offset=" + this.Offset;
-        if (Main.OffsetFile !== null)
-            queryString += (queryString != "" ? "&" : "?") + "filename=" + this.OffsetFile;
-        //(Main.Levels ? "?levels=" + Main.Levels + "&query=" + $("#queryField").val() : "?query=" + $("#queryField").val()
+        var params = State.Parameters();
+        var url: string;
+        if (!params["c"] && !params["s"])
+        {
+            url = '/Logs/' + Main.CurrentGateway;
+        }
+        else
+        {
+            var startDate = (Main.CurrentTime ? new Date(Main.CurrentTime.getTime()) : new Date(Main.EndDate.getTime() - 20 * 60 * 1000));
+            var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
+
+            var queryString = "";
+            if (Main.Levels)
+                queryString += (queryString != "" ? "&" : "?") + "levels=" + Main.Levels;
+            if ($("#queryField").val())
+                queryString += (queryString != "" ? "&" : "?") + "query=" + $("#queryField").val();
+            if (Main.Offset !== null)
+                queryString += (queryString != "" ? "&" : "?") + "offset=" + this.Offset;
+            if (Main.OffsetFile !== null)
+                queryString += (queryString != "" ? "&" : "?") + "filename=" + this.OffsetFile;
+            //(Main.Levels ? "?levels=" + Main.Levels + "&query=" + $("#queryField").val() : "?query=" + $("#queryField").val()
+            url = '/Logs/' + Main.CurrentGateway + '/' + startDate.getTime() + '/' + endDate.getTime() + queryString;
+        } 
 
         Main.loadingLogs = $.ajax({
             type: 'GET',
-            url: '/Logs/' + Main.CurrentGateway + '/' + startDate.getTime() + '/' + endDate.getTime() + queryString,
+            url: url,
             success: function (data)
             {
                 Main.loadingLogs = null;
@@ -402,8 +436,9 @@ class Main
                     });
 
                 // Scroll to bottom
-                if (Main.IsLast)
-                    $("#logsContent").scrollTop($("#logsContent")[0].scrollHeight - $("#logsContent").height());
+                //if (Main.IsLast)
+                if (!params["c"] && !params["s"])
+                    $("#logsContent div.k-grid-content").scrollTop($("#logsContent div.k-grid-content")[0].scrollHeight - $("#logsContent div.k-grid-content").height());
                 else
                     $("#logsContent").scrollTop(0);
             },

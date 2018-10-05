@@ -5,6 +5,20 @@
         return document.location.pathname.split('/');
     }
 
+    static Parameters(): any
+    {
+        var url = "" + document.location;
+        if (url.indexOf("#") == -1)
+            url = "";
+        else
+            url = url.substr(url.indexOf("#") + 1);
+        var parts = url.split("&");
+        var queryString = {};
+        parts.forEach(row => queryString[row.split("=")[0]] = decodeURIComponent(row.split("=")[1]));
+
+        return queryString;
+    }
+
     static Pop(jEvent: JQueryEventObject)
     {
         Main.CurrentGateway = null;
@@ -53,15 +67,16 @@
             $("#gatewayDetails").hide();
         }
 
-        var url = "" + document.location;
-        console.log(url);
+        /*var url = "" + document.location;
+        //console.log(url);
         if (url.indexOf("#") == -1)
             url = "";
         else
             url = url.substr(url.indexOf("#") + 1);
         var parts = url.split("&");
         var queryString = {};
-        parts.forEach(row => queryString[row.split("=")[0]] = decodeURIComponent(row.split("=")[1]));
+        parts.forEach(row => queryString[row.split("=")[0]] = decodeURIComponent(row.split("=")[1]));*/
+        var queryString = State.Parameters();
 
         if (queryString["c"])
             Main.CurrentTime = new Date(parseInt(queryString["c"]));
