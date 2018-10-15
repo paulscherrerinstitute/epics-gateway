@@ -96,6 +96,31 @@ namespace GWLogger.Backend.DataContext
         private static HashSet<string> knownFiles = new HashSet<string>();
         private readonly Context Context;
 
+        public DataFile(Context context, string gateway)
+        {
+            this.Context = context;
+            try
+            {
+                LockObject.Wait();
+                this.gateway = gateway;
+                SetFile();
+
+                // Recovers how many entries in that last session
+                if (File.Exists(StorageDirectory + "\\" + gateway.ToLower() + ".sessions"))
+                {
+                    using (var reader = new BinaryReader(File.Open(StorageDirectory + "\\" + gateway.ToLower() + ".sessions", FileMode.Open, FileAccess.Read)))
+                    {
+                        reader.BaseStream.Seek(reader.BaseStream.Length - sizeof(long), SeekOrigin.Begin);
+                        nbLogEntries = reader.ReadInt64();
+                    }
+                }
+            }
+            finally
+            {
+                LockObject.Release();
+            }
+        }
+
         public static bool Exists(string gatewayName)
         {
             if (string.IsNullOrWhiteSpace(gatewayName))
@@ -155,20 +180,7 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        public DataFile(Context context, string gateway)
-        {
-            this.Context = context;
-            try
-            {
-                LockObject.Wait();
-                this.gateway = gateway;
-                SetFile();
-            }
-            finally
-            {
-                LockObject.Release();
-            }
-        }
+
 
         private void SetFile(string filename = null)
         {
