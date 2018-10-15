@@ -4,12 +4,13 @@
     "noImplicitAny": false,
     "noEmitOnError": false,
     "removeComments": false,
+    "noEmit": true,
     "sourceMap": true,
     "target": "es5",
     "outFile": "../main.js",
     "experimentalDecorators": true
   },
-  "include": ["../Scripts/**/*.d.ts","./**/*.ts"],
+  "include": [ "../Scripts/**/*.d.ts", "./**/*.ts" ],
   "exclude": [
     "node_modules",
     "wwwroot"
