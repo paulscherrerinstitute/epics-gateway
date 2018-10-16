@@ -110,8 +110,11 @@ namespace GWLogger.Backend.DataContext
                 {
                     using (var reader = new BinaryReader(File.Open(StorageDirectory + "\\" + gateway.ToLower() + ".sessions", FileMode.Open, FileAccess.Read)))
                     {
-                        reader.BaseStream.Seek(reader.BaseStream.Length - sizeof(long), SeekOrigin.Begin);
-                        nbLogEntries = reader.ReadInt64();
+                        if (reader.BaseStream.Length > sizeof(long))
+                        {
+                            reader.BaseStream.Seek(reader.BaseStream.Length - sizeof(long), SeekOrigin.Begin);
+                            nbLogEntries = reader.ReadInt64();
+                        }
                     }
                 }
             }

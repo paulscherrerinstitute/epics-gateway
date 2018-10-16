@@ -598,20 +598,6 @@ class Main
         });
     }
 
-    static ShowHelp()
-    {
-        $("#help").show();
-        $("#clients, #servers, #logs").hide();
-        $("#closeHelp").show();
-    }
-
-    static HideHelp()
-    {
-        $("#help").hide();
-        $("#clients, #servers, #logs").show();
-        $("#closeHelp").hide();
-    }
-
     static LogFilter(evt: JQueryEventObject)
     {
         $("#logFilter li").removeClass("activeTab");
@@ -636,6 +622,7 @@ class Main
     static Init(): void
     {
         Live.InitShortDisplay();
+        Main.QueriesHelp();
 
         $.ajax({
             type: 'POST',
@@ -654,17 +641,37 @@ class Main
         $("#mainTabs li").click((evt) =>
         {
             var tab = evt.target.innerHTML;
-            if (tab == "Status")
+            switch (tab)
             {
-                if (Main.Path == "Status")
-                    Main.CurrentGateway = null;
-                Main.Path = "Status";
+                case "Status":
+                    if ($("#helpView").is(":visible"))
+                        $("#helpView").hide();
+                    if (Main.Path == "Status")
+                        Main.CurrentGateway = null;
+                    Main.Path = "Status";
+                    State.Set();
+                    State.Pop(null);
+                    break;
+                case "Logs":
+                    if ($("#helpView").is(":visible"))
+                        $("#helpView").hide();
+                    if (Main.Path == "GW")
+                        break;
+                    Main.Path = "GW";
+                    State.Set();
+                    State.Pop(null);
+                    break;
+                case "Help":
+                    if ($("#helpView").is(":visible"))
+                        $("#helpView").hide();
+                    else
+                        $("#helpView").show();
+                    break;
+                default:
+                    State.Set();
+                    State.Pop(null);
+                    break;
             }
-            else
-                Main.Path = "GW";
-
-            State.Set();
-            State.Pop(null);
         });
 
         Main.BaseTitle = window.document.title;
@@ -734,7 +741,7 @@ class Main
             }
         };
         $("#endDate").kendoDateTimePicker({ format: "yyyy/MM/dd MM:mm:ss", change: endDateChange }).on("keyup", endDateChange);
-        $("#queryField").on("focus", () =>
+        /*$("#queryField").on("focus", () =>
         {
             $("#querySuggestions").show();
             Main.ShowSuggestion();
@@ -742,7 +749,7 @@ class Main
         $("#queryField").on("blur", () =>
         {
             $("#querySuggestions").hide();
-        });
+        });*/
         $("#queryField").on("keyup", (evt: JQueryEventObject) =>
         {
             switch (evt.keyCode)
@@ -751,11 +758,11 @@ class Main
                     $("#queryField").blur();
                     break;
                 case 13:
-                    $("#querySuggestions").hide();
+                    //$("#querySuggestions").hide();
                     break;
                 default:
-                    $("#querySuggestions").show();
-                    Main.ShowSuggestion();
+                    //$("#querySuggestions").show();
+                    //Main.ShowSuggestion();
                     break;
             }
 
@@ -780,19 +787,15 @@ class Main
 
         $("#logFilter li").click(Main.LogFilter);
 
-        $("#logHelp").click(Main.ShowHelp);
-        $("#closeHelp").click(Main.HideHelp);
-
         State.Pop(null);
     }
 
-    static ShowSuggestion()
+    static QueriesHelp()
     {
         var html = "";
-        html += "<h1>Queries:</h1>";
         html += "&lt;variable&gt; &lt;condition&gt; &lt;value&gt; [and/or &lt;...&gt;]";
 
-        html += "<h1>Variables:</h1><table>";
+        html += "<h3>Variables:</h3><table>";
         var n = 0;
         for (var i in availableVariables)
         {
@@ -805,7 +808,7 @@ class Main
         }
         html += "</tr></table>";
 
-        html += "<h1>Conditions:</h1><table>";
+        html += "<h3>Conditions:</h3><table>";
         n = 0;
         for (var i in availableConditions)
         {
@@ -818,7 +821,7 @@ class Main
         }
         html += "</tr></table>";
 
-        $("#querySuggestions").html(html);
+        $("#queriesHelp").html(html);
     }
 
     static DelayedSearch(cb, fromPop: boolean = false)

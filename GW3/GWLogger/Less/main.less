@@ -7,6 +7,7 @@
 @borderSpacing: 5px;
 @tabTextColor: #e6dfdf;
 @containerBackground: #FFFFFF;
+@errorPanel: 150px;
 
 @middleSidebar: (@leftSidebar+5)/2;
 
@@ -65,6 +66,21 @@ body
     {
         font-weight: bold;
         color: #6b6750;
+    }
+}
+
+.button
+{
+    cursor: pointer;
+    background-color: @labelBackgroundColor;
+    padding: 3px;
+    display: inline-block;
+    color: @labelColor;
+    border-radius: 2px;
+
+    &:hover
+    {
+        background-color: #707ece;
     }
 }
 
@@ -154,20 +170,32 @@ body
     width: ~"calc(100% - 40px)";
 }
 
-#help
+#helpView
 {
     .container;
-    top: (@timeRangeHeight + @borderSpacing);
-    left: (@leftSidebar + @borderSpacing);
-    right: @borderSpacing;
-    bottom: @borderSpacing;
-    padding: 5px;
-
+    top: 35px;
+    left: 0px;
+    right: calc(@errorPanel + 10);
+    bottom: 5px;
+    overflow-y: hidden;
+    display: none;
+    
     &:after
     {
         .containterLabel;
         content: "Help";
     }
+}
+
+#helpContent
+{
+    padding: 5px;
+    position: absolute;
+    top: 15px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    overflow-y: scroll;
 }
 
 #gatewaySessions
@@ -201,8 +229,8 @@ body
     position: absolute;
     top: (@timeRangeHeight + @borderSpacing * 2 + 25);
     left: (@leftSidebar + @borderSpacing);
-    right: @borderSpacing;
-    width: ~"calc(100vw - 310px)";
+    right: calc(@borderSpacing * 2 + @errorPanel);
+    width: ~"calc(100vw - @{errorPanel} - 315px)";
 }
 
 #clients
@@ -210,9 +238,9 @@ body
     .container;
     top: (@timeRangeHeight + @borderSpacing * 3 + 55);
     left: (@leftSidebar + @borderSpacing);
-    width: ~"calc(50vw - @{middleSidebar} - @{borderSpacing})";
+    width: ~"calc(50vw + 70px - @{errorPanel} - @{middleSidebar} - @{borderSpacing})";
     height: ~"calc(50% - @{timeRangeHeight} - @{borderSpacing} - 69px)";
-    display: none;
+    //display: none;
 
     &:after
     {
@@ -231,9 +259,9 @@ body
     .container;
     top: (@timeRangeHeight + @borderSpacing * 3 + 55);
     right: @borderSpacing;
-    width: ~"calc(50vw - @{middleSidebar} - @{borderSpacing})";
+    width: ~"calc(50vw + 70px  - @{errorPanel} - @{middleSidebar} - @{borderSpacing})";
     height: ~"calc(50% - @{timeRangeHeight} - @{borderSpacing} - 69px)";
-    display: none;
+    //display: none;
     padding-top: 16px;
 
     &:after
@@ -250,7 +278,7 @@ body
     left: (@leftSidebar + @borderSpacing);
     right: @borderSpacing;
     height: ~"calc(50% - @{borderSpacing} - @{borderSpacing})";
-    display: none;
+    //display: none;
     //padding-top: 16px;
     &:before
     {
@@ -275,55 +303,6 @@ body
 #logsContent tbody > tr
 {
     cursor: pointer;
-}
-
-#logHelp
-{
-    position: absolute;
-    background-color: #6b6750;
-    color: white;
-    font-size: 25px;
-    font-weight: bold;
-    right: 0;
-    bottom: 0;
-    border-top-left-radius: 40px;
-    height: 40px;
-    width: 40px;
-    padding-left: 17px;
-    padding-top: 10px;
-    box-sizing: border-box;
-    box-shadow: #606060 -1px -1px 4px;
-    cursor: pointer;
-
-    &:hover
-    {
-        color: #dcc3c3;
-    }
-}
-
-#closeHelp
-{
-    position: absolute;
-    background-color: red;
-    color: white;
-    font-size: 25px;
-    font-weight: bold;
-    right: 0;
-    bottom: 0;
-    border-top-left-radius: 40px;
-    height: 40px;
-    width: 40px;
-    padding-left: 17px;
-    padding-top: 10px;
-    box-sizing: border-box;
-    box-shadow: #606060 -1px -1px 4px;
-    cursor: pointer;
-    display: none;
-
-    &:hover
-    {
-        color: darkred;
-    }
 }
 
 .listContent
@@ -471,7 +450,7 @@ select
 
 .dateInputs
 {
-    width: ~"calc(50vw - 213px)";
+    width: ~"calc(50vw - @{errorPanel} / 2 - 216px)";
 }
 
 #querySuggestions
@@ -597,7 +576,7 @@ select
     position: absolute;
     top: 35px;
     left: 0px;
-    right: 0px;
+    right: calc(@errorPanel + 5);
     bottom: 0px;
 }
 
@@ -606,7 +585,7 @@ select
     position: absolute;
     top: 35px;
     left: 0px;
-    right: 0px;
+    right: calc(@errorPanel + 5);
     bottom: 0px;
 }
 
@@ -640,7 +619,7 @@ select
 #gatewayBeamlines
 {
     float: left;
-    width: ~"calc(100vw - 325px)";
+    width: ~"calc(100vw - @{errorPanel} - 330px)";
     margin-right: 5px;
     margin-left: 5px;
     background-color: @containerBackground;
@@ -702,7 +681,7 @@ select
     position: absolute;
     top: 35px;
     left: 0px;
-    right: 0px;
+    right: calc(@errorPanel + 5);
     bottom: 0px;
     overflow: hidden;
     display: none;
@@ -778,4 +757,21 @@ select
     width: 230px;
     bottom: 5px;
     padding: 5px;
+}
+
+#errorsView
+{
+    position: absolute;
+    top: 35px;
+    right: 0px;
+    width: calc(@errorPanel+4px);
+    bottom: 5px;
+    overflow: hidden;
+    .container;
+
+    &:before
+    {
+        .containterLabel;
+        content: "Errors";
+    }
 }

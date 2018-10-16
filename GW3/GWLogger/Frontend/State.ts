@@ -25,8 +25,8 @@
         Main.CurrentTime = null;
         Main.EndDate = null;
 
-        $("#help").show();
-        $("#clients, #servers, #logs").hide();
+        //$("#help").show();
+        //$("#clients, #servers, #logs").hide();
 
         var path = State.Path();
 
