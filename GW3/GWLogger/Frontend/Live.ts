@@ -5,6 +5,7 @@
     Mem: number;
     Searches: number;
     Build: string;
+    State: number;
 }
 
 interface HistoricData
@@ -139,25 +140,44 @@ class Live
                 }
             });
         }
-        else
-        {
-            $.ajax({
-                type: 'POST',
-                url: 'DataAccess.asmx/GetShortInformation',
-                data: JSON.stringify({}),
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'json',
-                success: function (msg)
+
+        $.ajax({
+            type: 'POST',
+            url: 'DataAccess.asmx/GetShortInformation',
+            data: JSON.stringify({}),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (msg)
+            {
+                Live.shortInfo = msg.d;
+                Live.shortInfo.sort((a, b) =>
                 {
-                    Live.shortInfo = msg.d;
-                    Live.DisplayShort();
-                },
-                error: function (msg, textStatus)
+                    if (a.Name > b.Name)
+                        return 1;
+                    if (a.Name < b.Name)
+                        return -1;
+                    return 0;
+                });
+
+                var html = "";
+                for (var i = 0; i < Live.shortInfo.length; i++)
                 {
-                    console.log(msg.responseText);
+                    if (Live.shortInfo[i].State < 3)
+                        continue;
+                    html += "<a href='/Status/" + Live.shortInfo[i].Name + "'>" + Live.shortInfo[i].Name + "</a>";
                 }
-            });
-        }
+                if (html == "")
+                    html = "<span>No errors</span>";
+                $("#errorsContent").html(html);
+
+                if (!Main.CurrentGateway && Main.Path != "GW")
+                    Live.DisplayShort();
+            },
+            error: function (msg, textStatus)
+            {
+                console.log(msg.responseText);
+            }
+        });
     }
 
     static DisplayDetails()
@@ -176,14 +196,29 @@ class Live
             // Clear rect
             ctx.clearRect(0, 0, 100, 100);
 
-            if (Live.shortInfo[i].Cpu > 70 || Live.shortInfo[i].Cpu === null || Live.shortInfo[i].Cpu === undefined)
+            /*if (Live.shortInfo[i].Cpu > 70 || Live.shortInfo[i].Cpu === null || Live.shortInfo[i].Cpu === undefined)
                 ctx.fillStyle = "#FFE0E0";
             else if (Live.shortInfo[i].Cpu > 50)
                 ctx.fillStyle = "#ffca93";
             else if (Live.shortInfo[i].Cpu > 30)
                 ctx.fillStyle = "#fff6af";
             else
-                ctx.fillStyle = "#FFFFFF";
+                ctx.fillStyle = "#FFFFFF";*/
+            switch (Live.shortInfo[i].State)
+            {
+                case 3:
+                    ctx.fillStyle = "#FFE0E0";
+                    break;
+                case 2:
+                    ctx.fillStyle = "#ffca93";
+                    break;
+                case 1:
+                    ctx.fillStyle = "#fff6af";
+                    break;
+                case 0:
+                default:
+                    ctx.fillStyle = "#FFFFFF";
+            }
 
             ctx.beginPath();
             ctx.lineWidth = 15;
@@ -210,6 +245,7 @@ class Live
                 ctx.strokeStyle = "#ffe500";
             else
                 ctx.strokeStyle = "#00E000";
+            ctx.lineCap = "round";
             ctx.arc(50, 50, 39, 1.5 * Math.PI, 1.5 * Math.PI + (2 * Math.PI) * Math.min(100, (Live.shortInfo[i].Searches ? Live.shortInfo[i].Searches : 0)) / 100);
             ctx.stroke();
 
@@ -224,8 +260,11 @@ class Live
                 ctx.strokeStyle = "#ffe500";
             else
                 ctx.strokeStyle = "#00E000";
+            ctx.lineCap = "round";
             ctx.arc(50, 50, 45, 1.5 * Math.PI, 1.5 * Math.PI + (2 * Math.PI) * (Live.shortInfo[i].Cpu ? Live.shortInfo[i].Cpu : 0) / 100);
             ctx.stroke();
+
+            ctx.lineCap = "butt";
 
             // CPU info
             var str = "" + (Live.shortInfo[i].Cpu ? Math.round(Live.shortInfo[i].Cpu) : "-");

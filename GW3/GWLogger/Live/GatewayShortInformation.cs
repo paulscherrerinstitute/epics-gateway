@@ -7,5 +7,6 @@
         public int? Mem { get; set; }
         public int? Searches { get; set; }
         public string Build { get; set; }
+        public int State { get; set; }
     }
 }

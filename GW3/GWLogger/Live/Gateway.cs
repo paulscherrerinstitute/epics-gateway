@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace GWLogger.Live
@@ -6,6 +7,7 @@ namespace GWLogger.Live
     public class Gateway
     {
         private const int NbHistoricPoint = 500;
+        private const int NbStateAvg = 20;
 
         private LiveInformation liveInformation;
 
@@ -56,6 +58,48 @@ namespace GWLogger.Live
                 pvsHistory.Add(new HistoricData { Value = nbPvs.Value });
                 while (pvsHistory.Count > NbHistoricPoint)
                     pvsHistory.RemoveAt(0);
+            }
+        }
+
+        public int State => Math.Max(CpuState, SearchState);
+
+        public int CpuState
+        {
+            get
+            {
+                if (CpuHistory.Count == 0)
+                    return 0;
+                var lasts = ((IEnumerable<HistoricData>)CpuHistory).Reverse().Take(NbStateAvg);
+                if (!(lasts.First().Value.HasValue || lasts.Count(l => l.Value.HasValue) >= lasts.Count() / 2))
+                    return 3;
+                var avg = lasts.Where(row => row.Value.HasValue).Average(row => row.Value.Value);
+                if (avg > 70)
+                    return 3;
+                if (avg > 50)
+                    return 2;
+                if (avg > 30)
+                    return 1;
+                return 0;
+            }
+        }
+
+        public int SearchState
+        {
+            get
+            {
+                if (CpuHistory.Count == 0)
+                    return 0;
+                var lasts = ((IEnumerable<HistoricData>)SearchHistory).Reverse().Take(NbStateAvg);
+                if (!(lasts.First().Value.HasValue || lasts.Count(l => l.Value.HasValue) >= lasts.Count() / 2))
+                    return 3;
+                var avg = lasts.Where(row => row.Value.HasValue).Average(row => row.Value.Value);
+                if (avg > 90)
+                    return 3;
+                if (avg > 50)
+                    return 2;
+                if (avg > 30)
+                    return 1;
+                return 0;
             }
         }
 

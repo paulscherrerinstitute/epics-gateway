@@ -74,6 +74,8 @@ body
     cursor: pointer;
     background-color: @labelBackgroundColor;
     padding: 3px;
+    padding-bottom: 5px;
+    padding-top: 5px;
     display: inline-block;
     color: @labelColor;
     border-radius: 3px;
@@ -180,7 +182,7 @@ body
     bottom: 5px;
     overflow-y: hidden;
     display: none;
-    
+
     &:after
     {
         .containterLabel;
@@ -242,7 +244,6 @@ body
     width: ~"calc(50vw + 70px - @{errorPanel} - @{middleSidebar} - @{borderSpacing})";
     height: ~"calc(50% - @{timeRangeHeight} - @{borderSpacing} - 69px)";
     //display: none;
-
     &:after
     {
         .containterLabel;
@@ -780,11 +781,34 @@ select
 #errorsContent
 {
     position: absolute;
-    top: 15px;
+    top: 16px;
     left: 0px;
     right: 0px;
     bottom: 0px;
     padding: 5px;
+    overflow-y: scroll;
+
+    a
+    {
+        .button;
+        background-color: #b60000;
+        margin-bottom: 5px;
+        width: ~"calc(100% - 10px)";
+    }
+
+    span
+    {
+        display: inline-block;
+        width: ~"calc(100% - 10px)";
+        color: white;
+        background-color: #00b725;
+        margin-top: 10px;
+        padding: 3px;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        border-radius: 5px;
+        text-align: center;
+    }
 }
 
 #inventoryLink

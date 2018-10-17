@@ -47,7 +47,8 @@ namespace GWLogger.Live
                     Cpu = row.Cpu,
                     Mem = row.Mem,
                     Searches = row.Searches,
-                    Build = row.BuildTime
+                    Build = row.BuildTime,
+                    State = row.State
                 }).ToList();
             }
         }

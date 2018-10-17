@@ -234,6 +234,8 @@ class Main
                             r.End = new Date(r.End.getTime() - tz);
                     });
 
+                    if ($("#clientsContent").data("kendoGrid"))
+                        $("#clientsContent").data("kendoGrid").destroy();
                     $("#clientsContent").html("").kendoGrid({
                         columns: [
                             { title: "Client", field: "RemoteIpPoint" },
@@ -255,6 +257,8 @@ class Main
                         r.End = new Date(r.End.getTime() - tz);
                 });
 
+                if ($("#serversContent").data("kendoGrid"))
+                    $("#serversContent").data("kendoGrid").destroy();
                 $("#serversContent").html("").kendoGrid({
                     columns: [
                         { title: "Client", field: "RemoteIpPoint" },
@@ -317,6 +321,8 @@ class Main
                     Main.loadingLogs = null;
                     var data = <KeyValuePair[]>msg.d;
 
+                    if ($("#logsContent").data("kendoGrid"))
+                        $("#logsContent").data("kendoGrid").destroy();
                     $("#logsContent").html("").kendoGrid({
                         columns: [
                             { title: (tab.getAttribute("report") == "SearchesPerformed" ? "Client" : "Channel"), field: "Key" },
@@ -356,7 +362,7 @@ class Main
         }
         else
         {
-            var startDate = (Main.CurrentTime ? new Date(Main.CurrentTime.getTime()) : new Date(Main.EndDate.getTime() - 20 * 60 * 1000));
+            var startDate = (Main.CurrentTime ? new Date(Main.CurrentTime.getTime()) : (Main.EndDate ? new Date(Main.EndDate.getTime() - 20 * 60 * 1000) : new Date((new Date()).getTime() - 20 * 60 * 1000)));
             var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
 
             var queryString = "";
@@ -370,7 +376,7 @@ class Main
                 queryString += (queryString != "" ? "&" : "?") + "filename=" + this.OffsetFile;
             //(Main.Levels ? "?levels=" + Main.Levels + "&query=" + $("#queryField").val() : "?query=" + $("#queryField").val()
             url = '/Logs/' + Main.CurrentGateway + '/' + startDate.getTime() + '/' + endDate.getTime() + queryString;
-        } 
+        }
 
         Main.loadingLogs = $.ajax({
             type: 'GET',
@@ -385,7 +391,8 @@ class Main
                 {
                     r.Date = new Date(<number>r.Date + tz);
                 });
-
+                if ($("#logsContent").data("kendoGrid"))
+                    $("#logsContent").data("kendoGrid").destroy();
                 $("#logsContent").html("").kendoGrid({
                     columns: [
                         { title: "Date", field: "Date", format: "{0:MM/dd HH:mm:ss.fff}", width: "160px" },
@@ -540,8 +547,8 @@ class Main
                 Main.LoadLogStats(true);
             }
         }
-        else
-            Live.RefreshShort();
+
+        Live.RefreshShort();
     }
 
     static Resize(): void
