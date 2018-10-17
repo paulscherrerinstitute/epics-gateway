@@ -79,6 +79,8 @@ class Live
                 success: function (msg)
                 {
                     var data: GatewayInformation = msg.d;
+                    data.Cpu = Math.round(data.Cpu * 100) / 100;
+                    data.RunningTime = data.RunningTime.substr(0, data.RunningTime.lastIndexOf('.'));
 
                     var html = "";
                     for (var i in data)
