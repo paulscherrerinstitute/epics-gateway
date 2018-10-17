@@ -92,7 +92,7 @@ namespace GWLogger.Live
                 var lasts = ((IEnumerable<HistoricData>)SearchHistory).Reverse().Take(NbStateAvg);
                 if (!(lasts.First().Value.HasValue || lasts.Count(l => l.Value.HasValue) >= lasts.Count() / 2))
                     return 3;
-                var avg = lasts.Where(row => row.Value.HasValue).Average(row => row.Value.Value);
+                var avg = lasts.Where(row => row.Value.HasValue).Average(row => Math.Min(150, row.Value.Value));
                 if (avg > 90)
                     return 3;
                 if (avg > 50)
