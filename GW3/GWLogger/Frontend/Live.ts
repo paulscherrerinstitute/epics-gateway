@@ -54,6 +54,7 @@ class Live
         $("#currentGW").html("Loading...");
         $("#gwInfos").html("");
         $("#inventoryLink").attr("href", "https://inventory.psi.ch/#action=Part&system=" + encodeURIComponent(Main.CurrentGateway.toUpperCase()));
+        $("#logLink").attr("href", "/GW/" + Main.CurrentGateway);
 
         Live.cpuChart.SetDataSource({ Values: [] });
         Live.searchesChart.SetDataSource({ Values: [] });
@@ -65,6 +66,7 @@ class Live
         if (Main.CurrentGateway)
         {
             $("#inventoryLink").attr("href", "https://inventory.psi.ch/#action=Part&system=" + encodeURIComponent(Main.CurrentGateway.toUpperCase()));
+            $("#logLink").attr("href", "/GW/" + Main.CurrentGateway);
 
             this.mustUpdate--;
             if (this.mustUpdate >= 0)
