@@ -864,7 +864,7 @@ namespace GWLogger.Backend.DataContext
                     var chunk = new List<LogEntry>();
                     //DataReader.BaseStream.Seek(Index[pos], SeekOrigin.Begin);
                     // 48 being an average of bytes per entries
-                    DataReader.BaseStream.Seek(Math.Max(0, DataReader.BaseStream.Length - 48 * nbEntries), SeekOrigin.Begin);
+                    DataReader.BaseStream.Seek(Math.Max(0, DataReader.BaseStream.Length - 57 * nbEntries), SeekOrigin.Begin);
                     while (DataReader.BaseStream.Position < streamLength)
                     {
                         /*if (pos < Index.Length - 1 && DataReader.BaseStream.Position >= Index[pos + 1])

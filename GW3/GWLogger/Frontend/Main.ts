@@ -657,7 +657,7 @@ class Main
                 vals.push(
                     {
                         Name: "Total",
-                        AverageEntryBytes: avgBytesTot / vals.length,
+                        AverageEntryBytes: Math.round(avgBytesTot / vals.length),
                         LogsPerSeconds: totSec,
                         TotalDataSize: totSize
                     });
@@ -672,7 +672,7 @@ class Main
                     {
                         data: vals
                     },
-                    resizable: true,
+                    sortable: true
                 });
 
                 /*var 
