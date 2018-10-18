@@ -257,6 +257,7 @@
     <Compile Include="Backend\DataContext\SessionLocation.cs" />
     <Compile Include="Backend\DTOs\Connection.cs" />
     <Compile Include="Backend\DTOs\Connections.cs" />
+    <Compile Include="Backend\DTOs\DataFileStats.cs" />
     <Compile Include="Backend\DTOs\GatewaySession.cs" />
     <Compile Include="Backend\DTOs\GatewayStats.cs" />
     <Compile Include="Backend\DTOs\IdValue.cs" />
@@ -303,6 +304,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Frontend\DTOs\Connections.ts" />
+    <TypeScriptCompile Include="Frontend\DTOs\DataFileStats.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\FreeSpace.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewayInformation.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewaySession.ts" />

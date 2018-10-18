@@ -10,6 +10,7 @@
 </head>
 <body>
     <ul class="tabs" id="mainTabs">
+        <li><div class="hamburger"><div></div><div></div><div></div></div></li>
         <li class="activeTab">Status</li>
         <li>Logs</li>
         <li style="float: right;">Help</li>
@@ -114,6 +115,9 @@
         <div id="detailInfo"></div>
         <div id="mouseCapture"></div>
     </div>
+    <div id="reportView"><div id="closeReport" class="button" onclick="$('#reportView').hide();">Close</div>
+    <div id="reportContent" class="no-scrollbar"></div>
+    </div>
     <div id="errorsView"><div id="errorsContent"></div></div>
     <div id="helpView">
         <div id="helpContent">
@@ -145,6 +149,11 @@
             <br />
             <center><div class="button" onclick="$('#helpView').hide();">Close</div></center>
         </div>
+    </div>
+    <div id="hamburgerMenu">
+        <div onclick="Main.LogStatistics()">Log Statistics</div>
+        <!--<div>Gateway Versions</div>
+    <div>Subscription</div>-->
     </div>
     <script src="Scripts/jquery-3.3.1.min.js"></script>
     <script src="Scripts/kendo.all.min.js"></script>

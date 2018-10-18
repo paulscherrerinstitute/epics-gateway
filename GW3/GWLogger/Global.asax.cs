@@ -28,10 +28,16 @@ namespace GWLogger
 
         protected void Application_BeginRequest(object sender, EventArgs e)
         {
+            Context.Response.Cache.SetCacheability(System.Web.HttpCacheability.NoCache);
+            Context.Response.Headers.Add("Cache-Control", "no-cache, no-store");
+            Context.Response.Cache.SetExpires(DateTime.UtcNow.AddYears(-1));
+
             string fullOrigionalpath = Request.Url.AbsolutePath;
 
             if (fullOrigionalpath.StartsWith("/GW/") || fullOrigionalpath.StartsWith("/Status/"))
+            {
                 Context.RewritePath("/index.html");
+            }
             else if (fullOrigionalpath.ToLower().StartsWith("/logs"))
                 //Context.RemapHandler("/Logs.ashx");
                 Context.RemapHandler(new Logs());

@@ -183,6 +183,48 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
+        public DataFileStats GetLogsStats()
+        {
+            try
+            {
+                LockObject.Wait();
+
+                var totSize = Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.data").Sum(row => new FileInfo(row).Length);
+
+                var stats = new List<long>();
+                var dataSize = 0L;
+
+                // Day before
+                SetFile(FileName(DateTime.UtcNow.AddDays(-1)));
+                dataSize += DataReader.BaseStream.Length;
+
+
+                for (var i = 0; i < Stats.GetLength(0); i++)
+                    if (Stats[i, 0] != 0)
+                        stats.Add(Stats[i, 0]);
+
+
+                // Today
+                SetFile();
+                dataSize += DataReader.BaseStream.Length;
+
+                for (var i = 0; i < Stats.GetLength(0); i++)
+                    if (Stats[i, 0] != 0)
+                        stats.Add(Stats[i, 0]);
+
+                return new DataFileStats
+                {
+                    Name = gateway,
+                    LogsPerSeconds = stats.Average(row => row / 600.0),
+                    AverageEntryBytes = dataSize / stats.Sum(),
+                    TotalDataSize = totSize
+                };
+            }
+            finally
+            {
+                LockObject.Release();
+            }
+        }
 
 
         private void SetFile(string filename = null)
@@ -819,24 +861,24 @@ namespace GWLogger.Backend.DataContext
 
                     //while (pos >= 0 && result.Count < nbEntries && Index[pos] >= 0)
                     //{
-                        var chunk = new List<LogEntry>();
-                        //DataReader.BaseStream.Seek(Index[pos], SeekOrigin.Begin);
-                        // 48 being an average of bytes per entries
-                        DataReader.BaseStream.Seek(Math.Max(0, DataReader.BaseStream.Length - 48 * nbEntries), SeekOrigin.Begin);
-                        while (DataReader.BaseStream.Position < streamLength)
+                    var chunk = new List<LogEntry>();
+                    //DataReader.BaseStream.Seek(Index[pos], SeekOrigin.Begin);
+                    // 48 being an average of bytes per entries
+                    DataReader.BaseStream.Seek(Math.Max(0, DataReader.BaseStream.Length - 48 * nbEntries), SeekOrigin.Begin);
+                    while (DataReader.BaseStream.Position < streamLength)
+                    {
+                        /*if (pos < Index.Length - 1 && DataReader.BaseStream.Position >= Index[pos + 1])
+                            break;*/
+                        try
                         {
-                            /*if (pos < Index.Length - 1 && DataReader.BaseStream.Position >= Index[pos + 1])
-                                break;*/
-                            try
-                            {
-                                chunk.Add(ReadEntry(DataReader, this.CurrentDate.Date, streamLength));
-                            }
-                            catch
-                            {
-                            }
+                            chunk.Add(ReadEntry(DataReader, this.CurrentDate.Date, streamLength));
                         }
-                        result.InsertRange(0, chunk);
-                        //pos--;
+                        catch
+                        {
+                        }
+                    }
+                    result.InsertRange(0, chunk);
+                    //pos--;
                     //}
                 }
 

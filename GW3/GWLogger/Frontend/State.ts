@@ -36,7 +36,7 @@
             if (path[1] == "GW")
             {
                 Main.Path = "GW";
-                $($("#mainTabs li")[1]).addClass("activeTab");
+                $($("#mainTabs li")[2]).addClass("activeTab");
                 $("#gatewayView").hide();
                 $("#gatewayDetails").hide();
                 $("#logView").show();
@@ -44,7 +44,7 @@
             else
             {
                 Main.Path = "Status";
-                $($("#mainTabs li")[0]).addClass("activeTab");
+                $($("#mainTabs li")[1]).addClass("activeTab");
                 $("#gatewayView").show();
                 $("#gatewayDetails").hide();
                 $("#logView").hide();

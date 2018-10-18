@@ -195,7 +195,7 @@ class Main
         if (showClientConnections)
         {
             $("#clientsTabs li").removeClass("activeTab");
-            $("#clientsTabs li:nth-child(1)").addClass("activeTab");
+            $("#clientsTabs li:nth-child(2)").addClass("activeTab");
 
             var prefs = Utils.Preferences;
             prefs['showSearches'] = false
@@ -616,7 +616,7 @@ class Main
             if (tabs[i] == evt.target)
             {
                 Main.CurrentTab = i;
-                console.log("Tab " + i);
+                //console.log("Tab " + i);
                 break;
             }
         }
@@ -624,6 +624,69 @@ class Main
         State.Set();
         Main.Levels = evt.target.getAttribute("level");
         Main.LoadTimeInfo();
+    }
+
+    static LogStatistics(): void
+    {
+        $("#reportView").show();
+        $("#reportContent").html("Loading...");
+
+        if ($("#reportContent").data("kendoGrid"))
+            $("#reportContent").data("kendoGrid").destroy();
+
+        $.ajax({
+            type: 'POST',
+            url: '/DataAccess.asmx/GetDataFileStats',
+            data: JSON.stringify({}),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (msg)
+            {
+                var vals = <DataFileStats[]>msg.d;
+
+                var totSec = 0;
+                var avgBytesTot = 0;
+                var totSize = 0;
+                for (var i = 0; i < vals.length; i++)
+                {
+                    totSec += vals[i].LogsPerSeconds;
+                    avgBytesTot += vals[i].AverageEntryBytes;
+                    totSize += vals[i].TotalDataSize;
+                }
+
+                vals.push(
+                    {
+                        Name: "Total",
+                        AverageEntryBytes: avgBytesTot / vals.length,
+                        LogsPerSeconds: totSec,
+                        TotalDataSize: totSize
+                    });
+
+                $("#reportContent").html("").kendoGrid({
+                    columns: [
+                        { title: "Gateway", field: "Name" },
+                        { title: "Logs Per Sec.", field: "LogsPerSeconds", format: "{0:0.00}" },
+                        { title: "Average Entry", field: "AverageEntryBytes" },
+                        { title: "Size On Disk", field: "TotalDataSize", template: (row: DataFileStats) => Utils.HumanReadable(row.TotalDataSize) }],
+                    dataSource:
+                    {
+                        data: vals
+                    },
+                    resizable: true,
+                });
+
+                /*var 
+                for (var i = 0; i < vals.length; i++)
+                {
+                    html += "<tr><td>" + vals[i].Name + "</td>";
+                    html += "<td>" + vals[i].LogsPerSeconds + "</td>";
+                    html += "<td>" + vals[i].AverageEntryBytes + "</td>";
+                    html += "<td>" + Utils.HumanReadable(vals[i].TotalDataSize) + "</td>";
+                }
+                html += "</table>";
+                $("#reportView").html(html);*/
+            }
+        });
     }
 
     static Init(): void
@@ -647,10 +710,11 @@ class Main
 
         $("#mainTabs li").click((evt) =>
         {
-            var tab = evt.target.innerHTML;
+            var tab = evt.target.textContent;
             switch (tab)
             {
                 case "Status":
+                    $("#reportView").hide();
                     if ($("#helpView").is(":visible"))
                         $("#helpView").hide();
                     if (Main.Path == "Status")
@@ -660,6 +724,7 @@ class Main
                     State.Pop(null);
                     break;
                 case "Logs":
+                    $("#reportView").hide();
                     if ($("#helpView").is(":visible"))
                         $("#helpView").hide();
                     if (Main.Path == "GW")
@@ -669,16 +734,25 @@ class Main
                     State.Pop(null);
                     break;
                 case "Help":
+                    $("#reportView").hide();
                     if ($("#helpView").is(":visible"))
                         $("#helpView").hide();
                     else
                         $("#helpView").show();
+                    break;
+                case "": // Hambuger
+                    $("#hamburgerMenu").toggleClass("visibleHamburger");
                     break;
                 default:
                     State.Set();
                     State.Pop(null);
                     break;
             }
+        });
+
+        $("#hamburgerMenu div").on("click", () =>
+        {
+            $("#hamburgerMenu").toggleClass("visibleHamburger");
         });
 
         Main.BaseTitle = window.document.title;

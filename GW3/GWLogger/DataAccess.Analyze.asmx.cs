@@ -107,6 +107,12 @@ namespace GWLogger
             return searchesData.GroupBy(row => row.Channel).Select(row => new KeyValuePair<string, int>(row.Key, row.Count())).OrderByDescending(row => row.Value).ToList();
         }
 
+        [WebMethod]
+        public List<Backend.DTOs.DataFileStats> GetDataFileStats()
+        {
+            return Global.DataContext.GetDataFileStats();
+        }
+
         private static string Hostname(string ip)
         {
             return System.Net.Dns.GetHostEntry(ip).HostName;

@@ -235,13 +235,6 @@ namespace GWLogger.Backend.DataContext
                 readerLock.ExitWriteLock();
             }
         }
-        /*
-                public List<LogEntry> ReadLog(string gatewayName, DateTime start, DateTime end, int nbMaxEntries = -1, List<int> messageTypes = null)
-                {
-                    if (!files.Exists(gatewayName))
-                        return null;
-                    return files[gatewayName].ReadLog(start, end, null, nbMaxEntries, messageTypes);
-                }*/
 
         public List<LogEntry> ReadLog(string gatewayName, DateTime start, DateTime end, string query, int nbMaxEntries = -1, List<int> messageTypes = null, string startFile = null, long offset = 0, CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -265,6 +258,11 @@ namespace GWLogger.Backend.DataContext
             {
                 readerLock.ExitWriteLock();
             }
+        }
+
+        public List<DataFileStats> GetDataFileStats()
+        {
+            return files.Select(row => row.GetLogsStats()).OrderBy(row => row.Name).ToList();
         }
 
 

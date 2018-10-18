@@ -86,8 +86,22 @@ function isString(variable)
     return (typeof variable == 'string' || variable instanceof String);
 }
 
+var humanSizes = ["", "Kb", "Mb", "Gb", "Tb"];
+
 class Utils
 {
+    static HumanReadable(size: number): string
+    {
+        var val = size;
+        var arrayPos = 0;
+        while (val > 1024 && arrayPos < humanSizes.length - 1)
+        {
+            val = Math.round((val / 1024) * 10) / 10;
+            arrayPos++;
+        }
+        return "" + val + humanSizes[arrayPos];
+    }
+
     static FixObjectDates(source: any)
     {
         var dest = JSON.parse(JSON.stringify(source));

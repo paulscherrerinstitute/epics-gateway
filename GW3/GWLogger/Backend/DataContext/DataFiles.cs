@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GWLogger.Backend.DataContext
 {
-    internal class DataFiles : IDisposable
+    internal class DataFiles : IDisposable, IEnumerable<DataFile>
     {
-        Dictionary<string, DataFile> dataFiles = new Dictionary<string, DataFile>();
+        private Dictionary<string, DataFile> dataFiles = new Dictionary<string, DataFile>();
         private readonly Context Context;
 
         public DataFiles(Context context)
@@ -66,6 +68,21 @@ namespace GWLogger.Backend.DataContext
         public bool Exists(string gatewayName)
         {
             return DataFile.Exists(gatewayName);
+        }
+
+        public IEnumerator<DataFile> GetEnumerator()
+        {
+            List<DataFile> tempDataFiles=null;
+            lock (dataFiles)
+            {
+                tempDataFiles = dataFiles.Values.ToList();
+            }
+            return tempDataFiles.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
     }
 }
