@@ -658,9 +658,7 @@ class Main
             {
                 var dataItem = <GatewayShortInformation>(<any>grid.dataItem(this));
                 if (dataItem.Version < lastVersion)
-                {
                     this.className += " oldGatewayVersion";
-                }
             })
         });
         grid.dataSource.fetch();
@@ -715,16 +713,18 @@ class Main
                     sortable: true
                 });
 
-                /*var 
-                for (var i = 0; i < vals.length; i++)
+                var grid = $("#reportContent").data("kendoGrid");
+                grid.bind("dataBound", (row) =>
                 {
-                    html += "<tr><td>" + vals[i].Name + "</td>";
-                    html += "<td>" + vals[i].LogsPerSeconds + "</td>";
-                    html += "<td>" + vals[i].AverageEntryBytes + "</td>";
-                    html += "<td>" + Utils.HumanReadable(vals[i].TotalDataSize) + "</td>";
-                }
-                html += "</table>";
-                $("#reportView").html(html);*/
+                    var items = row.sender.items();
+                    items.each(function (index)
+                    {
+                        var dataItem = <DataFileStats>(<any>grid.dataItem(this));
+                        if (dataItem.Name == "Total")
+                            this.className += " summary";
+                    })
+                });
+                grid.dataSource.fetch();
             }
         });
     }
