@@ -626,6 +626,46 @@ class Main
         Main.LoadTimeInfo();
     }
 
+    static GWVersions(): void
+    {
+        $("#reportView").show();
+
+        if ($("#reportContent").data("kendoGrid"))
+            $("#reportContent").data("kendoGrid").destroy();
+
+        var lastVersion = null;
+        for (var i = 0; i < Live.shortInfo.length; i++)
+            if (lastVersion == null || Live.shortInfo[i].Version > lastVersion)
+                lastVersion = Live.shortInfo[i].Version;
+
+        $("#reportContent").html("").kendoGrid({
+            columns: [
+                { title: "Gateway", field: "Name" },
+                { title: "Build", field: "Build" },
+                { title: "Version", field: "Version" }],
+            dataSource:
+            {
+                data: Live.shortInfo
+            },
+            sortable: true
+        });
+
+        var grid = $("#reportContent").data("kendoGrid");
+        grid.bind("dataBound", (row) =>
+        {
+            var items = row.sender.items();
+            items.each(function (index)
+            {
+                var dataItem = <GatewayShortInformation>(<any>grid.dataItem(this));
+                if (dataItem.Version < lastVersion)
+                {
+                    this.className += " oldGatewayVersion";
+                }
+            })
+        });
+        grid.dataSource.fetch();
+    }
+
     static LogStatistics(): void
     {
         $("#reportView").show();

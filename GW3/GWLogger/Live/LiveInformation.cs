@@ -44,11 +44,12 @@ namespace GWLogger.Live
                 return Gateways.Select(row => new GatewayShortInformation
                 {
                     Name = row.Name,
-                    Cpu = row.Cpu,
+                    CPU = row.Cpu,
                     Mem = row.Mem,
                     Searches = row.Searches,
                     Build = row.BuildTime,
-                    State = row.State
+                    State = row.State,
+                    Version = row.Version
                 }).ToList();
             }
         }
@@ -60,10 +61,11 @@ namespace GWLogger.Live
                 return Gateways.Select(row => new GatewayInformation
                 {
                     Name = row.Name,
-                    Cpu = row.Cpu,
+                    CPU = row.Cpu,
                     Mem = row.Mem,
                     Searches = row.Searches,
                     Build = row.BuildTime,
+                    Version = row.Version,
                     Messages = row.Messages,
                     PVs = row.PVs,
                     RunningTime = row.RunningTime

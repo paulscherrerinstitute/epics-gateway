@@ -1,11 +1,12 @@
 ﻿interface GatewayShortInformation
 {
     Name: string;
-    Cpu: number;
+    CPU: number;
     Mem: number;
     Searches: number;
     Build: string;
     State: number;
+    Version: string;
 }
 
 interface HistoricData
@@ -81,7 +82,7 @@ class Live
                 success: function (msg)
                 {
                     var data: GatewayInformation = msg.d;
-                    data.Cpu = Math.round(data.Cpu * 100) / 100;
+                    data.CPU = Math.round(data.CPU * 100) / 100;
                     data.RunningTime = data.RunningTime.substr(0, data.RunningTime.lastIndexOf('.'));
 
                     var html = "";
@@ -256,22 +257,22 @@ class Live
             // CPU
             ctx.beginPath();
             ctx.lineWidth = 5;
-            if (Live.shortInfo[i].Cpu > 70 || Live.shortInfo[i].Cpu === null || Live.shortInfo[i].Cpu === undefined)
+            if (Live.shortInfo[i].CPU > 70 || Live.shortInfo[i].CPU === null || Live.shortInfo[i].CPU === undefined)
                 ctx.strokeStyle = "#E00000";
-            else if (Live.shortInfo[i].Cpu > 50)
+            else if (Live.shortInfo[i].CPU > 50)
                 ctx.strokeStyle = "#ff8300";
-            else if (Live.shortInfo[i].Cpu > 30)
+            else if (Live.shortInfo[i].CPU > 30)
                 ctx.strokeStyle = "#ffe500";
             else
                 ctx.strokeStyle = "#00E000";
             ctx.lineCap = "round";
-            ctx.arc(50, 50, 45, 1.5 * Math.PI, 1.5 * Math.PI + (2 * Math.PI) * (Live.shortInfo[i].Cpu ? Live.shortInfo[i].Cpu : 0) / 100);
+            ctx.arc(50, 50, 45, 1.5 * Math.PI, 1.5 * Math.PI + (2 * Math.PI) * (Live.shortInfo[i].CPU ? Live.shortInfo[i].CPU : 0) / 100);
             ctx.stroke();
 
             ctx.lineCap = "butt";
 
             // CPU info
-            var str = "" + (Live.shortInfo[i].Cpu ? Math.round(Live.shortInfo[i].Cpu) : "-");
+            var str = "" + (Live.shortInfo[i].CPU ? Math.round(Live.shortInfo[i].CPU) : "-");
             ctx.font = "20px Sans-serif";
             var w = ctx.measureText(str).width;
             ctx.lineWidth = 1;

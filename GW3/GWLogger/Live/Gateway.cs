@@ -20,6 +20,7 @@ namespace GWLogger.Live
         private GatewayNullableValue<int> nbMessages;
         private GatewayValue<string> runningTime;
         private GatewayValue<string> build;
+        private GatewayValue<string> version;
         private List<HistoricData> cpuHistory = new List<HistoricData>();
         private List<HistoricData> searchHistory = new List<HistoricData>();
         private List<HistoricData> pvsHistory = new List<HistoricData>();
@@ -35,6 +36,7 @@ namespace GWLogger.Live
             nbMessages = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":MESSAGES-SEC");
             runningTime = new GatewayValue<string>(this.liveInformation.Client, gatewayName + ":RUNNING-TIME");
             build = new GatewayValue<string>(this.liveInformation.Client, gatewayName + ":BUILD");
+            version = new GatewayValue<string>(this.liveInformation.Client, gatewayName + ":VERSION");
         }
 
         internal void UpdateGraph()
@@ -143,5 +145,7 @@ namespace GWLogger.Live
         public string RunningTime => runningTime.Value;
 
         public string BuildTime => build.Value;
+
+        public string Version => version.Value;
     }
 }
