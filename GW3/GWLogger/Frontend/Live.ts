@@ -83,7 +83,7 @@ class Live
                 {
                     var data: GatewayInformation = msg.d;
                     data.CPU = Math.round(data.CPU * 100) / 100;
-                    data.RunningTime = data.RunningTime.substr(0, data.RunningTime.lastIndexOf('.'));
+                    data.RunningTime = data.RunningTime ? data.RunningTime.substr(0, data.RunningTime.lastIndexOf('.')) : "";
 
                     var html = "";
                     for (var i in data)

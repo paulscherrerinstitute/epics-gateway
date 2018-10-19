@@ -310,6 +310,12 @@ class Main
         }
         else if (tab.getAttribute("report"))
         {
+            var FirstColumn = {
+                'SearchesPerformed': 'Client',
+                'SearchesOnChannelsPerformed': 'Channel',
+                'MostActiveClasses': 'Class'
+            };
+
             Main.loadingLogs = $.ajax({
                 type: 'POST',
                 url: '/DataAccess.asmx/' + tab.getAttribute("report"),
@@ -325,7 +331,7 @@ class Main
                         $("#logsContent").data("kendoGrid").destroy();
                     $("#logsContent").html("").kendoGrid({
                         columns: [
-                            { title: (tab.getAttribute("report") == "SearchesPerformed" ? "Client" : "Channel"), field: "Key" },
+                            { title: (FirstColumn[tab.getAttribute("report")]), field: "Key" },
                             { title: "Searches", field: "Value", width: "80px", format: "{0:n0}", attributes: { style: "text-align:right;" } }],
                         dataSource:
                         {
@@ -347,7 +353,12 @@ class Main
                 },
                 error: function (msg, textStatus)
                 {
-                    console.log(msg.responseText);
+                    if (textStatus == "abort")
+                        return;
+                    if (textStatus)
+                        console.log(textStatus)
+                    if (msg.responseText)
+                        console.log(msg.responseText);
                 }
             });
             return;

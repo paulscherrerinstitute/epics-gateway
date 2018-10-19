@@ -128,8 +128,12 @@
         //Main.DelayedSearch(Main.LoadLogStats, true);
     }
 
+    static lastSave: Date = null;
     static Set()
     {
+        if (State.lastSave && ((new Date()).getTime() - this.lastSave.getTime()) < 5000)
+            return;
+        State.lastSave = new Date();
         var params = "";
         if (Main.Path == "GW")
         {

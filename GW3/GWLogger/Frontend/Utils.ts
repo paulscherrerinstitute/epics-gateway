@@ -130,12 +130,17 @@ class Utils
         return source.getFullYear() + "/" + ("" + (source.getMonth() + 1)).padLeft("0", 2) + "/" + ("" + source.getDate()).padLeft("0", 2);
     }
 
+    static AsUtc(source: Date): Date
+    {
+        return new Date(Date.UTC(source.getFullYear(), source.getMonth(), source.getDate(), source.getHours(), source.getMinutes(), source.getSeconds(), source.getMilliseconds()));
+    }
+
     static GWDateFormat(source: Date)
     {
         if (!source)
             return "";
-        return ("" + (source.getMonth() + 1)).padLeft("0", 2) + "/" + ("" + source.getDate()).padLeft("0", 2) + " " +
-            ("" + source.getHours()).padLeft("0", 2) + ":" + ("" + source.getMinutes()).padLeft("0", 2) + ":" + ("" + source.getSeconds()).padLeft("0", 2);
+        return ("" + (source.getUTCMonth() + 1)).padLeft("0", 2) + "/" + ("" + source.getUTCDate()).padLeft("0", 2) + " " +
+            ("" + source.getUTCHours()).padLeft("0", 2) + ":" + ("" + source.getUTCMinutes()).padLeft("0", 2) + ":" + ("" + source.getUTCSeconds()).padLeft("0", 2);
     }
 
     static GWDateFormatMilis(source: Date)

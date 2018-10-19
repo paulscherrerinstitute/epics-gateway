@@ -2,7 +2,7 @@
 {
     static DrawStats(): void
     {
-        if (!Main.Stats)
+        if (!Main.Stats || !Main.Stats.Logs || !Main.Stats.Logs.length)
             return;
 
         var end = Main.Stats.Logs[Main.Stats.Logs.length - 1].Date;
@@ -15,7 +15,8 @@
         canvas.width = width;
         canvas.height = height;
 
-        var w = width / 145;
+        //var w = width / 145;
+        var w = width / Main.Stats.Logs.length;
         var b = height * 2 / 3;
         var bn = height - b;
 
@@ -34,7 +35,8 @@
 
         var prevErrorValY: number = null;
 
-        for (var i = 0; i < 145; i++)
+        //for (var i = 0; i < 145; i++)
+        for (var i = 0; i < Main.Stats.Logs.length; i++)
         {
             var dt = new Date(end.getTime() - i * 10 * 60 * 1000);
 
@@ -79,21 +81,21 @@
         ctx.strokeStyle = "#FFFFFF";
         ctx.font = "12px sans-serif";
 
-        var dts = Utils.ShortGWDateFormat(Main.EndDate);
+        var dts = Utils.ShortGWDateFormat(new Date(end.getTime() - end.getTimezoneOffset() * 60000));
         var tw = ctx.measureText(dts).width;
         ctx.fillStyle = "rgba(255,255,255,0.7)";
         ctx.fillRect(width - (tw + 5), b + 2, tw + 2, 16);
         ctx.fillStyle = "#000000";
         ctx.fillText(dts, width - (tw + 5), b + 14);
 
-        var dts = Utils.ShortGWDateFormat(new Date(end.getTime() - 72 * 10 * 60 * 1000));
+        var dts = Utils.ShortGWDateFormat(new Date(end.getTime() - end.getTimezoneOffset() * 60000 - Main.Stats.Logs.length / 2 * 10 * 60 * 1000));
         var tw = ctx.measureText(dts).width;
         ctx.fillStyle = "rgba(255,255,255,0.7)";
         ctx.fillRect(width / 2 - tw / 2, b + 2, tw + 2, 16);
         ctx.fillStyle = "#000000";
         ctx.fillText(dts, width / 2 - tw / 2, b + 14);
 
-        var dts = Utils.ShortGWDateFormat(new Date(end.getTime() - 144 * 10 * 60 * 1000));
+        var dts = Utils.ShortGWDateFormat(new Date(end.getTime() - end.getTimezoneOffset() * 60000 - Main.Stats.Logs.length * 10 * 60 * 1000));
         var tw = ctx.measureText(dts).width;
         ctx.fillStyle = "rgba(255,255,255,0.7)";
         ctx.fillRect(5, b + 2, tw + 2, 16);
@@ -108,8 +110,8 @@
             //var tdiff = (end.getTime() - Main.CurrentTime.getTime()) + end.getTimezoneOffset() * 60000;
             var tdiff = (end.getTime() + 10 * 60 * 1000 - Main.CurrentTime.getTime());
             var t = tdiff / (10 * 60 * 1000);
-            //var x = width - Math.floor(t * w + w / 2);
-            var x = width - Math.floor(t * w);
+            var x = width - Math.floor(t * w + w / 2);
+            //var x = width - Math.floor(t * w);
 
             ctx.lineWidth = 1;
             ctx.strokeStyle = "rgba(0,0,255,0.7)";
@@ -148,15 +150,15 @@
     static TimeLineMouse(evt: JQueryMouseEventObject): void
     {
         var width = $("#timeRangeCanvas").width();
-        var w = width / 145;
+        var w = width / (Main.Stats.Logs.length + 1);
         //var x = evt.pageX - ($("#timeRange").position().left + $("#timeRange div").width());
-        var x = evt.pageX - ($("#timeRange").position().left + 15);
+        var x = evt.pageX - $("#timeRange").position().left;
 
-        var tx = Math.floor((width - x) / w);
+        var tx = Math.ceil((width - x) / w);
         if (tx < 0)
             tx = 0;
-        if (tx > 144)
-            tx = 144;
+        if (tx > Main.Stats.Logs.length - 1)
+            tx = Main.Stats.Logs.length - 1;
         //console.log(tx);
 
 
@@ -166,7 +168,9 @@
             Main.StartDate = new Date(Main.EndDate.getTime() - 24 * 3600 * 1000);
         }
 
-        Main.CurrentTime = new Date((Main.EndDate.getTime() + Main.EndDate.getTimezoneOffset() * 60000) - tx * 10 * 60 * 1000);
+        Main.CurrentTime = new Date(Main.Stats.Logs[Main.Stats.Logs.length - 1].Date.getTime() - tx * 10 * 60 * 1000);
+        //Main.CurrentTime = new Date(Main.EndDate.getTime() - tx * 10 * 60 * 1000);
+        //Main.CurrentTime = new Date((Main.EndDate.getTime() + Main.EndDate.getTimezoneOffset() * 60000) - tx * 10 * 60 * 1000);
         if (tx == 0 && ((new Date()).getTime() - Main.CurrentTime.getTime()) < 24 * 3600 * 1000)
             Main.IsLast = true;
         else
