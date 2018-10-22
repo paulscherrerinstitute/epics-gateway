@@ -72,7 +72,7 @@ namespace GWLogger.Backend.DataContext
 
         public IEnumerator<DataFile> GetEnumerator()
         {
-            List<DataFile> tempDataFiles=null;
+            List<DataFile> tempDataFiles = null;
             lock (dataFiles)
             {
                 tempDataFiles = dataFiles.Values.ToList();
@@ -83,6 +83,15 @@ namespace GWLogger.Backend.DataContext
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
+        }
+
+        internal void StoreHistory()
+        {
+            lock (dataFiles)
+            {
+                foreach (var i in dataFiles)
+                    i.Value.StoreHistory();
+            }
         }
     }
 }

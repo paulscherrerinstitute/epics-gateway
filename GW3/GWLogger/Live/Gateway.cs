@@ -18,12 +18,16 @@ namespace GWLogger.Live
         private GatewayNullableValue<int> nbPvs;
         private GatewayNullableValue<int> nbSearches;
         private GatewayNullableValue<int> nbMessages;
+        private GatewayNullableValue<int> nbClients;
+        private GatewayNullableValue<int> nbServers;
         private GatewayValue<string> runningTime;
         private GatewayValue<string> build;
         private GatewayValue<string> version;
         private List<HistoricData> cpuHistory = new List<HistoricData>();
         private List<HistoricData> searchHistory = new List<HistoricData>();
         private List<HistoricData> pvsHistory = new List<HistoricData>();
+        private List<HistoricData> clientsHistory = new List<HistoricData>();
+        private List<HistoricData> serversHistory = new List<HistoricData>();
 
         public Gateway(LiveInformation liveInformation, string gatewayName)
         {
@@ -37,6 +41,8 @@ namespace GWLogger.Live
             runningTime = new GatewayValue<string>(this.liveInformation.Client, gatewayName + ":RUNNING-TIME");
             build = new GatewayValue<string>(this.liveInformation.Client, gatewayName + ":BUILD");
             version = new GatewayValue<string>(this.liveInformation.Client, gatewayName + ":VERSION");
+            nbClients = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NBCLIENTS");
+            nbServers = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NBSERVERS");
         }
 
         internal void UpdateGraph()
@@ -61,9 +67,113 @@ namespace GWLogger.Live
                 while (pvsHistory.Count > NbHistoricPoint)
                     pvsHistory.RemoveAt(0);
             }
+
+            lock (clientsHistory)
+            {
+                clientsHistory.Add(new HistoricData { Value = nbClients.Value });
+                while (clientsHistory.Count > NbHistoricPoint)
+                    clientsHistory.RemoveAt(0);
+            }
+
+            lock (serversHistory)
+            {
+                serversHistory.Add(new HistoricData { Value = nbServers.Value });
+                while (serversHistory.Count > NbHistoricPoint)
+                    serversHistory.RemoveAt(0);
+            }
         }
 
         public int State => Math.Max(CpuState, SearchState);
+
+        /// <summary>
+        /// Average PVs in the last 10 minutes
+        /// </summary>
+        public int AvgPvs
+        {
+            get
+            {
+                try
+                {
+                    return (int)(((IEnumerable<HistoricData>)PvsHistory).Reverse().Take(120).Where(row => row.Value.HasValue).Select(row => row.Value).Average());
+                }
+                catch
+                {
+                    return 0;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Average Searches in the last 10 minutes
+        /// </summary>
+        public int AvgSearches
+        {
+            get
+            {
+                try
+                {
+                    return (int)(((IEnumerable<HistoricData>)SearchHistory).Reverse().Take(120).Where(row => row.Value.HasValue).Select(row => row.Value).Average());
+                }
+                catch
+                {
+                    return 0;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Average CPU in the last 10 minutes
+        /// </summary>
+        public int AvgCPU
+        {
+            get
+            {
+                try
+                {
+                    return (int)(((IEnumerable<HistoricData>)CpuHistory).Reverse().Take(120).Where(row => row.Value.HasValue).Select(row => row.Value).Average());
+                }
+                catch
+                {
+                    return 0;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Average Clients in the last 10 minutes
+        /// </summary>
+        public int AvgNbClients
+        {
+            get
+            {
+                try
+                {
+                    return (int)(((IEnumerable<HistoricData>)NbClientsHistory).Reverse().Take(120).Where(row => row.Value.HasValue).Select(row => row.Value).Average());
+                }
+                catch
+                {
+                    return 0;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Average Servers in the last 10 minutes
+        /// </summary>
+        public int AvgNbServers
+        {
+            get
+            {
+                try
+                {
+                    return (int)(((IEnumerable<HistoricData>)NbServersHistory).Reverse().Take(120).Where(row => row.Value.HasValue).Select(row => row.Value).Average());
+                }
+                catch
+                {
+                    return 0;
+                }
+            }
+        }
 
         public int CpuState
         {
@@ -132,6 +242,24 @@ namespace GWLogger.Live
             }
         }
 
+        public List<HistoricData> NbClientsHistory
+        {
+            get
+            {
+                lock (clientsHistory)
+                    return clientsHistory.ToList();
+            }
+        }
+
+        public List<HistoricData> NbServersHistory
+        {
+            get
+            {
+                lock (serversHistory)
+                    return serversHistory.ToList();
+            }
+        }
+
         public double? Cpu => cpuChannel.Value;
 
         public int? Mem => memChannel.Value;
@@ -147,5 +275,9 @@ namespace GWLogger.Live
         public string BuildTime => build.Value;
 
         public string Version => version.Value;
+
+        public int? NbClients => nbClients.Value;
+
+        public int? NbServers => nbServers.Value;
     }
 }

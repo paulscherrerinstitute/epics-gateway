@@ -9,4 +9,6 @@
     Messages: number;
     PVs: number;
     RunningTime: string;
+    NbClients: number;
+    NbServers: number;
 }

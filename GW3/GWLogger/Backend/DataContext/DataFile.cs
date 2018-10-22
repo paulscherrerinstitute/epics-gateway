@@ -23,7 +23,7 @@ namespace GWLogger.Backend.DataContext
         private long nbLogEntries = 0;
         private BinaryIndex<short> commandIndex = null;
 
-        public long[,] Stats = new long[24 * 6, 3];
+        public long[,] Stats = new long[24 * 6, 7];
         private FileStream clientSession;
         private string currentClientSession;
         private Dictionary<string, SessionLocation> openClientSessions = new Dictionary<string, SessionLocation>();
@@ -78,6 +78,26 @@ namespace GWLogger.Backend.DataContext
             catch
             {
                 filePaths = new Dictionary<string, int>();
+            }
+        }
+
+        internal void StoreHistory()
+        {
+            var idxPos = IndexPosition(DateTime.UtcNow);
+            var gw = Global.LiveInformation[this.gateway];
+            if (gw == null)
+            {
+                Stats[idxPos, 3] = 0;
+                Stats[idxPos, 4] = 0;
+                Stats[idxPos, 5] = 0;
+                Stats[idxPos, 6] = 0;
+            }
+            else
+            {
+                Stats[idxPos, 3] = gw.AvgCPU;
+                Stats[idxPos, 4] = gw.AvgPvs;
+                Stats[idxPos, 5] = gw.AvgNbClients;
+                Stats[idxPos, 6] = gw.AvgNbServers;
             }
         }
 
@@ -341,9 +361,23 @@ namespace GWLogger.Backend.DataContext
             {
                 using (var reader = new BinaryReader(File.Open(statFileName, FileMode.Open, FileAccess.Read)))
                 {
-                    for (var s = 0; s < Stats.GetLength(1); s++)
-                        for (var i = 0; i < Stats.GetLength(0); i++)
-                            Stats[i, s] = reader.ReadInt64();
+                    // Old format, only 3 stats available
+                    if (reader.BaseStream.Length == sizeof(long) * 3 * Stats.GetLength(0))
+                    {
+                        for (var s = 0; s < 3; s++)
+                            for (var i = 0; i < Stats.GetLength(0); i++)
+                                Stats[i, s] = reader.ReadInt64();
+                        // Fill with 0
+                        for (var s = 3; s < Stats.GetLength(1); s++)
+                            for (var i = 0; i < Stats.GetLength(0); i++)
+                                Stats[i, s] = 0;
+                    }
+                    else
+                    {
+                        for (var s = 0; s < Stats.GetLength(1); s++)
+                            for (var i = 0; i < Stats.GetLength(0); i++)
+                                Stats[i, s] = reader.ReadInt64();
+                    }
                 }
             }
             catch
@@ -1273,10 +1307,14 @@ namespace GWLogger.Backend.DataContext
             {
                 Searches = new List<LogStat>(),
                 Logs = new List<LogStat>(),
-                Errors = new List<LogStat>()
+                Errors = new List<LogStat>(),
+                CPU = new List<LogStat>(),
+                PVs = new List<LogStat>(),
+                Clients = new List<LogStat>(),
+                Servers = new List<LogStat>()
             };
 
-            var stats = new List<LogStat>[] { result.Logs, result.Searches, result.Errors };
+            var stats = new List<LogStat>[] { result.Logs, result.Searches, result.Errors, result.CPU, result.PVs, result.Clients, result.Servers };
 
             try
             {

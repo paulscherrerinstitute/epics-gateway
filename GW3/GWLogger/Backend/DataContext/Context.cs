@@ -63,6 +63,9 @@ namespace GWLogger.Backend.DataContext
                   while (!isDisposed)
                   {
                       Thread.Sleep(5000);
+
+                      files.StoreHistory();
+
                       step++;
                       if (step >= 60)
                       {

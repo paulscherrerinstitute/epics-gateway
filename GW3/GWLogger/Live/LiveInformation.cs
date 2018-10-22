@@ -37,6 +37,17 @@ namespace GWLogger.Live
             }
         }
 
+        public Gateway this[string key]
+        {
+            get
+            {
+                lock (Gateways)
+                {
+                    return Gateways.FirstOrDefault(row => string.Compare(row.Name, key, true) == 0);
+                }
+            }
+        }
+
         public List<GatewayShortInformation> GetShortInformation()
         {
             lock (Gateways)
@@ -68,7 +79,9 @@ namespace GWLogger.Live
                     Version = row.Version,
                     Messages = row.Messages,
                     PVs = row.PVs,
-                    RunningTime = row.RunningTime
+                    RunningTime = row.RunningTime,
+                    NbClients = row.NbClients,
+                    NbServers = row.NbServers
                 }).FirstOrDefault(row => row.Name.ToLower() == gatewayName.ToLower());
             }
         }

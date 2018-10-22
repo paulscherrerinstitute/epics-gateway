@@ -11,5 +11,7 @@
         public int? Messages { get; set; }
         public int? PVs { get; set; }
         public string RunningTime { get; set; }
+        public int? NbClients { get; set; }
+        public int? NbServers { get; set; }
     }
 }
