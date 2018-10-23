@@ -11,5 +11,6 @@ namespace GWLogger.Backend.DTOs
         public List<LogStat> PVs { get; set; }
         public List<LogStat> Clients { get; set; }
         public List<LogStat> Servers { get; set; }
+        public List<LogStat> MsgSecs { get; set; }
     }
 }

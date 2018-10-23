@@ -10,6 +10,7 @@ class GatewayStats
     PVs: LogStat[];
     Clients: LogStat[];
     Servers: LogStat[];
+    MsgSecs: LogStat[];
 
     constructor(_logs: LogStat[],
         _searches: LogStat[],
@@ -17,7 +18,8 @@ class GatewayStats
         _cpu: LogStat[],
         _pvs: LogStat[],
         _clients: LogStat[],
-        _servers: LogStat[]
+        _servers: LogStat[],
+        _msgSecs: LogStat[]
     )
     {
         this.Logs = _logs;
@@ -27,6 +29,7 @@ class GatewayStats
         this.PVs = _pvs;
         this.Clients = _clients;
         this.Servers = _servers;
+        this.MsgSecs = _msgSecs;
     }
 
     public static CreateFromObject(obj: any): GatewayStats
@@ -39,7 +42,9 @@ class GatewayStats
             (obj.CPU ? obj.CPU.map(function (c) { return LogStat.CreateFromObject(c); }) : null),
             (obj.PVs ? obj.PVs.map(function (c) { return LogStat.CreateFromObject(c); }) : null),
             (obj.Clients ? obj.Clients.map(function (c) { return LogStat.CreateFromObject(c); }) : null),
-            (obj.Servers ? obj.Servers.map(function (c) { return LogStat.CreateFromObject(c); }) : null));
+            (obj.Servers ? obj.Servers.map(function (c) { return LogStat.CreateFromObject(c); }) : null),
+            (obj.MsgSecs ? obj.MsgSecs.map(function (c) { return LogStat.CreateFromObject(c); }) : null)
+        );
     }
 }
 

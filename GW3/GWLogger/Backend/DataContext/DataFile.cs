@@ -23,7 +23,8 @@ namespace GWLogger.Backend.DataContext
         private long nbLogEntries = 0;
         private BinaryIndex<short> commandIndex = null;
 
-        public long[,] Stats = new long[24 * 6, 7];
+        // Logs, Searches, Errors, CPU, PVs, Clients, Servers, MsgSecs
+        public long[,] Stats = new long[24 * 6, 8];
         private FileStream clientSession;
         private string currentClientSession;
         private Dictionary<string, SessionLocation> openClientSessions = new Dictionary<string, SessionLocation>();
@@ -91,6 +92,7 @@ namespace GWLogger.Backend.DataContext
                 Stats[idxPos, 4] = 0;
                 Stats[idxPos, 5] = 0;
                 Stats[idxPos, 6] = 0;
+                Stats[idxPos, 7] = 0;
             }
             else
             {
@@ -98,6 +100,7 @@ namespace GWLogger.Backend.DataContext
                 Stats[idxPos, 4] = gw.AvgPvs;
                 Stats[idxPos, 5] = gw.AvgNbClients;
                 Stats[idxPos, 6] = gw.AvgNbServers;
+                Stats[idxPos, 8] = gw.AvgMsgSec;
             }
         }
 
@@ -361,14 +364,16 @@ namespace GWLogger.Backend.DataContext
             {
                 using (var reader = new BinaryReader(File.Open(statFileName, FileMode.Open, FileAccess.Read)))
                 {
-                    // Old format, only 3 stats available
-                    if (reader.BaseStream.Length == sizeof(long) * 3 * Stats.GetLength(0))
+                    // Old formats
+                    if (reader.BaseStream.Length != sizeof(long) * Stats.GetLength(1) * Stats.GetLength(0))
                     {
-                        for (var s = 0; s < 3; s++)
+                        var nbColsAvailable = reader.BaseStream.Length / (sizeof(long) * Stats.GetLength(0));
+
+                        for (var s = 0; s < nbColsAvailable; s++)
                             for (var i = 0; i < Stats.GetLength(0); i++)
                                 Stats[i, s] = reader.ReadInt64();
                         // Fill with 0
-                        for (var s = 3; s < Stats.GetLength(1); s++)
+                        for (var s = nbColsAvailable; s < Stats.GetLength(1); s++)
                             for (var i = 0; i < Stats.GetLength(0); i++)
                                 Stats[i, s] = 0;
                     }
@@ -1311,10 +1316,11 @@ namespace GWLogger.Backend.DataContext
                 CPU = new List<LogStat>(),
                 PVs = new List<LogStat>(),
                 Clients = new List<LogStat>(),
-                Servers = new List<LogStat>()
+                Servers = new List<LogStat>(),
+                MsgSecs = new List<LogStat>()
             };
 
-            var stats = new List<LogStat>[] { result.Logs, result.Searches, result.Errors, result.CPU, result.PVs, result.Clients, result.Servers };
+            var stats = new List<LogStat>[] { result.Logs, result.Searches, result.Errors, result.CPU, result.PVs, result.Clients, result.Servers, result.MsgSecs };
 
             try
             {

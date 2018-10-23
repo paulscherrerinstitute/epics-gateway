@@ -26,6 +26,7 @@ namespace GWLogger.Live
         private List<HistoricData> cpuHistory = new List<HistoricData>();
         private List<HistoricData> searchHistory = new List<HistoricData>();
         private List<HistoricData> pvsHistory = new List<HistoricData>();
+        private List<HistoricData> msgSecHistory = new List<HistoricData>();
         private List<HistoricData> clientsHistory = new List<HistoricData>();
         private List<HistoricData> serversHistory = new List<HistoricData>();
 
@@ -80,6 +81,13 @@ namespace GWLogger.Live
                 serversHistory.Add(new HistoricData { Value = nbServers.Value });
                 while (serversHistory.Count > NbHistoricPoint)
                     serversHistory.RemoveAt(0);
+            }
+            
+            lock (msgSecHistory)
+            {
+                msgSecHistory.Add(new HistoricData { Value = nbMessages.Value });
+                while (msgSecHistory.Count > NbHistoricPoint)
+                    msgSecHistory.RemoveAt(0);
             }
         }
 
@@ -175,6 +183,24 @@ namespace GWLogger.Live
             }
         }
 
+        /// <summary>
+        /// Average Messages Per Seconds in the last 10 minutes
+        /// </summary>
+        public int AvgMsgSec
+        {
+            get
+            {
+                try
+                {
+                    return (int)(((IEnumerable<HistoricData>)MsgSecHistory).Reverse().Take(120).Where(row => row.Value.HasValue).Select(row => row.Value).Average());
+                }
+                catch
+                {
+                    return 0;
+                }
+            }
+        }
+
         public int CpuState
         {
             get
@@ -257,6 +283,15 @@ namespace GWLogger.Live
             {
                 lock (serversHistory)
                     return serversHistory.ToList();
+            }
+        }
+
+        public List<HistoricData> MsgSecHistory
+        {
+            get
+            {
+                lock (msgSecHistory)
+                    return msgSecHistory.ToList();
             }
         }
 
