@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GWLogger.Backend.DataContext.Query.Tokens
 {
-    internal abstract class Token
+    public abstract class Token
     {
         public string Value { get; protected set; }
 

@@ -110,7 +110,7 @@ namespace GWLogger
         [WebMethod]
         public List<KeyValuePair<string, int>> MostActiveClasses(string gatewayName, DateTime datePoint)
         {
-            var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), null, 500, null, null, 0, Context.Response.ClientDisconnectedToken);
+            var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), null, 10000, null, null, 0, Context.Response.ClientDisconnectedToken);
             if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
                 return null;
 
@@ -118,7 +118,7 @@ namespace GWLogger
 
             return searches.GroupBy(row => row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == detailTypeId)?.Value)
                 .Select(row => new KeyValuePair<string, int>(row.Key.Split('\\').Last().Replace(".cs", ""), row.Count()))
-                .OrderBy(row => row.Value).ToList();
+                .OrderByDescending(row => row.Value).ToList();
         }
 
         [WebMethod]

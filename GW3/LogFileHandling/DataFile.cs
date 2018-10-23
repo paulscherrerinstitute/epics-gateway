@@ -5,13 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Xml.Serialization;
 
 namespace GWLogger.Backend.DataContext
 {
     public class DataFile : IDisposable
     {
-        private string gateway;
+        public string Gateway { get; }
         public SemaphoreSlim LockObject { get; private set; } = new SemaphoreSlim(1);
 
         private FileStream file;
@@ -31,11 +30,9 @@ namespace GWLogger.Backend.DataContext
         private FileStream serverSession;
         private string currentServerSession;
         private Dictionary<string, SessionLocation> openServerSessions = new Dictionary<string, SessionLocation>();
-        private static Dictionary<string, int> memberNames = new Dictionary<string, int>();
-        private static Dictionary<int, string> reverseMemberNames = new Dictionary<int, string>();
-        private static Dictionary<string, int> filePaths = new Dictionary<string, int>();
-        private static Dictionary<int, string> reverseFilePaths = new Dictionary<int, string>();
         private static Regex specialChars = new Regex(@"^[a-zA-Z0-9\.,\-\+ \:_\\/\?\*]+$");
+
+        private static DateTime _jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         // SourceMemberName
         private static int sourceMemberNameId = -1;
@@ -48,13 +45,13 @@ namespace GWLogger.Backend.DataContext
         private bool isAtEnd = true;
         private bool mustFlush = false;
 
-        public static string StorageDirectory => System.Configuration.ConfigurationManager.AppSettings["storageDirectory"];
+        //public static string Context.StorageDirectory => System.Configuration.ConfigurationManager.AppSettings["Context.StorageDirectory"];
 
-        static DataFile()
+        /*static DataFile()
         {
             try
             {
-                using (var stream = File.OpenRead(StorageDirectory + "\\MemberNames.xml"))
+                using (var stream = File.OpenRead(Context.StorageDirectory + "\\MemberNames.xml"))
                 {
                     var ser = new XmlSerializer(typeof(List<IdValue>));
                     var data = (List<IdValue>)ser.Deserialize(stream);
@@ -68,7 +65,7 @@ namespace GWLogger.Backend.DataContext
             }
             try
             {
-                using (var stream = File.OpenRead(StorageDirectory + "\\FilePaths.xml"))
+                using (var stream = File.OpenRead(Context.StorageDirectory + "\\FilePaths.xml"))
                 {
                     var ser = new XmlSerializer(typeof(List<IdValue>));
                     var data = (List<IdValue>)ser.Deserialize(stream);
@@ -80,40 +77,15 @@ namespace GWLogger.Backend.DataContext
             {
                 filePaths = new Dictionary<string, int>();
             }
-        }
+        }*/
 
-        internal void StoreHistory()
+        public static List<string> Gateways(string storageDirectory)
         {
-            var idxPos = IndexPosition(DateTime.UtcNow);
-            var gw = Global.LiveInformation[this.gateway];
-            if (gw == null)
-            {
-                Stats[idxPos, 3] = 0;
-                Stats[idxPos, 4] = 0;
-                Stats[idxPos, 5] = 0;
-                Stats[idxPos, 6] = 0;
-                Stats[idxPos, 7] = 0;
-            }
-            else
-            {
-                Stats[idxPos, 3] = gw.AvgCPU;
-                Stats[idxPos, 4] = gw.AvgPvs;
-                Stats[idxPos, 5] = gw.AvgNbClients;
-                Stats[idxPos, 6] = gw.AvgNbServers;
-                Stats[idxPos, 8] = gw.AvgMsgSec;
-            }
-        }
-
-        public static List<string> Gateways
-        {
-            get
-            {
-                return Directory.GetFiles(StorageDirectory, "*.data")
-                    .Select(row => Path.GetFileName(row).Split(new char[] { '.' }).First())
-                    .Distinct()
-                    .OrderBy(row => row)
-                    .ToList();
-            }
+            return Directory.GetFiles(storageDirectory, "*.data")
+                .Select(row => Path.GetFileName(row).Split(new char[] { '.' }).First())
+                .Distinct()
+                .OrderBy(row => row)
+                .ToList();
         }
 
         private static HashSet<string> knownFiles = new HashSet<string>();
@@ -125,13 +97,13 @@ namespace GWLogger.Backend.DataContext
             try
             {
                 LockObject.Wait();
-                this.gateway = gateway;
+                this.Gateway = gateway;
                 SetFile();
 
                 // Recovers how many entries in that last session
-                if (File.Exists(StorageDirectory + "\\" + gateway.ToLower() + ".sessions"))
+                if (File.Exists(Context.StorageDirectory + "\\" + gateway.ToLower() + ".sessions"))
                 {
-                    using (var reader = new BinaryReader(File.Open(StorageDirectory + "\\" + gateway.ToLower() + ".sessions", FileMode.Open, FileAccess.Read)))
+                    using (var reader = new BinaryReader(File.Open(Context.StorageDirectory + "\\" + gateway.ToLower() + ".sessions", FileMode.Open, FileAccess.Read)))
                     {
                         if (reader.BaseStream.Length > sizeof(long))
                         {
@@ -147,7 +119,7 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        public static bool Exists(string gatewayName)
+        public static bool Exists(string storageDirectory,string gatewayName)
         {
             if (string.IsNullOrWhiteSpace(gatewayName))
                 return false;
@@ -155,7 +127,7 @@ namespace GWLogger.Backend.DataContext
             {
                 if (knownFiles.Contains(gatewayName.ToLower()))
                     return true;
-                var res = Directory.GetFiles(StorageDirectory, gatewayName.ToLower() + ".*.data").Any();
+                var res = Directory.GetFiles(storageDirectory, gatewayName.ToLower() + ".*.data").Any();
                 if (res)
                     knownFiles.Add(gatewayName.ToLower());
                 return res;
@@ -172,7 +144,7 @@ namespace GWLogger.Backend.DataContext
                 LockObject.Wait();
                 // Delete all the data files
 
-                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.*").Where(row => DateOfFile(row) <= toDel))
+                foreach (var i in Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.*").Where(row => DateOfFile(row) <= toDel))
                 {
                     if (needToClose)
                     {
@@ -194,10 +166,10 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        public static void DeleteFiles(string gateway)
+        public static void DeleteFiles(string storageDirectory, string gateway)
         {
             // Delete all the data files
-            foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.*"))
+            foreach (var i in Directory.GetFiles(storageDirectory, gateway.ToLower() + ".*.*"))
                 File.Delete(i);
 
             lock (knownFiles)
@@ -212,7 +184,7 @@ namespace GWLogger.Backend.DataContext
             {
                 LockObject.Wait();
 
-                var totSize = Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.data").Sum(row => new FileInfo(row).Length);
+                var totSize = Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.data").Sum(row => new FileInfo(row).Length);
 
                 var stats = new List<long>();
                 var dataSize = 0L;
@@ -237,7 +209,7 @@ namespace GWLogger.Backend.DataContext
 
                 return new DataFileStats
                 {
-                    Name = gateway,
+                    Name = Gateway,
                     LogsPerSeconds = stats.Average(row => row / 600.0),
                     AverageEntryBytes = dataSize / stats.Sum(),
                     TotalDataSize = totSize
@@ -335,7 +307,7 @@ namespace GWLogger.Backend.DataContext
 
         private void UpdateGatewaySessions(DateTime? startNewSession = null)
         {
-            var sessionFile = StorageDirectory + "\\" + gateway.ToLower() + ".sessions";
+            var sessionFile = Context.StorageDirectory + "\\" + Gateway.ToLower() + ".sessions";
             using (var writer = new BinaryWriter(File.Open(sessionFile, FileMode.OpenOrCreate, FileAccess.Write)))
             {
                 if (lastLogEntry.HasValue && nbLogEntries > 0)
@@ -400,7 +372,7 @@ namespace GWLogger.Backend.DataContext
             if (!forDate.HasValue)
                 forDate = DateTime.UtcNow;
 
-            return StorageDirectory + "\\" + gateway.ToLower() + "." + forDate.Value.Year + ("" + forDate.Value.Month).PadLeft(2, '0') + ("" + forDate.Value.Day).PadLeft(2, '0') + extention;
+            return Context.StorageDirectory + "\\" + Gateway.ToLower() + "." + forDate.Value.Year + ("" + forDate.Value.Month).PadLeft(2, '0') + ("" + forDate.Value.Day).PadLeft(2, '0') + extention;
         }
 
         public DateTime CurrentDate => DateOfFile(currentFile);
@@ -412,7 +384,7 @@ namespace GWLogger.Backend.DataContext
 
         }
 
-        private int IndexPosition(DateTime date)
+        public static int IndexPosition(DateTime date)
         {
             return date.Minute / 10 + date.Hour * 6;
         }
@@ -425,7 +397,7 @@ namespace GWLogger.Backend.DataContext
 
                 var result = new List<GatewaySession>();
 
-                var sessionFile = StorageDirectory + "\\" + gateway.ToLower() + ".sessions";
+                var sessionFile = Context.StorageDirectory + "\\" + Gateway.ToLower() + ".sessions";
                 using (var reader = new BinaryReader(File.Open(sessionFile, FileMode.Open)))
                 {
                     var start = Math.Max(reader.BaseStream.Length - 100 * sizeof(long) * 3, 0);
@@ -848,7 +820,7 @@ namespace GWLogger.Backend.DataContext
 
                             if (entry != null && entry.EntryDate >= start && entry.EntryDate <= end && (query == null || query.CheckCondition(Context, entry)) && (messageTypes == null || messageTypes.Contains(entry.MessageTypeId)))
                             {
-                                entry.Gateway = gateway;
+                                entry.Gateway = Gateway;
                                 entry.CurrentFile = Path.GetFileName(fileToUse).Replace(".data", "");
                                 result.Add(entry);
                             }
@@ -875,7 +847,7 @@ namespace GWLogger.Backend.DataContext
             try
             {
                 LockObject.Wait();
-                var files = new Queue<string>(Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.data").OrderByDescending(row => row));
+                var files = new Queue<string>(Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.data").OrderByDescending(row => row));
 
                 var result = new List<LogEntry>();
                 while (result.Count < nbEntries && files.Count > 0)
@@ -963,28 +935,28 @@ namespace GWLogger.Backend.DataContext
                 stream.Write((byte)i.DetailTypeId);
                 if (i.DetailTypeId == sourceMemberNameId)
                 {
-                    lock (memberNames)
+                    lock (Context.memberNames)
                     {
-                        if (!memberNames.ContainsKey(i.Value))
+                        if (!Context.memberNames.ContainsKey(i.Value))
                         {
-                            memberNames.Add(i.Value, memberNames.Count == 0 ? 1 : memberNames.Values.Max() + 1);
-                            reverseMemberNames.Add(memberNames[i.Value], i.Value);
-                            StoreMemberNames();
+                            Context.memberNames.Add(i.Value, Context.memberNames.Count == 0 ? 1 : Context.memberNames.Values.Max() + 1);
+                            Context.reverseMemberNames.Add(Context.memberNames[i.Value], i.Value);
+                            Context.StoreMemberNames();
                         }
-                        stream.Write((ushort)memberNames[i.Value]);
+                        stream.Write((ushort)Context.memberNames[i.Value]);
                     }
                 }
                 else if (i.DetailTypeId == sourceFilePathId)
                 {
-                    lock (filePaths)
+                    lock (Context.filePaths)
                     {
-                        if (!filePaths.ContainsKey(i.Value))
+                        if (!Context.filePaths.ContainsKey(i.Value))
                         {
-                            filePaths.Add(i.Value, filePaths.Count == 0 ? 1 : filePaths.Values.Max() + 1);
-                            reverseFilePaths.Add(filePaths[i.Value], i.Value);
-                            StoreFilePaths();
+                            Context.filePaths.Add(i.Value, Context.filePaths.Count == 0 ? 1 : Context.filePaths.Values.Max() + 1);
+                            Context.reverseFilePaths.Add(Context.filePaths[i.Value], i.Value);
+                            Context.StoreFilePaths();
                         }
-                        stream.Write((ushort)filePaths[i.Value]);
+                        stream.Write((ushort)Context.filePaths[i.Value]);
                     }
                 }
                 else
@@ -992,22 +964,9 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        private void StoreFilePaths()
+        public static long ToJsDate(DateTime from)
         {
-            using (var stream = File.OpenWrite(StorageDirectory + "\\FilePaths.xml"))
-            {
-                var ser = new XmlSerializer(typeof(List<IdValue>));
-                ser.Serialize(stream, filePaths.Select(row => new IdValue { Id = row.Value, Value = row.Key }).ToList());
-            }
-        }
-
-        private void StoreMemberNames()
-        {
-            using (var stream = File.OpenWrite(StorageDirectory + "\\MemberNames.xml"))
-            {
-                var ser = new XmlSerializer(typeof(List<IdValue>));
-                ser.Serialize(stream, memberNames.Select(row => new IdValue { Id = row.Value, Value = row.Key }).ToList());
-            }
+            return System.Convert.ToInt64((from - _jan1st1970).TotalMilliseconds);
         }
 
         private LogEntry ReadEntry(BinaryReader stream, DateTime approxiateDay, long streamLength)
@@ -1036,10 +995,10 @@ namespace GWLogger.Backend.DataContext
                     continue;
                 }
                 // Still a possible date
-                if ((dt - approxiateDay).TotalDays <= 30 && dt.ToJsDate() > 0)
+                if ((dt - approxiateDay).TotalDays <= 30 && DataFile.ToJsDate(dt) > 0)
                 {
                     cmd = stream.ReadByte();
-                    if (cmd <= Global.DataContext.MaxMessageTypes)
+                    if (cmd <= Context.MaxMessageTypes)
                     {
                         pos += i;
                         found = true;
@@ -1082,18 +1041,18 @@ namespace GWLogger.Backend.DataContext
                 if (detail.DetailTypeId == sourceFilePathId)
                 {
                     var n = stream.ReadUInt16();
-                    lock (filePaths)
+                    lock (Context.filePaths)
                     {
                         //detail.Value = filePaths.First(row => row.Value == n).Key;
-                        detail.Value = reverseFilePaths[n];
+                        detail.Value = Context.reverseFilePaths[n];
                     }
                 }
                 else if (detail.DetailTypeId == sourceMemberNameId)
                 {
                     var n = stream.ReadUInt16();
-                    lock (filePaths)
+                    lock (Context.filePaths)
                     {
-                        detail.Value = reverseMemberNames[n];// memberNames.First(row => row.Value == n).Key;
+                        detail.Value = Context.reverseMemberNames[n];// memberNames.First(row => row.Value == n).Key;
                     }
                 }
                 else
@@ -1165,9 +1124,9 @@ namespace GWLogger.Backend.DataContext
                 }
 
                 var dayStart = new DateTime(start.Year, start.Month, start.Day);
-                /*foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.clientSessions").OrderBy(row => row)                 
+                /*foreach (var i in Directory.GetFiles(Context.StorageDirectory, gateway.ToLower() + ".*.clientSessions").OrderBy(row => row)                 
                 .Where(row => DateOfFile(row) >= dayStart && DateOfFile(row) <= end))*/
-                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.clientSessions").OrderBy(row => row))
+                foreach (var i in Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.clientSessions").OrderBy(row => row))
                 {
                     using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read), System.Text.Encoding.UTF8))
                     {
@@ -1221,9 +1180,9 @@ namespace GWLogger.Backend.DataContext
                 }
 
                 var dayStart = new DateTime(start.Year, start.Month, start.Day);
-                /*foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.serverSessions").OrderBy(row => row)
+                /*foreach (var i in Directory.GetFiles(Context.StorageDirectory, gateway.ToLower() + ".*.serverSessions").OrderBy(row => row)
                     .Where(row => DateOfFile(row) >= dayStart && DateOfFile(row) <= end))*/
-                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.serverSessions").OrderBy(row => row))
+                foreach (var i in Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.serverSessions").OrderBy(row => row))
                 {
                     using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read), System.Text.Encoding.UTF8))
                     {
@@ -1276,7 +1235,7 @@ namespace GWLogger.Backend.DataContext
                 }
                 var dayStart = new DateTime(start.Year, start.Month, start.Day);
 
-                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.searches")
+                foreach (var i in Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.searches")
                     .OrderBy(row => row)
                     .Where(row => DateOfFile(row) >= dayStart && DateOfFile(row) <= end))
                 {
@@ -1328,7 +1287,7 @@ namespace GWLogger.Backend.DataContext
 
                 var dayStart = new DateTime(start.Year, start.Month, start.Day);
 
-                foreach (var i in Directory.GetFiles(StorageDirectory, gateway.ToLower() + ".*.stats")
+                foreach (var i in Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.stats")
                     .OrderBy(row => row)
                     .Where(row => DateOfFile(row) >= dayStart && DateOfFile(row) <= end))
                 {

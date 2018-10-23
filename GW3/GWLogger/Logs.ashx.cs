@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Web;
 
 namespace GWLogger
@@ -14,34 +13,17 @@ namespace GWLogger
     /// </summary>
     public class Logs : IHttpHandler
     {
-        private static Dictionary<int, string> Convertion;
-        private static Dictionary<int, string> DetailTypes;
-        private static ReaderWriterLockSlim changeLock = new ReaderWriterLockSlim();
+        private Dictionary<int, string> Convertion;
+        private Dictionary<int, string> DetailTypes;
+        private object changeLock = new object();
 
-        static Logs()
+        internal void RefreshLookup()
         {
-            RefreshLookup();
+            Convertion = Global.DataContext.MessageTypes.ToDictionary(key => key.Id, val => val.DisplayMask);
+            DetailTypes = Global.DataContext.MessageDetailTypes.ToDictionary(key => key.Id, val => val.Value);
         }
 
-        static internal void RefreshLookup()
-        {
-            changeLock.EnterWriteLock();
-            try
-            {
-                Convertion = Global.DataContext.MessageTypes.ToDictionary(key => key.Id, val => val.DisplayMask);
-                DetailTypes = Global.DataContext.MessageDetailTypes.ToDictionary(key => key.Id, val => val.Value);
-            }
-            catch (Exception ex)
-            {
-
-            }
-            finally
-            {
-                changeLock.ExitWriteLock();
-            }
-        }
-
-        private static string Convert(string remoteIpPoint, int messageType, IEnumerable<Backend.DataContext.LogEntryDetail> details)
+        private string Convert(string remoteIpPoint, int messageType, IEnumerable<Backend.DataContext.LogEntryDetail> details)
         {
             if (!Convertion.ContainsKey(messageType) || Convertion[messageType] == null)
             {
@@ -74,60 +56,61 @@ namespace GWLogger
 
         public void ProcessRequest(HttpContext context)
         {
-            var cancel = context.Response.ClientDisconnectedToken;
-            var logLevels = Global.DataContext.MessageTypes.ToDictionary(key => key.Id, val => val.LogLevel);
-
-            List<int> msgTypes = null;
-            if (!string.IsNullOrWhiteSpace(context.Request["levels"]))
+            lock (changeLock)
             {
-                var levelsRequested = context.Request["levels"];
-                var levels = levelsRequested.Split(new char[] { ',' }).Select(row => int.Parse(row));
-                msgTypes = logLevels.Where(row => levels.Contains(row.Value)).Select(row => row.Key).ToList();
-            }
-            string query = null;
-            if (!string.IsNullOrWhiteSpace(context.Request["query"]))
-                query = context.Request["query"];
+                RefreshLookup();
 
-            long offset = 0;
-            string startFile = null;
-            if (!string.IsNullOrWhiteSpace(context.Request["offset"]))
-                offset = long.Parse(context.Request["offset"]);
-            if (!string.IsNullOrWhiteSpace(context.Request["filename"]))
-                startFile = context.Request["filename"];
+                var cancel = context.Response.ClientDisconnectedToken;
+                var logLevels = Global.DataContext.MessageTypes.ToDictionary(key => key.Id, val => val.LogLevel);
 
-            //context.Request;
-            var path = context.Request.Path.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).ToArray();
-            IEnumerable<Backend.DataContext.LogEntry> logs = null;
-            //var t = ctx.LogEntries.ToList();
-            var gateway = path[0];
-            if (path.Length == 1 || path[1] == "NaN")
-            {
-                logs = Global.DataContext.ReadLastLogs(gateway);
-            }
-            else
-            {
-                var start = long.Parse(path[1]).ToNetDate();
-                var startTrim = start.Trim();
-
-                if (path.Length > 2)
+                List<int> msgTypes = null;
+                if (!string.IsNullOrWhiteSpace(context.Request["levels"]))
                 {
-                    var end = long.Parse(path[2]).ToNetDate().Trim();
-                    logs = Global.DataContext.ReadLog(gateway, start, end, query, 100, msgTypes, startFile, offset, cancel);
+                    var levelsRequested = context.Request["levels"];
+                    var levels = levelsRequested.Split(new char[] { ',' }).Select(row => int.Parse(row));
+                    msgTypes = logLevels.Where(row => levels.Contains(row.Value)).Select(row => row.Key).ToList();
+                }
+                string query = null;
+                if (!string.IsNullOrWhiteSpace(context.Request["query"]))
+                    query = context.Request["query"];
+
+                long offset = 0;
+                string startFile = null;
+                if (!string.IsNullOrWhiteSpace(context.Request["offset"]))
+                    offset = long.Parse(context.Request["offset"]);
+                if (!string.IsNullOrWhiteSpace(context.Request["filename"]))
+                    startFile = context.Request["filename"];
+
+                //context.Request;
+                var path = context.Request.Path.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).ToArray();
+                IEnumerable<Backend.DataContext.LogEntry> logs = null;
+                //var t = ctx.LogEntries.ToList();
+                var gateway = path[0];
+                if (path.Length == 1 || path[1] == "NaN")
+                {
+                    logs = Global.DataContext.ReadLastLogs(gateway);
                 }
                 else
-                    logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, 100, msgTypes, startFile, offset, cancel);
-            }
+                {
+                    var start = long.Parse(path[1]).ToNetDate();
+                    var startTrim = start.Trim();
 
-            context.Response.ContentType = "application/json";
-            context.Response.CacheControl = "no-cache";
-            context.Response.Expires = 0;
-            context.Response.Write("[");
+                    if (path.Length > 2)
+                    {
+                        var end = long.Parse(path[2]).ToNetDate().Trim();
+                        logs = Global.DataContext.ReadLog(gateway, start, end, query, 100, msgTypes, startFile, offset, cancel);
+                    }
+                    else
+                        logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, 100, msgTypes, startFile, offset, cancel);
+                }
 
-            var messageDetails = Global.DataContext.MessageDetailTypes.ToDictionary(key => key.Id, val => val.Value);
+                context.Response.ContentType = "application/json";
+                context.Response.CacheControl = "no-cache";
+                context.Response.Expires = 0;
+                context.Response.Write("[");
 
-            changeLock.EnterReadLock();
-            try
-            {
+                var messageDetails = Global.DataContext.MessageDetailTypes.ToDictionary(key => key.Id, val => val.Value);
+
                 var isFirst = true;
                 foreach (var i in logs)
                 {
@@ -170,10 +153,6 @@ namespace GWLogger
 
                     context.Response.Write("}");
                 }
-            }
-            finally
-            {
-                changeLock.ExitReadLock();
             }
             context.Response.Write("]");
         }

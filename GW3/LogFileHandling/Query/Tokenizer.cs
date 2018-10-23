@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GWLogger.Backend.DataContext.Query
 {
-    class Tokenizer
+    public class Tokenizer
     {
         List<Token> Tokens { get; } = new List<Token>();
         public int Position { get; set; }

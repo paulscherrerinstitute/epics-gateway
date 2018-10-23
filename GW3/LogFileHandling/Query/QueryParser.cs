@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GWLogger.Backend.DataContext.Query
 {
-    class QueryParser
+    public class QueryParser
     {
         public string Source { get; }
         public int Position { get; set; }

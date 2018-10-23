@@ -8,6 +8,6 @@
         public int? Searches { get; set; }
         public string Build { get; set; }
         public int State { get; set; }
-        public string Version { get; internal set; }
+        public string Version { get; set; }
     }
 }

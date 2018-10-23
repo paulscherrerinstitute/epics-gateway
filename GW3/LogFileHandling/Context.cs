@@ -24,13 +24,23 @@ namespace GWLogger.Backend.DataContext
         // will be used in reverse as we don't want to parallelize the read
         private static ReaderWriterLockSlim readerLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
 
-        public Context()
+        public delegate void DataFileEvent(DataFile file);
+        public event DataFileEvent StoreHistory;
+        public string StorageDirectory { get; }
+
+        internal Dictionary<string, int> memberNames = new Dictionary<string, int>();
+        internal Dictionary<int, string> reverseMemberNames = new Dictionary<int, string>();
+        internal Dictionary<string, int> filePaths = new Dictionary<string, int>();
+        internal Dictionary<int, string> reverseFilePaths = new Dictionary<int, string>();
+
+        public Context(string storageDirectory)
         {
+            StorageDirectory = storageDirectory;
             files = new DataFiles(this);
 
             try
             {
-                using (var stream = File.OpenRead(DataFile.StorageDirectory + "\\MessageTypes.xml"))
+                using (var stream = File.OpenRead(StorageDirectory + "\\MessageTypes.xml"))
                 {
                     XmlSerializer ser = new XmlSerializer(typeof(List<DTOs.MessageType>));
                     var v = (List<DTOs.MessageType>)ser.Deserialize(stream);
@@ -43,7 +53,7 @@ namespace GWLogger.Backend.DataContext
             }
             try
             {
-                using (var stream = File.OpenRead(DataFile.StorageDirectory + "\\MessageDetails.xml"))
+                using (var stream = File.OpenRead(StorageDirectory + "\\MessageDetails.xml"))
                 {
                     XmlSerializer ser = new XmlSerializer(typeof(List<IdValue>));
                     var v = (List<IdValue>)ser.Deserialize(stream);
@@ -55,6 +65,35 @@ namespace GWLogger.Backend.DataContext
             {
             }
 
+            try
+            {
+                using (var stream = File.OpenRead(StorageDirectory + "\\MemberNames.xml"))
+                {
+                    var ser = new XmlSerializer(typeof(List<IdValue>));
+                    var data = (List<IdValue>)ser.Deserialize(stream);
+                    memberNames = data.ToDictionary(key => key.Value, val => val.Id);
+                    reverseMemberNames = data.ToDictionary(key => key.Id, val => val.Value);
+                }
+            }
+            catch
+            {
+                memberNames = new Dictionary<string, int>();
+            }
+            try
+            {
+                using (var stream = File.OpenRead(StorageDirectory + "\\FilePaths.xml"))
+                {
+                    var ser = new XmlSerializer(typeof(List<IdValue>));
+                    var data = (List<IdValue>)ser.Deserialize(stream);
+                    filePaths = data.ToDictionary(key => key.Value, val => val.Id);
+                    reverseFilePaths = data.ToDictionary(key => key.Id, val => val.Value);
+                }
+            }
+            catch
+            {
+                filePaths = new Dictionary<string, int>();
+            }
+
             errorMessages = messageTypes.Where(row => row.LogLevel >= 3).Select(row => row.Id).ToList();
 
             autoFlusher = new Thread((obj) =>
@@ -64,7 +103,9 @@ namespace GWLogger.Backend.DataContext
                   {
                       Thread.Sleep(5000);
 
-                      files.StoreHistory();
+                      foreach (var f in files)
+                          StoreHistory?.Invoke(f);
+                      //files.StoreHistory();
 
                       step++;
                       if (step >= 60)
@@ -83,6 +124,24 @@ namespace GWLogger.Backend.DataContext
             bufferConsumer = new Thread(BufferConsumer);
             bufferConsumer.IsBackground = true;
             bufferConsumer.Start();
+        }
+
+        internal void StoreFilePaths()
+        {
+            using (var stream = File.OpenWrite(StorageDirectory + "\\FilePaths.xml"))
+            {
+                var ser = new XmlSerializer(typeof(List<IdValue>));
+                ser.Serialize(stream, filePaths.Select(row => new IdValue { Id = row.Value, Value = row.Key }).ToList());
+            }
+        }
+
+        internal void StoreMemberNames()
+        {
+            using (var stream = File.OpenWrite(StorageDirectory + "\\MemberNames.xml"))
+            {
+                var ser = new XmlSerializer(typeof(List<IdValue>));
+                ser.Serialize(stream, memberNames.Select(row => new IdValue { Id = row.Value, Value = row.Key }).ToList());
+            }
         }
 
         public double BufferUsage => Math.Round(bufferedEntries.Count * 10000.0 / MaxBufferedEntries) / 100;
@@ -142,11 +201,11 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        internal List<string> Gateways
+        public List<string> Gateways
         {
             get
             {
-                return DataFile.Gateways;
+                return DataFile.Gateways(StorageDirectory);
             }
         }
 
@@ -168,7 +227,7 @@ namespace GWLogger.Backend.DataContext
                     if (messageTypes.Any(row => !value.Select(r2 => r2.Id).Contains(row.Id)) ||
                         value.Any(row => !messageTypes.Select(r2 => r2.Id).Contains(row.Id)))
                     {
-                        using (var stream = File.OpenWrite(DataFile.StorageDirectory + "\\MessageTypes.xml"))
+                        using (var stream = File.OpenWrite(StorageDirectory + "\\MessageTypes.xml"))
                         {
                             XmlSerializer ser = new XmlSerializer(typeof(List<DTOs.MessageType>));
                             ser.Serialize(stream, value);
@@ -177,7 +236,6 @@ namespace GWLogger.Backend.DataContext
                         messageTypes.AddRange(value);
 
                         errorMessages = messageTypes.Where(row => row.LogLevel >= 3).Select(row => row.Id).ToList();
-                        Logs.RefreshLookup();
                     }
                 }
             }
@@ -197,7 +255,7 @@ namespace GWLogger.Backend.DataContext
                 if (messageDetailTypes.Any(row => !value.Select(r2 => r2.Id).Contains(row.Id)) ||
                     value.Any(row => !messageDetailTypes.Select(r2 => r2.Id).Contains(row.Id)))
                 {
-                    using (var stream = File.OpenWrite(DataFile.StorageDirectory + "\\MessageDetails.xml"))
+                    using (var stream = File.OpenWrite(StorageDirectory + "\\MessageDetails.xml"))
                     {
                         XmlSerializer ser = new XmlSerializer(typeof(List<IdValue>));
                         ser.Serialize(stream, value);
@@ -205,8 +263,6 @@ namespace GWLogger.Backend.DataContext
                     messageDetailTypes.Clear();
                     messageDetailTypes.AddRange(value);
                     maxMessageTypes = -1;
-
-                    Logs.RefreshLookup();
                 }
             }
         }

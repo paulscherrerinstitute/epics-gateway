@@ -67,7 +67,7 @@ namespace GWLogger.Backend.DataContext
 
         public bool Exists(string gatewayName)
         {
-            return DataFile.Exists(gatewayName);
+            return DataFile.Exists(Context.StorageDirectory, gatewayName);
         }
 
         public IEnumerator<DataFile> GetEnumerator()
@@ -83,15 +83,6 @@ namespace GWLogger.Backend.DataContext
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
-        }
-
-        internal void StoreHistory()
-        {
-            lock (dataFiles)
-            {
-                foreach (var i in dataFiles)
-                    i.Value.StoreHistory();
-            }
         }
     }
 }

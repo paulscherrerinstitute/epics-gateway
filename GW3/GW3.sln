@@ -30,6 +30,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GWLogger", "GWLogger\GWLogg
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataCleaner", "DataCleaner\DataCleaner.csproj", "{1B6FB420-5121-4BC0-9F5D-6061283E5D8C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogFileHandling", "LogFileHandling\LogFileHandling.csproj", "{6E617DEB-8F84-45CF-913E-3258203FDA50}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -124,6 +126,14 @@ Global
 		{1B6FB420-5121-4BC0-9F5D-6061283E5D8C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1B6FB420-5121-4BC0-9F5D-6061283E5D8C}.Release|x86.ActiveCfg = Release|Any CPU
 		{1B6FB420-5121-4BC0-9F5D-6061283E5D8C}.Release|x86.Build.0 = Release|Any CPU
+		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Debug|x86.Build.0 = Debug|Any CPU
+		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Release|x86.ActiveCfg = Release|Any CPU
+		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

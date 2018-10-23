@@ -226,46 +226,6 @@
     <Compile Include="Backend\Controllers\AnalyzeController.cs" />
     <Compile Include="Backend\Controllers\DiskController.cs" />
     <Compile Include="Backend\Controllers\LogController.cs" />
-    <Compile Include="Backend\DataContext\BinaryIndex.cs" />
-    <Compile Include="Backend\DataContext\Context.cs" />
-    <Compile Include="Backend\DataContext\DataFile.cs" />
-    <Compile Include="Backend\DataContext\DataFiles.cs" />
-    <Compile Include="Backend\DataContext\LogEntry.cs" />
-    <Compile Include="Backend\DataContext\LogEntryDetail.cs" />
-    <Compile Include="Backend\DataContext\LogSession.cs" />
-    <Compile Include="Backend\DataContext\Query\InvalidTokenException.cs" />
-    <Compile Include="Backend\DataContext\Query\MissingTokenException.cs" />
-    <Compile Include="Backend\DataContext\Query\QueryParser.cs" />
-    <Compile Include="Backend\DataContext\Query\Statement\AndNode.cs" />
-    <Compile Include="Backend\DataContext\Query\Statement\ConditionNode.cs" />
-    <Compile Include="Backend\DataContext\Query\Statement\OrNode.cs" />
-    <Compile Include="Backend\DataContext\Query\Statement\QueryNode.cs" />
-    <Compile Include="Backend\DataContext\Query\Statement\ValueNode.cs" />
-    <Compile Include="Backend\DataContext\Query\Statement\VariableNode.cs" />
-    <Compile Include="Backend\DataContext\Query\Tokenizer.cs" />
-    <Compile Include="Backend\DataContext\Query\Tokens\Token.cs" />
-    <Compile Include="Backend\DataContext\Query\Tokens\TokenAnd.cs" />
-    <Compile Include="Backend\DataContext\Query\Tokens\TokenCloseParenthesis.cs" />
-    <Compile Include="Backend\DataContext\Query\Tokens\TokenCompare.cs" />
-    <Compile Include="Backend\DataContext\Query\Tokens\TokenName.cs" />
-    <Compile Include="Backend\DataContext\Query\Tokens\TokenNumber.cs" />
-    <Compile Include="Backend\DataContext\Query\Tokens\TokenOpenParenthesis.cs" />
-    <Compile Include="Backend\DataContext\Query\Tokens\TokenOr.cs" />
-    <Compile Include="Backend\DataContext\Query\Tokens\TokenString.cs" />
-    <Compile Include="Backend\DataContext\Query\UnknownConditionException.cs" />
-    <Compile Include="Backend\DataContext\SearchEntry.cs" />
-    <Compile Include="Backend\DataContext\SessionLocation.cs" />
-    <Compile Include="Backend\DTOs\Connection.cs" />
-    <Compile Include="Backend\DTOs\Connections.cs" />
-    <Compile Include="Backend\DTOs\DataFileStats.cs" />
-    <Compile Include="Backend\DTOs\GatewaySession.cs" />
-    <Compile Include="Backend\DTOs\GatewayStats.cs" />
-    <Compile Include="Backend\DTOs\IdValue.cs" />
-    <Compile Include="Backend\DTOs\LogEntry.cs" />
-    <Compile Include="Backend\DTOs\LogEntryDetail.cs" />
-    <Compile Include="Backend\DTOs\LogStat.cs" />
-    <Compile Include="Backend\DTOs\MessageType.cs" />
-    <Compile Include="Backend\DTOs\SearchRequest.cs" />
     <Compile Include="Backend\EqualityComparer.cs" />
     <Compile Include="Backend\Helpers.cs" />
     <Compile Include="DataAccess.Analyze.asmx.cs">
@@ -325,7 +285,12 @@
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\LogFileHandling\LogFileHandling.csproj">
+      <Project>{6e617deb-8f84-45cf-913e-3258203fda50}</Project>
+      <Name>LogFileHandling</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

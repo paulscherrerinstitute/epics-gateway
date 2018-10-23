@@ -2,7 +2,7 @@
 
 namespace GWLogger.Backend.DataContext.Query.Statement
 {
-    internal abstract class QueryNode
+    public abstract class QueryNode
     {
         internal static QueryNode Get(QueryParser parser)
         {
