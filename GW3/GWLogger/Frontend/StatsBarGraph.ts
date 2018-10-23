@@ -108,7 +108,8 @@
         if (Main.CurrentTime)
         {
             //var tdiff = (end.getTime() - Main.CurrentTime.getTime()) + end.getTimezoneOffset() * 60000;
-            var tdiff = (end.getTime() + 10 * 60 * 1000 - Main.CurrentTime.getTime());
+            //var tdiff = (end.getTime() + 10 * 60 * 1000 - Main.CurrentTime.getTime());
+            var tdiff = (end.getTime() - Main.CurrentTime.getTime());
             var t = tdiff / (10 * 60 * 1000);
             var x = width - Math.floor(t * w + w / 2);
             //var x = width - Math.floor(t * w);
@@ -150,14 +151,14 @@
     static TimeLineMouse(evt: JQueryMouseEventObject): void
     {
         var width = $("#timeRangeCanvas").width();
-        var w = width / (Main.Stats.Logs.length + 1);
+        var w = width / Main.Stats.Logs.length;
         //var x = evt.pageX - ($("#timeRange").position().left + $("#timeRange div").width());
-        var x = evt.pageX - $("#timeRange").position().left;
+        var x = evt.pageX - $("#timeRange").position().left - 10;
 
         var tx = Math.ceil((width - x) / w);
         if (tx < 0)
             tx = 0;
-        if (tx > Main.Stats.Logs.length - 1)
+        if (tx >= Main.Stats.Logs.length)
             tx = Main.Stats.Logs.length - 1;
         //console.log(tx);
 

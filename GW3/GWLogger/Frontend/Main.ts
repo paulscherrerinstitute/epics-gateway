@@ -344,10 +344,17 @@ class Main
                         var row = <KeyValuePair>(<object>$("#logsContent").data("kendoGrid").dataItem($(evt.target).parent()));
                         if ($("#queryField").val().trim() != "")
                             $("#queryField").val($("#queryField").val().trim() + " and ");
-                        if (tab.getAttribute("report") == "SearchesPerformed")
+
+                        var query = tab.getAttribute("query")
+                        var val = row.Key;
+                        if (tab.getAttribute("split"))
+                            val = val.split(tab.getAttribute("split"))[0];
+                        $("#queryField").val($("#queryField").val() + query.replace(/'/g,"\"").replace(/\{0\}/g, val));
+
+                        /*if (tab.getAttribute("report") == "SearchesPerformed")
                             $("#queryField").val($("#queryField").val() + "remote starts \"" + row.Key.split(':')[0] + ":\"");
                         else
-                            $("#queryField").val($("#queryField").val() + "channel = \"" + row.Key + "\"");
+                            $("#queryField").val($("#queryField").val() + "channel = \"" + row.Key + "\"");*/
                         $("#logFilter > li")[0].click();
                     });
                 },

@@ -110,14 +110,32 @@ namespace GWLogger
         [WebMethod]
         public List<KeyValuePair<string, int>> MostActiveClasses(string gatewayName, DateTime datePoint)
         {
-            var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), null, 10000, null, null, 0, Context.Response.ClientDisconnectedToken);
+            // Retrieves up to 20K lines of logs
+            var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), null, 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
             if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
                 return null;
 
-            var detailTypeId = Global.DataContext.MessageDetailTypes.FirstOrDefault(row => row.Value == "SourceFilePath")?.Id;
+            // Find the different details IDs
+            var srcFileId = Global.DataContext.MessageDetailTypes.FirstOrDefault(row => row.Value == "SourceFilePath")?.Id;
+            var funcId = Global.DataContext.MessageDetailTypes.FirstOrDefault(row => row.Value == "SourceMemberName")?.Id;
+            var lineId = Global.DataContext.MessageDetailTypes.FirstOrDefault(row => row.Value == "SourceLineNumber")?.Id;
 
-            return searches.GroupBy(row => row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == detailTypeId)?.Value)
-                .Select(row => new KeyValuePair<string, int>(row.Key.Split('\\').Last().Replace(".cs", ""), row.Count()))
+            // Find the firsts msg IDs for each class&function
+            var msgTypeIds = searches
+                .Select(row => new
+                {
+                    MsgType = row.MessageTypeId,
+                    Func = row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == srcFileId)?.Value + row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == funcId)?.Value,
+                    Line = int.Parse(row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == lineId)?.Value)
+                })
+                .GroupBy(row => row.Func)
+                .Select(row => row.OrderBy(r2 => r2.Line).Select(r2 => r2.MsgType).First())
+                .ToList();
+
+            // Returns the Class.Function & the number of time it was reached. Only the first message of a function will be displayed
+            return searches.Where(row => msgTypeIds.Contains(row.MessageTypeId))
+                .GroupBy(row => row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == srcFileId)?.Value + "@" + row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == funcId)?.Value)
+                .Select(row => new KeyValuePair<string, int>(row.Key.Split('@')[0].Split('\\').Last().Replace(".cs", "") + "." + row.Key.Split('@')[1].Replace(".ctor","Constructor"), row.Count()))
                 .OrderByDescending(row => row.Value).ToList();
         }
 
