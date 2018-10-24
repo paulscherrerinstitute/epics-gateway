@@ -1,4 +1,5 @@
-﻿using GWLogger.Backend.Controllers;
+﻿using GWLogger.Backend;
+using GWLogger.Backend.Controllers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -92,8 +93,7 @@ namespace GWLogger
                 return null;
             var channelName = Global.DataContext.MessageDetailTypes.First(row => row.Value == "ChannelName").Id;
             var searchesData = searches.Select(row => new { Remote = row.RemoteIpPoint, Channel = row.LogEntryDetails.First(r2 => r2.DetailTypeId == channelName).Value });
-            var hosts = searchesData.Select(row => row.Remote.Split(':')[0]).Distinct().ToDictionary(key => key, val => Hostname(val));
-            return searchesData.GroupBy(row => row.Remote).Select(row => new KeyValuePair<string, int>(row.Key + " (" + hosts[row.Key.Split(':')[0]] + ")", row.Count())).OrderByDescending(row => row.Value).ToList();
+            return searchesData.GroupBy(row => row.Remote).Select(row => new KeyValuePair<string, int>(row.Key + " (" + row.Key.Hostname() + ")", row.Count())).OrderByDescending(row => row.Value).ToList();
         }
 
         [WebMethod]
@@ -135,19 +135,80 @@ namespace GWLogger
             // Returns the Class.Function & the number of time it was reached. Only the first message of a function will be displayed
             return searches.Where(row => msgTypeIds.Contains(row.MessageTypeId))
                 .GroupBy(row => row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == srcFileId)?.Value + "@" + row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == funcId)?.Value)
-                .Select(row => new KeyValuePair<string, int>(row.Key.Split('@')[0].Split('\\').Last().Replace(".cs", "") + "." + row.Key.Split('@')[1].Replace(".ctor","Constructor"), row.Count()))
+                .Select(row => new KeyValuePair<string, int>(row.Key.Split('@')[0].Split('\\').Last().Replace(".cs", "") + "." + row.Key.Split('@')[1].Replace(".ctor", "Constructor"), row.Count()))
                 .OrderByDescending(row => row.Value).ToList();
+        }
+
+        [WebMethod]
+        public List<KeyValuePair<string, int>> ActiveClients(string gatewayName, DateTime datePoint)
+        {
+            // Retrieves up to 20K lines of logs
+            var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), null, 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
+            if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
+                return null;
+
+            // Find the different details IDs
+            var srcFileId = Global.DataContext.MessageDetailTypes.FirstOrDefault(row => row.Value == "SourceFilePath")?.Id;
+            var funcId = Global.DataContext.MessageDetailTypes.FirstOrDefault(row => row.Value == "SourceMemberName")?.Id;
+            var lineId = Global.DataContext.MessageDetailTypes.FirstOrDefault(row => row.Value == "SourceLineNumber")?.Id;
+
+            // Find the firsts msg IDs for each class&function
+            var msgTypeIds = searches
+                .Select(row => new
+                {
+                    MsgType = row.MessageTypeId,
+                    Func = row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == srcFileId)?.Value + row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == funcId)?.Value,
+                    Line = int.Parse(row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == lineId)?.Value)
+                })
+                .GroupBy(row => row.Func)
+                .Select(row => row.OrderBy(r2 => r2.Line).Select(r2 => r2.MsgType).First())
+                .ToList();
+
+            return searches
+                .Where(row=> msgTypeIds.Contains(row.MessageTypeId) && row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == funcId)?.Value == "DoRequest" && !(row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == srcFileId)?.Value.Contains("Echo") ?? false))
+                .GroupBy(row=>row.RemoteIpPoint.Hostname())
+                .Select(row=>new KeyValuePair<string,int>(row.Key,row.Count()))
+                .OrderByDescending(row => row.Value)
+                .ToList();
+        }
+
+        [WebMethod]
+        public List<KeyValuePair<string, int>> ActiveServers(string gatewayName, DateTime datePoint)
+        {
+            // Retrieves up to 20K lines of logs
+            var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), null, 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
+            if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
+                return null;
+
+            // Find the different details IDs
+            var srcFileId = Global.DataContext.MessageDetailTypes.FirstOrDefault(row => row.Value == "SourceFilePath")?.Id;
+            var funcId = Global.DataContext.MessageDetailTypes.FirstOrDefault(row => row.Value == "SourceMemberName")?.Id;
+            var lineId = Global.DataContext.MessageDetailTypes.FirstOrDefault(row => row.Value == "SourceLineNumber")?.Id;
+
+            // Find the firsts msg IDs for each class&function
+            var msgTypeIds = searches
+                .Select(row => new
+                {
+                    MsgType = row.MessageTypeId,
+                    Func = row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == srcFileId)?.Value + row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == funcId)?.Value,
+                    Line = int.Parse(row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == lineId)?.Value)
+                })
+                .GroupBy(row => row.Func)
+                .Select(row => row.OrderBy(r2 => r2.Line).Select(r2 => r2.MsgType).First())
+                .ToList();
+
+            return searches
+                .Where(row => msgTypeIds.Contains(row.MessageTypeId) && row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == funcId)?.Value == "DoResponse" && !(row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == srcFileId)?.Value.Contains("Echo")??false))
+                .GroupBy(row => row.RemoteIpPoint.Hostname())
+                .Select(row => new KeyValuePair<string, int>(row.Key, row.Count()))
+                .OrderByDescending(row => row.Value)
+                .ToList();
         }
 
         [WebMethod]
         public List<Backend.DTOs.DataFileStats> GetDataFileStats()
         {
             return Global.DataContext.GetDataFileStats();
-        }
-
-        private static string Hostname(string ip)
-        {
-            return System.Net.Dns.GetHostEntry(ip).HostName;
         }
     }
 }

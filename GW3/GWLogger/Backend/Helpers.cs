@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
 namespace GWLogger.Backend
 {
@@ -54,6 +53,32 @@ namespace GWLogger.Backend
         public static string JsEscape(this string source)
         {
             return source.Replace("\\", "\\\\").Replace("\"", "\\\"");
+        }
+
+        public static string Hostname(this string ip)
+        {
+            if (ip.Contains(':'))
+                ip = ip.Split(':')[0];
+
+            lock (knownHosts)
+            {
+                knownHosts.RemoveAll(row => (DateTime.UtcNow - row.LastChecked).TotalHours > 1);
+                var known = knownHosts.FirstOrDefault(row => row.Ip == ip);
+                if (known == null)
+                {
+                    known = new KnownHost { Ip = ip, Hostname = System.Net.Dns.GetHostEntry(ip).HostName };
+                    knownHosts.Add(known);
+                }
+                return known.Hostname;
+            }
+        }
+
+        private static List<KnownHost> knownHosts = new List<KnownHost>();
+        private class KnownHost
+        {
+            public string Ip { get; set; }
+            public string Hostname { get; set; }
+            public DateTime LastChecked { get; } = DateTime.UtcNow;
         }
     }
 }

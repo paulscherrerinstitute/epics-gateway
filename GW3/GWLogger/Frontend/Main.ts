@@ -190,83 +190,32 @@ class Main
         });
     }
 
-    static ShowStats(showClientConnections: boolean = true)
+    static ShowStats()
     {
-        if (showClientConnections)
-        {
-            $("#clientsTabs li").removeClass("activeTab");
-            $("#clientsTabs li:nth-child(2)").addClass("activeTab");
-
-            var prefs = Utils.Preferences;
-            prefs['showSearches'] = false
-            Utils.Preferences = prefs;
-        }
-
-        //var startDate = new Date(Main.CurrentTime.getTime() - 10 * 60 * 1000);
-        //var startDate = (Main.CurrentTime ? new Date(Main.CurrentTime.getTime()) : new Date(Main.EndDate.getTime() - 20 * 60 * 1000));
         var startDate = new Date((new Date()).getTime() - 10 * 60 * 1000);
         if (Main.CurrentTime)
             startDate = Main.CurrentTime;
-        var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
-        var tz = (new Date()).getTimezoneOffset() * 60000;
 
         $.ajax({
             type: 'POST',
-            url: 'DataAccess.asmx/GetConnectionsBetween',
+            url: 'DataAccess.asmx/ActiveClients',
             data: JSON.stringify({
                 "gatewayName": Main.CurrentGateway,
-                "start": Utils.FullDateFormat(startDate),
-                "end": Utils.FullDateFormat(endDate)
+                "datePoint": Utils.FullDateFormat(startDate)
             }),
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             success: function (msg)
             {
-                var connections = Connections.CreateFromObject(msg.d);
-                if (showClientConnections)
-                {
-                    var data: Connection[] = connections.Clients;
-                    data.forEach((r) =>
-                    {
-                        if (r.Start)
-                            r.Start = new Date(r.Start.getTime() - tz);
-                        if (r.End)
-                            r.End = new Date(r.End.getTime() - tz);
-                    });
-
-                    if ($("#clientsContent").data("kendoGrid"))
-                        $("#clientsContent").data("kendoGrid").destroy();
-                    $("#clientsContent").html("").kendoGrid({
-                        columns: [
-                            { title: "Client", field: "RemoteIpPoint" },
-                            { title: "Start", field: "Start", format: "{0:MM/dd HH:mm:ss.fff}" },
-                            { title: "End", field: "End", format: "{0:MM/dd HH:mm:ss.fff}" }],
-                        dataSource:
-                        {
-                            data: data
-                        }
-                    });
-                }
-
-                data = connections.Servers;
-                data.forEach((r) =>
-                {
-                    if (r.Start)
-                        r.Start = new Date(r.Start.getTime() - tz);
-                    if (r.End)
-                        r.End = new Date(r.End.getTime() - tz);
-                });
-
-                if ($("#serversContent").data("kendoGrid"))
-                    $("#serversContent").data("kendoGrid").destroy();
-                $("#serversContent").html("").kendoGrid({
+                if ($("#clientsContent").data("kendoGrid"))
+                    $("#clientsContent").data("kendoGrid").destroy();
+                $("#clientsContent").html("").kendoGrid({
                     columns: [
-                        { title: "Client", field: "RemoteIpPoint" },
-                        { title: "Start", field: "Start", format: "{0:MM/dd HH:mm:ss.fff}" },
-                        { title: "End", field: "End", format: "{0:MM/dd HH:mm:ss.fff}" }],
+                        { title: "Client", field: "Key" },
+                        { title: "Nb Actions", field: "Value" }],
                     dataSource:
                     {
-                        data: data
+                        data: msg.d
                     }
                 });
             },
@@ -275,6 +224,36 @@ class Main
                 console.log(msg.responseText);
             }
         });
+
+        $.ajax({
+            type: 'POST',
+            url: 'DataAccess.asmx/ActiveServers',
+            data: JSON.stringify({
+                "gatewayName": Main.CurrentGateway,
+                "datePoint": Utils.FullDateFormat(startDate)
+            }),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (msg)
+            {
+                if ($("#serversContent").data("kendoGrid"))
+                    $("#serversContent").data("kendoGrid").destroy();
+                $("#serversContent").html("").kendoGrid({
+                    columns: [
+                        { title: "Server", field: "Key" },
+                        { title: "Nb Actions", field: "Value" }],
+                    dataSource:
+                    {
+                        data: msg.d
+                    }
+                });
+            },
+            error: function (msg, textStatus)
+            {
+                console.log(msg.responseText);
+            }
+        });
+
     }
 
     static LoadTimeInfo(refresh: boolean = false)
@@ -287,13 +266,7 @@ class Main
             $("#clients, #servers, #logs").show();
         }
 
-        if (Utils.Preferences['showSearches'] === true)
-        {
-            Main.ShowSearches();
-            Main.ShowStats(false);
-        }
-        else
-            Main.ShowStats();
+        Main.ShowStats();
 
         if (refresh && Main.loadingLogs)
             return;
@@ -578,51 +551,6 @@ class Main
         });
     }
 
-    static ShowSearches()
-    {
-        var current = Main.CurrentTime.getTime();
-        var startDate = new Date(current);
-
-        var prefs = Utils.Preferences;
-        prefs['showSearches'] = true
-        Utils.Preferences = prefs;
-
-        $("#clientsTabs li").removeClass("activeTab");
-        $("#clientsTabs li:nth-child(2)").addClass("activeTab");
-
-        $.ajax({
-            type: 'POST',
-            url: '/DataAccess.asmx/GetSearchedChannels',
-            data: JSON.stringify({ "gatewayName": Main.CurrentGateway, "datePoint": Utils.FullDateFormat(startDate) }),
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
-            success: function (msg)
-            {
-                var data: SearchRequest[];
-                if (msg.d)
-                    data = (<object[]>msg.d).map(c => SearchRequest.CreateFromObject(c));
-                else
-                    data = [];
-
-                $("#clientsContent").html("").kendoGrid({
-                    columns: [
-                        { title: "Channel", field: "Channel" },
-                        { title: "Client", field: "Client" },
-                        { title: "Nb", field: "NbSearches", format: "{0:n0}", attributes: { style: "text-align:right;" } },
-                        { title: "Date", field: "Date", format: "{0:MM/dd HH:mm:ss.fff}" }],
-                    dataSource:
-                    {
-                        data: Main.Logs
-                    }
-                });
-            },
-            error: function (msg, textStatus)
-            {
-                console.log(msg.responseText);
-            }
-        });
-    }
-
     static LogFilter(evt: JQueryEventObject)
     {
         $("#logFilter li").removeClass("activeTab");
@@ -820,8 +748,6 @@ class Main
         $("#timeRangeCanvas").on("mousedown", StatsBarGraph.TimeLineSelected);
         window.setInterval(Main.Refresh, 1000);
         $(window).bind('popstate', State.Pop);
-        $("#clientsTabs li:nth-child(1)").click(Main.ShowStats);
-        $("#clientsTabs li:nth-child(2)").click(Main.ShowSearches);
         $("#prevDay").click(() =>
         {
             Main.Offset = null;

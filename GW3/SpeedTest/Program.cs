@@ -27,7 +27,7 @@ namespace SpeedTest
 
         static void Log()
         {
-            foreach (var i in Directory.EnumerateFiles(GWLogger.Backend.DataContext.DataFile.StorageDirectory, "*.*.*"))
+            foreach (var i in Directory.EnumerateFiles(System.Configuration.ConfigurationManager.AppSettings["storageDirectory"], "*.*.*"))
             {
                 if (i.Split('\\').Last().Split('.').Length != 3 || i.Split('\\').Last().Split('.')[1].Length != 8)
                     continue;
@@ -37,7 +37,7 @@ namespace SpeedTest
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            using (var ctx = new GWLogger.Backend.DataContext.Context())
+            using (var ctx = new GWLogger.Backend.DataContext.Context(System.Configuration.ConfigurationManager.AppSettings["storageDirectory"]))
             {
                 // Remove all
                 ctx.CleanOlderThan(-1);

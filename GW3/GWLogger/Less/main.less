@@ -243,17 +243,18 @@ body
     left: (@leftSidebar + @borderSpacing);
     width: ~"calc(50vw + 70px - @{errorPanel} - @{middleSidebar} - @{borderSpacing})";
     height: ~"calc(50% - @{timeRangeHeight} - @{borderSpacing} - 69px)";
+    padding-top: 16px;
+
     //display: none;
     &:after
     {
         .containterLabel;
         content: "Clients";
     }
-
-    & table
+    /*& table
     {
         .dataTable;
-    }
+    }*/
 }
 
 #servers
@@ -373,9 +374,8 @@ select
 
 #clientsContent
 {
-    top: 48px;
-    padding-top: 0px;
-    height: ~"calc(100% - 49px)";
+    top: 0px;
+    height: ~"calc(100% - 19px)";
     overflow: hidden;
     position: absolute;
 }
@@ -383,7 +383,7 @@ select
 #serversContent
 {
     top: 0px;
-    height: ~"calc(100% - 23px)";
+    height: ~"calc(100% - 19px)";
     overflow: hidden;
     position: absolute;
 }

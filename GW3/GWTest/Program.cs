@@ -27,7 +27,7 @@ namespace GWTest
 
         private static void ReadBrokenLogs()
         {
-            using (var ctx = new GWLogger.Backend.DataContext.Context())
+            using (var ctx = new GWLogger.Backend.DataContext.Context(System.Configuration.ConfigurationManager.AppSettings["storageDirectory"]))
             {
                 var logs = ctx.ReadLog("cryo-cagw02", new DateTime(2018, 08, 31, 18, 08, 00), new DateTime(2018, 08, 31, 18, 40, 00), "class contains \"search\" and channel = \"ika-ka3\"", 100);
                 //var logs = ctx.ReadLog("cryo-cagw02", new DateTime(2018, 08, 31, 18, 08, 00), new DateTime(2018, 08, 31, 18, 40, 00), "", 100);
