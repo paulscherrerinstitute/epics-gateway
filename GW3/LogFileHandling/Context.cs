@@ -22,7 +22,7 @@ namespace GWLogger.Backend.DataContext
         private CancellationTokenSource cancelOperation = new CancellationTokenSource();
 
         // will be used in reverse as we don't want to parallelize the read
-        private static ReaderWriterLockSlim readerLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+        private static object accessLock = new object();
 
         public delegate void DataFileEvent(DataFile file);
         public event DataFileEvent StoreHistory;
@@ -188,15 +188,12 @@ namespace GWLogger.Backend.DataContext
                 lock (messageTypes)
                     knownErrors = errorMessages.ToList();
                 //foreach (var entry in entries.OrderBy(row => row.Gateway))
-                try
+                foreach (var entry in entries)
                 {
-                    readerLock.EnterReadLock();
-                    foreach (var entry in entries)
+                    lock (accessLock)
+                    {
                         files[entry.Gateway].Save(entry, knownErrors.Contains(entry.MessageTypeId));
-                }
-                finally
-                {
-                    readerLock.ExitReadLock();
+                    }
                 }
             }
         }
@@ -284,14 +281,9 @@ namespace GWLogger.Backend.DataContext
         {
             if (!files.Exists(gatewayName))
                 return null;
-            try
+            lock (accessLock)
             {
-                readerLock.EnterWriteLock();
                 return files[gatewayName].ReadLastLogs(nbEntries);
-            }
-            finally
-            {
-                readerLock.ExitWriteLock();
             }
         }
 
@@ -308,14 +300,9 @@ namespace GWLogger.Backend.DataContext
             catch
             {
             }
-            try
+            lock (accessLock)
             {
-                readerLock.EnterWriteLock();
                 return files[gatewayName].ReadLog(start, end, node, nbMaxEntries, messageTypes, startFile, offset, cancellationToken);
-            }
-            finally
-            {
-                readerLock.ExitWriteLock();
             }
         }
 

@@ -192,7 +192,11 @@ class Main
 
     static ShowStats()
     {
-        var startDate = new Date((new Date()).getTime() - 10 * 60 * 1000);
+        if (!Main.Stats || !Main.Stats.Logs || Main.Stats.Logs.length == 0)
+            return;
+
+        var startDate = Main.Stats.Logs[Main.Stats.Logs.length - 1].Date;
+        //var startDate = new Date((new Date()).getTime() - 10 * 60 * 1000);
         if (Main.CurrentTime)
             startDate = Main.CurrentTime;
 
@@ -253,7 +257,6 @@ class Main
                 console.log(msg.responseText);
             }
         });
-
     }
 
     static LoadTimeInfo(refresh: boolean = false)
@@ -265,8 +268,6 @@ class Main
             $("#help").hide();
             $("#clients, #servers, #logs").show();
         }
-
-        Main.ShowStats();
 
         if (refresh && Main.loadingLogs)
             return;
@@ -297,6 +298,8 @@ class Main
                 dataType: 'json',
                 success: function (msg)
                 {
+                    Main.ShowStats();
+
                     Main.loadingLogs = null;
                     var data = <KeyValuePair[]>msg.d;
 
@@ -324,10 +327,6 @@ class Main
                             val = val.split(tab.getAttribute("split"))[0];
                         $("#queryField").val($("#queryField").val() + query.replace(/'/g,"\"").replace(/\{0\}/g, val));
 
-                        /*if (tab.getAttribute("report") == "SearchesPerformed")
-                            $("#queryField").val($("#queryField").val() + "remote starts \"" + row.Key.split(':')[0] + ":\"");
-                        else
-                            $("#queryField").val($("#queryField").val() + "channel = \"" + row.Key + "\"");*/
                         $("#logFilter > li")[0].click();
                     });
                 },
@@ -374,6 +373,8 @@ class Main
             url: url,
             success: function (data)
             {
+                Main.ShowStats();
+
                 Main.loadingLogs = null;
                 var logs: LogEntry[] = data;
                 Main.Logs = logs;
@@ -746,7 +747,7 @@ class Main
         $("#gatewaySelector").on("change", Main.GatewayChanged);
         $(window).on("resize", Main.Resize);
         $("#timeRangeCanvas").on("mousedown", StatsBarGraph.TimeLineSelected);
-        window.setInterval(Main.Refresh, 1000);
+        window.setInterval(Main.Refresh, 2000);
         $(window).bind('popstate', State.Pop);
         $("#prevDay").click(() =>
         {

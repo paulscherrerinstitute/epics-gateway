@@ -69,10 +69,10 @@ class Live
             $("#inventoryLink").attr("href", "https://inventory.psi.ch/#action=Part&system=" + encodeURIComponent(Main.CurrentGateway.toUpperCase()));
             $("#logLink").attr("href", "/GW/" + Main.CurrentGateway);
 
-            this.mustUpdate--;
+            /*this.mustUpdate--;
             if (this.mustUpdate >= 0)
                 return;
-            this.mustUpdate = 5;
+            this.mustUpdate = 5;*/
             $.ajax({
                 type: 'POST',
                 url: 'DataAccess.asmx/GetGatewayInformation',
