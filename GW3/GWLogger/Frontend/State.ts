@@ -138,12 +138,13 @@
         var params = "";
         if (Main.Path == "GW")
         {
-            if (Main.CurrentTime)
-                params += (params != "" ? "&" : "#") + "c=" + Main.CurrentTime.getTime();
-            if (Main.StartDate)
+            if (Main.StartDate && Main.EndDate)
+            {
+                if (Main.CurrentTime)
+                    params += (params != "" ? "&" : "#") + "c=" + Main.CurrentTime.getTime();
                 params += (params != "" ? "&" : "#") + "s=" + Main.StartDate.getTime();
-            if (Main.EndDate)
                 params += (params != "" ? "&" : "#") + "e=" + Main.EndDate.getTime();
+            }
             if ($("#queryField").val())
                 params += (params != "" ? "&" : "#") + "q=" + encodeURIComponent($("#queryField").val());
             if (Main.CurrentTab != 0)
