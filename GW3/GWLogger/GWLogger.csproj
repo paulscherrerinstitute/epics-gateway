@@ -220,6 +220,20 @@
     <Content Include="styles\kendo.flat.mobile.min.css" />
     <Content Include="styles\kendo.material.min.css" />
     <Content Include="styles\kendo.material.mobile.min.css" />
+    <Content Include="styles\Material\editor.png" />
+    <Content Include="styles\Material\imagebrowser.png" />
+    <Content Include="styles\Material\indeterminate.gif" />
+    <Content Include="styles\Material\loading-image.gif" />
+    <Content Include="styles\Material\loading.gif" />
+    <Content Include="styles\Material\loading_2x.gif" />
+    <Content Include="styles\Material\markers.png" />
+    <Content Include="styles\Material\markers_2x.png" />
+    <Content Include="styles\Material\slider-h.gif" />
+    <Content Include="styles\Material\slider-v.gif" />
+    <Content Include="styles\Material\sprite.png" />
+    <Content Include="styles\Material\sprite_2x.png" />
+    <Content Include="styles\Material\sprite_kpi.png" />
+    <Content Include="styles\Material\sprite_kpi_2x.png" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
