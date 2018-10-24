@@ -284,6 +284,7 @@ class Main
         }
         else if (tab.getAttribute("report"))
         {
+            $("#showLastBtn").hide();
             var FirstColumn = {
                 'SearchesPerformed': 'Client',
                 'SearchesOnChannelsPerformed': 'Channel',
@@ -346,12 +347,14 @@ class Main
 
         var params = State.Parameters();
         var url: string;
-        if (!params["c"] && !params["s"])
+        if (!params["c"] && !params["s"] && !Main.CurrentTime)
         {
             url = '/Logs/' + Main.CurrentGateway;
+            $("#showLastBtn").hide();
         }
         else
         {
+            $("#showLastBtn").show();
             var startDate = (Main.CurrentTime ? new Date(Main.CurrentTime.getTime()) : (Main.EndDate ? new Date(Main.EndDate.getTime() - 20 * 60 * 1000) : new Date((new Date()).getTime() - 20 * 60 * 1000)));
             var endDate = new Date(startDate.getTime() + 20 * 60 * 1000);
 
@@ -707,7 +710,7 @@ class Main
                     if (Main.Path == "Status")
                         Main.CurrentGateway = null;
                     Main.Path = "Status";
-                    State.Set();
+                    State.Set(true);
                     State.Pop(null);
                     break;
                 case "Logs":
@@ -717,7 +720,7 @@ class Main
                     if (Main.Path == "GW")
                         break;
                     Main.Path = "GW";
-                    State.Set();
+                    State.Set(true);
                     State.Pop(null);
                     break;
                 case "Help":
@@ -731,7 +734,7 @@ class Main
                     $("#hamburgerMenu").toggleClass("visibleHamburger");
                     break;
                 default:
-                    State.Set();
+                    State.Set(true);
                     State.Pop(null);
                     break;
             }
@@ -807,6 +810,15 @@ class Main
             }
         };
         $("#endDate").kendoDateTimePicker({ format: "yyyy/MM/dd MM:mm:ss", change: endDateChange }).on("keyup", endDateChange);
+        $("#showLastBtn").on("click", () =>
+        {
+            Main.StartDate = null;
+            Main.EndDate = null;
+            Main.CurrentTime = null;
+            $("#queryField").val("");
+            State.Set(true);
+            State.Pop(null);
+        });
         /*$("#queryField").on("focus", () =>
         {
             $("#querySuggestions").show();

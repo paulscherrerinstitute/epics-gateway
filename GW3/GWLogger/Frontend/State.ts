@@ -124,14 +124,15 @@
                 Main.IsLast = false;
         }
 
+        Main.Refresh();
         Main.LoadGateways();
         //Main.DelayedSearch(Main.LoadLogStats, true);
     }
 
     static lastSave: Date = null;
-    static Set()
+    static Set(force: boolean = false)
     {
-        if (State.lastSave && ((new Date()).getTime() - this.lastSave.getTime()) < 5000)
+        if (force == false && State.lastSave && ((new Date()).getTime() - this.lastSave.getTime()) < 5000)
             return;
         State.lastSave = new Date();
         var params = "";

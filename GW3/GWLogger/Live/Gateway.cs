@@ -82,7 +82,7 @@ namespace GWLogger.Live
                 while (serversHistory.Count > NbHistoricPoint)
                     serversHistory.RemoveAt(0);
             }
-            
+
             lock (msgSecHistory)
             {
                 msgSecHistory.Add(new HistoricData { Value = nbMessages.Value });
@@ -210,14 +210,21 @@ namespace GWLogger.Live
                 var lasts = ((IEnumerable<HistoricData>)CpuHistory).Reverse().Take(NbStateAvg);
                 if (!(lasts.First().Value.HasValue || lasts.Count(l => l.Value.HasValue) >= lasts.Count() / 2))
                     return 3;
-                var avg = lasts.Where(row => row.Value.HasValue).Average(row => row.Value.Value);
-                if (avg > 70)
+                try
+                {
+                    var avg = lasts.Where(row => row.Value.HasValue).Average(row => row.Value.Value);
+                    if (avg > 70)
+                        return 3;
+                    if (avg > 50)
+                        return 2;
+                    if (avg > 30)
+                        return 1;
+                    return 0;
+                }
+                catch
+                {
                     return 3;
-                if (avg > 50)
-                    return 2;
-                if (avg > 30)
-                    return 1;
-                return 0;
+                }
             }
         }
 
@@ -230,14 +237,21 @@ namespace GWLogger.Live
                 var lasts = ((IEnumerable<HistoricData>)SearchHistory).Reverse().Take(NbStateAvg);
                 if (!(lasts.First().Value.HasValue || lasts.Count(l => l.Value.HasValue) >= lasts.Count() / 2))
                     return 3;
-                var avg = lasts.Where(row => row.Value.HasValue).Average(row => Math.Min(150, row.Value.Value));
-                if (avg > 90)
+                try
+                {
+                    var avg = lasts.Where(row => row.Value.HasValue).Average(row => Math.Min(150, row.Value.Value));
+                    if (avg > 90)
+                        return 3;
+                    if (avg > 50)
+                        return 2;
+                    if (avg > 30)
+                        return 1;
+                    return 0;
+                }
+                catch
+                {
                     return 3;
-                if (avg > 50)
-                    return 2;
-                if (avg > 30)
-                    return 1;
-                return 0;
+                }
             }
         }
 

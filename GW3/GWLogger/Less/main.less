@@ -244,7 +244,6 @@ body
     width: ~"calc(50vw + 70px - @{errorPanel} - @{middleSidebar} - @{borderSpacing})";
     height: ~"calc(50% - @{timeRangeHeight} - @{borderSpacing} - 69px)";
     padding-top: 16px;
-
     //display: none;
     &:after
     {
@@ -930,4 +929,14 @@ select
 {
     background-color: #cdd3d4 !important;
     font-weight: bold;
+}
+
+#showLastBtn
+{
+    position: absolute;
+    bottom: ~"calc(50% - 30px - @{borderSpacing} - @{borderSpacing})";
+    right: 30px;
+    .button;
+    display: none;
+    box-shadow: rgba(0,0,0,0.8) 0px 0px 2px;
 }
