@@ -580,7 +580,7 @@ class Main
     {
         $("#reportView").show();
         $('#helpView').hide();
-        $("#reportContent").css({ "overflow": "hidden", "padding": "0px" });
+        $("#reportContent").removeClass().addClass("fixed").removeAttr('style').html("Loading...");
 
         if ($("#reportContent").data("kendoGrid"))
             $("#reportContent").data("kendoGrid").destroy();
@@ -620,8 +620,7 @@ class Main
     {
         $("#reportView").show();
         $('#helpView').hide();
-        $("#reportContent").css({ "overflow": "hidden", "padding": "0px" });
-        $("#reportContent").html("Loading...");
+        $("#reportContent").removeClass().addClass("fixed").removeAttr('style').html("Loading...");
 
         if ($("#reportContent").data("kendoGrid"))
             $("#reportContent").data("kendoGrid").destroy();

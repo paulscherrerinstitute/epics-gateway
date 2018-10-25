@@ -3,7 +3,7 @@
     static Show()
     {
         $("#reportView").show();
-        $("#reportContent").removeClass().css({ "overflow": "auto", "padding": "5px" });
+        $("#reportContent").removeAttr('style').removeClass().css({ "overflow": "auto", "padding": "5px" });
         $('#helpView').hide();
 
         if ($("#reportContent").data("kendoGrid"))
