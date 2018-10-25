@@ -44,15 +44,15 @@
         $("#dbgTestResult").html("Checking...");
         $("#dbgRun").hide();
 
-        var channel = $("#dbgChannel").val();
-        var gateway = $("#dbgGateway").data("kendoDropDownList").value();
+        var channel: string = $("#dbgChannel").val();
+        var gateway: string = $("#dbgGateway").data("kendoDropDownList").value();
         var checkDone = 0;
 
         $.ajax({
             type: 'POST',
             url: 'DataAccess.asmx/GetGatewayNetworks',
             data: JSON.stringify({
-                "gatewayName": $("#dbgGateway").data("kendoDropDownList").value(),
+                "gatewayName": gateway,
             }),
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
@@ -127,6 +127,8 @@ be possible to discover those. The solution of this last issue is to have only o
                                     else if (nets.length == 4 && ((nets[0]['result'] != 'ok' && nets[3]['result'] == 'ok') || (nets[1]['result'] != 'ok' && nets[2]['result'] == 'ok')))
                                         $("#dbgTestResult").html($("#dbgTestResult").html() + "<h2>Summary</h2>Either the gateway is blocking the channel due to the configuration \
 or an odd state of the gateway prevents the channel to be read correctly.");
+                                    else if (nets.length == 4 && ((nets[0]['result'] == 'ok' && nets[1]['result'] == 'ok') || (nets[2]['result'] == 'ok' && nets[3]['result'] == 'ok')) && channel.startsWith(gateway + ":"))
+                                        $("#dbgTestResult").html($("#dbgTestResult").html() + "<h2>Summary</h2>Works as expected as those are channels from the gateway itself.");
                                     else if (nets.length == 2 && ((nets[0]['result'] == 'ok' && nets[1]['result'] == 'ok')))
                                         $("#dbgTestResult").html($("#dbgTestResult").html() + "<h2>Summary</h2>Works as expected");
                                     else if (nets.length == 2 && nets[0]['result'] != 'ok' && nets[1]['result'] != 'ok')
