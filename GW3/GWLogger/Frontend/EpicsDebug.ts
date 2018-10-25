@@ -117,17 +117,26 @@
                                     if (nets.length == 4 && ((nets[0]['result'] == 'ok' && nets[3]['result'] == 'ok') || (nets[1]['result'] == 'ok' && nets[2]['result'] == 'ok')))
                                         $("#dbgTestResult").html($("#dbgTestResult").html() + "<h2>Summary</h2>Works as expected");
                                     else if (nets.length == 4 && nets[0]['result'] == 'ok' && nets[1]['result'] == 'ok' && nets[2]['result'] == 'ok' && nets[3]['result'] == 'ok')
-                                        $("#dbgTestResult").html($("#dbgTestResult").html() + "<h2>Summary</h2>The channel seems to be available on both network. Either we have a loopback or an IOC is duplicating a gateway.");
+                                        $("#dbgTestResult").html($("#dbgTestResult").html() + "<h2>Summary</h2>The channel seems to be available on both network. Either we \
+have a loopback or an IOC is duplicating a gateway.");
                                     else if (nets.length == 4 && nets[0]['result'] != 'ok' && nets[1]['result'] != 'ok' && nets[2]['result'] != 'ok' && nets[3]['result'] != 'ok')
-                                        $("#dbgTestResult").html($("#dbgTestResult").html() + "<h2>Summary</h2>The channel doesn't seems to exists in the selected networks. Either you introduced a typo or the server serving it is down or the channel never existed.");
+                                        $("#dbgTestResult").html($("#dbgTestResult").html() + "<h2>Summary</h2>The channel doesn't seems to exists in the selected networks. \
+Either you introduced a typo or the server\ serving it is down or the channel never existed. It is also possible that the gateway tries to reach the IOC via unicast (no \
+broadcast address), and multiple IOCs runs on the same machine, in this case only the first started process will intercept EPICS search messages, and thefore it will not \
+be possible to discover those. The solution of this last issue is to have only one running IOC on the system or to use special ports for it.");
                                     else if (nets.length == 4 && ((nets[0]['result'] != 'ok' && nets[3]['result'] == 'ok') || (nets[1]['result'] != 'ok' && nets[2]['result'] == 'ok')))
-                                        $("#dbgTestResult").html($("#dbgTestResult").html() + "<h2>Summary</h2>Either the gateway is blocking the channel due to the configuration or an odd state of the gateway prevents the channel to be read correctly.");
+                                        $("#dbgTestResult").html($("#dbgTestResult").html() + "<h2>Summary</h2>Either the gateway is blocking the channel due to the configuration \
+or an odd state of the gateway prevents the channel to be read correctly.");
                                     else if (nets.length == 2 && ((nets[0]['result'] == 'ok' && nets[1]['result'] == 'ok')))
                                         $("#dbgTestResult").html($("#dbgTestResult").html() + "<h2>Summary</h2>Works as expected");
                                     else if (nets.length == 2 && nets[0]['result'] != 'ok' && nets[1]['result'] != 'ok')
-                                        $("#dbgTestResult").html($("#dbgTestResult").html() + "<h2>Summary</h2>The channel doesn't seems to exists in the selected networks. Either you introduced a typo or the server serving it is down or the channel never existed.");
+                                        $("#dbgTestResult").html($("#dbgTestResult").html() + "<h2>Summary</h2>The channel doesn't seems to exists in the selected networks. \
+Either you introduced a typo or the server\ serving it is down or the channel never existed. It is also possible that the gateway tries to reach the IOC via unicast (no \
+broadcast address), and multiple IOCs runs on the same machine, in this case only the first started process will intercept EPICS search messages, and thefore it will not \
+be possible to discover those. The solution of this last issue is to have only one running IOC on the system or to use special ports for it.");
                                     else if (nets.length == 1 && ((nets[0]['result'] != 'ok' && nets[1]['result'] == 'ok')))
-                                        $("#dbgTestResult").html($("#dbgTestResult").html() + "<h2>Summary</h2>Either the gateway is blocking the channel due to the configuration or an odd state of the gateway prevents the channel to be read correctly.");
+                                        $("#dbgTestResult").html($("#dbgTestResult").html() + "<h2>Summary</h2>Either the gateway is blocking the channel due to the \
+configuration or an odd state of the gateway prevents the channel to be read correctly.");
                                     else
                                         $("#dbgTestResult").html($("#dbgTestResult").html() + "<h2>Summary</h2>The gateway is reactly oddly, please contact the support.");
 
