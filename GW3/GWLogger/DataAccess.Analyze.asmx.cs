@@ -165,9 +165,9 @@ namespace GWLogger
                 .ToList();
 
             return searches
-                .Where(row=> msgTypeIds.Contains(row.MessageTypeId) && row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == funcId)?.Value == "DoRequest" && !(row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == srcFileId)?.Value.Contains("Echo") ?? false))
-                .GroupBy(row=>row.RemoteIpPoint.Hostname())
-                .Select(row=>new KeyValuePair<string,int>(row.Key,row.Count()))
+                .Where(row => msgTypeIds.Contains(row.MessageTypeId) && row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == funcId)?.Value == "DoRequest" && !(row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == srcFileId)?.Value.Contains("Echo") ?? false))
+                .GroupBy(row => row.RemoteIpPoint.Hostname())
+                .Select(row => new KeyValuePair<string, int>(row.Key, row.Count()))
                 .OrderByDescending(row => row.Value)
                 .ToList();
         }
@@ -198,7 +198,7 @@ namespace GWLogger
                 .ToList();
 
             return searches
-                .Where(row => msgTypeIds.Contains(row.MessageTypeId) && row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == funcId)?.Value == "DoResponse" && !(row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == srcFileId)?.Value.Contains("Echo")??false))
+                .Where(row => msgTypeIds.Contains(row.MessageTypeId) && row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == funcId)?.Value == "DoResponse" && !(row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == srcFileId)?.Value.Contains("Echo") ?? false))
                 .GroupBy(row => row.RemoteIpPoint.Hostname())
                 .Select(row => new KeyValuePair<string, int>(row.Key, row.Count()))
                 .OrderByDescending(row => row.Value)
@@ -209,6 +209,25 @@ namespace GWLogger
         public List<Backend.DTOs.DataFileStats> GetDataFileStats()
         {
             return Global.DataContext.GetDataFileStats();
+        }
+
+        [WebMethod]
+        public List<KeyValuePair<string, string>> GetGatewayNetworks(string gatewayName)
+        {
+            var partInfo = Global.Inventory.GetPartBySystem(gatewayName);
+            var attributes = Global.Inventory.GetPartAttributes(partInfo.PSILabel);
+            string[] toPick;
+            if (attributes.First(row => row.Name == "Directions").Value == "BIDIRECTIONAL")
+                toPick = new string[] { "Local Address Side A", "Remote Address Side A", "Local Address Side B", "Remote Address Side B" };
+            else
+                toPick = new string[] { "Local Address Side A", "Remote Address Side B" };
+            return attributes.Where(row => toPick.Contains(row.Name)).Select(row => new KeyValuePair<string, string>(row.Name, row.Value)).ToList();
+        }
+
+        [WebMethod]
+        public string EpicsCheck(string gatewayName, string config, string channel)
+        {
+            return Global.DirectCommands.SendEpicsCommand(config, channel, gatewayName.ToUpper());
         }
     }
 }

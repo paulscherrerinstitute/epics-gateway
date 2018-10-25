@@ -124,7 +124,7 @@
             On top most of the interface some tabs are available (Status, Logs, Help). By clicking on them the interface switch in the different modes.
 
             <h3>Status</h3>
-            The status page allows to get an overview in near real time (updates every 5 seconds) of all the EPICS gateways.
+            The status page allows to get an overview in near real time (updates every 2 seconds) of all the EPICS gateways.
             Each gateway is displayed with a gray circle and some values in the middle, as well as the gateway name under the circle.
             Over the gray circle 2 arcs may appear of different colors. The most external one shows the CPU in percent form, while
             the inner arc one shows number of searches per seconds the gateway receives (up to 100).<br />
@@ -132,15 +132,25 @@
             By clicking on the gateway, more details of the gateway will be displayed.
             <h3>Logs</h3>
             <ul>
-                <li>Select the gateway you want to check on the top left side. The gateway sessions are then loaded and displayed on the left bar, as well as the statistics are displayed on the time range widget.</li>
+                <li>Select the gateway you want to check on the top left side. The gateway sessions are then loaded and displayed on the left bar,
+                as well as the statistics are displayed on the time range widget.</li>
                 <li>You can click (and drag) the time range widget to check out more details on that time.</li>
-                <li>The time range shows 3 values: top light green bars are the number of event logs, bottom dark green bars are the number of searches, red lines are the number of errors. The graphs uses 3 different scales.</li>
+                <li>The time range shows 3 values: top light green bars are the number of event logs, bottom dark green bars are the number of searches,
+                red lines are the number of errors. The graphs uses 3 different scales.</li>
                 <li>Logs uses UTC time (avoiding issue with day light saving time).</li>
                 <li>The current UTC time is displayed on the bottom left corner of the screen.</li>
                 <li>Each bar of the time range is a 10 min range.</li>
             </ul>
             <h2>Queries:</h2>
             <div id="queriesHelp"></div>
+            <h2>EPICS Debug:</h2>
+            By clicking on the hamburger menu (on the top left) and then on the entry "EPICS Debug" it is possible to try to debug if
+            there is an error with a gateway or if the gateway seems to react in an abnormal way.<br />
+            <br />
+            To use the tool, an EPICS channel name must be given and a gateway selected. Once this is done, by pressing the button "Run test"
+            a couple of tests will be run on the gateway machine. At the end of the tests, a summary displays what seems to be the state of the gateway.<br />
+            <br />
+            In case of error as status, it's advice to re-run the test, and only then if the error persist contact the support.
             <h2>Data retention:</h2>
             Data is kept for a max. time of 5 days.
             <div class="button topClose" onclick="$('#helpView').hide();">Close</div>
@@ -149,6 +159,7 @@
     <div id="hamburgerMenu">
         <div onclick="Main.LogStatistics()">Log Statistics</div>
         <div onclick="Main.GWVersions()">Gateway Versions</div>
+        <div onclick="EpicsDebug.Show()">EPICS Debug</div>
         <!--<div>Subscription</div>-->
     </div>
     <script src="Scripts/jquery-3.3.1.min.js"></script>

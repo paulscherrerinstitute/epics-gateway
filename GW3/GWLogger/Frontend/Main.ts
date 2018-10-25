@@ -579,6 +579,8 @@ class Main
     static GWVersions(): void
     {
         $("#reportView").show();
+        $('#helpView').hide();
+        $("#reportContent").css({ "overflow": "hidden", "padding": "0px" });
 
         if ($("#reportContent").data("kendoGrid"))
             $("#reportContent").data("kendoGrid").destroy();
@@ -617,6 +619,8 @@ class Main
     static LogStatistics(): void
     {
         $("#reportView").show();
+        $('#helpView').hide();
+        $("#reportContent").css({ "overflow": "hidden", "padding": "0px" });
         $("#reportContent").html("Loading...");
 
         if ($("#reportContent").data("kendoGrid"))

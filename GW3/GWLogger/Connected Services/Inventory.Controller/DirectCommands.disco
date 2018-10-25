@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<discovery xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.xmlsoap.org/disco/">
+  <contractRef ref="http://inventory.psi.ch/manage/DirectCommands.asmx?wsdl" docRef="http://inventory.psi.ch/manage/DirectCommands.asmx" xmlns="http://schemas.xmlsoap.org/disco/scl/" />
+  <soap address="http://inventory.psi.ch/manage/DirectCommands.asmx" xmlns:q1="https://inventory.psi.ch/manage/DirectCommands.asmx" binding="q1:DirectCommandsSoap" xmlns="http://schemas.xmlsoap.org/disco/soap/" />
+  <soap address="http://inventory.psi.ch/manage/DirectCommands.asmx" xmlns:q2="https://inventory.psi.ch/manage/DirectCommands.asmx" binding="q2:DirectCommandsSoap12" xmlns="http://schemas.xmlsoap.org/disco/soap/" />
+</discovery>

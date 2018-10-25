@@ -74,6 +74,8 @@
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
@@ -93,7 +95,263 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Frontend\introspection.js" />
+    <None Include="Connected Services\Inventory.Controller\DirectCommands.disco" />
+    <None Include="Connected Services\Inventory.Controller\configuration91.svcinfo" />
+    <None Include="Connected Services\Inventory.Controller\configuration.svcinfo" />
+    <None Include="Connected Services\Inventory.Controller\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Connected Services\Inventory\DataAccess.disco" />
+    <None Include="Connected Services\Inventory\configuration91.svcinfo" />
+    <None Include="Connected Services\Inventory\configuration.svcinfo" />
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.ActiveDirectoryGroup.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.ActiveDirectoryUser.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.AddPartResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.AuthToken.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.Company.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.ConnectorMatrixInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.ConnectorType.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.DataClass.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.DataClassField.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.DataField.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.DataFieldSpec.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.Disturbance.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.DisturbanceField.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.EpicsBootInfoIocInfo.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.EpicsBootInfoServiceLogEntry.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.EpicsBootInfoStatusInfo.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.EpicsGatewayActivity.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.GatewayConfiguration.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.GatewayFilterType.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.GetEpicsBootInfoServiceLogsResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.GetHandledRequestsResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.HostCheckEntryInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.HostCheckInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.HostCheckTypeInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.HostInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.HostPiquetInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.HostPuppetAttributeInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.HostRelation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.IdValuePair.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.LastBootEntry.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.LastBootInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.LocationInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.MaintenanceHistory.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.MaintenancePart.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.MaintenanceSheet.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.MultiConnection.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.NediPort.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.Order.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.OrderItem.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.PartDisturbance.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.PartDocumentInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.PartHistoryInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.PartInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.PartNoteInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.PartPartialHierarchy.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.PartTypeAttribute.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.PartTypeConnector.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.PartTypeInfomation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.PartTypeShort.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.PlanInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.PortserverIoc.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.PrefixInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.PsErrorCodeInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.PsiGroup.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.PSP.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.Rack.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.RequestedPartTypeInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.RequestInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.RoleType.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.SearchResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.SearchTidResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.ShortPart.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.ShortUserInfo.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.SimpleNodeItem.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.SoftIocInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.StoredSearch.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.SwitchEffect.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.TableDetails.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.TableInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.TidHistory.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.TidManual.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.TidNewDeviceRequest.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.TidSearchResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.TreeNode.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.UploadPartDocumentResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.UploadPartTypeDocumentResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.UserAction.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.UserRole.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.UserRoleSummary.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.VmStatusInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\Inventory\GWLogger.Inventory.WikiPage.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <None Include="Connected Services\Inventory\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
     <Content Include="Frontend\tsconfig.json" />
     <Content Include="graphtest.html" />
     <Content Include="Images\fine.png" />
@@ -103,6 +361,8 @@
     <Content Include="Introspection.ashx" />
     <Content Include="main.js.map" />
     <Content Include="Logs.ashx" />
+    <None Include="Connected Services\Inventory.Controller\DirectCommands.wsdl" />
+    <None Include="Connected Services\Inventory\DataAccess.wsdl" />
     <None Include="packages.config" />
     <None Include="Properties\PublishProfiles\GFAEPICSLOG.pubxml" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
@@ -237,11 +497,22 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Backend\BootInfoAPI.cs" />
     <Compile Include="Backend\Controllers\AnalyzeController.cs" />
     <Compile Include="Backend\Controllers\DiskController.cs" />
     <Compile Include="Backend\Controllers\LogController.cs" />
     <Compile Include="Backend\EqualityComparer.cs" />
     <Compile Include="Backend\Helpers.cs" />
+    <Compile Include="Connected Services\Inventory.Controller\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Connected Services\Inventory\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
     <Compile Include="DataAccess.Analyze.asmx.cs">
       <DependentUpon>DataAccess.asmx</DependentUpon>
       <SubType>Component</SubType>
@@ -286,6 +557,7 @@
     <TypeScriptCompile Include="Frontend\DTOs\KeyValuePair.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\LogEntry.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\SearchRequest.ts" />
+    <TypeScriptCompile Include="Frontend\EpicsDebug.ts" />
     <TypeScriptCompile Include="Frontend\LineGraph.ts" />
     <TypeScriptCompile Include="Frontend\Live.ts" />
     <TypeScriptCompile Include="Frontend\Main.ts" />
@@ -304,6 +576,13 @@
       <Project>{6e617deb-8f84-45cf-913e-3258203fda50}</Project>
       <Name>LogFileHandling</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Connected Services\Inventory.Controller\" />
+    <WCFMetadataStorage Include="Connected Services\Inventory\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

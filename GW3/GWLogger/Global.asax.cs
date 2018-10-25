@@ -9,9 +9,14 @@ namespace GWLogger
         public static Backend.DataContext.Context DataContext { get;  }= new Backend.DataContext.Context(System.Configuration.ConfigurationManager.AppSettings["storageDirectory"]);
         public static Live.LiveInformation LiveInformation { get; } = new Live.LiveInformation();
 
+        public static Inventory.DataAccessSoapClient Inventory { get; } = new Inventory.DataAccessSoapClient();
+
+        public static Inventory.Controller.DirectCommandsSoapClient DirectCommands { get; } = new Inventory.Controller.DirectCommandsSoapClient();
 
         protected void Application_Start(object sender, EventArgs e)
         {
+            Inventory.ServerName();
+
             var doc = new HtmlAgilityPack.HtmlDocument();
             doc.LoadHtml(File.ReadAllText(Server.MapPath("/index.html")));
             doc.DocumentNode.SelectNodes("//div")

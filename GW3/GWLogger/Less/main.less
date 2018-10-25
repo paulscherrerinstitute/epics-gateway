@@ -199,6 +199,7 @@ body
     right: 0px;
     bottom: 0px;
     overflow-y: scroll;
+    text-align: justify;
 }
 
 #gatewaySessions
@@ -902,11 +903,11 @@ select
     bottom: 0px;
 }
 
-.topReport
+.topClose
 {
     position: fixed;
     z-index: 1000000;
-    top: 40px;
+    top: 60px;
     right: calc(@errorPanel + 35px);
 }
 
@@ -939,4 +940,56 @@ select
     .button;
     display: none;
     box-shadow: rgba(0,0,0,0.8) 0px 0px 2px;
+}
+
+#dbgEpicsTable
+{
+    width: 500px;
+
+    & tr > td:first-child
+    {
+        font-weight: bold;
+        white-space: nowrap;
+        width: 1%;
+    }
+
+    & input, & td > span
+    {
+        width: 100%;
+    }
+}
+
+.dbgCheckResult
+{
+    display: inline-block;
+    width: ~"calc(25% - 6px)";
+    overflow: hidden;
+    vertical-align: top;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    margin: 3px;
+
+    & table
+    {
+        width: 100%;
+        white-space: nowrap;
+    }
+
+    & table tr > td:first-child
+    {
+        font-weight: bold;
+        width: 1%;
+    }
+}
+
+.dbgSucceed
+{
+    font-weight: bold;
+    color: #007e06;
+}
+
+.dbgFail
+{
+    font-weight: bold;
+    color: #cf0000;
 }
