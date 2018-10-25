@@ -7,7 +7,7 @@ namespace GWLogger.Live
     public class Gateway
     {
         private const int NbHistoricPoint = 500;
-        private const int NbStateAvg = 20;
+        private const int NbStateAvg = 24;
 
         private LiveInformation liveInformation;
 

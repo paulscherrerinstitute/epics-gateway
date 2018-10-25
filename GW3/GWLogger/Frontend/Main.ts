@@ -326,7 +326,7 @@ class Main
                         var val = row.Key;
                         if (tab.getAttribute("split"))
                             val = val.split(tab.getAttribute("split"))[0];
-                        $("#queryField").val($("#queryField").val() + query.replace(/'/g,"\"").replace(/\{0\}/g, val));
+                        $("#queryField").val($("#queryField").val() + query.replace(/'/g, "\"").replace(/\{0\}/g, val));
 
                         $("#logFilter > li")[0].click();
                     });
@@ -701,6 +701,12 @@ class Main
                     Main.MessageTypes[vals[i].Key] = vals[i].Value;
             }
         });
+
+
+        Live.DisplayPaint("#canvas_all_fine", { CPU: 10, Searches: 20, State: 0 });
+        Live.DisplayPaint("#canvas_high_search", { CPU: 10, Searches: 100, State: 0 });
+        Live.DisplayPaint("#canvas_high_cpu", { CPU: 90, Searches: 20, State: 0 });
+        Live.DisplayPaint("#canvas_error", { CPU: 90, Searches: 20, State: 3 });
 
         $("#mainTabs li").click((evt) =>
         {

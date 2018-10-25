@@ -128,15 +128,49 @@
             Each gateway is displayed with a gray circle and some values in the middle, as well as the gateway name under the circle.
             Over the gray circle 2 arcs may appear of different colors. The most external one shows the CPU in percent form, while
             the inner arc one shows number of searches per seconds the gateway receives (up to 100).<br />
+
+            <table>
+                <tr>
+                    <td><canvas id='canvas_all_fine' width='100' height='100'></canvas></td>
+                    <td>A display like this shows that everything is within the nominal range.</td>
+                </tr>
+                <tr>
+                    <td><canvas id='canvas_high_search' width='100' height='100'></canvas></td>
+                    <td>
+                        A display like this shows an high number of searches, but the gateway is not in error as it takes 2 minutes of high number
+                        of searches before the gateway is considered in error.
+                    </td>
+                </tr>
+                <tr>
+                    <td><canvas id='canvas_high_cpu' width='100' height='100'></canvas></td>
+                    <td>
+                        A display like this shows an high CPU usage, but the gateway is not in error as it takes 2 minutes of high CPU load
+                        before the gateway is considered in error.
+                    </td>
+                </tr>
+                <tr>
+                    <td><canvas id='canvas_error' width='100' height='100'></canvas></td>
+                    <td>A display like this shows an high CPU usage and the gateway in error (see the red background in the middle).</td>
+                </tr>
+            </table>
+
             <br />
             By clicking on the gateway, more details of the gateway will be displayed.
+            <h3>Erros</h3>
+            On the right most of the interface a column contains either a green button with the text "No errors" or one or more red buttons.
+            In case a red button replaces the green one, the red button text will be the gateway which is currently on an error state.
+            It's possible to click on the red button to directly jump on the live details view of that particular gateway.
             <h3>Logs</h3>
             <ul>
-                <li>Select the gateway you want to check on the top left side. The gateway sessions are then loaded and displayed on the left bar,
-                as well as the statistics are displayed on the time range widget.</li>
+                <li>
+                    Select the gateway you want to check on the top left side. The gateway sessions are then loaded and displayed on the left bar,
+                    as well as the statistics are displayed on the time range widget.
+                </li>
                 <li>You can click (and drag) the time range widget to check out more details on that time.</li>
-                <li>The time range shows 3 values: top light green bars are the number of event logs, bottom dark green bars are the number of searches,
-                red lines are the number of errors. The graphs uses 3 different scales.</li>
+                <li>
+                    The time range shows 3 values: top light green bars are the number of event logs, bottom dark green bars are the number of searches,
+                    red lines are the number of errors. The graphs uses 3 different scales.
+                </li>
                 <li>Logs uses UTC time (avoiding issue with day light saving time).</li>
                 <li>The current UTC time is displayed on the bottom left corner of the screen.</li>
                 <li>Each bar of the time range is a 10 min range.</li>
