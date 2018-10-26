@@ -96,6 +96,7 @@ namespace GatewayLogic
                       }
                   }
               });
+            checkDeadLock.Priority = ThreadPriority.BelowNormal;
             checkDeadLock.Start();
         }
 
@@ -208,6 +209,7 @@ namespace GatewayLogic
                 MessageLogger = new MessageLogger(Configuration.GatewayName);
 
             updaterThread = new Thread(Updater);
+            updaterThread.Priority = ThreadPriority.BelowNormal;
             updaterThread.IsBackground = true;
             updaterThread.Start();
 

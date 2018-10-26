@@ -114,9 +114,10 @@ namespace GatewayLogic.Services
 
             bufferFlusher = new Thread(FlushLogAsync);
             //bufferFlusher.IsBackground = true;
+            bufferFlusher.Priority = ThreadPriority.Lowest;
             bufferFlusher.Start();
 
-            Thread performanceDisplay = new Thread(() =>
+            /*Thread performanceDisplay = new Thread(() =>
               {
                   while (true)
                   {
@@ -134,7 +135,7 @@ namespace GatewayLogic.Services
                   }
               });
             performanceDisplay.IsBackground = true;
-            performanceDisplay.Start();
+            performanceDisplay.Start();*/
         }
 
         public void MessageLogger_MessageHandler(string remoteIpPoint,
