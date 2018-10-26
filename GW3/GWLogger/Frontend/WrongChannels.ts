@@ -18,7 +18,7 @@
         html += "</table><br/>";
         html += "<span class='button' onclick='WrongChannels.Check()' id='dbgRun'>Run Check</span>";
         html += "</center>";
-        html += "<div id='wrgChannelSearch' class='fixed'>Not yet implemented sorry...</div>";
+        html += "<div id='wrgChannelSearch' class='fixed'></div>";
 
         $("#reportContent").html(html);
 
@@ -31,8 +31,66 @@
 
     static Check()
     {
-        $("#wrgChannelSearch").html("<b>Not yet implemented sorry...</b>");
+        $("#dbgRun").hide();
+        $("#wrgChannelSearch").html("Please wait, loading...");
 
-        //$("#wrgChannelSearch");
+        $.ajax({
+            type: 'POST',
+            url: '/DataAccess.asmx/BadClientConfig',
+            data: JSON.stringify({ gatewayName: $("#dbgGateway").data("kendoDropDownList").value() }),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (msg)
+            {
+                var order = 0;
+                var orderString = null;
+                for (var i = 0; i < msg.d.length; i++)
+                {
+                    if (orderString != msg.d[i].Hostname)
+                    {
+                        order++;
+                        orderString = msg.d[i].Hostname;
+                    }
+                    msg.d[i].SortOrder = order;
+                }
+
+                /*for (var i = 0; i < msg.d.length; i++)
+                    msg.d[i].SortOrder = i;*/
+
+                $("#dbgRun").show();
+                $("#wrgChannelSearch").html("").kendoGrid({
+                    dataSource:
+                    {
+                        schema: {
+                            model: {
+                                fields: {
+                                    SortOrder: { type: "number" },
+                                    Hostname: { type: "string" },
+                                    Channel: { type: "string" },
+                                    Count: { type: "number" }
+                                }
+                            }
+                        },
+                        data: msg.d,
+                        group: { field: "SortOrder", aggregates: [{ field: "Count", aggregate: "sum" }, { field: "Hostname", aggregate: "min" }] },
+                        sort: [{ field: "Count", dir: "desc" }, { field: "Channel", dir: "asc" }]
+                    },
+                    sortable: true,
+                    columns: [
+                        { field: "SortOrder", hidden: true, groupHeaderTemplate: "Hostname: #= aggregates.Hostname.min #, Total Wrong Channels: #= aggregates.Count.sum#" },
+                        { title: "Hostname", field: "Hostname" },
+                        { title: "Channel", field: "Channel" },
+                        { title: "Count", field: "Count" }],
+                    dataBound: function (e)
+                    {
+                        var grid = this;
+                        $(".k-grouping-row").each(function (e)
+                        {
+                            grid.collapseGroup(this);
+                        });
+                    }
+                });
+            }
+        });
     }
 }

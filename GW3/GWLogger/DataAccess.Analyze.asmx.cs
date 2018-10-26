@@ -52,7 +52,7 @@ namespace GWLogger
         [WebMethod]
         public List<KeyValuePair<string, int>> SearchesPerformed(string gatewayName, DateTime datePoint)
         {
-            var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), "type = \"SearchRequest\"", -1, null, null, 0, Context.Response.ClientDisconnectedToken);
+            var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), "type = \"SearchRequest\"", 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
             if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
                 return null;
             var channelName = Global.DataContext.MessageDetailTypes.First(row => row.Value == "ChannelName").Id;
@@ -63,7 +63,7 @@ namespace GWLogger
         [WebMethod]
         public List<KeyValuePair<string, int>> SearchesOnChannelsPerformed(string gatewayName, DateTime datePoint)
         {
-            var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), "type = \"SearchRequest\"", -1, null, null, 0, Context.Response.ClientDisconnectedToken);
+            var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), "type = \"SearchRequest\"", 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
             if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
                 return null;
             var channelName = Global.DataContext.MessageDetailTypes.First(row => row.Value == "ChannelName").Id;
@@ -193,5 +193,68 @@ namespace GWLogger
         {
             return Global.DirectCommands.SendEpicsCommand(config, channel, gatewayName.ToUpper());
         }
+
+        [WebMethod]
+        public List<HostChannelCount> BadClientConfig(string gatewayName)
+        {
+            // Take the last 10 min slot
+            var datePoint = DateTime.UtcNow.Trim();
+
+            var lastEntries = Global.DataContext.ReadLastLogs(gatewayName, 100);
+            // No data, let's try to get the last entries instead
+            if (lastEntries.Last().EntryDate < datePoint)
+                datePoint = lastEntries.Last().EntryDate.Trim();
+
+            var searchData = new List<KeyValuePair<string, string>>();
+            for (var i = 0; i < 3; i++)
+            {
+                var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), "type = \"SearchRequestTooNew\"", 10000, null, null, 0, Context.Response.ClientDisconnectedToken);
+                if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
+                    return null;
+                var channelName = Global.DataContext.MessageDetailTypes.First(row => row.Value == "ChannelName").Id;
+                searchData.AddRange(searches
+                    .Select(row => new KeyValuePair<string, string>
+                    (
+                        row.RemoteIpPoint.Hostname(),
+                        row.LogEntryDetails.First(r2 => r2.DetailTypeId == channelName).Value
+                    )));
+
+                // scroll back in time
+                datePoint = datePoint.AddMinutes(-10);
+            }
+
+            // Extract the data
+            var result = searchData.GroupBy(row => row.Key + ";" + row.Value)
+                .Select(row => new HostChannelCount
+                {
+                    Hostname = row.First().Key,
+                    Channel = row.First().Value,
+                    Count = row.Count()
+                }).ToList();
+            // Find how many faults per hosts
+            var d = result.GroupBy(row => row.Hostname).ToDictionary(key => key.Key, val => val.Sum(r2 => r2.Count));
+            // Order list by faults, then by host,then by channel count, then by channel name
+            result.Sort((a, b) =>
+            {
+                if (d[a.Hostname] > d[b.Hostname])
+                    return -1;
+                if (d[a.Hostname] < d[b.Hostname])
+                    return 1;
+                var h = string.Compare(a.Hostname, b.Hostname, true);
+                if (h != 0)
+                    return h;
+                if (a.Count != b.Count)
+                    return b.Count - a.Count;
+                return string.Compare(a.Channel, b.Channel);
+            });
+            return result;
+        }
+    }
+
+    public class HostChannelCount
+    {
+        public string Hostname { get; set; }
+        public string Channel { get; set; }
+        public int Count { get; set; }
     }
 }
