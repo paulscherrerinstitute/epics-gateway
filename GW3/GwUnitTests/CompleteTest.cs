@@ -1315,7 +1315,7 @@ namespace GwUnitTests
             }
         }
 
-        [TestMethod]
+/*        [TestMethod]
         [Timeout(5000)]
         public void CheckSubArrayMonitorVariableIndex()
         {
@@ -1364,7 +1364,7 @@ namespace GwUnitTests
                     }
                 }
             }
-        }
+        }*/
 
         [TestMethod]
         [Timeout(5000)]
