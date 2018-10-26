@@ -18,7 +18,7 @@
         html += "</table><br/>";
         html += "<span class='button' onclick='WrongChannels.Check()' id='dbgRun'>Run Check</span>";
         html += "</center>";
-        html += "<div id='wrgChannelSearch' class='fixed'></div>";
+        html += "<div id='wrgChannelSearch' class='fixed'>Not yet implemented sorry...</div>";
 
         $("#reportContent").html(html);
 
@@ -31,6 +31,8 @@
 
     static Check()
     {
+        $("#wrgChannelSearch").html("<b>Not yet implemented sorry...</b>");
+
         //$("#wrgChannelSearch");
     }
 }
