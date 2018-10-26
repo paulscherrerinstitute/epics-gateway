@@ -24,12 +24,6 @@ namespace GWLogger.Backend.DataContext
 
         // Logs, Searches, Errors, CPU, PVs, Clients, Servers, MsgSecs
         public long[,] Stats = new long[24 * 6, 8];
-        private FileStream clientSession;
-        private string currentClientSession;
-        private Dictionary<string, SessionLocation> openClientSessions = new Dictionary<string, SessionLocation>();
-        private FileStream serverSession;
-        private string currentServerSession;
-        private Dictionary<string, SessionLocation> openServerSessions = new Dictionary<string, SessionLocation>();
         private static Regex specialChars = new Regex(@"^[a-zA-Z0-9\.,\-\+ \:_\\/\?\*]+$");
 
         private static DateTime _jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -39,8 +33,6 @@ namespace GWLogger.Backend.DataContext
 
         // SourceFilePath
         private static int sourceFilePathId = -1;
-        private FileStream searches;
-        private string currentSearches;
 
         private bool isAtEnd = true;
         private bool mustFlush = false;
@@ -488,241 +480,6 @@ namespace GWLogger.Backend.DataContext
                 Stats[idxPos, 0]++;
                 if (isAnError)
                     Stats[idxPos, 2]++;
-
-                switch (entry.MessageTypeId)
-                {
-                    case 4: // Client session start
-                        if (currentClientSession != FileName(entry.EntryDate, ".clientSessions"))
-                        {
-                            if (clientSession != null)
-                            {
-                                clientSession.Seek(0, SeekOrigin.End);
-                                clientSession.Dispose();
-                            }
-                            currentClientSession = FileName(entry.EntryDate, ".clientSessions");
-                            clientSession = File.Open(FileName(entry.EntryDate, ".clientSessions"), FileMode.OpenOrCreate, FileAccess.ReadWrite);
-                        }
-
-                        using (var writer = new BinaryWriter(clientSession, System.Text.Encoding.UTF8, true))
-                        {
-                            clientSession.Seek(0, SeekOrigin.End);
-                            if (!openClientSessions.ContainsKey(entry.RemoteIpPoint))
-                                openClientSessions.Add(entry.RemoteIpPoint, new SessionLocation
-                                {
-                                    FileName = currentClientSession,
-                                    Position = clientSession.Position
-                                });
-                            writer.Write(entry.EntryDate.ToBinary());
-                            writer.Write(0L);
-                            writer.Write(entry.RemoteIpPoint);
-                        }
-                        break;
-                    case 6: // Client session stop
-                        {
-                            if (openClientSessions.ContainsKey(entry.RemoteIpPoint))
-                            {
-
-                                if (!File.Exists(openClientSessions[entry.RemoteIpPoint].FileName))
-                                    break;
-
-                                if (currentClientSession != openClientSessions[entry.RemoteIpPoint].FileName)
-                                {
-                                    if (clientSession != null)
-                                    {
-                                        clientSession.Seek(0, SeekOrigin.End);
-                                        clientSession.Dispose();
-                                    }
-                                    currentClientSession = openClientSessions[entry.RemoteIpPoint].FileName;
-                                    clientSession = File.Open(openClientSessions[entry.RemoteIpPoint].FileName, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-                                }
-
-                                clientSession.Seek(openClientSessions[entry.RemoteIpPoint].Position + sizeof(long), SeekOrigin.Begin);
-                                using (var writer = new BinaryWriter(clientSession, System.Text.Encoding.UTF8, true))
-                                {
-                                    writer.Write(entry.EntryDate.ToBinary());
-                                }
-
-
-                                openClientSessions.Remove(entry.RemoteIpPoint);
-                                break;
-                            }
-
-                            var dateTried = entry.EntryDate;
-                            var found = false;
-                            while (!found)
-                            {
-                                if (!File.Exists(FileName(dateTried, ".clientSessions")))
-                                    break;
-
-                                if (currentClientSession != FileName(dateTried, ".clientSessions"))
-                                {
-                                    if (clientSession != null)
-                                    {
-                                        clientSession.Seek(0, SeekOrigin.End);
-                                        clientSession.Dispose();
-                                    }
-                                    currentClientSession = FileName(dateTried, ".clientSessions");
-                                    clientSession = File.Open(FileName(dateTried, ".clientSessions"), FileMode.OpenOrCreate, FileAccess.ReadWrite);
-                                }
-                                else
-                                    clientSession.Seek(0, SeekOrigin.Begin);
-
-                                using (var reader = new BinaryReader(clientSession, System.Text.Encoding.UTF8, true))
-                                {
-                                    while (reader.BaseStream.Position < reader.BaseStream.Length)
-                                    {
-                                        reader.ReadInt64();
-                                        var pos = reader.BaseStream.Position;
-                                        var endDate = reader.ReadInt64();
-                                        var client = reader.ReadString();
-                                        if (endDate == 0 && client == entry.RemoteIpPoint)
-                                        {
-                                            using (var writer = new BinaryWriter(clientSession, System.Text.Encoding.UTF8, true))
-                                            {
-                                                writer.BaseStream.Seek(pos, SeekOrigin.Begin);
-                                                writer.Write(entry.EntryDate.ToBinary());
-
-                                                found = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if (!found)
-                                    dateTried = dateTried.AddDays(-1);
-                            }
-                            break;
-                        }
-                    case 39: // Search
-                        {
-                            Stats[idxPos, 1]++;
-                            if (currentSearches != FileName(entry.EntryDate, ".searches"))
-                            {
-                                if (searches != null)
-                                {
-                                    searches.Seek(0, SeekOrigin.End);
-                                    searches.Dispose();
-                                }
-                                currentSearches = FileName(entry.EntryDate, ".searches");
-                                searches = File.Open(FileName(entry.EntryDate, ".searches"), FileMode.OpenOrCreate, FileAccess.ReadWrite);
-                            }
-
-                            using (var writer = new BinaryWriter(searches, System.Text.Encoding.UTF8, true))
-                            {
-                                searches.Seek(0, SeekOrigin.End);
-                                writer.Write(entry.EntryDate.ToBinary());
-                                writer.Write(entry.RemoteIpPoint);
-                                writer.Write((entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == 7)?.Value) ?? "");
-                            }
-                            break;
-                        }
-                    case 55: // Server session start
-                        if (currentServerSession != FileName(entry.EntryDate, ".serverSessions"))
-                        {
-                            if (serverSession != null)
-                            {
-                                serverSession.Seek(0, SeekOrigin.End);
-                                serverSession.Dispose();
-                            }
-                            currentServerSession = FileName(entry.EntryDate, ".serverSessions");
-                            serverSession = File.Open(FileName(entry.EntryDate, ".serverSessions"), FileMode.OpenOrCreate, FileAccess.ReadWrite);
-                        }
-
-                        using (var writer = new BinaryWriter(serverSession, System.Text.Encoding.UTF8, true))
-                        {
-                            serverSession.Seek(0, SeekOrigin.End);
-                            if (!openServerSessions.ContainsKey(entry.RemoteIpPoint))
-                                openServerSessions.Add(entry.RemoteIpPoint, new SessionLocation
-                                {
-                                    FileName = currentServerSession,
-                                    Position = serverSession.Position
-                                });
-                            writer.Write(entry.EntryDate.ToBinary());
-                            writer.Write(0L);
-                            writer.Write(entry.RemoteIpPoint);
-                        }
-                        break;
-                    case 53: // Server session stop
-                        {
-                            if (openServerSessions.ContainsKey(entry.RemoteIpPoint))
-                            {
-
-                                if (!File.Exists(openServerSessions[entry.RemoteIpPoint].FileName))
-                                    break;
-
-                                if (currentServerSession != openServerSessions[entry.RemoteIpPoint].FileName)
-                                {
-                                    if (serverSession != null)
-                                    {
-                                        serverSession.Seek(0, SeekOrigin.End);
-                                        serverSession.Dispose();
-                                    }
-                                    currentServerSession = openServerSessions[entry.RemoteIpPoint].FileName;
-                                    serverSession = File.Open(openServerSessions[entry.RemoteIpPoint].FileName, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-                                }
-
-                                serverSession.Seek(openServerSessions[entry.RemoteIpPoint].Position + sizeof(long), SeekOrigin.Begin);
-                                using (var writer = new BinaryWriter(serverSession, System.Text.Encoding.UTF8, true))
-                                {
-                                    writer.Write(entry.EntryDate.ToBinary());
-                                }
-
-
-                                openServerSessions.Remove(entry.RemoteIpPoint);
-                                break;
-                            }
-
-                            var dateTried = entry.EntryDate;
-                            var found = false;
-                            while (!found)
-                            {
-                                if (!File.Exists(FileName(dateTried, ".serverSessions")))
-                                    break;
-
-                                if (currentServerSession != FileName(dateTried, ".serverSessions"))
-                                {
-                                    if (serverSession != null)
-                                    {
-                                        serverSession.Seek(0, SeekOrigin.End);
-                                        serverSession.Dispose();
-                                    }
-                                    currentServerSession = FileName(dateTried, ".serverSessions");
-                                    serverSession = File.Open(FileName(dateTried, ".serverSessions"), FileMode.OpenOrCreate, FileAccess.ReadWrite);
-                                }
-                                else
-                                    serverSession.Seek(0, SeekOrigin.Begin);
-
-                                using (var reader = new BinaryReader(serverSession, System.Text.Encoding.UTF8, true))
-                                {
-                                    while (reader.BaseStream.Position < reader.BaseStream.Length)
-                                    {
-                                        reader.ReadInt64();
-                                        var pos = reader.BaseStream.Position;
-                                        var endDate = reader.ReadInt64();
-                                        var client = reader.ReadString();
-                                        if (endDate == 0 && client == entry.RemoteIpPoint)
-                                        {
-                                            using (var writer = new BinaryWriter(serverSession, System.Text.Encoding.UTF8, true))
-                                            {
-                                                writer.BaseStream.Seek(pos, SeekOrigin.Begin);
-                                                writer.Write(entry.EntryDate.ToBinary());
-
-                                                found = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if (!found)
-                                    dateTried = dateTried.AddDays(-1);
-                            }
-                            break;
-                        }
-                    default:
-                        break;
-                }
             }
             finally
             {
@@ -857,23 +614,11 @@ namespace GWLogger.Backend.DataContext
                     if (lastFile != currentFile)
                         SetFile(lastFile);
 
-                    /*long pos = 0;
-                    for (var i = Index.Length - 1; i > 0; i--)
-                    {
-                        if (Index[i] != -1)
-                        {
-                            pos = i;
-                            break;
-                        }
-                    }*/
                     isAtEnd = false;
 
                     var streamLength = DataReader.BaseStream.Length;
 
-                    //while (pos >= 0 && result.Count < nbEntries && Index[pos] >= 0)
-                    //{
                     var chunk = new List<LogEntry>();
-                    //DataReader.BaseStream.Seek(Index[pos], SeekOrigin.Begin);
                     // 48 being an average of bytes per entries
                     DataReader.BaseStream.Seek(Math.Max(0, DataReader.BaseStream.Length - 57 * nbEntries), SeekOrigin.Begin);
                     while (DataReader.BaseStream.Position < streamLength)
@@ -884,13 +629,15 @@ namespace GWLogger.Backend.DataContext
                         {
                             chunk.Add(ReadEntry(DataReader, this.CurrentDate.Date, streamLength));
                         }
+                        catch(EndOfStreamException)
+                        {
+                            break;
+                        }
                         catch
                         {
                         }
                     }
                     result.InsertRange(0, chunk);
-                    //pos--;
-                    //}
                 }
 
                 if (result.Count > nbEntries)
@@ -1081,190 +828,6 @@ namespace GWLogger.Backend.DataContext
             return result;
         }
 
-        /*LogEntry ReadEntry(BinaryReader stream)
-        {
-            var result = new LogEntry
-            {
-                EntryDate = DateTime.FromBinary(stream.ReadInt64()).ToUniversalTime(),
-                MessageTypeId = stream.ReadByte(),
-                RemoteIpPoint = stream.ReadString(),
-                LogEntryDetails = new List<LogEntryDetail>()
-            };
-
-            var nbDetails = (int)stream.ReadByte();
-            for (var i = 0; i < nbDetails; i++)
-            {
-                result.LogEntryDetails.Add(new LogEntryDetail
-                {
-                    DetailTypeId = (int)stream.ReadByte(),
-                    Value = stream.ReadString()
-                });
-            }
-
-            return result;
-        }*/
-
-        public List<LogSession> ReadClientSessions(DateTime start, DateTime end)
-        {
-            if (end == start)
-                end = end.AddMinutes(10);
-
-            var result = new List<LogSession>();
-
-            try
-            {
-                LockObject.Wait();
-
-                if (clientSession != null)
-                {
-                    clientSession.Seek(0, SeekOrigin.End);
-                    clientSession.Dispose();
-                    clientSession = null;
-                    currentClientSession = null;
-                }
-
-                var dayStart = new DateTime(start.Year, start.Month, start.Day);
-                /*foreach (var i in Directory.GetFiles(Context.StorageDirectory, gateway.ToLower() + ".*.clientSessions").OrderBy(row => row)                 
-                .Where(row => DateOfFile(row) >= dayStart && DateOfFile(row) <= end))*/
-                foreach (var i in Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.clientSessions").OrderBy(row => row))
-                {
-                    using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read), System.Text.Encoding.UTF8))
-                    {
-                        while (reader.BaseStream.Position < reader.BaseStream.Length)
-                        {
-                            var entryStartDate = DateTime.FromBinary(reader.ReadInt64());
-                            var ed = reader.ReadInt64();
-                            DateTime? entryEndDate;
-                            if (ed == 0)
-                                entryEndDate = null;
-                            else
-                                entryEndDate = DateTime.FromBinary(ed).ToUniversalTime();
-                            var endPoint = reader.ReadString();
-
-                            if ((entryEndDate.HasValue && start <= entryStartDate && end >= entryEndDate.Value) || (!entryEndDate.HasValue && start <= entryStartDate))
-                                result.Add(new LogSession
-                                {
-                                    Start = entryStartDate,
-                                    End = entryEndDate,
-                                    Remote = endPoint
-                                });
-                        }
-                    }
-                }
-            }
-            finally
-            {
-                LockObject.Release();
-            }
-
-            return result.OrderBy(row => row.Start).ThenBy(row => row.Remote).ToList();
-        }
-
-        public List<LogSession> ReadServerSessions(DateTime start, DateTime end)
-        {
-            if (end == start)
-                end = end.AddMinutes(10);
-
-            var result = new List<LogSession>();
-
-            try
-            {
-                LockObject.Wait();
-
-                if (serverSession != null)
-                {
-                    serverSession.Seek(0, SeekOrigin.End);
-                    serverSession.Dispose();
-                    serverSession = null;
-                    currentServerSession = null;
-                }
-
-                var dayStart = new DateTime(start.Year, start.Month, start.Day);
-                /*foreach (var i in Directory.GetFiles(Context.StorageDirectory, gateway.ToLower() + ".*.serverSessions").OrderBy(row => row)
-                    .Where(row => DateOfFile(row) >= dayStart && DateOfFile(row) <= end))*/
-                foreach (var i in Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.serverSessions").OrderBy(row => row))
-                {
-                    using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read), System.Text.Encoding.UTF8))
-                    {
-                        while (reader.BaseStream.Position < reader.BaseStream.Length)
-                        {
-                            var entryStartDate = DateTime.FromBinary(reader.ReadInt64());
-                            var ed = reader.ReadInt64();
-                            DateTime? entryEndDate;
-                            if (ed == 0)
-                                entryEndDate = null;
-                            else
-                                entryEndDate = DateTime.FromBinary(ed);
-                            var endPoint = reader.ReadString();
-
-                            if ((entryEndDate.HasValue && start <= entryStartDate && end >= entryEndDate.Value) || (!entryEndDate.HasValue && start <= entryStartDate))
-                                result.Add(new LogSession
-                                {
-                                    Start = entryStartDate,
-                                    End = entryEndDate,
-                                    Remote = endPoint
-                                });
-                        }
-                    }
-                }
-            }
-            finally
-            {
-                LockObject.Release();
-            }
-
-            return result.OrderBy(row => row.Start).ThenBy(row => row.Remote).ToList();
-        }
-
-        public List<SearchEntry> ReadSearches(DateTime start, DateTime end)
-        {
-            if (end == start)
-                end = end.AddMinutes(10);
-            var result = new List<SearchEntry>();
-
-            try
-            {
-                LockObject.Wait();
-
-                if (searches != null)
-                {
-                    searches.Seek(0, SeekOrigin.End);
-                    searches.Dispose();
-                    searches = null;
-                    currentSearches = null;
-                }
-                var dayStart = new DateTime(start.Year, start.Month, start.Day);
-
-                foreach (var i in Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.searches")
-                    .OrderBy(row => row)
-                    .Where(row => DateOfFile(row) >= dayStart && DateOfFile(row) <= end))
-                {
-                    using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read), System.Text.Encoding.UTF8))
-                    {
-                        while (reader.BaseStream.Position < reader.BaseStream.Length)
-                        {
-                            var entry = new SearchEntry
-                            {
-                                Date = DateTime.FromBinary(reader.ReadInt64()),
-                                Remote = reader.ReadString(),
-                                Channel = reader.ReadString()
-                            };
-
-
-                            if (entry.Date >= start && entry.Date <= end)
-                                result.Add(entry);
-                        }
-                    }
-                }
-            }
-            finally
-            {
-                LockObject.Release();
-            }
-
-            return result.OrderBy(row => row.Channel).ToList();
-        }
-
         public GatewayStats GetStats(DateTime start, DateTime end)
         {
             var result = new GatewayStats
@@ -1328,31 +891,6 @@ namespace GWLogger.Backend.DataContext
             file.Seek(0, SeekOrigin.End);
 
             SaveStats();
-
-            if (clientSession != null)
-            {
-                clientSession.Seek(0, SeekOrigin.End);
-                clientSession.Dispose();
-                clientSession = null;
-                currentClientSession = null;
-            }
-            openClientSessions.Clear();
-
-            if (serverSession != null)
-            {
-                serverSession.Seek(0, SeekOrigin.End);
-                serverSession.Dispose();
-                serverSession = null;
-                currentServerSession = null;
-            }
-            openServerSessions.Clear();
-
-            if (currentSearches != null)
-            {
-                searches.Dispose();
-                searches = null;
-                currentSearches = null;
-            }
 
             if (currentFile != null)
             {

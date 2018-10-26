@@ -311,28 +311,6 @@ namespace GWLogger.Backend.DataContext
             return files.Select(row => row.GetLogsStats()).OrderBy(row => row.Name).ToList();
         }
 
-
-        public List<LogSession> ReadClientSessions(string gatewayName, DateTime start, DateTime end)
-        {
-            if (!files.Exists(gatewayName))
-                return null;
-            return files[gatewayName].ReadClientSessions(start, end);
-        }
-
-        public List<LogSession> ReadServerSessions(string gatewayName, DateTime start, DateTime end)
-        {
-            if (!files.Exists(gatewayName))
-                return null;
-            return files[gatewayName].ReadServerSessions(start, end);
-        }
-
-        public List<SearchEntry> ReadSearches(string gatewayName, DateTime start, DateTime end)
-        {
-            if (!files.Exists(gatewayName))
-                return null;
-            return files[gatewayName].ReadSearches(start, end);
-        }
-
         public void CleanOlderThan(int nbDays = 10)
         {
             if (!System.Diagnostics.Debugger.IsAttached)
