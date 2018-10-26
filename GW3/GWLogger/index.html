@@ -123,7 +123,7 @@
         <div id="helpContent">
             <h1>Welcome to the CAESAR</h1>
             <h2>Why CAESAR?</h2>
-            CAESAR stands for CA EPICS Spy (the last AR are there just because).
+            CAESAR stands for <b>CA</b> <b>EPICS</b> <b>S</b>py <b>A</b>nd <b>R</b>eport.
             <h2>How to use it:</h2>
             On top most of the interface some tabs are available (Status, Logs, Help). By clicking on them the interface switch in the different modes.
 
@@ -194,6 +194,9 @@
             channels has been searched on a given gateway and didn't returned any result. The result is grouped by client hostname where the top most
             demanding client is shown on top. To expand a group you have to click on the triangle which will then show all the channels requested by that
             particular client.
+            <h2>Web Notifications</h2>
+            It is possible to let the web application emit a sound and a notification in case of error. To enable it, use the hamburger menu
+            (on the top left) and then the "Enable Notifications".
             <h2>Data retention:</h2>
             Data is kept for a max. time of 5 days.
             <div class="button topClose" onclick="$('#helpView').hide();">Close</div>
@@ -201,11 +204,15 @@
     </div>
     <div id="hamburgerMenu">
         <div onclick="WrongChannels.Show()">Check Wrong Channels</div>
+        <div onclick="Notifications.Enable()">Enable Notifications</div>
         <div onclick="EpicsDebug.Show()">EPICS Debug</div>
         <div onclick="Main.GWVersions()">Gateway Versions</div>
         <div onclick="Main.LogStatistics()">Log Statistics</div>
         <!--<div>Subscription</div>-->
     </div>
+    <audio controls="controls" id="notificationSound" hidden="hidden">
+        <source src="ding_ding.mp3" type="audio/mpeg" />
+    </audio>
     <script src="Scripts/jquery-3.3.1.min.js"></script>
     <script src="Scripts/kendo.all.min.js"></script>
     <script src="main.js"></script>

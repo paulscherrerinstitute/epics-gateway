@@ -354,6 +354,7 @@
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
+    <Content Include="ding_ding.mp3" />
     <Content Include="favicon-16x16.png" />
     <Content Include="favicon-32x32.png" />
     <Content Include="favicon.ico" />
@@ -566,6 +567,7 @@
     <TypeScriptCompile Include="Frontend\LineGraph.ts" />
     <TypeScriptCompile Include="Frontend\Live.ts" />
     <TypeScriptCompile Include="Frontend\Main.ts" />
+    <TypeScriptCompile Include="Frontend\Notifications.ts" />
     <TypeScriptCompile Include="Frontend\StatsBarGraph.ts" />
     <TypeScriptCompile Include="Frontend\Query.ts" />
     <TypeScriptCompile Include="Frontend\State.ts" />

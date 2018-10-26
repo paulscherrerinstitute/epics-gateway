@@ -22,6 +22,7 @@ class Live
     static searchesChart: LineGraph;
     static pvsChart: LineGraph;
     static mustUpdate: number = 0;
+    static currentErrors: string[] = [];
 
     static InitShortDisplay()
     {
@@ -164,13 +165,22 @@ class Live
                     return 0;
                 });
 
+                var errorDisplayed = false;
+                var newErrors: string[] = [];
                 var html = "";
                 for (var i = 0; i < Live.shortInfo.length; i++)
                 {
                     if (Live.shortInfo[i].State < 3)
                         continue;
+                    if ((!Live.currentErrors || Live.currentErrors.indexOf(Live.shortInfo[i].Name) == -1) && errorDisplayed == false)
+                    {
+                        errorDisplayed = true;
+                        Notifications.Show(Live.shortInfo[i].Name + " is on error.");
+                    }
+                    newErrors.push(Live.shortInfo[i].Name);
                     html += "<a href='/Status/" + Live.shortInfo[i].Name + "'>" + Live.shortInfo[i].Name + "</a>";
                 }
+                Live.currentErrors = newErrors;
                 if (html == "")
                     html = "<span>No errors</span>";
                 $("#errorsContent").html(html);
