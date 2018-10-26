@@ -568,6 +568,7 @@
     <TypeScriptCompile Include="Frontend\Query.ts" />
     <TypeScriptCompile Include="Frontend\State.ts" />
     <TypeScriptCompile Include="Frontend\Utils.ts" />
+    <TypeScriptCompile Include="Frontend\WrongChannels.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\kendo\kendo.all.d.ts" />
   </ItemGroup>

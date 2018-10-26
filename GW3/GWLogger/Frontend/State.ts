@@ -129,12 +129,22 @@
         //Main.DelayedSearch(Main.LoadLogStats, true);
     }
 
-    static lastSave: Date = null;
+    static setStateTimeout: number;
+
     static Set(force: boolean = false)
     {
-        if (force == false && State.lastSave && ((new Date()).getTime() - this.lastSave.getTime()) < 5000)
-            return;
-        State.lastSave = new Date();
+        if (State.setStateTimeout)
+            clearTimeout(State.setStateTimeout);
+        State.setStateTimeout = null;
+        if (force)
+            State.DoSet();
+        else
+            setTimeout(State.DoSet, 200);
+    }
+
+    static DoSet()
+    {
+        State.setStateTimeout = null;
         var params = "";
         if (Main.Path == "GW")
         {
