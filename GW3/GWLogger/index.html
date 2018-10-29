@@ -106,9 +106,6 @@
             </ul>
             <div id="logsContent" class="listContent"></div>
         </div>
-        <div id="utcTime"></div>
-        <div id="bufferSpace"></div>
-        <div id="freeSpace"></div>
         <div id="querySuggestions"></div>
         <div id="detailInfo"></div>
         <div id="showLastBtn">Last entries</div>
@@ -119,6 +116,9 @@
         <div id="reportContent" class="fixed"></div>
     </div>
     <div id="errorsView"><div id="errorsContent"></div></div>
+    <div id="bufferSpace"></div>
+    <div id="freeSpace"></div>
+    <div id="currentTime"></div>
     <div id="helpView">
         <div id="helpContent">
             <h1>Welcome to the CAESAR</h1>
@@ -181,7 +181,7 @@
             </ul>
             <h2>Queries:</h2>
             <div id="queriesHelp"></div>
-            <h2>EPICS Debug:</h2>
+            <h2>EPICS Debug tool:</h2>
             By clicking on the hamburger menu (on the top left) and then on the entry "EPICS Debug" it is possible to try to debug if
             there is an error with a gateway or if the gateway seems to react in an abnormal way.<br />
             <br />
@@ -197,8 +197,30 @@
             <h2>Web Notifications</h2>
             It is possible to let the web application emit a sound and a notification in case of error. To enable it, use the hamburger menu
             (on the top left) and then the "Enable Notifications".
+            <h2>Alert Subscription</h2>
+            The site allows to subscribe to alerts. To enable it, use the hamburder menu (on the top left) and then the "Alert Subscription" page.
+            Choose all the gateways you are interested in, and press the "Save" button at the bottom.
             <h2>Data retention:</h2>
             Data is kept for a max. time of 5 days.
+            <h1>How to debug EPICS</h1>
+            Due to the distributed nature of EPICS, the problem can be on one or more of the following point:
+            <ul>
+                <li>EPICS Client configuration (environement variables)</li>
+                <li>Client side (Eg. caQtDM)</li>
+                <li>EPICS Gateway</li>
+                <li>EPICS Server (Eg. IOC)</li>
+            </ul>
+            In some case a single request will need to pass multiple gateways, and therefore makes the debugging yet even more complex.<br />
+            <br />
+            Therefore to debug an EPICS issue follow the following checklist:
+            <ul>
+                <li>Make sure the environement variables are set correctly (Eg. cam / cao / cahipa etc.)</li>
+                <li>Make sure the channel you want to connect to really exists (check it on the same network as the IOC)</li>
+                <li>Make sure the channel is not blocked by the gateway due to some naming issue.</li>
+                <li>Use the Debug tool included in this web site.</li>
+                <li>Make sure you are using a gateway to reach that channel (if the IOC runs on the same network as you are, then no gateways are involved)</li>
+                <li>If it still doesn't work report the issue specifying which channel doesn't work, on which network you are and on which network the IOC running the channel is.</li>
+            </ul>
             <div class="button topClose" onclick="$('#helpView').hide();">Close</div>
         </div>
     </div>

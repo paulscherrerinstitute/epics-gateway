@@ -504,38 +504,45 @@ class Main
         $("#detailInfo").hide();
     }
 
+    static lastRefresh: number = 0;
     static Refresh()
     {
+        var now = new Date();
+        $("#currentTime").html(("" + now.getUTCHours()).padLeft("0", 2) + ":" + ("" + now.getUTCMinutes()).padLeft("0", 2) + ":" + ("" + now.getUTCSeconds()).padLeft("0", 2));
+        if (Main.lastRefresh == 1)
+        {
+            Main.lastRefresh = 0;
+            return;
+        }
+        Main.lastRefresh++;
+
+        $.ajax({
+            type: 'POST',
+            url: 'DataAccess.asmx/GetFreeSpace',
+            data: JSON.stringify({}),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (msg)
+            {
+                var free = <FreeSpace>msg.d;
+                $("#freeSpace").html("" + (Math.round(free.FreeMB * 1000 / free.TotMB) / 10) + "%");
+            }
+        });
+
+        $.ajax({
+            type: 'POST',
+            url: 'DataAccess.asmx/GetBufferUsage',
+            data: JSON.stringify({}),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (msg)
+            {
+                $("#bufferSpace").html("" + msg.d + "%");
+            }
+        });
+
         if (Main.Path == "GW")
         {
-            var now = new Date();
-            $("#utcTime").html(("" + now.getUTCHours()).padLeft("0", 2) + ":" + ("" + now.getUTCMinutes()).padLeft("0", 2) + ":" + ("" + now.getUTCSeconds()).padLeft("0", 2));
-
-            $.ajax({
-                type: 'POST',
-                url: 'DataAccess.asmx/GetFreeSpace',
-                data: JSON.stringify({}),
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'json',
-                success: function (msg)
-                {
-                    var free = <FreeSpace>msg.d;
-                    $("#freeSpace").html("" + (Math.round(free.FreeMB * 1000 / free.TotMB) / 10) + "%");
-                }
-            });
-
-            $.ajax({
-                type: 'POST',
-                url: 'DataAccess.asmx/GetBufferUsage',
-                data: JSON.stringify({}),
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'json',
-                success: function (msg)
-                {
-                    $("#bufferSpace").html("" + msg.d + "%");
-                }
-            });
-
             if (Main.CurrentGateway)
             {
                 Main.LoadSessions();
@@ -759,7 +766,7 @@ class Main
         $("#gatewaySelector").on("change", Main.GatewayChanged);
         $(window).on("resize", Main.Resize);
         $("#timeRangeCanvas").on("mousedown", StatsBarGraph.TimeLineSelected);
-        window.setInterval(Main.Refresh, 2000);
+        window.setInterval(Main.Refresh, 1000);
         $(window).bind('popstate', State.Pop);
         $("#prevDay").click(() =>
         {

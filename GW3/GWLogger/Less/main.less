@@ -112,7 +112,7 @@ body
     left: 0px;
     top: 0px;
     width: @leftSidebar;
-    bottom: 120px + @borderSpacing * 4;
+    bottom: 5px;
     padding: 5px;
     padding-top: 17px;
     overflow: hidden;
@@ -180,7 +180,7 @@ body
     top: 35px;
     left: 0px;
     right: calc(@errorPanel + 10);
-    bottom: 5px;
+    bottom: 0px;
     overflow-y: hidden;
     display: none;
 
@@ -419,40 +419,6 @@ select
     {
         .containterLabel;
         content: "UTC Time";
-    }
-}
-
-#freeSpace
-{
-    .container;
-    bottom: @borderSpacing;
-    width: @leftSidebar;
-    left: 0px;
-    height: 40px;
-    padding-top: 20px;
-    text-align: center;
-
-    &:after
-    {
-        .containterLabel;
-        content: "Free DB Space";
-    }
-}
-
-#bufferSpace
-{
-    .container;
-    bottom: @borderSpacing * 2 + 40px;
-    width: @leftSidebar;
-    left: 0px;
-    height: 40px;
-    padding-top: 20px;
-    text-align: center;
-
-    &:after
-    {
-        .containterLabel;
-        content: "Buffer";
     }
 }
 
@@ -773,7 +739,7 @@ select
     top: 35px;
     right: 0px;
     width: calc(@errorPanel+4px);
-    bottom: 5px;
+    bottom: 125px;
     overflow: hidden;
     .container;
 
@@ -821,6 +787,58 @@ select
         text-align: right;
     }
 }
+
+#currentTime
+{
+    .container;
+    bottom: 5px;
+    right: 0px;
+    height: 35px;
+    width: calc(@errorPanel+4px);
+    padding-top: 17px;
+    text-align: center;
+
+    &:after
+    {
+        .containterLabel;
+        content: "UTC Time";
+    }
+}
+
+#freeSpace
+{
+    .container;
+    bottom: 85px;
+    right: 0px;
+    height: 35px;
+    width: calc(@errorPanel+4px);
+    padding-top: 17px;
+    text-align: center;
+
+    &:after
+    {
+        .containterLabel;
+        content: "Free DB Space";
+    }
+}
+
+#bufferSpace
+{
+    .container;
+    bottom: 45px;
+    right: 0px;
+    height: 35px;
+    width: calc(@errorPanel+4px);
+    padding-top: 17px;
+    text-align: center;
+
+    &:after
+    {
+        .containterLabel;
+        content: "Buffer";
+    }
+}
+
 
 #detailsButtons
 {
