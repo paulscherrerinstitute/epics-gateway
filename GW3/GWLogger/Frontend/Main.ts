@@ -703,7 +703,7 @@ class Main
 
 
         Live.DisplayPaint("#canvas_all_fine", { CPU: 10, Searches: 20, State: 0 });
-        Live.DisplayPaint("#canvas_high_search", { CPU: 10, Searches: 100, State: 0 });
+        Live.DisplayPaint("#canvas_high_search", { CPU: 10, Searches: 291, State: 0 });
         Live.DisplayPaint("#canvas_high_cpu", { CPU: 90, Searches: 20, State: 0 });
         Live.DisplayPaint("#canvas_error", { CPU: 90, Searches: 20, State: 3 });
 

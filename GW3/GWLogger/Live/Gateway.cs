@@ -46,7 +46,7 @@ namespace GWLogger.Live
             nbServers = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NBSERVERS");
         }
 
-        internal void UpdateGraph()
+        internal void UpdateGateway()
         {
             lock (cpuHistory)
             {
@@ -205,7 +205,8 @@ namespace GWLogger.Live
         {
             get
             {
-                if (CpuHistory.Count == 0)
+                // We need to wait till we have enough data before sending an error
+                if (CpuHistory.Count < NbStateAvg)
                     return 0;
                 var lasts = ((IEnumerable<HistoricData>)CpuHistory).Reverse().Take(NbStateAvg);
                 if (!(lasts.First().Value.HasValue || lasts.Count(l => l.Value.HasValue) >= lasts.Count() / 2))
@@ -232,7 +233,8 @@ namespace GWLogger.Live
         {
             get
             {
-                if (CpuHistory.Count == 0)
+                // We need to wait till we have enough data before sending an error
+                if (SearchHistory.Count < NbStateAvg)
                     return 0;
                 var lasts = ((IEnumerable<HistoricData>)SearchHistory).Reverse().Take(NbStateAvg);
                 if (!(lasts.First().Value.HasValue || lasts.Count(l => l.Value.HasValue) >= lasts.Count() / 2))
@@ -240,11 +242,11 @@ namespace GWLogger.Live
                 try
                 {
                     var avg = lasts.Where(row => row.Value.HasValue).Average(row => Math.Min(150, row.Value.Value));
-                    if (avg > 90)
+                    if (avg > 290)
                         return 3;
-                    if (avg > 50)
+                    if (avg > 190)
                         return 2;
-                    if (avg > 30)
+                    if (avg > 90)
                         return 1;
                     return 0;
                 }

@@ -123,7 +123,7 @@
         <div id="helpContent">
             <h1>Welcome to the CAESAR</h1>
             <h2>Why CAESAR?</h2>
-            CAESAR stands for <b>CA</b> <b>EPICS</b> <b>S</b>py <b>A</b>nd <b>R</b>eport.
+            CAESAR stands for <b>CA</b> <b>E</b>PICS <b>S</b>py <b>A</b>nd <b>R</b>eport.
             <h2>How to use it:</h2>
             On top most of the interface some tabs are available (Status, Logs, Help). By clicking on them the interface switch in the different modes.
 
@@ -208,8 +208,9 @@
         <div onclick="EpicsDebug.Show()">EPICS Debug</div>
         <div onclick="Main.GWVersions()">Gateway Versions</div>
         <div onclick="Main.LogStatistics()">Log Statistics</div>
-        <!--<div>Subscription</div>-->
+        <div onclick="Subscription.Show()">Alert Subscription</div>
     </div>
+    <span id="popupNotification"></span>
     <audio controls="controls" id="notificationSound" hidden="hidden">
         <source src="ding_ding.mp3" type="audio/mpeg" />
     </audio>

@@ -74,6 +74,8 @@
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data.Entity" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.DirectoryServices.Protocols" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Threading.Tasks.Dataflow, Version=4.6.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -107,6 +109,7 @@
     <None Include="Connected Services\Inventory\DataAccess.disco" />
     <None Include="Connected Services\Inventory\configuration91.svcinfo" />
     <None Include="Connected Services\Inventory\configuration.svcinfo" />
+    <Content Include="AuthAccess\AuthService.asmx" />
     <Content Include="Connected Services\Inventory\GWLogger.Inventory.ActiveDirectoryGroup.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Content>
@@ -503,6 +506,11 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AuthAccess\AlertSubscription.cs" />
+    <Compile Include="AuthAccess\AuthService.asmx.cs">
+      <DependentUpon>AuthService.asmx</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Backend\BootInfoAPI.cs" />
     <Compile Include="Backend\Controllers\AnalyzeController.cs" />
     <Compile Include="Backend\Controllers\DiskController.cs" />
@@ -571,6 +579,7 @@
     <TypeScriptCompile Include="Frontend\StatsBarGraph.ts" />
     <TypeScriptCompile Include="Frontend\Query.ts" />
     <TypeScriptCompile Include="Frontend\State.ts" />
+    <TypeScriptCompile Include="Frontend\Subscription.ts" />
     <TypeScriptCompile Include="Frontend\Utils.ts" />
     <TypeScriptCompile Include="Frontend\WrongChannels.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />

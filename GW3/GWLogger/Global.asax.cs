@@ -6,7 +6,8 @@ namespace GWLogger
 {
     public class Global : System.Web.HttpApplication
     {
-        public static Backend.DataContext.Context DataContext { get;  }= new Backend.DataContext.Context(System.Configuration.ConfigurationManager.AppSettings["storageDirectory"]);
+        public static string StorageDirectory { get; } = System.Configuration.ConfigurationManager.AppSettings["storageDirectory"];
+        public static Backend.DataContext.Context DataContext { get; } = new Backend.DataContext.Context(StorageDirectory);
         public static Live.LiveInformation LiveInformation { get; } = new Live.LiveInformation();
 
         public static Inventory.DataAccessSoapClient Inventory { get; } = new Inventory.DataAccessSoapClient();

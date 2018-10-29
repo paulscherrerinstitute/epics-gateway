@@ -250,16 +250,16 @@ class Live
         // Searches
         ctx.beginPath();
         ctx.lineWidth = 5;
-        if (info.Searches > 90)
+        if (info.Searches > 290)
             ctx.strokeStyle = "#E00000";
-        else if (info.Searches > 50)
+        else if (info.Searches > 190)
             ctx.strokeStyle = "#ff8300";
-        else if (info.Searches > 30)
+        else if (info.Searches > 90)
             ctx.strokeStyle = "#ffe500";
         else
             ctx.strokeStyle = "#00E000";
         ctx.lineCap = "round";
-        ctx.arc(50, 50, 39, 1.5 * Math.PI, 1.5 * Math.PI + (2 * Math.PI) * Math.min(100, (info.Searches ? info.Searches : 0)) / 100);
+        ctx.arc(50, 50, 39, 1.5 * Math.PI, 1.5 * Math.PI + (2 * Math.PI) * Math.min(300, (info.Searches ? info.Searches : 0)) / 300);
         ctx.stroke();
 
         // CPU
