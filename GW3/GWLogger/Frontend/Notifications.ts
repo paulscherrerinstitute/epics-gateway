@@ -52,6 +52,14 @@
         (<HTMLAudioElement>$("#notificationSound")[0]).play();
 
         Notifications.notification = new Notification("CAESAR", { icon: '/favicon-32x32.png', body: text, silent: false });
+        Notifications.notification.onclick = (x) =>
+        {
+            window.focus();
+            Notifications.notification.close();
+            Notifications.notification = null;
+            clearTimeout(Notifications.notificationTimeout);
+            Notifications.notificationTimeout = null;
+        };
         Notifications.notificationTimeout = setTimeout(Notifications.Close, 4000);
     }
 

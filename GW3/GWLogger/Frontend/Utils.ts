@@ -79,6 +79,41 @@ String.prototype.id = function ()
         .replace(/\(/g, "_").replace(/\)/g, "_").replace(/\&/g, "_").replace(/,/g, "_").replace(/\=/g, "_");
 }
 
+interface Array<T>
+{
+    /**
+    * Escape the string for a "value" attribute.
+    */
+    sum(prop?: string): number;
+    mean(prop?: string): number;
+}
+
+Array.prototype.sum = function (prop?: string): number
+{
+    var total = 0
+    for (var i = 0, _len = this.length; i < _len; i++)
+    {
+        if (prop)
+            total += this[i][prop]
+        else
+            total += this[i]
+    }
+    return total;
+}
+
+Array.prototype.mean = function (prop?: string): number
+{
+    var total = 0
+    for (var i = 0, _len = this.length; i < _len; i++)
+    {
+        if (prop)
+            total += this[i][prop]
+        else
+            total += this[i]
+    }
+    return total / this.length;
+}
+
 
 function isString(variable)
 {

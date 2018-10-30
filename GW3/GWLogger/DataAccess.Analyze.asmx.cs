@@ -249,6 +249,12 @@ namespace GWLogger
             });
             return result;
         }
+
+        [WebMethod]
+        public List<Backend.DTOs.GatewayStats> GetAllStats(string gatewayName)
+        {
+            return Global.DataContext.GetStats(gatewayName);
+        }
     }
 
     public class HostChannelCount

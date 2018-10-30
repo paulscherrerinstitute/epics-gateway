@@ -146,6 +146,14 @@ namespace GWLogger.Backend.DataContext
 
         public double BufferUsage => Math.Round(bufferedEntries.Count * 10000.0 / MaxBufferedEntries) / 100;
 
+        public List<GatewayStats> GetStats(string gatewayName)
+        {
+            if (!files.Exists(gatewayName))
+                return null;
+            return files[gatewayName].GetStats();
+        }
+
+
         public GatewayStats GetStats(string gatewayName, DateTime start, DateTime end)
         {
             if (!files.Exists(gatewayName))

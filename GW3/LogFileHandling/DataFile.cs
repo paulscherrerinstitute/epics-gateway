@@ -111,7 +111,7 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        public static bool Exists(string storageDirectory,string gatewayName)
+        public static bool Exists(string storageDirectory, string gatewayName)
         {
             if (string.IsNullOrWhiteSpace(gatewayName))
                 return false;
@@ -629,7 +629,7 @@ namespace GWLogger.Backend.DataContext
                         {
                             chunk.Add(ReadEntry(DataReader, this.CurrentDate.Date, streamLength));
                         }
-                        catch(EndOfStreamException)
+                        catch (EndOfStreamException)
                         {
                             break;
                         }
@@ -828,6 +828,64 @@ namespace GWLogger.Backend.DataContext
             return result;
         }
 
+        public List<GatewayStats> GetStats()
+        {
+            var result = new List<GatewayStats>();
+
+            try
+            {
+                LockObject.Wait();
+
+                foreach (var i in Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.stats")
+                .OrderBy(row => row))
+                {
+                    var entry = new GatewayStats
+                    {
+                        Searches = new List<LogStat>(),
+                        Logs = new List<LogStat>(),
+                        Errors = new List<LogStat>(),
+                        CPU = new List<LogStat>(),
+                        PVs = new List<LogStat>(),
+                        Clients = new List<LogStat>(),
+                        Servers = new List<LogStat>(),
+                        MsgSecs = new List<LogStat>()
+                    };
+
+                    var stats = new List<LogStat>[] { entry.Logs, entry.Searches, entry.Errors, entry.CPU, entry.PVs, entry.Clients, entry.Servers, entry.MsgSecs };
+
+                    using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read)))
+                    {
+                        try
+                        {
+                            var nbColsAvailable = reader.BaseStream.Length / (sizeof(long) * Stats.GetLength(0));
+
+                            for (var s = 0; s < Math.Min(nbColsAvailable, Stats.GetLength(1)); s++)
+                                for (var j = 0; j < Stats.GetLength(0); j++)
+                                    stats[s].Add(new LogStat { Date = DateOfFile(i).AddMinutes(10 * j), Value = reader.ReadInt64() });
+
+                            // Fill with 0
+                            for (var s = nbColsAvailable; s < Stats.GetLength(1); s++)
+                                for (var j = 0; j < Stats.GetLength(0); j++)
+                                    stats[s].Add(new LogStat { Date = DateOfFile(i).AddMinutes(10 * j), Value = 0 });
+
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                    result.Add(entry);
+
+                }
+            }
+            finally
+            {
+                LockObject.Release();
+            }
+
+            return result;
+        }
+
         public GatewayStats GetStats(DateTime start, DateTime end)
         {
             var result = new GatewayStats
@@ -859,7 +917,30 @@ namespace GWLogger.Backend.DataContext
                     {
                         try
                         {
-                            for (var s = 0; s < Stats.GetLength(1); s++)
+                            var nbColsAvailable = reader.BaseStream.Length / (sizeof(long) * Stats.GetLength(0));
+
+                            for (var s = 0; s < Math.Min(nbColsAvailable, Stats.GetLength(1)); s++)
+                            {
+                                for (var j = 0; j < Stats.GetLength(0); j++)
+                                {
+                                    var t = DateOfFile(i).AddMinutes(10 * j);
+                                    if (t >= start && t <= end)
+                                        stats[s].Add(new LogStat { Date = t, Value = reader.ReadInt64() });
+                                }
+                            }
+
+                            // Fill with 0
+                            for (var s = nbColsAvailable; s < Stats.GetLength(1); s++)
+                            {
+                                for (var j = 0; j < Stats.GetLength(0); j++)
+                                {
+                                    var t = DateOfFile(i).AddMinutes(10 * j);
+                                    if (t >= start && t <= end)
+                                        stats[s].Add(new LogStat { Date = t, Value = 0 });
+                                }
+                            }
+
+                            /*for (var s = 0; s < Stats.GetLength(1); s++)
                             {
                                 for (var j = 0; j < Stats.GetLength(0); j++)
                                 {
@@ -868,7 +949,7 @@ namespace GWLogger.Backend.DataContext
                                     if (t >= start && t <= end)
                                         stats[s].Add(new LogStat { Date = t, Value = v });
                                 }
-                            }
+                            }*/
                         }
                         catch
                         {
