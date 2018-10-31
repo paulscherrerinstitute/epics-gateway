@@ -208,9 +208,19 @@ namespace GWLogger
             var searchData = new List<KeyValuePair<string, string>>();
             for (var i = 0; i < 3; i++)
             {
-                var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), "type = \"SearchRequestTooNew\"", 10000, null, null, 0, Context.Response.ClientDisconnectedToken);
                 if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
                     return null;
+                List<Backend.DataContext.LogEntry> searches = null;
+                try
+                {
+                    searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), "type = \"SearchRequestTooNew\"", 10000, null, null, 0, Context.Response.ClientDisconnectedToken);
+                }
+                catch
+                {
+                }
+                if (searches == null || searches.Count == 0)
+                    continue;
+
                 var channelName = Global.DataContext.MessageDetailTypes.First(row => row.Value == "ChannelName").Id;
                 searchData.AddRange(searches
                     .Select(row => new KeyValuePair<string, string>

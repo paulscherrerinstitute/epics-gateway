@@ -99,6 +99,10 @@
             success: function (msg)
             {
                 Notifications.Popup("Subscriptions updated.");
+            },
+            error: function (msg, textStatus)
+            {
+                Notifications.Popup("Error: " + msg.responseText, "error");
             }
         });
     }

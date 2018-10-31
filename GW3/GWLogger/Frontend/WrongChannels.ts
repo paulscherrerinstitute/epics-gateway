@@ -90,6 +90,11 @@
                         });
                     }
                 });
+            },
+            error: function (msg, textStatus)
+            {
+                $("#dbgRun").show();
+                $("#wrgChannelSearch").html("Error: " + msg.responseText);
             }
         });
     }

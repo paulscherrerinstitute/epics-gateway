@@ -3,12 +3,12 @@
     static notification: Notification = null;
     static notificationTimeout: number = null;
 
-    static Popup(message: string)
+    static Popup(message: string, type: string = "info")
     {
         if (!$("#popupNotification").data("kendoNotification"))
             $("#popupNotification").kendoNotification();
         var popup = $("#popupNotification").data("kendoNotification");
-        popup.show(message, "info");
+        popup.show(message, type);
     }
 
     static Enable()
