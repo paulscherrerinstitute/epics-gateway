@@ -9,6 +9,7 @@ namespace GatewayLogic.Services
     {
         private readonly SafeLock dictionaryLock = new SafeLock();
         private readonly Dictionary<string, ChannelInformationDetails> dictionary = new Dictionary<string, ChannelInformationDetails>();
+        private readonly Dictionary<uint, ChannelInformationDetails> uidDictionary = new Dictionary<uint, ChannelInformationDetails>();
 
         private uint nextId = 1;
         private object counterLock = new object();
@@ -22,13 +23,15 @@ namespace GatewayLogic.Services
               {
                   using (dictionaryLock.Aquire())
                   {
-                      var toDrop = dictionary.Select(row=>row.Value).Where(row => (row.ConnectionIsBuilding && (DateTime.UtcNow - row.StartBuilding).TotalSeconds > 5) || row.ShouldDrop).ToList();
+                      var toDrop = dictionary.Select(row => row.Value).Where(row => (row.ConnectionIsBuilding && (DateTime.UtcNow - row.StartBuilding).TotalSeconds > 5) || row.ShouldDrop).ToList();
 
                       toDrop.ForEach(row =>
                           {
                               row.Drop(Gateway);
                               row.Dispose();
                               dictionary.Remove(row.ChannelName);
+
+                              uidDictionary.Remove(row.GatewayId);
                           });
                   }
               };
@@ -223,7 +226,10 @@ namespace GatewayLogic.Services
         {
             using (dictionaryLock.Aquire())
             {
-                return dictionary.Values.FirstOrDefault(row => row.GatewayId == id);
+                if(uidDictionary.ContainsKey(id))
+                    return uidDictionary[id];
+                return null;
+                //return dictionary.Values.FirstOrDefault(row => row.GatewayId == id);
             }
         }
 
@@ -235,6 +241,7 @@ namespace GatewayLogic.Services
                 {
                     var result = new ChannelInformationDetails(nextId++, channelName, search);
                     dictionary.Add(channelName, result);
+                    uidDictionary.Add(result.GatewayId, result);
                 }
                 return dictionary[channelName];
             }
@@ -264,6 +271,7 @@ namespace GatewayLogic.Services
                 foreach (var i in dictionary.Values)
                     i.Dispose();
                 dictionary.Clear();
+                uidDictionary.Clear();
             }
             //dictionaryLock.Dispose();
         }
@@ -276,6 +284,8 @@ namespace GatewayLogic.Services
             channel.Dispose();
             using (dictionaryLock.Aquire())
             {
+                if (dictionary.ContainsKey(channel.ChannelName))
+                    uidDictionary.Remove(dictionary[channel.ChannelName].GatewayId);
                 dictionary.Remove(channel.ChannelName);
             }
             gateway.MonitorInformation.Drop(channel.GatewayId);
@@ -297,7 +307,7 @@ namespace GatewayLogic.Services
 
             using (dictionaryLock.Aquire())
             {
-                toDrop.ForEach(row => dictionary.Remove(row.ChannelName));
+                toDrop.ForEach(row => { dictionary.Remove(row.ChannelName); uidDictionary.Remove(row.GatewayId); });
             }
         }
 
@@ -306,10 +316,12 @@ namespace GatewayLogic.Services
             IEnumerable<Client> clients;
             using (dictionaryLock.Aquire())
             {
-                var channel = dictionary.Values.FirstOrDefault(row => row.GatewayId == gatewayId);
-                if (channel == null)
+                //var channel = dictionary.Values.FirstOrDefault(row => row.GatewayId == gatewayId);
+                if (!uidDictionary.ContainsKey(gatewayId))
                     return;
+                var channel = uidDictionary[gatewayId];
                 clients = channel.GetClientConnections();
+                uidDictionary.Remove(gatewayId);
                 dictionary.Remove(channel.ChannelName);
             }
 

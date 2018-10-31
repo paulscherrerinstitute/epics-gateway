@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GatewayLogic.Services
 {
-    class MonitorInformation : IDisposable
+    internal class MonitorInformation : IDisposable
     {
-        readonly SafeLock dictionaryLock = new SafeLock();
-        readonly List<MonitorInformationDetail> monitors = new List<MonitorInformationDetail>();
+        private readonly SafeLock dictionaryLock = new SafeLock();
+        private readonly List<MonitorInformationDetail> monitors = new List<MonitorInformationDetail>();
+        private readonly Dictionary<uint, MonitorInformationDetail> monitorLookup = new Dictionary<uint, MonitorInformationDetail>();
+        private readonly Dictionary<string, MonitorInformationDetail> clientLookup = new Dictionary<string, MonitorInformationDetail>();
 
         private uint nextId = 1;
 
@@ -32,17 +32,19 @@ namespace GatewayLogic.Services
             public bool FirstTime { get; set; } = true;
             public bool HasReceivedFirstResult { get; set; } = false;
             public ushort MonitorMask { get; internal set; }
+            public MonitorInformation MonitorInformation { get; }
 
             internal SafeLock clientsLock = new SafeLock();
             public List<ClientId> clients = new List<ClientId>();
 
-            public MonitorInformationDetail(uint id, ChannelInformation.ChannelInformationDetails channelInformation, ushort dataType, uint dataCount, UInt16 monitorMask)
+            public MonitorInformationDetail(uint id, ChannelInformation.ChannelInformationDetails channelInformation, ushort dataType, uint dataCount, UInt16 monitorMask, MonitorInformation monitorInformation)
             {
                 GatewayId = id;
                 ChannelInformation = channelInformation;
                 DataCount = dataCount;
                 DataType = dataType;
                 MonitorMask = monitorMask;
+                MonitorInformation = monitorInformation;
             }
 
             ~MonitorInformationDetail()
@@ -57,6 +59,8 @@ namespace GatewayLogic.Services
                     if (!clients.Any(row => row.Client == clientId.Client && row.Id == clientId.Id))
                         clients.Add(clientId);
                 }
+                using (MonitorInformation.dictionaryLock.Aquire())
+                    MonitorInformation.clientLookup.Add(clientId.Client.ToString() + ";" + clientId.Id.ToString(), this);
             }
 
             internal void RemoveClient(Gateway gateway, IPEndPoint endPoint, uint clientId)
@@ -71,10 +75,14 @@ namespace GatewayLogic.Services
                         needToDeleteThis = true;
                 }
 
+                using (MonitorInformation.dictionaryLock.Aquire())
+                    MonitorInformation.clientLookup.Remove(endPoint.ToString() + ";" + clientId.ToString());
+
                 if (needToDeleteThis)
                 {
                     using (gateway.MonitorInformation.dictionaryLock.Aquire())
                     {
+                        gateway.MonitorInformation.monitorLookup.Remove(this.GatewayId);
                         gateway.MonitorInformation.monitors.Remove(this);
                     }
                     this.Drop();
@@ -130,8 +138,9 @@ namespace GatewayLogic.Services
                         && row.MonitorMask == monitorMask);
                 if (monitor == null)
                 {
-                    monitor = new MonitorInformationDetail(nextId++, channelInformation, dataType, dataCount, monitorMask);
+                    monitor = new MonitorInformationDetail(nextId++, channelInformation, dataType, dataCount, monitorMask, this);
                     monitors.Add(monitor);
+                    monitorLookup.Add(monitor.GatewayId, monitor);
                 }
                 return monitor;
             }
@@ -141,18 +150,30 @@ namespace GatewayLogic.Services
         {
             using (dictionaryLock.Aquire())
             {
-                return monitors.FirstOrDefault(row => row.GatewayId == id);
+                //return monitors.FirstOrDefault(row => row.GatewayId == id);
+                if (monitorLookup.ContainsKey(id))
+                    return monitorLookup[id];
+                return null;
             }
         }
 
         public MonitorInformationDetail GetByClientId(IPEndPoint clientEndPoint, uint clientId)
         {
-            List<MonitorInformationDetail> copy;
-
+            var key = clientEndPoint.ToString() + ";" + clientId;
             using (dictionaryLock.Aquire())
-                copy = monitors.ToList();
+            {
+                if (clientLookup.ContainsKey(key))
+                    return clientLookup[key];
+                return null;
+            }
 
-            return copy.FirstOrDefault(row => row.Any(r2 => r2.Client == clientEndPoint && r2.Id == clientId));
+
+            /*List<MonitorInformationDetail> copy;
+
+        using (dictionaryLock.Aquire())
+            copy = monitors.ToList();
+
+        return copy.FirstOrDefault(row => row.Any(r2 => r2.Client == clientEndPoint && r2.Id == clientId));*/
         }
 
         public void Dispose()
@@ -162,6 +183,8 @@ namespace GatewayLogic.Services
                 foreach (var i in monitors)
                     i.Dispose();
                 monitors.Clear();
+                monitorLookup.Clear();
+                clientLookup.Clear();
             }
             //dictionaryLock.Dispose();
         }
@@ -182,6 +205,8 @@ namespace GatewayLogic.Services
 
             using (dictionaryLock.Aquire())
             {
+                toDrop.ForEach(row => monitorLookup.Remove(row.GatewayId));                
+                monitors.SelectMany(row => row.GetClients().Select(r2 => r2.Client.ToString() + ";" + r2.Id)).ToList().ForEach(row => clientLookup.Remove(row));
                 monitors.RemoveAll(row => row.ChannelInformation.GatewayId == channelId);
             }
         }

@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace GatewayLogic
 {
-    class UsableLock : IDisposable
+    internal class UsableLock : IDisposable
     {
+        //private SemaphoreSlim lockObject = new SemaphoreSlim(1);
         private SafeLock locker;
 
         public UsableLock(SafeLock locker)
@@ -26,33 +24,43 @@ namespace GatewayLogic
         }
     }
 
-    class LockInfo
+    internal class LockInfo
     {
+        //public SemaphoreSlim RowLock { get; } = new SemaphoreSlim(1);
         public DateTime LockRequestedOn { get; } = DateTime.UtcNow;
         public string MemberName { get; set; }
         public string SourceFilePath { get; set; }
         public int SourceLineNumber { get; set; }
     }
 
-    class SafeLock : IDisposable
+    internal class SafeLock : IDisposable
     {
-        static List<SafeLock> lockers = new List<SafeLock>();
-
-        List<LockInfo> openLocks = new List<LockInfo>();
+        private static List<SafeLock> lockers = new List<SafeLock>();
+        private static SemaphoreSlim lockObject = new SemaphoreSlim(1);
+        public SemaphoreSlim openLockLocker { get; } = new SemaphoreSlim(1);
+        private List<LockInfo> openLocks = new List<LockInfo>();
         public LockInfo Holder { get; private set; }
         public static int TotalLocks
         {
             get
             {
-                lock (lockers)
+                //lock (lockers)
+                try
+                {
+                    lockObject.Wait();
                     return lockers.Count;
+                }
+                finally
+                {
+                    lockObject.Release();
+                }
             }
         }
 
-        SemaphoreSlim semaphore = new SemaphoreSlim(1);
+        private SemaphoreSlim semaphore = new SemaphoreSlim(1);
         private bool disposed = false;
-
-        static List<SafeLockCleanInfo> needToCleanup = new List<SafeLockCleanInfo>();
+        private static SemaphoreSlim needToCleanupLock = new SemaphoreSlim(1);
+        private static List<SafeLockCleanInfo> needToCleanup = new List<SafeLockCleanInfo>();
         private readonly string memberName;
 
         public string sourceFilePath { get; }
@@ -67,8 +75,16 @@ namespace GatewayLogic
             this.sourceFilePath = sourceFilePath;
             this.sourceLineNumber = sourceLineNumber;
 
-            lock (lockers)
+            //lock (lockers)
+            try
+            {
+                lockObject.Wait();
                 lockers.Add(this);
+            }
+            finally
+            {
+                lockObject.Release();
+            }
         }
 
         public static List<LockInfo> DeadLockCheck(TimeSpan? span = null)
@@ -77,13 +93,29 @@ namespace GatewayLogic
                 span = TimeSpan.FromSeconds(10);
             var now = DateTime.UtcNow;
             List<SafeLock> copy;
-            lock (lockers)
+            //lock (lockers)
+            try
+            {
+                lockObject.Wait();
                 copy = lockers.ToList();
+            }
+            finally
+            {
+                lockObject.Release();
+            }
             return copy.Where((row) =>
             {
                 List<LockInfo> lockCopy;
-                lock (row.openLocks)
+                //lock (row.openLocks)
+                try
+                {
+                    row.openLockLocker.Wait();
                     lockCopy = row.openLocks.ToList();
+                }
+                finally
+                {
+                    row.openLockLocker.Release();
+                }
 
                 return lockCopy.Count > 0 && (now - (row.Holder?.LockRequestedOn ?? now)) > span;
             })
@@ -116,8 +148,16 @@ namespace GatewayLogic
                 SourceFilePath = sourceFilePath,
                 SourceLineNumber = sourceLineNumber
             };
-            lock (openLocks)
+            //lock (openLocks)
+            try
+            {
+                openLockLocker.Wait();
                 openLocks.Add(info);
+            }
+            finally
+            {
+                openLockLocker.Release();
+            }
 
             if (timeout != 0)
             {
@@ -134,8 +174,16 @@ namespace GatewayLogic
             else
                 semaphore.Wait();
 
-            lock (openLocks)
+            //lock (openLocks)
+            try
+            {
+                openLockLocker.Wait();
                 openLocks.Remove(info);
+            }
+            finally
+            {
+                openLockLocker.Release();
+            }
             Holder = info;
         }
 
@@ -153,8 +201,16 @@ namespace GatewayLogic
             if (disposed)
                 return;
             disposed = true;
-            lock (lockers)
+            //lock (lockers)
+            try
+            {
+                lockObject.Wait();
                 lockers.Remove(this);
+            }
+            finally
+            {
+                lockObject.Release();
+            }
             //semaphore.Dispose();
 
             semaphore.Dispose();
@@ -171,11 +227,17 @@ namespace GatewayLogic
 
         public static void Clean()
         {
-            lock (needToCleanup)
+            //lock (needToCleanup)
+            try
             {
+                needToCleanupLock.Wait();
                 foreach (var i in needToCleanup)
                     i.Object.semaphore.Dispose();
                 needToCleanup.Clear();
+            }
+            finally
+            {
+                needToCleanupLock.Release();
             }
         }
 
@@ -183,9 +245,15 @@ namespace GatewayLogic
         {
             get
             {
-                lock (lockers)
+                //lock (lockers)
+                try
                 {
+                    SafeLock.lockObject.Wait();
                     return lockers.Select(row => row.sourceFilePath + "." + row.memberName + ":" + row.sourceLineNumber).ToArray();
+                }
+                finally
+                {
+                    SafeLock.lockObject.Release();
                 }
             }
         }
@@ -194,11 +262,27 @@ namespace GatewayLogic
 
         public static void Reset()
         {
-            lock (needToCleanup)
+            //lock (needToCleanup)
+            try
+            {
+                needToCleanupLock.Wait();
                 needToCleanup.Clear();
+            }
+            finally
+            {
+                needToCleanupLock.Release();
+            }
 
-            lock (lockers)
+            //lock (lockers)
+            try
+            {
+                SafeLock.lockObject.Wait();
                 lockers.Clear();
+            }
+            finally
+            {
+                SafeLock.lockObject.Release();
+            }
         }
     }
 }

@@ -691,6 +691,16 @@ class Main
 
     static Init(): void
     {
+        var currentUrl = (document.location + "");
+        if (currentUrl.toLowerCase().startsWith("http://caesar"))
+        {
+            if (currentUrl.toLowerCase().startsWith("http://caesar/"))
+                document.location.replace(currentUrl.toLowerCase().replace("http://caesar/", "https://caesar.psi.ch/"));
+            else
+                document.location.replace(currentUrl.toLowerCase().replace("http://caesar", "https://caesar"));
+            return;
+        }
+
         Live.InitShortDisplay();
         Main.QueriesHelp();
 
