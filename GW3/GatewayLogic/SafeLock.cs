@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 
 namespace GatewayLogic
@@ -24,6 +22,7 @@ namespace GatewayLogic
         }
     }
 
+#if SAFE_LOCK
     internal class LockInfo
     {
         //public SemaphoreSlim RowLock { get; } = new SemaphoreSlim(1);
@@ -211,12 +210,8 @@ namespace GatewayLogic
             {
                 lockObject.Release();
             }
-            //semaphore.Dispose();
 
             semaphore.Dispose();
-
-            /*lock (needToCleanup)
-                needToCleanup.Add(new SafeLockCleanInfo { When = DateTime.UtcNow.AddSeconds(2), Object = this });*/
         }
 
         private class SafeLockCleanInfo
@@ -285,4 +280,45 @@ namespace GatewayLogic
             }
         }
     }
+#else
+    internal class SafeLock : IDisposable
+    {
+        private SemaphoreSlim semaphore = new SemaphoreSlim(1);
+
+        public bool IsDisposed { get; private set; } = false;
+
+        ~SafeLock()
+        {
+            semaphore.Dispose();
+        }
+
+        public void Dispose()
+        {
+            IsDisposed = true;
+        }
+
+        public UsableLock Aquire(int timeout)
+        {
+            if (!semaphore.Wait(timeout))
+                throw new TimeoutException("Lock wasn't aquired in the time range.");
+            return new UsableLock(this);
+        }
+
+        public UsableLock Aquire()
+        {
+            semaphore.Wait();
+            return new UsableLock(this);
+        }
+
+        public void Wait()
+        {
+            semaphore.Wait();
+        }
+
+        internal void Release()
+        {
+            semaphore.Release();
+        }
+    }
+#endif
 }

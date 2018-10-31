@@ -64,7 +64,9 @@ namespace GatewayLogic
         private Dictionary<string, int> searches = new Dictionary<string, int>();
         private Dictionary<string, int> searchers = new Dictionary<string, int>();
 
+#if SAFE_LOCK
         Thread checkDeadLock;
+#endif
 
         bool isDiposed = false;
 
@@ -80,6 +82,7 @@ namespace GatewayLogic
             ClientConnection = new ClientConnection(this);
             ServerConnection = new ServerConnection(this);
 
+#if SAFE_LOCK
             checkDeadLock = new Thread((obj) =>
               {
                   var span = TimeSpan.FromSeconds(10);
@@ -98,6 +101,7 @@ namespace GatewayLogic
               });
             checkDeadLock.Priority = ThreadPriority.BelowNormal;
             checkDeadLock.Start();
+#endif
         }
 
         void Updater()

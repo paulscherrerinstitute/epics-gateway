@@ -12,6 +12,7 @@ namespace GatewayLogic.Services
         private uint nextId = 1;
         SafeLock dictionaryLock = new SafeLock();
         Dictionary<string, SearchInformationDetail> dictionary = new Dictionary<string, SearchInformationDetail>();
+        Dictionary<uint, SearchInformationDetail> gwIdDictionary = new Dictionary<uint, SearchInformationDetail>();
         Gateway gateway;
 
         public SearchInformation(Gateway gateway)
@@ -84,6 +85,7 @@ namespace GatewayLogic.Services
                     var result = new SearchInformationDetail(nextId++);
                     result.Channel = channelName;
                     dictionary.Add(channelName, result);
+                    gwIdDictionary.Add(result.GatewayId, result);
                 }
                 else
                     gateway.MessageLogger.Write(null, LogMessageType.RecoverSearchInfo, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
@@ -104,8 +106,11 @@ namespace GatewayLogic.Services
         {
             using (dictionaryLock.Aquire())
             {
-                var result = dictionary.Values.FirstOrDefault(row => row.GatewayId == gatewayId);
-                return result;
+                if (gwIdDictionary.ContainsKey(gatewayId))
+                    return gwIdDictionary[gatewayId];
+                return null;
+                /*var result = dictionary.Values.FirstOrDefault(row => row.GatewayId == gatewayId);
+                return result;*/
             }
         }
 
@@ -116,6 +121,7 @@ namespace GatewayLogic.Services
                 foreach (var i in dictionary.Values)
                     i.Dispose();
                 dictionary.Clear();
+                gwIdDictionary.Clear();
             }
             //dictionaryLock.Dispose();
         }
@@ -129,6 +135,7 @@ namespace GatewayLogic.Services
                 if (dictionary.ContainsKey(channelName))
                 {
                     dictionary[channelName].Dispose();
+                    gwIdDictionary.Remove(dictionary[channelName].GatewayId);
                     dictionary.Remove(channelName);
                 }
             }
@@ -141,6 +148,7 @@ namespace GatewayLogic.Services
                 foreach (var i in dictionary.Values)
                     i.Dispose();
                 dictionary.Clear();
+                gwIdDictionary.Clear();
             }
         }
     }
