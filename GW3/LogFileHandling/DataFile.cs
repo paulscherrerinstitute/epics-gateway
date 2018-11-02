@@ -477,6 +477,9 @@ namespace GWLogger.Backend.DataContext
                     DataWriter.Write(i.Value);
                 }*/
 
+                if (entry.MessageTypeId == 39)
+                    Stats[idxPos, 1]++;
+
                 Stats[idxPos, 0]++;
                 if (isAnError)
                     Stats[idxPos, 2]++;
