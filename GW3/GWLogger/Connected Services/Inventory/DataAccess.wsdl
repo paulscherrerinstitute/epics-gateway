@@ -2,6 +2,35 @@
 <wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://inventory.psi.ch/DataAccess.asmx" xmlns:s1="http://inventory.psi.ch/DataAccess.asmx/AbstractTypes" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://inventory.psi.ch/DataAccess.asmx" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
   <wsdl:types>
     <s:schema elementFormDefault="qualified" targetNamespace="http://inventory.psi.ch/DataAccess.asmx">
+      <s:element name="GetPartDocuments">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="psiLabel" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetPartDocumentsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetPartDocumentsResult" type="tns:ArrayOfPartDocumentInformation" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfPartDocumentInformation">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="PartDocumentInformation" nillable="true" type="tns:PartDocumentInformation" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="PartDocumentInformation">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Link" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="LinkedOn" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="Author" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="LinkType" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Filename" type="s:string" />
+        </s:sequence>
+      </s:complexType>
       <s:element name="DeleteDocument">
         <s:complexType>
           <s:sequence>
@@ -656,8 +685,8 @@
       </s:element>
       <s:complexType name="SearchDefinition">
         <s:sequence>
-          <s:element minOccurs="0" maxOccurs="1" name="Columns" type="tns:ArrayOfString" />
           <s:element minOccurs="0" maxOccurs="1" name="Query" type="tns:ArrayOfSearchCondition" />
+          <s:element minOccurs="0" maxOccurs="1" name="Columns" type="tns:ArrayOfString" />
         </s:sequence>
       </s:complexType>
       <s:complexType name="ArrayOfSearchCondition">
@@ -1610,16 +1639,29 @@
       <s:element name="DeleteMaintenanceSheetForPartResponse">
         <s:complexType />
       </s:element>
-      <s:element name="UpdatePartDisturbance">
+      <s:element name="GetPartDisturbance">
         <s:complexType>
           <s:sequence>
-            <s:element minOccurs="0" maxOccurs="1" name="tokenId" type="s:string" />
             <s:element minOccurs="1" maxOccurs="1" name="disturbanceId" type="s:int" />
-            <s:element minOccurs="0" maxOccurs="1" name="fields" type="tns:ArrayOfDataField" />
-            <s:element minOccurs="1" maxOccurs="1" name="sendUpdate" type="s:boolean" />
           </s:sequence>
         </s:complexType>
       </s:element>
+      <s:element name="GetPartDisturbanceResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetPartDisturbanceResult" type="tns:PartDisturbance" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="PartDisturbance">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Author" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="AuthorName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ReportedOn" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="Fields" type="tns:ArrayOfDataField" />
+        </s:sequence>
+      </s:complexType>
       <s:complexType name="ArrayOfDataField">
         <s:sequence>
           <s:element minOccurs="0" maxOccurs="unbounded" name="DataField" nillable="true" type="tns:DataField" />
@@ -1635,6 +1677,16 @@
           <s:element minOccurs="1" maxOccurs="1" name="ReadOnly" type="s:boolean" />
         </s:sequence>
       </s:complexType>
+      <s:element name="UpdatePartDisturbance">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="tokenId" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="disturbanceId" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="fields" type="tns:ArrayOfDataField" />
+            <s:element minOccurs="1" maxOccurs="1" name="sendUpdate" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
       <s:element name="UpdatePartDisturbanceResponse">
         <s:complexType />
       </s:element>
@@ -3813,35 +3865,6 @@
       <s:element name="UpdatePartNoteResponse">
         <s:complexType />
       </s:element>
-      <s:element name="GetPartDocuments">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="0" maxOccurs="1" name="psiLabel" type="s:string" />
-          </s:sequence>
-        </s:complexType>
-      </s:element>
-      <s:element name="GetPartDocumentsResponse">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="0" maxOccurs="1" name="GetPartDocumentsResult" type="tns:ArrayOfPartDocumentInformation" />
-          </s:sequence>
-        </s:complexType>
-      </s:element>
-      <s:complexType name="ArrayOfPartDocumentInformation">
-        <s:sequence>
-          <s:element minOccurs="0" maxOccurs="unbounded" name="PartDocumentInformation" nillable="true" type="tns:PartDocumentInformation" />
-        </s:sequence>
-      </s:complexType>
-      <s:complexType name="PartDocumentInformation">
-        <s:sequence>
-          <s:element minOccurs="0" maxOccurs="1" name="Link" type="s:string" />
-          <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
-          <s:element minOccurs="1" maxOccurs="1" name="LinkedOn" nillable="true" type="s:dateTime" />
-          <s:element minOccurs="0" maxOccurs="1" name="Author" type="s:string" />
-          <s:element minOccurs="0" maxOccurs="1" name="LinkType" type="s:string" />
-          <s:element minOccurs="0" maxOccurs="1" name="Filename" type="s:string" />
-        </s:sequence>
-      </s:complexType>
       <s:element name="GetMainNode">
         <s:complexType />
       </s:element>
@@ -5112,6 +5135,20 @@
           <s:element minOccurs="0" maxOccurs="1" name="Parameter" type="s:string" />
         </s:sequence>
       </s:complexType>
+      <s:element name="GetRolesForUser">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="username" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetRolesForUserResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetRolesForUserResult" type="tns:ArrayOfUserRoleSummary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
       <s:element name="GetUserActionLog">
         <s:complexType>
           <s:sequence>
@@ -5714,29 +5751,7 @@
           </s:sequence>
         </s:complexType>
       </s:element>
-      <s:element name="GetPartDisturbance">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="1" maxOccurs="1" name="disturbanceId" type="s:int" />
-          </s:sequence>
-        </s:complexType>
-      </s:element>
-      <s:element name="GetPartDisturbanceResponse">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="0" maxOccurs="1" name="GetPartDisturbanceResult" type="tns:PartDisturbance" />
-          </s:sequence>
-        </s:complexType>
-      </s:element>
-      <s:complexType name="PartDisturbance">
-        <s:sequence>
-          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
-          <s:element minOccurs="1" maxOccurs="1" name="Author" type="s:int" />
-          <s:element minOccurs="0" maxOccurs="1" name="AuthorName" type="s:string" />
-          <s:element minOccurs="1" maxOccurs="1" name="ReportedOn" type="s:dateTime" />
-          <s:element minOccurs="0" maxOccurs="1" name="Fields" type="tns:ArrayOfDataField" />
-        </s:sequence>
-      </s:complexType>
+      <s:element name="ArrayOfPartDocumentInformation" nillable="true" type="tns:ArrayOfPartDocumentInformation" />
       <s:element name="string" nillable="true" type="s:string" />
       <s:element name="boolean" type="s:boolean" />
       <s:element name="ArrayOfTreeNode" nillable="true" type="tns:ArrayOfTreeNode" />
@@ -5761,6 +5776,7 @@
       <s:element name="GatewayConfiguration" nillable="true" type="tns:GatewayConfiguration" />
       <s:element name="ArrayOfGatewayFilterType" nillable="true" type="tns:ArrayOfGatewayFilterType" />
       <s:element name="ArrayOfMaintenanceHistory" nillable="true" type="tns:ArrayOfMaintenanceHistory" />
+      <s:element name="PartDisturbance" nillable="true" type="tns:PartDisturbance" />
       <s:element name="ArrayOfDataField" nillable="true" type="tns:ArrayOfDataField" />
       <s:element name="PlanInformation" nillable="true" type="tns:PlanInformation" />
       <s:element name="ArrayOfPSP" nillable="true" type="tns:ArrayOfPSP" />
@@ -5799,7 +5815,6 @@
       <s:element name="ArrayOfLastBootInformation" nillable="true" type="tns:ArrayOfLastBootInformation" />
       <s:element name="ArrayOfPartHistoryInformation" nillable="true" type="tns:ArrayOfPartHistoryInformation" />
       <s:element name="ArrayOfPartNoteInformation" nillable="true" type="tns:ArrayOfPartNoteInformation" />
-      <s:element name="ArrayOfPartDocumentInformation" nillable="true" type="tns:ArrayOfPartDocumentInformation" />
       <s:element name="long" type="s:long" />
       <s:element name="ArrayOfPartTypeShort" nillable="true" type="tns:ArrayOfPartTypeShort" />
       <s:element name="ArrayOfDataClass" nillable="true" type="tns:ArrayOfDataClass" />
@@ -5828,7 +5843,6 @@
       <s:element name="ArrayOfConnectorMatrixInformation" nillable="true" type="tns:ArrayOfConnectorMatrixInformation" />
       <s:element name="ArrayOfTableInformation" nillable="true" type="tns:ArrayOfTableInformation" />
       <s:element name="TableDetails" nillable="true" type="tns:TableDetails" />
-      <s:element name="PartDisturbance" nillable="true" type="tns:PartDisturbance" />
     </s:schema>
     <s:schema targetNamespace="http://inventory.psi.ch/DataAccess.asmx/AbstractTypes">
       <s:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
@@ -5843,6 +5857,12 @@
       </s:complexType>
     </s:schema>
   </wsdl:types>
+  <wsdl:message name="GetPartDocumentsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetPartDocuments" />
+  </wsdl:message>
+  <wsdl:message name="GetPartDocumentsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetPartDocumentsResponse" />
+  </wsdl:message>
   <wsdl:message name="DeleteDocumentSoapIn">
     <wsdl:part name="parameters" element="tns:DeleteDocument" />
   </wsdl:message>
@@ -6418,6 +6438,12 @@
   </wsdl:message>
   <wsdl:message name="DeleteMaintenanceSheetForPartSoapOut">
     <wsdl:part name="parameters" element="tns:DeleteMaintenanceSheetForPartResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetPartDisturbanceSoapIn">
+    <wsdl:part name="parameters" element="tns:GetPartDisturbance" />
+  </wsdl:message>
+  <wsdl:message name="GetPartDisturbanceSoapOut">
+    <wsdl:part name="parameters" element="tns:GetPartDisturbanceResponse" />
   </wsdl:message>
   <wsdl:message name="UpdatePartDisturbanceSoapIn">
     <wsdl:part name="parameters" element="tns:UpdatePartDisturbance" />
@@ -7175,12 +7201,6 @@
   <wsdl:message name="UpdatePartNoteSoapOut">
     <wsdl:part name="parameters" element="tns:UpdatePartNoteResponse" />
   </wsdl:message>
-  <wsdl:message name="GetPartDocumentsSoapIn">
-    <wsdl:part name="parameters" element="tns:GetPartDocuments" />
-  </wsdl:message>
-  <wsdl:message name="GetPartDocumentsSoapOut">
-    <wsdl:part name="parameters" element="tns:GetPartDocumentsResponse" />
-  </wsdl:message>
   <wsdl:message name="GetMainNodeSoapIn">
     <wsdl:part name="parameters" element="tns:GetMainNode" />
   </wsdl:message>
@@ -7727,6 +7747,12 @@
   <wsdl:message name="GetUserRolesSoapOut">
     <wsdl:part name="parameters" element="tns:GetUserRolesResponse" />
   </wsdl:message>
+  <wsdl:message name="GetRolesForUserSoapIn">
+    <wsdl:part name="parameters" element="tns:GetRolesForUser" />
+  </wsdl:message>
+  <wsdl:message name="GetRolesForUserSoapOut">
+    <wsdl:part name="parameters" element="tns:GetRolesForUserResponse" />
+  </wsdl:message>
   <wsdl:message name="GetUserActionLogSoapIn">
     <wsdl:part name="parameters" element="tns:GetUserActionLog" />
   </wsdl:message>
@@ -7943,11 +7969,11 @@
   <wsdl:message name="GetPartDisturbancesSoapOut">
     <wsdl:part name="parameters" element="tns:GetPartDisturbancesResponse" />
   </wsdl:message>
-  <wsdl:message name="GetPartDisturbanceSoapIn">
-    <wsdl:part name="parameters" element="tns:GetPartDisturbance" />
+  <wsdl:message name="GetPartDocumentsHttpGetIn">
+    <wsdl:part name="psiLabel" type="s:string" />
   </wsdl:message>
-  <wsdl:message name="GetPartDisturbanceSoapOut">
-    <wsdl:part name="parameters" element="tns:GetPartDisturbanceResponse" />
+  <wsdl:message name="GetPartDocumentsHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfPartDocumentInformation" />
   </wsdl:message>
   <wsdl:message name="DeleteDocumentHttpGetIn">
     <wsdl:part name="tokenId" type="s:string" />
@@ -8525,6 +8551,12 @@
     <wsdl:part name="sheetForPartId" type="s:string" />
   </wsdl:message>
   <wsdl:message name="DeleteMaintenanceSheetForPartHttpGetOut" />
+  <wsdl:message name="GetPartDisturbanceHttpGetIn">
+    <wsdl:part name="disturbanceId" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetPartDisturbanceHttpGetOut">
+    <wsdl:part name="Body" element="tns:PartDisturbance" />
+  </wsdl:message>
   <wsdl:message name="DeletePartDisturbanceHttpGetIn">
     <wsdl:part name="tokenId" type="s:string" />
     <wsdl:part name="disturbanceId" type="s:string" />
@@ -9119,12 +9151,6 @@
     <wsdl:part name="description" type="s:string" />
   </wsdl:message>
   <wsdl:message name="UpdatePartNoteHttpGetOut" />
-  <wsdl:message name="GetPartDocumentsHttpGetIn">
-    <wsdl:part name="psiLabel" type="s:string" />
-  </wsdl:message>
-  <wsdl:message name="GetPartDocumentsHttpGetOut">
-    <wsdl:part name="Body" element="tns:ArrayOfPartDocumentInformation" />
-  </wsdl:message>
   <wsdl:message name="GetMainNodeHttpGetIn" />
   <wsdl:message name="GetMainNodeHttpGetOut">
     <wsdl:part name="Body" element="tns:string" />
@@ -9439,6 +9465,12 @@
   <wsdl:message name="GetUserRolesHttpGetOut">
     <wsdl:part name="Body" element="tns:ArrayOfUserRoleSummary" />
   </wsdl:message>
+  <wsdl:message name="GetRolesForUserHttpGetIn">
+    <wsdl:part name="username" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetRolesForUserHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfUserRoleSummary" />
+  </wsdl:message>
   <wsdl:message name="GetUserActionLogHttpGetIn">
     <wsdl:part name="tokenId" type="s:string" />
     <wsdl:part name="userToCheck" type="s:string" />
@@ -9600,11 +9632,11 @@
   <wsdl:message name="GetPartDisturbancesHttpGetOut">
     <wsdl:part name="Body" element="tns:SearchResult" />
   </wsdl:message>
-  <wsdl:message name="GetPartDisturbanceHttpGetIn">
-    <wsdl:part name="disturbanceId" type="s:string" />
+  <wsdl:message name="GetPartDocumentsHttpPostIn">
+    <wsdl:part name="psiLabel" type="s:string" />
   </wsdl:message>
-  <wsdl:message name="GetPartDisturbanceHttpGetOut">
-    <wsdl:part name="Body" element="tns:PartDisturbance" />
+  <wsdl:message name="GetPartDocumentsHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfPartDocumentInformation" />
   </wsdl:message>
   <wsdl:message name="DeleteDocumentHttpPostIn">
     <wsdl:part name="tokenId" type="s:string" />
@@ -10182,6 +10214,12 @@
     <wsdl:part name="sheetForPartId" type="s:string" />
   </wsdl:message>
   <wsdl:message name="DeleteMaintenanceSheetForPartHttpPostOut" />
+  <wsdl:message name="GetPartDisturbanceHttpPostIn">
+    <wsdl:part name="disturbanceId" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetPartDisturbanceHttpPostOut">
+    <wsdl:part name="Body" element="tns:PartDisturbance" />
+  </wsdl:message>
   <wsdl:message name="DeletePartDisturbanceHttpPostIn">
     <wsdl:part name="tokenId" type="s:string" />
     <wsdl:part name="disturbanceId" type="s:string" />
@@ -10776,12 +10814,6 @@
     <wsdl:part name="description" type="s:string" />
   </wsdl:message>
   <wsdl:message name="UpdatePartNoteHttpPostOut" />
-  <wsdl:message name="GetPartDocumentsHttpPostIn">
-    <wsdl:part name="psiLabel" type="s:string" />
-  </wsdl:message>
-  <wsdl:message name="GetPartDocumentsHttpPostOut">
-    <wsdl:part name="Body" element="tns:ArrayOfPartDocumentInformation" />
-  </wsdl:message>
   <wsdl:message name="GetMainNodeHttpPostIn" />
   <wsdl:message name="GetMainNodeHttpPostOut">
     <wsdl:part name="Body" element="tns:string" />
@@ -11096,6 +11128,12 @@
   <wsdl:message name="GetUserRolesHttpPostOut">
     <wsdl:part name="Body" element="tns:ArrayOfUserRoleSummary" />
   </wsdl:message>
+  <wsdl:message name="GetRolesForUserHttpPostIn">
+    <wsdl:part name="username" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetRolesForUserHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfUserRoleSummary" />
+  </wsdl:message>
   <wsdl:message name="GetUserActionLogHttpPostIn">
     <wsdl:part name="tokenId" type="s:string" />
     <wsdl:part name="userToCheck" type="s:string" />
@@ -11257,13 +11295,11 @@
   <wsdl:message name="GetPartDisturbancesHttpPostOut">
     <wsdl:part name="Body" element="tns:SearchResult" />
   </wsdl:message>
-  <wsdl:message name="GetPartDisturbanceHttpPostIn">
-    <wsdl:part name="disturbanceId" type="s:string" />
-  </wsdl:message>
-  <wsdl:message name="GetPartDisturbanceHttpPostOut">
-    <wsdl:part name="Body" element="tns:PartDisturbance" />
-  </wsdl:message>
   <wsdl:portType name="DataAccessSoap">
+    <wsdl:operation name="GetPartDocuments">
+      <wsdl:input message="tns:GetPartDocumentsSoapIn" />
+      <wsdl:output message="tns:GetPartDocumentsSoapOut" />
+    </wsdl:operation>
     <wsdl:operation name="DeleteDocument">
       <wsdl:input message="tns:DeleteDocumentSoapIn" />
       <wsdl:output message="tns:DeleteDocumentSoapOut" />
@@ -11647,6 +11683,10 @@
     <wsdl:operation name="DeleteMaintenanceSheetForPart">
       <wsdl:input message="tns:DeleteMaintenanceSheetForPartSoapIn" />
       <wsdl:output message="tns:DeleteMaintenanceSheetForPartSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetPartDisturbance">
+      <wsdl:input message="tns:GetPartDisturbanceSoapIn" />
+      <wsdl:output message="tns:GetPartDisturbanceSoapOut" />
     </wsdl:operation>
     <wsdl:operation name="UpdatePartDisturbance">
       <wsdl:input message="tns:UpdatePartDisturbanceSoapIn" />
@@ -12152,10 +12192,6 @@
       <wsdl:input message="tns:UpdatePartNoteSoapIn" />
       <wsdl:output message="tns:UpdatePartNoteSoapOut" />
     </wsdl:operation>
-    <wsdl:operation name="GetPartDocuments">
-      <wsdl:input message="tns:GetPartDocumentsSoapIn" />
-      <wsdl:output message="tns:GetPartDocumentsSoapOut" />
-    </wsdl:operation>
     <wsdl:operation name="GetMainNode">
       <wsdl:input message="tns:GetMainNodeSoapIn" />
       <wsdl:output message="tns:GetMainNodeSoapOut" />
@@ -12520,6 +12556,10 @@
       <wsdl:input message="tns:GetUserRolesSoapIn" />
       <wsdl:output message="tns:GetUserRolesSoapOut" />
     </wsdl:operation>
+    <wsdl:operation name="GetRolesForUser">
+      <wsdl:input message="tns:GetRolesForUserSoapIn" />
+      <wsdl:output message="tns:GetRolesForUserSoapOut" />
+    </wsdl:operation>
     <wsdl:operation name="GetUserActionLog">
       <wsdl:input message="tns:GetUserActionLogSoapIn" />
       <wsdl:output message="tns:GetUserActionLogSoapOut" />
@@ -12664,12 +12704,12 @@
       <wsdl:input message="tns:GetPartDisturbancesSoapIn" />
       <wsdl:output message="tns:GetPartDisturbancesSoapOut" />
     </wsdl:operation>
-    <wsdl:operation name="GetPartDisturbance">
-      <wsdl:input message="tns:GetPartDisturbanceSoapIn" />
-      <wsdl:output message="tns:GetPartDisturbanceSoapOut" />
-    </wsdl:operation>
   </wsdl:portType>
   <wsdl:portType name="DataAccessHttpGet">
+    <wsdl:operation name="GetPartDocuments">
+      <wsdl:input message="tns:GetPartDocumentsHttpGetIn" />
+      <wsdl:output message="tns:GetPartDocumentsHttpGetOut" />
+    </wsdl:operation>
     <wsdl:operation name="DeleteDocument">
       <wsdl:input message="tns:DeleteDocumentHttpGetIn" />
       <wsdl:output message="tns:DeleteDocumentHttpGetOut" />
@@ -13029,6 +13069,10 @@
     <wsdl:operation name="DeleteMaintenanceSheetForPart">
       <wsdl:input message="tns:DeleteMaintenanceSheetForPartHttpGetIn" />
       <wsdl:output message="tns:DeleteMaintenanceSheetForPartHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetPartDisturbance">
+      <wsdl:input message="tns:GetPartDisturbanceHttpGetIn" />
+      <wsdl:output message="tns:GetPartDisturbanceHttpGetOut" />
     </wsdl:operation>
     <wsdl:operation name="DeletePartDisturbance">
       <wsdl:input message="tns:DeletePartDisturbanceHttpGetIn" />
@@ -13466,10 +13510,6 @@
       <wsdl:input message="tns:UpdatePartNoteHttpGetIn" />
       <wsdl:output message="tns:UpdatePartNoteHttpGetOut" />
     </wsdl:operation>
-    <wsdl:operation name="GetPartDocuments">
-      <wsdl:input message="tns:GetPartDocumentsHttpGetIn" />
-      <wsdl:output message="tns:GetPartDocumentsHttpGetOut" />
-    </wsdl:operation>
     <wsdl:operation name="GetMainNode">
       <wsdl:input message="tns:GetMainNodeHttpGetIn" />
       <wsdl:output message="tns:GetMainNodeHttpGetOut" />
@@ -13706,6 +13746,10 @@
       <wsdl:input message="tns:GetUserRolesHttpGetIn" />
       <wsdl:output message="tns:GetUserRolesHttpGetOut" />
     </wsdl:operation>
+    <wsdl:operation name="GetRolesForUser">
+      <wsdl:input message="tns:GetRolesForUserHttpGetIn" />
+      <wsdl:output message="tns:GetRolesForUserHttpGetOut" />
+    </wsdl:operation>
     <wsdl:operation name="GetUserActionLog">
       <wsdl:input message="tns:GetUserActionLogHttpGetIn" />
       <wsdl:output message="tns:GetUserActionLogHttpGetOut" />
@@ -13830,12 +13874,12 @@
       <wsdl:input message="tns:GetPartDisturbancesHttpGetIn" />
       <wsdl:output message="tns:GetPartDisturbancesHttpGetOut" />
     </wsdl:operation>
-    <wsdl:operation name="GetPartDisturbance">
-      <wsdl:input message="tns:GetPartDisturbanceHttpGetIn" />
-      <wsdl:output message="tns:GetPartDisturbanceHttpGetOut" />
-    </wsdl:operation>
   </wsdl:portType>
   <wsdl:portType name="DataAccessHttpPost">
+    <wsdl:operation name="GetPartDocuments">
+      <wsdl:input message="tns:GetPartDocumentsHttpPostIn" />
+      <wsdl:output message="tns:GetPartDocumentsHttpPostOut" />
+    </wsdl:operation>
     <wsdl:operation name="DeleteDocument">
       <wsdl:input message="tns:DeleteDocumentHttpPostIn" />
       <wsdl:output message="tns:DeleteDocumentHttpPostOut" />
@@ -14195,6 +14239,10 @@
     <wsdl:operation name="DeleteMaintenanceSheetForPart">
       <wsdl:input message="tns:DeleteMaintenanceSheetForPartHttpPostIn" />
       <wsdl:output message="tns:DeleteMaintenanceSheetForPartHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetPartDisturbance">
+      <wsdl:input message="tns:GetPartDisturbanceHttpPostIn" />
+      <wsdl:output message="tns:GetPartDisturbanceHttpPostOut" />
     </wsdl:operation>
     <wsdl:operation name="DeletePartDisturbance">
       <wsdl:input message="tns:DeletePartDisturbanceHttpPostIn" />
@@ -14632,10 +14680,6 @@
       <wsdl:input message="tns:UpdatePartNoteHttpPostIn" />
       <wsdl:output message="tns:UpdatePartNoteHttpPostOut" />
     </wsdl:operation>
-    <wsdl:operation name="GetPartDocuments">
-      <wsdl:input message="tns:GetPartDocumentsHttpPostIn" />
-      <wsdl:output message="tns:GetPartDocumentsHttpPostOut" />
-    </wsdl:operation>
     <wsdl:operation name="GetMainNode">
       <wsdl:input message="tns:GetMainNodeHttpPostIn" />
       <wsdl:output message="tns:GetMainNodeHttpPostOut" />
@@ -14872,6 +14916,10 @@
       <wsdl:input message="tns:GetUserRolesHttpPostIn" />
       <wsdl:output message="tns:GetUserRolesHttpPostOut" />
     </wsdl:operation>
+    <wsdl:operation name="GetRolesForUser">
+      <wsdl:input message="tns:GetRolesForUserHttpPostIn" />
+      <wsdl:output message="tns:GetRolesForUserHttpPostOut" />
+    </wsdl:operation>
     <wsdl:operation name="GetUserActionLog">
       <wsdl:input message="tns:GetUserActionLogHttpPostIn" />
       <wsdl:output message="tns:GetUserActionLogHttpPostOut" />
@@ -14996,13 +15044,18 @@
       <wsdl:input message="tns:GetPartDisturbancesHttpPostIn" />
       <wsdl:output message="tns:GetPartDisturbancesHttpPostOut" />
     </wsdl:operation>
-    <wsdl:operation name="GetPartDisturbance">
-      <wsdl:input message="tns:GetPartDisturbanceHttpPostIn" />
-      <wsdl:output message="tns:GetPartDisturbanceHttpPostOut" />
-    </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="DataAccessSoap" type="tns:DataAccessSoap">
     <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetPartDocuments">
+      <soap:operation soapAction="http://inventory.psi.ch/DataAccess.asmx/GetPartDocuments" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="DeleteDocument">
       <soap:operation soapAction="http://inventory.psi.ch/DataAccess.asmx/DeleteDocument" style="document" />
       <wsdl:input>
@@ -15860,6 +15913,15 @@
     </wsdl:operation>
     <wsdl:operation name="DeleteMaintenanceSheetForPart">
       <soap:operation soapAction="http://inventory.psi.ch/DataAccess.asmx/DeleteMaintenanceSheetForPart" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetPartDisturbance">
+      <soap:operation soapAction="http://inventory.psi.ch/DataAccess.asmx/GetPartDisturbance" style="document" />
       <wsdl:input>
         <soap:body use="literal" />
       </wsdl:input>
@@ -17001,15 +17063,6 @@
         <soap:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
-    <wsdl:operation name="GetPartDocuments">
-      <soap:operation soapAction="http://inventory.psi.ch/DataAccess.asmx/GetPartDocuments" style="document" />
-      <wsdl:input>
-        <soap:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
     <wsdl:operation name="GetMainNode">
       <soap:operation soapAction="http://inventory.psi.ch/DataAccess.asmx/GetMainNode" style="document" />
       <wsdl:input>
@@ -17829,6 +17882,15 @@
         <soap:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="GetRolesForUser">
+      <soap:operation soapAction="http://inventory.psi.ch/DataAccess.asmx/GetRolesForUser" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="GetUserActionLog">
       <soap:operation soapAction="http://inventory.psi.ch/DataAccess.asmx/GetUserActionLog" style="document" />
       <wsdl:input>
@@ -18153,18 +18215,18 @@
         <soap:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
-    <wsdl:operation name="GetPartDisturbance">
-      <soap:operation soapAction="http://inventory.psi.ch/DataAccess.asmx/GetPartDisturbance" style="document" />
-      <wsdl:input>
-        <soap:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
   </wsdl:binding>
   <wsdl:binding name="DataAccessSoap12" type="tns:DataAccessSoap">
     <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetPartDocuments">
+      <soap12:operation soapAction="http://inventory.psi.ch/DataAccess.asmx/GetPartDocuments" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="DeleteDocument">
       <soap12:operation soapAction="http://inventory.psi.ch/DataAccess.asmx/DeleteDocument" style="document" />
       <wsdl:input>
@@ -19022,6 +19084,15 @@
     </wsdl:operation>
     <wsdl:operation name="DeleteMaintenanceSheetForPart">
       <soap12:operation soapAction="http://inventory.psi.ch/DataAccess.asmx/DeleteMaintenanceSheetForPart" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetPartDisturbance">
+      <soap12:operation soapAction="http://inventory.psi.ch/DataAccess.asmx/GetPartDisturbance" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>
@@ -20163,15 +20234,6 @@
         <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
-    <wsdl:operation name="GetPartDocuments">
-      <soap12:operation soapAction="http://inventory.psi.ch/DataAccess.asmx/GetPartDocuments" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
     <wsdl:operation name="GetMainNode">
       <soap12:operation soapAction="http://inventory.psi.ch/DataAccess.asmx/GetMainNode" style="document" />
       <wsdl:input>
@@ -20991,6 +21053,15 @@
         <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="GetRolesForUser">
+      <soap12:operation soapAction="http://inventory.psi.ch/DataAccess.asmx/GetRolesForUser" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="GetUserActionLog">
       <soap12:operation soapAction="http://inventory.psi.ch/DataAccess.asmx/GetUserActionLog" style="document" />
       <wsdl:input>
@@ -21315,18 +21386,18 @@
         <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
-    <wsdl:operation name="GetPartDisturbance">
-      <soap12:operation soapAction="http://inventory.psi.ch/DataAccess.asmx/GetPartDisturbance" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
   </wsdl:binding>
   <wsdl:binding name="DataAccessHttpGet" type="tns:DataAccessHttpGet">
     <http:binding verb="GET" />
+    <wsdl:operation name="GetPartDocuments">
+      <http:operation location="/GetPartDocuments" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="DeleteDocument">
       <http:operation location="/DeleteDocument" />
       <wsdl:input>
@@ -22076,6 +22147,15 @@
         <http:urlEncoded />
       </wsdl:input>
       <wsdl:output />
+    </wsdl:operation>
+    <wsdl:operation name="GetPartDisturbance">
+      <http:operation location="/GetPartDisturbance" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="DeletePartDisturbance">
       <http:operation location="/DeletePartDisturbance" />
@@ -23022,15 +23102,6 @@
       </wsdl:input>
       <wsdl:output />
     </wsdl:operation>
-    <wsdl:operation name="GetPartDocuments">
-      <http:operation location="/GetPartDocuments" />
-      <wsdl:input>
-        <http:urlEncoded />
-      </wsdl:input>
-      <wsdl:output>
-        <mime:mimeXml part="Body" />
-      </wsdl:output>
-    </wsdl:operation>
     <wsdl:operation name="GetMainNode">
       <http:operation location="/GetMainNode" />
       <wsdl:input>
@@ -23504,6 +23575,15 @@
         <mime:mimeXml part="Body" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="GetRolesForUser">
+      <http:operation location="/GetRolesForUser" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="GetUserActionLog">
       <http:operation location="/GetUserActionLog" />
       <wsdl:input>
@@ -23756,15 +23836,6 @@
     </wsdl:operation>
     <wsdl:operation name="GetPartDisturbances">
       <http:operation location="/GetPartDisturbances" />
-      <wsdl:input>
-        <http:urlEncoded />
-      </wsdl:input>
-      <wsdl:output>
-        <mime:mimeXml part="Body" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetPartDisturbance">
-      <http:operation location="/GetPartDisturbance" />
       <wsdl:input>
         <http:urlEncoded />
       </wsdl:input>
@@ -23775,6 +23846,15 @@
   </wsdl:binding>
   <wsdl:binding name="DataAccessHttpPost" type="tns:DataAccessHttpPost">
     <http:binding verb="POST" />
+    <wsdl:operation name="GetPartDocuments">
+      <http:operation location="/GetPartDocuments" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="DeleteDocument">
       <http:operation location="/DeleteDocument" />
       <wsdl:input>
@@ -24524,6 +24604,15 @@
         <mime:content type="application/x-www-form-urlencoded" />
       </wsdl:input>
       <wsdl:output />
+    </wsdl:operation>
+    <wsdl:operation name="GetPartDisturbance">
+      <http:operation location="/GetPartDisturbance" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="DeletePartDisturbance">
       <http:operation location="/DeletePartDisturbance" />
@@ -25470,15 +25559,6 @@
       </wsdl:input>
       <wsdl:output />
     </wsdl:operation>
-    <wsdl:operation name="GetPartDocuments">
-      <http:operation location="/GetPartDocuments" />
-      <wsdl:input>
-        <mime:content type="application/x-www-form-urlencoded" />
-      </wsdl:input>
-      <wsdl:output>
-        <mime:mimeXml part="Body" />
-      </wsdl:output>
-    </wsdl:operation>
     <wsdl:operation name="GetMainNode">
       <http:operation location="/GetMainNode" />
       <wsdl:input>
@@ -25952,6 +26032,15 @@
         <mime:mimeXml part="Body" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="GetRolesForUser">
+      <http:operation location="/GetRolesForUser" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="GetUserActionLog">
       <http:operation location="/GetUserActionLog" />
       <wsdl:input>
@@ -26204,15 +26293,6 @@
     </wsdl:operation>
     <wsdl:operation name="GetPartDisturbances">
       <http:operation location="/GetPartDisturbances" />
-      <wsdl:input>
-        <mime:content type="application/x-www-form-urlencoded" />
-      </wsdl:input>
-      <wsdl:output>
-        <mime:mimeXml part="Body" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetPartDisturbance">
-      <http:operation location="/GetPartDisturbance" />
       <wsdl:input>
         <mime:content type="application/x-www-form-urlencoded" />
       </wsdl:input>

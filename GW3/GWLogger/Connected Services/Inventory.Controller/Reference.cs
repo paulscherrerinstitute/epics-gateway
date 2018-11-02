@@ -21,6 +21,13 @@ namespace GWLogger.Inventory.Controller {
         
         [System.ServiceModel.OperationContractAttribute(Action="https://inventory.psi.ch/manage/DirectCommands.asmx/SendEpicsCommand", ReplyAction="*")]
         System.Threading.Tasks.Task<string> SendEpicsCommandAsync(string config, string channel, string slave);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="https://inventory.psi.ch/manage/DirectCommands.asmx/StartTask", ReplyAction="*")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        string StartTask(string slave, string task);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="https://inventory.psi.ch/manage/DirectCommands.asmx/StartTask", ReplyAction="*")]
+        System.Threading.Tasks.Task<string> StartTaskAsync(string slave, string task);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -56,6 +63,14 @@ namespace GWLogger.Inventory.Controller {
         
         public System.Threading.Tasks.Task<string> SendEpicsCommandAsync(string config, string channel, string slave) {
             return base.Channel.SendEpicsCommandAsync(config, channel, slave);
+        }
+        
+        public string StartTask(string slave, string task) {
+            return base.Channel.StartTask(slave, task);
+        }
+        
+        public System.Threading.Tasks.Task<string> StartTaskAsync(string slave, string task) {
+            return base.Channel.StartTaskAsync(slave, task);
         }
     }
 }

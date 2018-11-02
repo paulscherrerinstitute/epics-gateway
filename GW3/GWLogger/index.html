@@ -72,6 +72,8 @@
             <h2 id="currentGW"></h2>
             <table id="gwInfos"></table>
             <div id="detailsButtons">
+                <div class="button" onclick="Commands.Restart()">Restart Gateway</div>
+                <div class="button" onclick="Commands.Update()">Update Gateway</div>
                 <a id="logLink" class="button" href="">Logs</a>
                 <a id="inventoryLink" class="button" target="_blank" href="">Check configuration</a>
                 <a class="button" href="/">Close</a>
@@ -159,8 +161,10 @@
             </table>
 
             <br />
-            By clicking on the gateway, more details of the gateway will be displayed.
-            <h3>Erros</h3>
+            By clicking on the gateway, more details of the gateway will be displayed. On this page it's possible (for the authorized people) to restart
+            the gateway or upgrade the gateway to the latest build. The "Logs" button will switch to the "Logs" view and the "Check Configuration" will open
+            the inventory website showing the Gateway configuration.
+            <h3>Errors</h3>
             On the right most of the interface a column contains either a green button with the text "No errors" or one or more red buttons.
             In case a red button replaces the green one, the red button text will be the gateway which is currently on an error state.
             It's possible to click on the red button to directly jump on the live details view of that particular gateway.

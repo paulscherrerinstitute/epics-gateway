@@ -562,6 +562,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Frontend\Commands.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\Connections.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\DataFileStats.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\FreeSpace.ts" />

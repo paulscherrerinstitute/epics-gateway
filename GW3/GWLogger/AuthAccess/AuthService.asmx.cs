@@ -134,5 +134,16 @@ namespace GWLogger.AuthAccess
         {
             Live.LiveInformation.SendEmail(destination, "Test email", "If you receive this email, everything is fine.");
         }
+
+        [WebMethod]
+        public string GatewayCommand(string gatewayName, string command)
+        {
+            if (!Global.Inventory.GetRolesForUser(CurrentUser().Split('\\').Last()).Any(row => row.Access == "Administrator" || row.Access == "EPICS Gateway Manager"))
+                throw new System.Security.SecurityException("You don't have the right to issue such commands.");
+            var allowedCommands = new string[] { "UpdateGateway", "UpdateGateway3", "RestartGateway", "RestartGateway3" };
+            if (!allowedCommands.Contains(command))
+                throw new System.Security.SecurityException("Command not allowed.");
+            return Global.DirectCommands.StartTask(gatewayName, command);
+        }
     }
 }

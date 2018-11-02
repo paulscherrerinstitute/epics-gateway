@@ -15,6 +15,13 @@ namespace GWLogger.Inventory {
     [System.ServiceModel.ServiceContractAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", ConfigurationName="Inventory.DataAccessSoap")]
     public interface DataAccessSoap {
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://inventory.psi.ch/DataAccess.asmx/GetPartDocuments", ReplyAction="*")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        GWLogger.Inventory.PartDocumentInformation[] GetPartDocuments(string psiLabel);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://inventory.psi.ch/DataAccess.asmx/GetPartDocuments", ReplyAction="*")]
+        System.Threading.Tasks.Task<GWLogger.Inventory.PartDocumentInformation[]> GetPartDocumentsAsync(string psiLabel);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://inventory.psi.ch/DataAccess.asmx/DeleteDocument", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
         void DeleteDocument(string tokenId, string link);
@@ -690,6 +697,13 @@ namespace GWLogger.Inventory {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://inventory.psi.ch/DataAccess.asmx/DeleteMaintenanceSheetForPart", ReplyAction="*")]
         System.Threading.Tasks.Task DeleteMaintenanceSheetForPartAsync(string tokenId, int sheetForPartId);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://inventory.psi.ch/DataAccess.asmx/GetPartDisturbance", ReplyAction="*")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        GWLogger.Inventory.PartDisturbance GetPartDisturbance(int disturbanceId);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://inventory.psi.ch/DataAccess.asmx/GetPartDisturbance", ReplyAction="*")]
+        System.Threading.Tasks.Task<GWLogger.Inventory.PartDisturbance> GetPartDisturbanceAsync(int disturbanceId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://inventory.psi.ch/DataAccess.asmx/UpdatePartDisturbance", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -1573,13 +1587,6 @@ namespace GWLogger.Inventory {
         [System.ServiceModel.OperationContractAttribute(Action="http://inventory.psi.ch/DataAccess.asmx/UpdatePartNote", ReplyAction="*")]
         System.Threading.Tasks.Task UpdatePartNoteAsync(string tokenId, int noteId, string title, string description);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://inventory.psi.ch/DataAccess.asmx/GetPartDocuments", ReplyAction="*")]
-        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
-        GWLogger.Inventory.PartDocumentInformation[] GetPartDocuments(string psiLabel);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://inventory.psi.ch/DataAccess.asmx/GetPartDocuments", ReplyAction="*")]
-        System.Threading.Tasks.Task<GWLogger.Inventory.PartDocumentInformation[]> GetPartDocumentsAsync(string psiLabel);
-        
         [System.ServiceModel.OperationContractAttribute(Action="http://inventory.psi.ch/DataAccess.asmx/GetMainNode", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
         string GetMainNode();
@@ -2218,6 +2225,13 @@ namespace GWLogger.Inventory {
         [System.ServiceModel.OperationContractAttribute(Action="http://inventory.psi.ch/DataAccess.asmx/GetUserRoles", ReplyAction="*")]
         System.Threading.Tasks.Task<GWLogger.Inventory.UserRoleSummary[]> GetUserRolesAsync();
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://inventory.psi.ch/DataAccess.asmx/GetRolesForUser", ReplyAction="*")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        GWLogger.Inventory.UserRoleSummary[] GetRolesForUser(string username);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://inventory.psi.ch/DataAccess.asmx/GetRolesForUser", ReplyAction="*")]
+        System.Threading.Tasks.Task<GWLogger.Inventory.UserRoleSummary[]> GetRolesForUserAsync(string username);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://inventory.psi.ch/DataAccess.asmx/GetUserActionLog", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
         GWLogger.Inventory.UserAction[] GetUserActionLog(string tokenId, int userToCheck);
@@ -2470,115 +2484,6 @@ namespace GWLogger.Inventory {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://inventory.psi.ch/DataAccess.asmx/GetPartDisturbances", ReplyAction="*")]
         System.Threading.Tasks.Task<GWLogger.Inventory.SearchResult> GetPartDisturbancesAsync(string psiLabel);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://inventory.psi.ch/DataAccess.asmx/GetPartDisturbance", ReplyAction="*")]
-        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
-        GWLogger.Inventory.PartDisturbance GetPartDisturbance(int disturbanceId);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://inventory.psi.ch/DataAccess.asmx/GetPartDisturbance", ReplyAction="*")]
-        System.Threading.Tasks.Task<GWLogger.Inventory.PartDisturbance> GetPartDisturbanceAsync(int disturbanceId);
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-    [System.ServiceModel.MessageContractAttribute(WrapperName="UploadPartDocument", WrapperNamespace="http://inventory.psi.ch/DataAccess.asmx", IsWrapped=true)]
-    public partial class UploadPartDocumentRequest {
-        
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=0)]
-        public string tokenId;
-        
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=1)]
-        public string psiLabel;
-        
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=2)]
-        public string comment;
-        
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=3)]
-        public string filename;
-        
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=4)]
-        [System.Xml.Serialization.XmlElementAttribute(DataType="base64Binary")]
-        public byte[] fileContent;
-        
-        public UploadPartDocumentRequest() {
-        }
-        
-        public UploadPartDocumentRequest(string tokenId, string psiLabel, string comment, string filename, byte[] fileContent) {
-            this.tokenId = tokenId;
-            this.psiLabel = psiLabel;
-            this.comment = comment;
-            this.filename = filename;
-            this.fileContent = fileContent;
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-    [System.ServiceModel.MessageContractAttribute(WrapperName="UploadPartDocumentResponse", WrapperNamespace="http://inventory.psi.ch/DataAccess.asmx", IsWrapped=true)]
-    public partial class UploadPartDocumentResponse {
-        
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=0)]
-        public string UploadPartDocumentResult;
-        
-        public UploadPartDocumentResponse() {
-        }
-        
-        public UploadPartDocumentResponse(string UploadPartDocumentResult) {
-            this.UploadPartDocumentResult = UploadPartDocumentResult;
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-    [System.ServiceModel.MessageContractAttribute(WrapperName="UploadPartTypeDocument", WrapperNamespace="http://inventory.psi.ch/DataAccess.asmx", IsWrapped=true)]
-    public partial class UploadPartTypeDocumentRequest {
-        
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=0)]
-        public string tokenId;
-        
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=1)]
-        public string psiLabel;
-        
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=2)]
-        public string comment;
-        
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=3)]
-        public string filename;
-        
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=4)]
-        [System.Xml.Serialization.XmlElementAttribute(DataType="base64Binary")]
-        public byte[] fileContent;
-        
-        public UploadPartTypeDocumentRequest() {
-        }
-        
-        public UploadPartTypeDocumentRequest(string tokenId, string psiLabel, string comment, string filename, byte[] fileContent) {
-            this.tokenId = tokenId;
-            this.psiLabel = psiLabel;
-            this.comment = comment;
-            this.filename = filename;
-            this.fileContent = fileContent;
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-    [System.ServiceModel.MessageContractAttribute(WrapperName="UploadPartTypeDocumentResponse", WrapperNamespace="http://inventory.psi.ch/DataAccess.asmx", IsWrapped=true)]
-    public partial class UploadPartTypeDocumentResponse {
-        
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=0)]
-        public string UploadPartTypeDocumentResult;
-        
-        public UploadPartTypeDocumentResponse() {
-        }
-        
-        public UploadPartTypeDocumentResponse(string UploadPartTypeDocumentResult) {
-            this.UploadPartTypeDocumentResult = UploadPartTypeDocumentResult;
-        }
     }
     
     /// <remarks/>
@@ -2587,79 +2492,59 @@ namespace GWLogger.Inventory {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx")]
-    public partial class AttributeField : object, System.ComponentModel.INotifyPropertyChanged {
+    public partial class PartDocumentInformation : object, System.ComponentModel.INotifyPropertyChanged {
         
-        private string nameField;
+        private string linkField;
         
-        private string valueField;
+        private string descriptionField;
+        
+        private System.Nullable<System.DateTime> linkedOnField;
+        
+        private string authorField;
+        
+        private string linkTypeField;
+        
+        private string filenameField;
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=0)]
-        public string Name {
+        public string Link {
             get {
-                return this.nameField;
+                return this.linkField;
             }
             set {
-                this.nameField = value;
-                this.RaisePropertyChanged("Name");
+                this.linkField = value;
+                this.RaisePropertyChanged("Link");
             }
         }
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=1)]
-        public string Value {
+        public string Description {
             get {
-                return this.valueField;
+                return this.descriptionField;
             }
             set {
-                this.valueField = value;
-                this.RaisePropertyChanged("Value");
-            }
-        }
-        
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-        
-        protected void RaisePropertyChanged(string propertyName) {
-            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
-            if ((propertyChanged != null)) {
-                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3163.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx")]
-    public partial class PartDisturbance : object, System.ComponentModel.INotifyPropertyChanged {
-        
-        private int idField;
-        
-        private int authorField;
-        
-        private string authorNameField;
-        
-        private System.DateTime reportedOnField;
-        
-        private DataField[] fieldsField;
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
-        public int Id {
-            get {
-                return this.idField;
-            }
-            set {
-                this.idField = value;
-                this.RaisePropertyChanged("Id");
+                this.descriptionField = value;
+                this.RaisePropertyChanged("Description");
             }
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
-        public int Author {
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=2)]
+        public System.Nullable<System.DateTime> LinkedOn {
+            get {
+                return this.linkedOnField;
+            }
+            set {
+                this.linkedOnField = value;
+                this.RaisePropertyChanged("LinkedOn");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=3)]
+        public string Author {
             get {
                 return this.authorField;
             }
@@ -2670,186 +2555,26 @@ namespace GWLogger.Inventory {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=2)]
-        public string AuthorName {
-            get {
-                return this.authorNameField;
-            }
-            set {
-                this.authorNameField = value;
-                this.RaisePropertyChanged("AuthorName");
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=3)]
-        public System.DateTime ReportedOn {
-            get {
-                return this.reportedOnField;
-            }
-            set {
-                this.reportedOnField = value;
-                this.RaisePropertyChanged("ReportedOn");
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlArrayAttribute(Order=4)]
-        public DataField[] Fields {
-            get {
-                return this.fieldsField;
-            }
-            set {
-                this.fieldsField = value;
-                this.RaisePropertyChanged("Fields");
-            }
-        }
-        
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-        
-        protected void RaisePropertyChanged(string propertyName) {
-            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
-            if ((propertyChanged != null)) {
-                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3163.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx")]
-    public partial class DataField : object, System.ComponentModel.INotifyPropertyChanged {
-        
-        private int idField;
-        
-        private string nameField;
-        
-        private string typeNameField;
-        
-        private IdValuePair[] typeParamField;
-        
-        private string valueField;
-        
-        private bool readOnlyField;
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
-        public int Id {
-            get {
-                return this.idField;
-            }
-            set {
-                this.idField = value;
-                this.RaisePropertyChanged("Id");
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
-        public string Name {
-            get {
-                return this.nameField;
-            }
-            set {
-                this.nameField = value;
-                this.RaisePropertyChanged("Name");
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=2)]
-        public string TypeName {
-            get {
-                return this.typeNameField;
-            }
-            set {
-                this.typeNameField = value;
-                this.RaisePropertyChanged("TypeName");
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlArrayAttribute(Order=3)]
-        public IdValuePair[] TypeParam {
-            get {
-                return this.typeParamField;
-            }
-            set {
-                this.typeParamField = value;
-                this.RaisePropertyChanged("TypeParam");
-            }
-        }
-        
-        /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=4)]
-        public string Value {
+        public string LinkType {
             get {
-                return this.valueField;
+                return this.linkTypeField;
             }
             set {
-                this.valueField = value;
-                this.RaisePropertyChanged("Value");
+                this.linkTypeField = value;
+                this.RaisePropertyChanged("LinkType");
             }
         }
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=5)]
-        public bool ReadOnly {
+        public string Filename {
             get {
-                return this.readOnlyField;
+                return this.filenameField;
             }
             set {
-                this.readOnlyField = value;
-                this.RaisePropertyChanged("ReadOnly");
-            }
-        }
-        
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-        
-        protected void RaisePropertyChanged(string propertyName) {
-            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
-            if ((propertyChanged != null)) {
-                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3163.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx")]
-    public partial class IdValuePair : object, System.ComponentModel.INotifyPropertyChanged {
-        
-        private string idField;
-        
-        private string valueField;
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
-        public string Id {
-            get {
-                return this.idField;
-            }
-            set {
-                this.idField = value;
-                this.RaisePropertyChanged("Id");
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
-        public string Value {
-            get {
-                return this.valueField;
-            }
-            set {
-                this.valueField = value;
-                this.RaisePropertyChanged("Value");
+                this.filenameField = value;
+                this.RaisePropertyChanged("Filename");
             }
         }
         
@@ -3164,6 +2889,52 @@ namespace GWLogger.Inventory {
             set {
                 this.childConnectorsField = value;
                 this.RaisePropertyChanged("ChildConnectors");
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3163.0")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx")]
+    public partial class IdValuePair : object, System.ComponentModel.INotifyPropertyChanged {
+        
+        private string idField;
+        
+        private string valueField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public string Id {
+            get {
+                return this.idField;
+            }
+            set {
+                this.idField = value;
+                this.RaisePropertyChanged("Id");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public string Value {
+            get {
+                return this.valueField;
+            }
+            set {
+                this.valueField = value;
+                this.RaisePropertyChanged("Value");
             }
         }
         
@@ -4239,6 +4010,52 @@ namespace GWLogger.Inventory {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx")]
+    public partial class AttributeField : object, System.ComponentModel.INotifyPropertyChanged {
+        
+        private string nameField;
+        
+        private string valueField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public string Name {
+            get {
+                return this.nameField;
+            }
+            set {
+                this.nameField = value;
+                this.RaisePropertyChanged("Name");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public string Value {
+            get {
+                return this.valueField;
+            }
+            set {
+                this.valueField = value;
+                this.RaisePropertyChanged("Value");
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3163.0")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx")]
     public partial class SwitchEffect : object, System.ComponentModel.INotifyPropertyChanged {
         
         private string[] droppedField;
@@ -4872,108 +4689,6 @@ namespace GWLogger.Inventory {
             set {
                 this.prefixField = value;
                 this.RaisePropertyChanged("Prefix");
-            }
-        }
-        
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-        
-        protected void RaisePropertyChanged(string propertyName) {
-            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
-            if ((propertyChanged != null)) {
-                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3163.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx")]
-    public partial class PartDocumentInformation : object, System.ComponentModel.INotifyPropertyChanged {
-        
-        private string linkField;
-        
-        private string descriptionField;
-        
-        private System.Nullable<System.DateTime> linkedOnField;
-        
-        private string authorField;
-        
-        private string linkTypeField;
-        
-        private string filenameField;
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
-        public string Link {
-            get {
-                return this.linkField;
-            }
-            set {
-                this.linkField = value;
-                this.RaisePropertyChanged("Link");
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
-        public string Description {
-            get {
-                return this.descriptionField;
-            }
-            set {
-                this.descriptionField = value;
-                this.RaisePropertyChanged("Description");
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=2)]
-        public System.Nullable<System.DateTime> LinkedOn {
-            get {
-                return this.linkedOnField;
-            }
-            set {
-                this.linkedOnField = value;
-                this.RaisePropertyChanged("LinkedOn");
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=3)]
-        public string Author {
-            get {
-                return this.authorField;
-            }
-            set {
-                this.authorField = value;
-                this.RaisePropertyChanged("Author");
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=4)]
-        public string LinkType {
-            get {
-                return this.linkTypeField;
-            }
-            set {
-                this.linkTypeField = value;
-                this.RaisePropertyChanged("LinkType");
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=5)]
-        public string Filename {
-            get {
-                return this.filenameField;
-            }
-            set {
-                this.filenameField = value;
-                this.RaisePropertyChanged("Filename");
             }
         }
         
@@ -6656,6 +6371,108 @@ namespace GWLogger.Inventory {
             set {
                 this.commentField = value;
                 this.RaisePropertyChanged("Comment");
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3163.0")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx")]
+    public partial class DataField : object, System.ComponentModel.INotifyPropertyChanged {
+        
+        private int idField;
+        
+        private string nameField;
+        
+        private string typeNameField;
+        
+        private IdValuePair[] typeParamField;
+        
+        private string valueField;
+        
+        private bool readOnlyField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public int Id {
+            get {
+                return this.idField;
+            }
+            set {
+                this.idField = value;
+                this.RaisePropertyChanged("Id");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public string Name {
+            get {
+                return this.nameField;
+            }
+            set {
+                this.nameField = value;
+                this.RaisePropertyChanged("Name");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=2)]
+        public string TypeName {
+            get {
+                return this.typeNameField;
+            }
+            set {
+                this.typeNameField = value;
+                this.RaisePropertyChanged("TypeName");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlArrayAttribute(Order=3)]
+        public IdValuePair[] TypeParam {
+            get {
+                return this.typeParamField;
+            }
+            set {
+                this.typeParamField = value;
+                this.RaisePropertyChanged("TypeParam");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=4)]
+        public string Value {
+            get {
+                return this.valueField;
+            }
+            set {
+                this.valueField = value;
+                this.RaisePropertyChanged("Value");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=5)]
+        public bool ReadOnly {
+            get {
+                return this.readOnlyField;
+            }
+            set {
+                this.readOnlyField = value;
+                this.RaisePropertyChanged("ReadOnly");
             }
         }
         
@@ -9355,6 +9172,94 @@ namespace GWLogger.Inventory {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx")]
+    public partial class PartDisturbance : object, System.ComponentModel.INotifyPropertyChanged {
+        
+        private int idField;
+        
+        private int authorField;
+        
+        private string authorNameField;
+        
+        private System.DateTime reportedOnField;
+        
+        private DataField[] fieldsField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public int Id {
+            get {
+                return this.idField;
+            }
+            set {
+                this.idField = value;
+                this.RaisePropertyChanged("Id");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public int Author {
+            get {
+                return this.authorField;
+            }
+            set {
+                this.authorField = value;
+                this.RaisePropertyChanged("Author");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=2)]
+        public string AuthorName {
+            get {
+                return this.authorNameField;
+            }
+            set {
+                this.authorNameField = value;
+                this.RaisePropertyChanged("AuthorName");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=3)]
+        public System.DateTime ReportedOn {
+            get {
+                return this.reportedOnField;
+            }
+            set {
+                this.reportedOnField = value;
+                this.RaisePropertyChanged("ReportedOn");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlArrayAttribute(Order=4)]
+        public DataField[] Fields {
+            get {
+                return this.fieldsField;
+            }
+            set {
+                this.fieldsField = value;
+                this.RaisePropertyChanged("Fields");
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.3163.0")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx")]
     public partial class MaintenanceHistory : object, System.ComponentModel.INotifyPropertyChanged {
         
         private int idField;
@@ -10617,24 +10522,12 @@ namespace GWLogger.Inventory {
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx")]
     public partial class SearchDefinition : object, System.ComponentModel.INotifyPropertyChanged {
         
-        private string[] columnsField;
-        
         private SearchCondition[] queryField;
+        
+        private string[] columnsField;
         
         /// <remarks/>
         [System.Xml.Serialization.XmlArrayAttribute(Order=0)]
-        public string[] Columns {
-            get {
-                return this.columnsField;
-            }
-            set {
-                this.columnsField = value;
-                this.RaisePropertyChanged("Columns");
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlArrayAttribute(Order=1)]
         public SearchCondition[] Query {
             get {
                 return this.queryField;
@@ -10642,6 +10535,18 @@ namespace GWLogger.Inventory {
             set {
                 this.queryField = value;
                 this.RaisePropertyChanged("Query");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlArrayAttribute(Order=1)]
+        public string[] Columns {
+            get {
+                return this.columnsField;
+            }
+            set {
+                this.columnsField = value;
+                this.RaisePropertyChanged("Columns");
             }
         }
         
@@ -11230,6 +11135,108 @@ namespace GWLogger.Inventory {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="UploadPartDocument", WrapperNamespace="http://inventory.psi.ch/DataAccess.asmx", IsWrapped=true)]
+    public partial class UploadPartDocumentRequest {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=0)]
+        public string tokenId;
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=1)]
+        public string psiLabel;
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=2)]
+        public string comment;
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=3)]
+        public string filename;
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=4)]
+        [System.Xml.Serialization.XmlElementAttribute(DataType="base64Binary")]
+        public byte[] fileContent;
+        
+        public UploadPartDocumentRequest() {
+        }
+        
+        public UploadPartDocumentRequest(string tokenId, string psiLabel, string comment, string filename, byte[] fileContent) {
+            this.tokenId = tokenId;
+            this.psiLabel = psiLabel;
+            this.comment = comment;
+            this.filename = filename;
+            this.fileContent = fileContent;
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="UploadPartDocumentResponse", WrapperNamespace="http://inventory.psi.ch/DataAccess.asmx", IsWrapped=true)]
+    public partial class UploadPartDocumentResponse {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=0)]
+        public string UploadPartDocumentResult;
+        
+        public UploadPartDocumentResponse() {
+        }
+        
+        public UploadPartDocumentResponse(string UploadPartDocumentResult) {
+            this.UploadPartDocumentResult = UploadPartDocumentResult;
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="UploadPartTypeDocument", WrapperNamespace="http://inventory.psi.ch/DataAccess.asmx", IsWrapped=true)]
+    public partial class UploadPartTypeDocumentRequest {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=0)]
+        public string tokenId;
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=1)]
+        public string psiLabel;
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=2)]
+        public string comment;
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=3)]
+        public string filename;
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=4)]
+        [System.Xml.Serialization.XmlElementAttribute(DataType="base64Binary")]
+        public byte[] fileContent;
+        
+        public UploadPartTypeDocumentRequest() {
+        }
+        
+        public UploadPartTypeDocumentRequest(string tokenId, string psiLabel, string comment, string filename, byte[] fileContent) {
+            this.tokenId = tokenId;
+            this.psiLabel = psiLabel;
+            this.comment = comment;
+            this.filename = filename;
+            this.fileContent = fileContent;
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="UploadPartTypeDocumentResponse", WrapperNamespace="http://inventory.psi.ch/DataAccess.asmx", IsWrapped=true)]
+    public partial class UploadPartTypeDocumentResponse {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://inventory.psi.ch/DataAccess.asmx", Order=0)]
+        public string UploadPartTypeDocumentResult;
+        
+        public UploadPartTypeDocumentResponse() {
+        }
+        
+        public UploadPartTypeDocumentResponse(string UploadPartTypeDocumentResult) {
+            this.UploadPartTypeDocumentResult = UploadPartTypeDocumentResult;
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
     [System.ServiceModel.MessageContractAttribute(WrapperName="GetHandledRequests", WrapperNamespace="http://inventory.psi.ch/DataAccess.asmx", IsWrapped=true)]
     public partial class GetHandledRequestsRequest {
         
@@ -11455,6 +11462,14 @@ namespace GWLogger.Inventory {
         
         public DataAccessSoapClient(System.ServiceModel.Channels.Binding binding, System.ServiceModel.EndpointAddress remoteAddress) : 
                 base(binding, remoteAddress) {
+        }
+        
+        public GWLogger.Inventory.PartDocumentInformation[] GetPartDocuments(string psiLabel) {
+            return base.Channel.GetPartDocuments(psiLabel);
+        }
+        
+        public System.Threading.Tasks.Task<GWLogger.Inventory.PartDocumentInformation[]> GetPartDocumentsAsync(string psiLabel) {
+            return base.Channel.GetPartDocumentsAsync(psiLabel);
         }
         
         public void DeleteDocument(string tokenId, string link) {
@@ -12307,6 +12322,14 @@ namespace GWLogger.Inventory {
         
         public System.Threading.Tasks.Task DeleteMaintenanceSheetForPartAsync(string tokenId, int sheetForPartId) {
             return base.Channel.DeleteMaintenanceSheetForPartAsync(tokenId, sheetForPartId);
+        }
+        
+        public GWLogger.Inventory.PartDisturbance GetPartDisturbance(int disturbanceId) {
+            return base.Channel.GetPartDisturbance(disturbanceId);
+        }
+        
+        public System.Threading.Tasks.Task<GWLogger.Inventory.PartDisturbance> GetPartDisturbanceAsync(int disturbanceId) {
+            return base.Channel.GetPartDisturbanceAsync(disturbanceId);
         }
         
         public void UpdatePartDisturbance(string tokenId, int disturbanceId, GWLogger.Inventory.DataField[] fields, bool sendUpdate) {
@@ -13317,14 +13340,6 @@ namespace GWLogger.Inventory {
             return base.Channel.UpdatePartNoteAsync(tokenId, noteId, title, description);
         }
         
-        public GWLogger.Inventory.PartDocumentInformation[] GetPartDocuments(string psiLabel) {
-            return base.Channel.GetPartDocuments(psiLabel);
-        }
-        
-        public System.Threading.Tasks.Task<GWLogger.Inventory.PartDocumentInformation[]> GetPartDocumentsAsync(string psiLabel) {
-            return base.Channel.GetPartDocumentsAsync(psiLabel);
-        }
-        
         public string GetMainNode() {
             return base.Channel.GetMainNode();
         }
@@ -14086,6 +14101,14 @@ namespace GWLogger.Inventory {
             return base.Channel.GetUserRolesAsync();
         }
         
+        public GWLogger.Inventory.UserRoleSummary[] GetRolesForUser(string username) {
+            return base.Channel.GetRolesForUser(username);
+        }
+        
+        public System.Threading.Tasks.Task<GWLogger.Inventory.UserRoleSummary[]> GetRolesForUserAsync(string username) {
+            return base.Channel.GetRolesForUserAsync(username);
+        }
+        
         public GWLogger.Inventory.UserAction[] GetUserActionLog(string tokenId, int userToCheck) {
             return base.Channel.GetUserActionLog(tokenId, userToCheck);
         }
@@ -14391,14 +14414,6 @@ namespace GWLogger.Inventory {
         
         public System.Threading.Tasks.Task<GWLogger.Inventory.SearchResult> GetPartDisturbancesAsync(string psiLabel) {
             return base.Channel.GetPartDisturbancesAsync(psiLabel);
-        }
-        
-        public GWLogger.Inventory.PartDisturbance GetPartDisturbance(int disturbanceId) {
-            return base.Channel.GetPartDisturbance(disturbanceId);
-        }
-        
-        public System.Threading.Tasks.Task<GWLogger.Inventory.PartDisturbance> GetPartDisturbanceAsync(int disturbanceId) {
-            return base.Channel.GetPartDisturbanceAsync(disturbanceId);
         }
     }
 }

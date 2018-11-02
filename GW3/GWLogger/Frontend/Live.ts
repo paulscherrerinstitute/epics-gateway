@@ -63,6 +63,14 @@ class Live
         Live.pvsChart.SetDataSource({ Values: [] });
     }
 
+    static GetVersion(gwName: string): string
+    {
+        for (var i = 0; i < Live.shortInfo.length; i++)
+            if (Live.shortInfo[i].Name.toUpperCase() == gwName.toUpperCase())
+                return Live.shortInfo[i].Version;
+        return null;
+    }
+
     static RefreshShort()
     {
         if (Main.CurrentGateway)
