@@ -34,8 +34,8 @@ class Live
         {
             $(elem).on("click", (evt) =>
             {
-                var elem = evt.target;
-                while (elem.tagName != "div" && elem.className != "GWDisplay")
+                var elem = evt.currentTarget ? evt.currentTarget : evt.target;
+                while ((elem.localName ? elem.localName : elem.tagName) != "div" && elem.className.indexOf("GWDisplay") == -1)
                     elem = elem.parentElement;
                 var gwName = elem.id;
                 Live.ShowDetails(gwName);
