@@ -927,8 +927,9 @@ namespace GWLogger.Backend.DataContext
                                 for (var j = 0; j < Stats.GetLength(0); j++)
                                 {
                                     var t = DateOfFile(i).AddMinutes(10 * j);
+                                    var v = reader.ReadInt64();
                                     if (t >= start && t <= end)
-                                        stats[s].Add(new LogStat { Date = t, Value = reader.ReadInt64() });
+                                        stats[s].Add(new LogStat { Date = t, Value = v });
                                 }
                             }
 

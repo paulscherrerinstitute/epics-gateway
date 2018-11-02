@@ -123,33 +123,39 @@ class Live
                 success: function (msg)
                 {
                     var data: GatewayInformation = msg.d;
-                    data.CPU = Math.round(data.CPU * 100) / 100;
-                    data.RunningTime = data.RunningTime ? data.RunningTime.substr(0, data.RunningTime.lastIndexOf('.')) : "";
-
-                    var html = "";
-                    for (var i in data)
+                    try
                     {
-                        if (i == "__type" || i == "Name")
-                            continue;
-                        html += "<tr><td>" + i + "</td><td>" + data[i] + "</td></tr>";
-                    }
-                    $("#gwInfos").html(html);
+                        data.CPU = Math.round(data.CPU * 100) / 100;
+                        data.RunningTime = data.RunningTime ? data.RunningTime.substr(0, data.RunningTime.lastIndexOf('.')) : "";
 
-                    $("#gwInfos tr").kendoTooltip({
-                        position: "bottom",
-                        show: (e: kendo.ui.TooltipEvent) =>
+                        var html = "";
+                        for (var i in data)
                         {
-                            if (Live.lastToolTip)
-                                Live.lastToolTip.hide();
-                            Live.lastToolTip = e.sender;
-                            e.sender.refresh();
-                        },
-                        content: (e: kendo.ui.TooltipEvent) =>
-                        {
-                            return "EPICS Channel Name:<br>" + DebugChannels[e.sender.element[0].children[0].innerHTML].replace("{0}", Main.CurrentGateway.toUpperCase());
-                        },
-                        showAfter: 200
-                    });
+                            if (i == "__type" || i == "Name")
+                                continue;
+                            html += "<tr><td>" + i + "</td><td>" + data[i] + "</td></tr>";
+                        }
+                        $("#gwInfos").html(html);
+
+                        $("#gwInfos tr").kendoTooltip({
+                            position: "bottom",
+                            show: (e: kendo.ui.TooltipEvent) =>
+                            {
+                                if (Live.lastToolTip)
+                                    Live.lastToolTip.hide();
+                                Live.lastToolTip = e.sender;
+                                e.sender.refresh();
+                            },
+                            content: (e: kendo.ui.TooltipEvent) =>
+                            {
+                                return "EPICS Channel Name:<br>" + DebugChannels[e.sender.element[0].children[0].innerHTML].replace("{0}", Main.CurrentGateway.toUpperCase());
+                            },
+                            showAfter: 200
+                        });
+                    }
+                    catch (ex)
+                    {
+                    }
                 }
             });
 
@@ -164,40 +170,46 @@ class Live
                     $("#currentGW").html(Main.CurrentGateway.toUpperCase());
 
                     var data: HistoricData[] = null;
-                    for (var i = 0; i < msg.d.length; i++)
+                    try
                     {
-                        switch (msg.d[i].Key)
+                        for (var i = 0; i < msg.d.length; i++)
                         {
-                            case "CPU":
-                                data = msg.d[i].Value;
-                                Live.cpuChart.SetDataSource({
-                                    Values: data.map((c) =>
-                                    {
-                                        return { Label: Utils.ShortGWDateFormat(Utils.DateFromNet(c.Date)), Value: c.Value };
-                                    })
-                                });
-                                break;
-                            case "Searches":
-                                data = msg.d[i].Value;
-                                Live.searchesChart.SetDataSource({
-                                    Values: data.map((c) =>
-                                    {
-                                        return { Label: Utils.ShortGWDateFormat(Utils.DateFromNet(c.Date)), Value: c.Value };
-                                    })
-                                });
-                                break;
-                            case "PVs":
-                                data = msg.d[i].Value;
-                                Live.pvsChart.SetDataSource({
-                                    Values: data.map((c) =>
-                                    {
-                                        return { Label: Utils.ShortGWDateFormat(Utils.DateFromNet(c.Date)), Value: c.Value };
-                                    })
-                                });
-                                break;
-                            default:
-                                break;
+                            switch (msg.d[i].Key)
+                            {
+                                case "CPU":
+                                    data = msg.d[i].Value;
+                                    Live.cpuChart.SetDataSource({
+                                        Values: data.map((c) =>
+                                        {
+                                            return { Label: Utils.ShortGWDateFormat(Utils.DateFromNet(c.Date)), Value: c.Value };
+                                        })
+                                    });
+                                    break;
+                                case "Searches":
+                                    data = msg.d[i].Value;
+                                    Live.searchesChart.SetDataSource({
+                                        Values: data.map((c) =>
+                                        {
+                                            return { Label: Utils.ShortGWDateFormat(Utils.DateFromNet(c.Date)), Value: c.Value };
+                                        })
+                                    });
+                                    break;
+                                case "PVs":
+                                    data = msg.d[i].Value;
+                                    Live.pvsChart.SetDataSource({
+                                        Values: data.map((c) =>
+                                        {
+                                            return { Label: Utils.ShortGWDateFormat(Utils.DateFromNet(c.Date)), Value: c.Value };
+                                        })
+                                    });
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
+                    }
+                    catch (ex)
+                    {
                     }
                 }
             });

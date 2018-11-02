@@ -104,7 +104,15 @@ namespace GWLogger.Backend.DataContext
                       Thread.Sleep(5000);
 
                       foreach (var f in files)
-                          StoreHistory?.Invoke(f);
+                      {
+                          try
+                          {
+                              StoreHistory?.Invoke(f);
+                          }
+                          catch
+                          {
+                          }
+                      }
                       //files.StoreHistory();
 
                       step++;
