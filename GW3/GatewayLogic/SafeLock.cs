@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Threading;
+#if SAFE_LOCK
+using System.Collections.Generic;
+using System.Linq;
+#endif
 
 namespace GatewayLogic
 {
