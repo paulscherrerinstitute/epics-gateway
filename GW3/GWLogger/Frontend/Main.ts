@@ -46,19 +46,6 @@ class Main
 
                 if (Main.CurrentGateway)
                 {
-                    /*var items: any[] = $("#gatewaySelector").data("kendoDropDownList").items();
-                    for (var i = 0; i < items[i].length; i++)
-                    {
-                        if (items[i].innerText == Main.CurrentGateway)
-                        {
-                            $("#gatewaySelector").data("kendoDropDownList").select(i);
-                            break;
-                        }
-                    }*/
-                    /*$("#gatewaySelector").data("kendoDropDownList").select((c) =>
-                    {
-                        return c.value == Main.CurrentGateway;
-                    });*/
                     Main.GatewayChanged();
                 }
                 else
@@ -691,6 +678,15 @@ class Main
 
     static Init(): void
     {
+        $("*[tooltip]").each((idx, elem) =>
+        {
+            var text = $(elem).attr("tooltip");
+            var position = $(elem).attr("tooltip-position");
+            if (!position)
+                position = "bottom";
+            $(elem).kendoTooltip({ position: position, content: text });
+        });
+
         var currentUrl = (document.location + "");
         if (currentUrl.toLowerCase().startsWith("http://caesar"))
         {

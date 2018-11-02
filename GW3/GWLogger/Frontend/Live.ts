@@ -15,6 +15,9 @@ interface HistoricData
     Date: Date;
 }
 
+var DebugChannels = { 'CPU': '{0}:CPU', 'Mem': '{0}:MEM-FREE', 'Searches': '{0}:SEARCH-SEC', 'Build': '{0}:BUILD', 'Version': '{0}:VERSION', 'Messages': '{0}:MESSAGES-SEC', 'PVs': '{0}:PVTOTAL', 'RunningTime': '{0}:RUNNING-TIME', 'NbClients': '{0}:NBCLIENTS', 'NbServers': '{0}:NBSERVERS' };
+var GatewayStates = { 0: 'All Ok', 1: 'Minor', 2: 'Warning', 3: 'Error' };
+
 class Live
 {
     static shortInfo: GatewayShortInformation[] = [];
@@ -24,6 +27,7 @@ class Live
     static mustUpdate: number = 0;
     static currentErrors: string[] = [];
 
+    static lastStatusTooltip: kendo.ui.Tooltip = null;
     static InitShortDisplay()
     {
         $(".GWDisplay").each((idx, elem) =>
@@ -36,6 +40,28 @@ class Live
                 var gwName = elem.id;
                 Live.ShowDetails(gwName);
             }).html("<canvas id='canvas_" + elem.id + "' width='100' height='100'></canvas><br>" + elem.id);
+        });
+
+        $(".GWDisplay").kendoTooltip({
+            position: "bottom",
+            show: (e: kendo.ui.TooltipEvent) =>
+            {
+                if (Live.lastStatusTooltip)
+                    Live.lastStatusTooltip.hide();
+                Live.lastStatusTooltip = e.sender;
+                e.sender.refresh();
+            },
+            content: (e: kendo.ui.TooltipEvent) =>
+            {
+                var html = "<b>Gateway " + e.sender.element[0].id + "</b><br>";
+                html += "<table style='text-align: left;'>";
+                html += "<tr><td>Version</td><td>" + Live.GetVersion(e.sender.element[0].id) + "</td></tr>";
+                html += "<tr><td>State</td><td>" + GatewayStates[Live.GetState(e.sender.element[0].id)] + "</td></tr>";
+                html += "</table>";
+                html += "-- Click to view details --";
+                return html;
+            },
+            showAfter: 200
         });
 
         Live.cpuChart = new LineGraph("cpuGraph", { Values: [] }, { MinY: 0, MaxY: 100, XLabelWidth: 50, FontSize: 10, PlotColor: '#000080' });
@@ -71,6 +97,16 @@ class Live
         return null;
     }
 
+    static GetState(gwName: string): number
+    {
+        for (var i = 0; i < Live.shortInfo.length; i++)
+            if (Live.shortInfo[i].Name.toUpperCase() == gwName.toUpperCase())
+                return Live.shortInfo[i].State;
+        return null;
+    }
+
+    static lastToolTip: kendo.ui.Tooltip = null;
+
     static RefreshShort()
     {
         if (Main.CurrentGateway)
@@ -78,10 +114,6 @@ class Live
             $("#inventoryLink").attr("href", "https://inventory.psi.ch/#action=Part&system=" + encodeURIComponent(Main.CurrentGateway.toUpperCase()));
             $("#logLink").attr("href", "/GW/" + Main.CurrentGateway);
 
-            /*this.mustUpdate--;
-            if (this.mustUpdate >= 0)
-                return;
-            this.mustUpdate = 5;*/
             $.ajax({
                 type: 'POST',
                 url: 'DataAccess.asmx/GetGatewayInformation',
@@ -102,6 +134,22 @@ class Live
                         html += "<tr><td>" + i + "</td><td>" + data[i] + "</td></tr>";
                     }
                     $("#gwInfos").html(html);
+
+                    $("#gwInfos tr").kendoTooltip({
+                        position: "bottom",
+                        show: (e: kendo.ui.TooltipEvent) =>
+                        {
+                            if (Live.lastToolTip)
+                                Live.lastToolTip.hide();
+                            Live.lastToolTip = e.sender;
+                            e.sender.refresh();
+                        },
+                        content: (e: kendo.ui.TooltipEvent) =>
+                        {
+                            return "EPICS Channel Name:<br>" + DebugChannels[e.sender.element[0].children[0].innerHTML].replace("{0}", Main.CurrentGateway.toUpperCase());
+                        },
+                        showAfter: 200
+                    });
                 }
             });
 
