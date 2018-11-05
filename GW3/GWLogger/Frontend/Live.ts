@@ -1,4 +1,6 @@
-﻿interface GatewayShortInformation
+﻿/// <reference path="../scripts/typings/kendo/kendo.all.d.ts" />
+
+interface GatewayShortInformation
 {
     Name?: string;
     CPU: number;

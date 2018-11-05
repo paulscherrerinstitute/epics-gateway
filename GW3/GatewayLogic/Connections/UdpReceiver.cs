@@ -15,6 +15,7 @@ namespace GatewayLogic.Connections
         private bool disposed = false;
         private Socket receiver;
         private readonly byte[] buff = new byte[Gateway.BUFFER_SIZE];
+        private SafeLock lockBuffer = new SafeLock();
         private Dictionary<IPEndPoint, MemoryStream> normalSendBuffer = new Dictionary<IPEndPoint, MemoryStream>();
         private Dictionary<IPEndPoint, MemoryStream> reverseSendBuffer = new Dictionary<IPEndPoint, MemoryStream>();
         private Thread flusher;
@@ -62,7 +63,8 @@ namespace GatewayLogic.Connections
 
         public override void Send(DataPacket packet)
         {
-            lock (normalSendBuffer)
+            //lock (normalSendBuffer)
+            using (var lck = lockBuffer.Aquire())
             {
                 var sendBuffer = (packet.ReverseAnswer ? reverseSendBuffer : normalSendBuffer);
 
@@ -103,7 +105,8 @@ namespace GatewayLogic.Connections
 
         private void FlushBufferSend()
         {
-            lock (normalSendBuffer)
+            //lock (normalSendBuffer)
+            using (var lck = lockBuffer.Aquire())
             {
                 foreach (var i in normalSendBuffer)
                 {

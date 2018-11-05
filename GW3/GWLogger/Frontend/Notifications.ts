@@ -1,4 +1,6 @@
-﻿class Notifications
+﻿/// <reference path="../scripts/typings/kendo/kendo.all.d.ts" />
+
+class Notifications
 {
     static notification: Notification = null;
     static notificationTimeout: number = null;
@@ -27,7 +29,7 @@
             return;
         }
 
-        if (Notification.permission === "granted")
+        if (Notification['permission'] === "granted")
         {
             // If it's okay let's create a notification
             Notifications.Show("Notifications are already enabled.");
@@ -47,7 +49,7 @@
 
     static Show(text: string)
     {
-        if (!("Notification" in window) || Notification.permission !== "granted")
+        if (!("Notification" in window) || Notification['permission'] !== "granted")
             return;
         if (Notifications.notification)
             Notifications.notification.close();
@@ -59,7 +61,7 @@
 
         (<HTMLAudioElement>$("#notificationSound")[0]).play();
 
-        Notifications.notification = new Notification("CAESAR", { icon: '/favicon-32x32.png', body: text, silent: false });
+        Notifications.notification = new Notification("CAESAR", <any>{ icon: '/favicon-32x32.png', body: text, silent: false });
         Notifications.notification.onclick = (x) =>
         {
             window.focus();
