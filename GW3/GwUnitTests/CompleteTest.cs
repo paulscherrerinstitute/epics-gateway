@@ -1366,7 +1366,7 @@ namespace GwUnitTests
             }
         }*/
 
-        [TestMethod]
+        /*[TestMethod]
         [Timeout(5000)]
         public void CheckSubArrayMonitorVariableSize()
         {
@@ -1415,7 +1415,7 @@ namespace GwUnitTests
                     }
                 }
             }
-        }
+        }*/
 
         [TestMethod]
         [Timeout(3000)]
