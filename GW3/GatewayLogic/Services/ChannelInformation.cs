@@ -21,19 +21,18 @@ namespace GatewayLogic.Services
             Gateway = gateway;
             gateway.TenSecUpdate += (sender, evt) =>
               {
+                  List<ChannelInformationDetails> toDrop;
                   using (dictionaryLock.Aquire())
                   {
-                      var toDrop = dictionary.Select(row => row.Value).Where(row => (row.ConnectionIsBuilding && (DateTime.UtcNow - row.StartBuilding).TotalSeconds > 5) || row.ShouldDrop).ToList();
-
-                      toDrop.ForEach(row =>
-                          {
-                              row.Drop(Gateway);
-                              row.Dispose();
-                              dictionary.Remove(row.ChannelName);
-
-                              uidDictionary.Remove(row.GatewayId);
-                          });
+                      toDrop = dictionary.Select(row => row.Value).Where(row => (row.ConnectionIsBuilding && (DateTime.UtcNow - row.StartBuilding).TotalSeconds > 5) || row.ShouldDrop).ToList();
                   }
+                  toDrop.ForEach(row =>
+                      {
+                          row.Drop(Gateway);
+                          row.Dispose();
+                          dictionary.Remove(row.ChannelName);
+                          uidDictionary.Remove(row.GatewayId);
+                      });
               };
         }
 
@@ -226,7 +225,7 @@ namespace GatewayLogic.Services
         {
             using (dictionaryLock.Aquire())
             {
-                if(uidDictionary.ContainsKey(id))
+                if (uidDictionary.ContainsKey(id))
                     return uidDictionary[id];
                 return null;
                 //return dictionary.Values.FirstOrDefault(row => row.GatewayId == id);
