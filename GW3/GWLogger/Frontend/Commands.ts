@@ -4,7 +4,7 @@
     {
         Notifications.Confirm("Are you sure you want to restart " + Main.CurrentGateway).then(() =>
         {
-            var version = Live.GetVersion(Main.CurrentGateway);
+            var version = Live.Get(Main.CurrentGateway).Version;
             var command = "RestartGateway3";
             if (version && version.startsWith("1."))
                 command = "RestartGateway";
@@ -31,7 +31,7 @@
     {
         Notifications.Confirm("Are you sure you want to update " + Main.CurrentGateway).then(() =>
         {
-            var version = Live.GetVersion(Main.CurrentGateway);
+            var version = Live.Get(Main.CurrentGateway).Version;
             var command = "UpdateGateway3";
             if (version && version.startsWith("1."))
                 command = "UpdateGateway";

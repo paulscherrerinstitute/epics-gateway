@@ -57,8 +57,8 @@ class Live
             {
                 var html = "<b>Gateway " + e.sender.element[0].id + "</b><br>";
                 html += "<table style='text-align: left;'>";
-                html += "<tr><td>Version</td><td>" + Live.GetVersion(e.sender.element[0].id) + "</td></tr>";
-                html += "<tr><td>State</td><td>" + GatewayStates[Live.GetState(e.sender.element[0].id)] + "</td></tr>";
+                html += "<tr><td>Version</td><td>" + Live.Get(e.sender.element[0].id).Version + "</td></tr>";
+                html += "<tr><td>State</td><td>" + GatewayStates[Live.Get(e.sender.element[0].id).State] + "</td></tr>";
                 html += "</table>";
                 html += "-- Click to view details --";
                 return html;
@@ -91,19 +91,11 @@ class Live
         Live.pvsChart.SetDataSource({ Values: [] });
     }
 
-    static GetVersion(gwName: string): string
+    static Get(gwName: string): GatewayShortInformation
     {
         for (var i = 0; i < Live.shortInfo.length; i++)
             if (Live.shortInfo[i].Name.toUpperCase() == gwName.toUpperCase())
-                return Live.shortInfo[i].Version;
-        return null;
-    }
-
-    static GetState(gwName: string): number
-    {
-        for (var i = 0; i < Live.shortInfo.length; i++)
-            if (Live.shortInfo[i].Name.toUpperCase() == gwName.toUpperCase())
-                return Live.shortInfo[i].State;
+                return Live.shortInfo[i];
         return null;
     }
 
@@ -240,6 +232,8 @@ class Live
                 var html = "";
                 for (var i = 0; i < Live.shortInfo.length; i++)
                 {
+                    Map.SetGatewayState(Live.shortInfo[i].Name, Live.shortInfo[i].State);
+
                     if (Live.shortInfo[i].State < 3)
                         continue;
                     if ((!Live.currentErrors || Live.currentErrors.indexOf(Live.shortInfo[i].Name) == -1) && errorDisplayed == false)

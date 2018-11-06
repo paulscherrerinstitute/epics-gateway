@@ -31,6 +31,7 @@ class Map
 {
     static nets: KnownNetwork[] = [];
     static gateways: KnownNetwork[] = [];
+    static HoverGateway: string = "";
 
     static Init()
     {
@@ -40,7 +41,9 @@ class Map
         Map.AddGateway(700, 450, "SLS-ARCH-CAGW02");
 
 
-        var slsBeamlines = ["X01DC", "X02DA", "X03DA", "X03MA", "X04DB", "X04SA", "X05DA", "X05LA", "X06DA", "X06MX", "X06SA", "X07DA", "X07MA", "X09LA", "X09LB", "X10DA", "X10SA", "X11MA", "X12SA"];
+        var slsBeamlines = ["X01DC-CAGW02", "X02DA-CAGW02", "X03DA-CAGW02", "X03MA-CAGW02", "X04DB-CAGW02", "X04SA-CAGW02",
+            "X05DA-CAGW02", "X05LA-CAGW02", "X06DA-CAGW02", "X06MX-CAGW", "X06SA-CAGW02", "X07DA-CAGW02", "X07MA-CAGW02",
+            "X09LA-CAGW02", "X09LB-CAGW02", "X10DA-CAGW02", "X10SA-CAGW02", "X11MA-CAGW02", "X12SA-CAGW02"];
 
         for (var i = 0; i < slsBeamlines.length; i++)
         {
@@ -48,7 +51,7 @@ class Map
             var m = (i % 2 == 0 ? 260 : 390);
             var x = 800 + Math.cos(a) * m;
             var y = 500 + Math.sin(a) * m;
-            Map.AddNetwork(x, y, slsBeamlines[i], 50, 20);
+            Map.AddNetwork(x, y, slsBeamlines[i].split('-')[0], 50, 20);
         }
 
         for (var i = 0; i < slsBeamlines.length; i++)
@@ -58,9 +61,9 @@ class Map
             x = 800 + Math.cos(a) * m;
             y = 500 + Math.sin(a) * m;
 
-            Map.AddGateway(x - 40, y - 15, slsBeamlines[i] + "-CAGW02", 90, 10);
-            Map.AddGatewayLink(slsBeamlines[i] + "-CAGW02", slsBeamlines[i], 1);
-            Map.AddGatewayLink(slsBeamlines[i] + "-CAGW02", "SLS Machine", 1);
+            Map.AddGateway(x - 40, y - 15, slsBeamlines[i], 90, 10);
+            Map.AddGatewayLink(slsBeamlines[i], slsBeamlines[i].split('-')[0], 1);
+            Map.AddGatewayLink(slsBeamlines[i], "SLS Machine", 1);
         }
 
         Map.AddGatewayLink("SLS-CAGW02", "Office", 0);
@@ -85,20 +88,107 @@ class Map
         Map.AddNetwork(150, 600, "Cryo", 100);
         Map.AddGateway(90, 550, "CRYO-CAGW02", 120, 10);
         Map.AddGatewayLink("CRYO-CAGW02", "Office", 0);
+
+        // Legend
+        Map.Add("rect", { fill: "#F0F0F0", stroke_width: 2, stroke: "black", x: 1100 - 40, y: 2, width: 80, height: 160 });
+        Map.Add("text", { x: 1100 - 35, y: 10, alignment_baseline: "central", font_family: "Sans-serif", font_size: 16, style: "text-anchor: left;", font_weight: "bold", fill: "black" }, "Legend:");
+
+        Map.Add("circle", { fill: "white", stroke_width: 2, stroke: "#E0E0E0", cx: 1100, cy: 60, r: 35 });
+        Map.Add("text", { x: 1100, y: 60, alignment_baseline: "central", font_family: "Sans-serif", font_size: 16, style: "text-anchor: middle;", font_weight: "bold", fill: "#A0A0A0" }, "Network");
+
+        Map.Add("rect", { fill: "#b8f779", stroke_width: 2, stroke: "black", x: 1100 - 35, y: 60 + 40, width: 70, height: 12 + 18 });
+        Map.Add("text", { x: 1100 - 35 + 70 / 2, y: 60 + 40 + (12 + 16) / 2, alignment_baseline: "central", font_family: "Sans-serif", font_size: 16, style: "text-anchor: middle;", font_weight: "bold", fill: "black" }, "Gateway");
+
+        Map.Add("rect", { fill: "white", stroke_width: 2, stroke: "black", x: 1100 - 35, y: 60 + 40 + 45, width: 6, height: 6 });
+        Map.Add("text", { x: 1100, y: 60 + 40 + 47, alignment_baseline: "central", font_family: "Sans-serif", font_size: 16, style: "text-anchor: middle;", font_weight: "bold", fill: "black" }, "NIC");
+
+        $("#mapView").kendoTooltip({
+            showOn: "focus",
+            content: (e: kendo.ui.TooltipEvent) =>
+            {
+                var live = Live.Get(Map.HoverGateway);
+                var html = "<b>Gateway " + Map.HoverGateway + "</b><br>";
+                html += "<table style='text-align: left;'>";
+                html += "<tr><td>CPU</td><td>" + Math.round(live.CPU) + "%</td></tr>";
+                html += "<tr><td>Searches</td><td>" + live.Searches + " / Sec</td></tr>";
+                html += "<tr><td>Version</td><td>" + live.Version + "</td></tr>";
+                html += "<tr><td>State</td><td>" + GatewayStates[live.State] + "</td></tr>";
+                html += "</table>";
+                html += "-- Click to view details --";
+                return html;
+            }
+        }).data("kendoTooltip").hide();
     }
 
-    static AddNetwork(x, y, label, netSize: number = 150, fontSize: number = 30)
+    static AddNetwork(x: number, y: number, label: string, netSize: number = 150, fontSize: number = 30)
     {
         Map.nets.push({ X: x, Y: y, Name: label, Width: netSize });
         Map.Add("circle", { fill: "transparent", stroke_width: 2, stroke: "#E0E0E0", cx: x, cy: y, r: netSize });
         Map.Add("text", { x: x, y: y, alignment_baseline: "central", font_family: "Sans-serif", font_size: fontSize, style: "text-anchor: middle;", font_weight: "bold", fill: "#A0A0A0" }, label);
     }
 
-    static AddGateway(x, y, label, width: number = 180, fontSize: number = 18)
+    static toolTip: kendo.ui.Tooltip;
+
+    static AddGateway(x: number, y: number, label: string, width: number = 180, fontSize: number = 18)
     {
         Map.gateways.push({ X: x, Y: y, Name: label, Width: width, Height: 12 + fontSize });
-        Map.Add("rect", { fill: "white", stroke_width: 2, stroke: "black", x: x, y: y, width: width, height: 12 + fontSize });
-        Map.Add("text", { x: x + width / 2, y: y + (12 + fontSize) / 2, alignment_baseline: "central", font_family: "Sans-serif", font_size: fontSize, style: "text-anchor: middle;", font_weight: "bold", fill: "black" }, label);
+        var elem = Map.Add("rect", { id: "svg_gw_" + label, fill: "white", stroke_width: 2, stroke: "black", x: x, y: y, width: width, height: 12 + fontSize, cursor: "pointer" });
+        elem.onclick = (e) =>
+        {
+            Main.CurrentGateway = label.toLowerCase();
+            Main.Path = "Status";
+            State.Set(true);
+            State.Pop(null);
+
+        };
+        elem.onmouseover = (e) =>
+        {
+            /*if (Map.toolTip)
+                Map.toolTip.hide();*/
+            var j = $("#svg_gw_" + label);
+            j.attr("stroke", "#597db7");
+            j.attr("stroke-width", "4");
+            Map.toolTip = $("#mapView").data("kendoTooltip");
+            Map.HoverGateway = label;
+
+            if (Map.toolTip)
+            {
+                Map.toolTip.show($("#mapView"));
+                Map.toolTip.refresh();
+                this.toolTip['tt'] = (new Date()).getTime();
+            }
+            setTimeout(() =>
+            {
+                var p = $("#mapView").position();
+                $("#mapView_tt_active").parent().css({ left: (x + p.left - 90 + width / 2) + "px", top: (y + p.top + fontSize + 53) + "px" });
+            }, 10);
+            //Map.toolTip = $("#svgMap").kendoTooltip({ content: "Hello!" }).data("kendoTooltip");
+        }
+        elem.onmouseout = (e) =>
+        {
+            $("#svg_gw_" + label).attr("stroke", "black");
+            $("#svg_gw_" + label).attr("stroke-width", "2");
+            setTimeout(() =>
+            {
+                if (Map.toolTip && $("#svg_gw_" + label).attr("stroke-width") == "2")
+                {
+                    Map.toolTip.hide();
+                    Map.toolTip = null;
+                }
+            }, 10);
+        }
+        $(elem).kendoTooltip({ content: "Hello!" }).data("kendoTooltip");
+
+        var e2 = Map.Add("text", { x: x + width / 2, y: y + (12 + fontSize) / 2, alignment_baseline: "central", font_family: "Sans-serif", font_size: fontSize, cursor: "pointer", style: "text-anchor: middle;", font_weight: "bold", fill: "black" }, label);
+        e2.onclick = elem.onclick;
+        e2.onmouseover = elem.onmouseover;
+        e2.onmouseout = elem.onmouseout;
+    }
+
+    static SetGatewayState(label: string, state: number)
+    {
+        var colors: string[] = ["#b8f779", "#fff375", "#ffc942", "#ff9e91"];
+        $("#svg_gw_" + label).attr("fill", colors[state]);
     }
 
     static Add(tag: string, attrs: {}, content?: string): SVGElement

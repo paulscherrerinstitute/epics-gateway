@@ -76,6 +76,14 @@ gulp.task('compile:frontend', function ()
 {
     process.chdir(__dirname);
 
+    tsMain = typescript.createProject({
+        out: "main.js",
+        module: "system",
+        target: "es5",
+        experimentalDecorators: true,
+        sourceMap: true
+    });
+
     return gulp.src(['./Frontend/**/*.ts', './Scripts/typings/**/*.d.ts'])
         .pipe(sourcemaps.init())
         .pipe(sourcemaps.identityMap())
