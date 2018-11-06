@@ -1051,3 +1051,27 @@ select
         padding-left: 10px;
     }
 }
+
+#mapView
+{
+    .container;
+    display: none;
+    position: absolute;
+    top: 35px;
+    left: 5px;
+    right: calc(@errorPanel + 8);
+    bottom: 5px;
+    overflow: scroll;
+    padding-top: 35px;
+
+    &:before
+    {
+        .containterLabel;
+        content: "Map";
+        position: fixed;
+        top: 35px;
+        left: 5px;
+        right: @errorPanel + 24;
+        width: auto;
+    }
+}

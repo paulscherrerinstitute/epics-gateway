@@ -699,6 +699,7 @@ class Main
 
         Live.InitShortDisplay();
         Main.QueriesHelp();
+        Map.Init();
 
         $.ajax({
             type: 'POST',
@@ -742,6 +743,16 @@ class Main
                     if (Main.Path == "GW")
                         break;
                     Main.Path = "GW";
+                    State.Set(true);
+                    State.Pop(null);
+                    break;
+                case "Map":
+                    $("#reportView").hide();
+                    if ($("#helpView").is(":visible"))
+                        $("#helpView").hide();
+                    if (Main.Path == "Map")
+                        break;
+                    Main.Path = "Map";
                     State.Set(true);
                     State.Pop(null);
                     break;

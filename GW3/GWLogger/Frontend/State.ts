@@ -33,21 +33,31 @@
         if (path.length > 1)
         {
             $("#mainTabs li").removeClass("activeTab");
-            if (path[1] == "GW")
+            switch (path[1])
             {
-                Main.Path = "GW";
-                $($("#mainTabs li")[2]).addClass("activeTab");
-                $("#gatewayView").hide();
-                $("#gatewayDetails").hide();
-                $("#logView").show();
-            }
-            else
-            {
-                Main.Path = "Status";
-                $($("#mainTabs li")[1]).addClass("activeTab");
-                $("#gatewayView").show();
-                $("#gatewayDetails").hide();
-                $("#logView").hide();
+                case "GW":
+                    Main.Path = "GW";
+                    $($("#mainTabs li")[2]).addClass("activeTab");
+                    $("#mapView").hide();
+                    $("#gatewayView").hide();
+                    $("#gatewayDetails").hide();
+                    $("#logView").show();
+                    break;
+                case "Map":
+                    Main.Path = "Map";
+                    $($("#mainTabs li")[3]).addClass("activeTab");
+                    $("#mapView").show();
+                    $("#gatewayView").hide();
+                    $("#gatewayDetails").hide();
+                    $("#logView").hide();
+                    break;
+                default:
+                    Main.Path = "Status";
+                    $($("#mainTabs li")[1]).addClass("activeTab");
+                    $("#mapView").hide();
+                    $("#gatewayView").show();
+                    $("#gatewayDetails").hide();
+                    $("#logView").hide();
             }
         }
 
