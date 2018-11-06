@@ -143,8 +143,6 @@ class Map
         };
         elem.onmouseover = (e) =>
         {
-            /*if (Map.toolTip)
-                Map.toolTip.hide();*/
             var j = $("#svg_gw_" + label);
             j.attr("stroke", "#597db7");
             j.attr("stroke-width", "4");
@@ -160,9 +158,9 @@ class Map
             setTimeout(() =>
             {
                 var p = $("#mapView").position();
-                $("#mapView_tt_active").parent().css({ left: (x + p.left - 90 + width / 2) + "px", top: (y + p.top + fontSize + 53) + "px" });
+
+                $("#mapView_tt_active").parent().css({ left: (x + p.left - 90 + width / 2 - $("#mapView").scrollLeft()) + "px", top: (y + p.top + fontSize + 53 - $("#mapView").scrollTop()) + "px" });
             }, 10);
-            //Map.toolTip = $("#svgMap").kendoTooltip({ content: "Hello!" }).data("kendoTooltip");
         }
         elem.onmouseout = (e) =>
         {
@@ -177,7 +175,6 @@ class Map
                 }
             }, 10);
         }
-        $(elem).kendoTooltip({ content: "Hello!" }).data("kendoTooltip");
 
         var e2 = Map.Add("text", { x: x + width / 2, y: y + (12 + fontSize) / 2, alignment_baseline: "central", font_family: "Sans-serif", font_size: fontSize, cursor: "pointer", style: "text-anchor: middle;", font_weight: "bold", fill: "black" }, label);
         e2.onclick = elem.onclick;

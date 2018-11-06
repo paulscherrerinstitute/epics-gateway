@@ -5,6 +5,11 @@ class Notifications
     static notification: Notification = null;
     static notificationTimeout: number = null;
 
+    static Alert(message: string, title: string = "CAESAR")
+    {
+        $("#diaglog").kendoDialog({ closable: true, title: title, content: message, modal: true, actions: [{ text: "Ok", action: (e) => { return true }, primary: true }] });
+    }
+
     static Confirm(message: string, title: string = "CAESAR")
     {
         return (<any>$("<div></div>").kendoConfirm(<any>{

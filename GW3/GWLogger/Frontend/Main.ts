@@ -678,6 +678,9 @@ class Main
 
     static Init(): void
     {
+        if (/Trident\/|MSIE /.test("" + window.navigator.userAgent))
+            Notifications.Alert("Internet Explorer is not supported!");
+
         $("*[tooltip]").each((idx, elem) =>
         {
             var text = $(elem).attr("tooltip");
