@@ -731,7 +731,7 @@ namespace GWLogger.Backend.DataContext
             DateTime dt = DateTime.UtcNow;
             bool found = false;
             var pos = stream.BaseStream.Position;
-            for (var i = 0; i < 1024 && pos + i < streamLength; i++)
+            for (var i = 0; i < 128 && pos + i < streamLength; i++)
             {
                 if (i != 0)
                     stream.BaseStream.Seek(pos + i, SeekOrigin.Begin);
