@@ -9,5 +9,6 @@
         public string Build { get; set; }
         public int State { get; set; }
         public string Version { get; set; }
+        public string RunningTime { get; set; }
     }
 }

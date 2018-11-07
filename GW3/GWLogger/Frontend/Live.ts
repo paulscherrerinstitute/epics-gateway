@@ -9,6 +9,7 @@ interface GatewayShortInformation
     Build?: string;
     State: number;
     Version?: string;
+    RunningTime?: string;
 }
 
 interface HistoricData
@@ -120,7 +121,7 @@ class Live
                     try
                     {
                         data.CPU = Math.round(data.CPU * 100) / 100;
-                        data.RunningTime = data.RunningTime ? data.RunningTime.substr(0, data.RunningTime.lastIndexOf('.')) : "";
+                        data.RunningTime = data.RunningTime ? data.RunningTime.substr(0, data.RunningTime.lastIndexOf('.')).replace(".", " day(s) ") : "";
 
                         var html = "";
                         for (var i in data)

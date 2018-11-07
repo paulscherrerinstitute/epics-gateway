@@ -126,6 +126,7 @@ class Map
         html += "<table style='text-align: left;'>";
         html += "<tr><td>CPU</td><td>" + Math.round(live.CPU) + "%</td></tr>";
         html += "<tr><td>Searches</td><td>" + live.Searches + " / Sec</td></tr>";
+        html += "<tr><td>Running Time</td><td>" + (live.RunningTime ? live.RunningTime.substr(0, live.RunningTime.lastIndexOf('.')).replace(".", " day(s) ") : "&nbsp;") + "</td></tr>";
         html += "<tr><td>State</td><td>" + GatewayStates[live.State] + "</td></tr>";
         html += "<tr><td>Build</td><td>" + live.Build + "</td></tr>";
         html += "<tr><td>Version</td><td>" + live.Version + "</td></tr>";
@@ -171,7 +172,7 @@ class Map
             {
                 // If the placement is too low, then moves the tooltip above
                 if (t + 200 > $(window).innerHeight())
-                    t -= 172 + fontSize;
+                    t -= 185 + fontSize;
                 Map.toolTip.show($("#mapView"));
                 Map.toolTip.refresh();
             }

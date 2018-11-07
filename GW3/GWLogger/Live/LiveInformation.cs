@@ -102,7 +102,8 @@ namespace GWLogger.Live
                     Searches = row.Searches,
                     Build = row.BuildTime,
                     State = row.State,
-                    Version = row.Version
+                    Version = row.Version,
+                    RunningTime = row.RunningTime
                 }).ToList();
             }
         }
