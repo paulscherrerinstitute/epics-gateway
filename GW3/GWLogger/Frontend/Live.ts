@@ -233,6 +233,7 @@ class Live
                 for (var i = 0; i < Live.shortInfo.length; i++)
                 {
                     Map.SetGatewayState(Live.shortInfo[i].Name, Live.shortInfo[i].State);
+                    $("#mapView_tt_active .k-tooltip-content").html(Map.GetTooltipText(null));
 
                     if (Live.shortInfo[i].State < 3)
                         continue;

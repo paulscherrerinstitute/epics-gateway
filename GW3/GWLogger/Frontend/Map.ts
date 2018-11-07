@@ -41,9 +41,16 @@ class Map
         Map.AddGateway(700, 450, "SLS-ARCH-CAGW02");
 
 
-        var slsBeamlines = ["X01DC-CAGW02", "X02DA-CAGW02", "X03DA-CAGW02", "X03MA-CAGW02", "X04DB-CAGW02", "X04SA-CAGW02",
+        /*var slsBeamlines = ["X01DC-CAGW02", "X02DA-CAGW02", "X03DA-CAGW02", "X03MA-CAGW02", "X04DB-CAGW02", "X04SA-CAGW02",
             "X05DA-CAGW02", "X05LA-CAGW02", "X06DA-CAGW02", "X06MX-CAGW", "X06SA-CAGW02", "X07DA-CAGW02", "X07MA-CAGW02",
-            "X09LA-CAGW02", "X09LB-CAGW02", "X10DA-CAGW02", "X10SA-CAGW02", "X11MA-CAGW02", "X12SA-CAGW02"];
+            "X09LA-CAGW02", "X09LB-CAGW02", "X10DA-CAGW02", "X10SA-CAGW02", "X11MA-CAGW02", "X12SA-CAGW02"];*/
+
+        var slsBeamlines: string[] = [];
+        $(".GWDisplay").each((idx, elem) =>
+        {
+            if (elem.id.startsWith("X"))
+                slsBeamlines.push(elem.id);
+        });
 
         for (var i = 0; i < slsBeamlines.length; i++)
         {
@@ -102,22 +109,29 @@ class Map
         Map.Add("rect", { fill: "white", stroke_width: 2, stroke: "black", x: 1100 - 35, y: 60 + 40 + 45, width: 6, height: 6 });
         Map.Add("text", { x: 1100, y: 60 + 40 + 47, alignment_baseline: "central", font_family: "Sans-serif", font_size: 16, style: "text-anchor: middle;", font_weight: "bold", fill: "black" }, "NIC");
 
-        $("#mapView").kendoTooltip({
+        var t = $("#mapView").kendoTooltip({
             showOn: "focus",
-            content: (e: kendo.ui.TooltipEvent) =>
-            {
-                var live = Live.Get(Map.HoverGateway);
-                var html = "<b>Gateway " + Map.HoverGateway + "</b><br>";
-                html += "<table style='text-align: left;'>";
-                html += "<tr><td>CPU</td><td>" + Math.round(live.CPU) + "%</td></tr>";
-                html += "<tr><td>Searches</td><td>" + live.Searches + " / Sec</td></tr>";
-                html += "<tr><td>Version</td><td>" + live.Version + "</td></tr>";
-                html += "<tr><td>State</td><td>" + GatewayStates[live.State] + "</td></tr>";
-                html += "</table>";
-                html += "-- Click to view details --";
-                return html;
-            }
-        }).data("kendoTooltip").hide();
+            content: Map.GetTooltipText,
+            position: "center"
+        }).data("kendoTooltip");
+        t['_initPopup'](); // With the "position":"center" property avoid to add an "arrow"
+    }
+
+    static GetTooltipText(e: kendo.ui.TooltipEvent): string
+    {
+        var live = Live.Get(Map.HoverGateway);
+        if (!live)
+            return;
+        var html = "<b>Gateway " + Map.HoverGateway + "</b><br>";
+        html += "<table style='text-align: left;'>";
+        html += "<tr><td>CPU</td><td>" + Math.round(live.CPU) + "%</td></tr>";
+        html += "<tr><td>Searches</td><td>" + live.Searches + " / Sec</td></tr>";
+        html += "<tr><td>State</td><td>" + GatewayStates[live.State] + "</td></tr>";
+        html += "<tr><td>Build</td><td>" + live.Build + "</td></tr>";
+        html += "<tr><td>Version</td><td>" + live.Version + "</td></tr>";
+        html += "</table>";
+        html += "-- Click to view details --";
+        return html;
     }
 
     static AddNetwork(x: number, y: number, label: string, netSize: number = 150, fontSize: number = 30)
@@ -149,23 +163,29 @@ class Map
             Map.toolTip = $("#mapView").data("kendoTooltip");
             Map.HoverGateway = label;
 
+            var p = $("#mapView").position();
+            // Calculates the position on screen
+            var t = (y + p.top + fontSize + 53 - $("#mapView").scrollTop());
+
             if (Map.toolTip)
             {
+                // If the placement is too low, then moves the tooltip above
+                if (t + 200 > $(window).innerHeight())
+                    t -= 172 + fontSize;
                 Map.toolTip.show($("#mapView"));
                 Map.toolTip.refresh();
-                this.toolTip['tt'] = (new Date()).getTime();
             }
+            // Workaround to place the tooltip at the wished position
             setTimeout(() =>
             {
-                var p = $("#mapView").position();
-
-                $("#mapView_tt_active").parent().css({ left: (x + p.left - 90 + width / 2 - $("#mapView").scrollLeft()) + "px", top: (y + p.top + fontSize + 53 - $("#mapView").scrollTop()) + "px" });
+                $("#mapView_tt_active").parent().css({ left: (x + p.left - 90 + width / 2 - $("#mapView").scrollLeft()) + "px", top: t + "px" });
             }, 10);
         }
         elem.onmouseout = (e) =>
         {
             $("#svg_gw_" + label).attr("stroke", "black");
             $("#svg_gw_" + label).attr("stroke-width", "2");
+            // Workaround to avoids to close the tooltip while we are on a child element for example
             setTimeout(() =>
             {
                 if (Map.toolTip && $("#svg_gw_" + label).attr("stroke-width") == "2")
@@ -194,7 +214,7 @@ class Map
         for (var k in attrs)
             el.setAttribute(k.replace(/\_/g, "-"), attrs[k]);
         if (content)
-            el.innerHTML = content;
+            el.textContent = content;
         document.getElementById("svgMap").appendChild(el);
         return el;
     }
