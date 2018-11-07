@@ -19,7 +19,8 @@ namespace GWLogger.Live
     {
         public const int GraphPoints = 500;
         //private const int NbHistoricPoint = 500;
-        private const int NbHistoricPoint = 90000; // 5 days at 5 sec interval
+        //private const int NbHistoricPoint = 90000; // 5 days at 5 sec interval
+        private const int NbHistoricPoint = 5000;
         private const int NbStateAvg = 24;
 
         private LiveInformation liveInformation;
