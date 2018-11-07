@@ -68,7 +68,7 @@ class Map
             x = 800 + Math.cos(a) * m;
             y = 500 + Math.sin(a) * m;
 
-            Map.AddGateway(x - 40, y - 15, slsBeamlines[i], 90, 10);
+            Map.AddGateway(x - 40, y - 15, slsBeamlines[i], 110, 10);
             Map.AddGatewayLink(slsBeamlines[i], slsBeamlines[i].split('-')[0], 1);
             Map.AddGatewayLink(slsBeamlines[i], "SLS Machine", 1);
         }
@@ -77,11 +77,11 @@ class Map
         Map.AddGatewayLink("SLS-ARCH-CAGW02", "Office", 0);
 
         Map.AddNetwork(150, 330, "Swiss FEL", 100);
-        Map.AddGateway(90, 350, "SF-CAGW", 120, 10);
+        Map.AddGateway(90, 350, "SF-CAGW", 140, 10);
         Map.AddGatewayLink("SF-CAGW", "Office", 0);
 
         Map.AddNetwork(150, 110, "SF-ES", 100);
-        Map.AddGateway(90, 130, "SFES-CAGW", 120, 10);
+        Map.AddGateway(90, 130, "SFES-CAGW", 140, 10);
         Map.AddGatewayLink("SFES-CAGW", "Swiss FEL", 0);
 
         Map.AddNetwork(380, 210, "HIPA", 100);
@@ -89,15 +89,15 @@ class Map
         Map.AddGatewayLink("HIPA-CAGW02", "Office", 0);
 
         Map.AddNetwork(380, 800, "Proscan", 100);
-        Map.AddGateway(320, 750, "PROSCAN-CAGW02", 120, 10);
+        Map.AddGateway(320, 750, "PROSCAN-CAGW02", 140, 10);
         Map.AddGatewayLink("PROSCAN-CAGW02", "Office", 0);
 
         Map.AddNetwork(150, 600, "Cryo", 100);
-        Map.AddGateway(90, 550, "CRYO-CAGW02", 120, 10);
+        Map.AddGateway(90, 550, "CRYO-CAGW02", 140, 10);
         Map.AddGatewayLink("CRYO-CAGW02", "Office", 0);
 
         // Legend
-        Map.Add("rect", { fill: "#F0F0F0", stroke_width: 2, stroke: "black", x: 1100 - 40, y: 2, width: 80, height: 160 });
+        Map.Add("rect", { fill: "#F0F0F0", stroke_width: 2, stroke: "black", x: 1100 - 40, y: 2, width: 100, height: 180 });
         Map.Add("text", { x: 1100 - 35, y: 10, alignment_baseline: "central", font_family: "Sans-serif", font_size: 16, style: "text-anchor: left;", font_weight: "bold", fill: "black" }, "Legend:");
 
         Map.Add("circle", { fill: "white", stroke_width: 2, stroke: "#E0E0E0", cx: 1100, cy: 60, r: 35 });
@@ -107,7 +107,14 @@ class Map
         Map.Add("text", { x: 1100 - 35 + 70 / 2, y: 60 + 40 + (12 + 16) / 2, alignment_baseline: "central", font_family: "Sans-serif", font_size: 16, style: "text-anchor: middle;", font_weight: "bold", fill: "black" }, "Gateway");
 
         Map.Add("rect", { fill: "white", stroke_width: 2, stroke: "black", x: 1100 - 35, y: 60 + 40 + 45, width: 6, height: 6 });
-        Map.Add("text", { x: 1100, y: 60 + 40 + 47, alignment_baseline: "central", font_family: "Sans-serif", font_size: 16, style: "text-anchor: middle;", font_weight: "bold", fill: "black" }, "NIC");
+        Map.Add("text", { x: 1100 - 20, y: 60 + 40 + 47, alignment_baseline: "central", font_family: "Sans-serif", font_size: 16, style: "text-anchor: left;", font_weight: "bold", fill: "black" }, "NIC");
+
+        var points = [4, 0, 8, 6, 0, 6, 0, 0, 8, 0, 4, 6];
+        var ps = "";
+        for (var i = 0; i < 3; i++)
+            ps += (i != 0 ? " " : "") + (points[i * 2 + 6] + 1100 - 35) + "," + (points[i * 2 + 1 + 6] + 60 + 40 + 45 + 20);
+        Map.Add("polygon", { points: ps, fill: "#00E000", stroke: "black", stroke_width: 0.5 });
+        Map.Add("text", { x: 1100 - 20, y: 60 + 40 + 45 + 22, alignment_baseline: "central", font_family: "Sans-serif", font_size: 16, style: "text-anchor: left;", font_weight: "bold", fill: "black" }, "Direction");
 
         var t = $("#mapView").kendoTooltip({
             showOn: "focus",
@@ -130,6 +137,7 @@ class Map
         html += "<tr><td>State</td><td>" + GatewayStates[live.State] + "</td></tr>";
         html += "<tr><td>Build</td><td>" + live.Build + "</td></tr>";
         html += "<tr><td>Version</td><td>" + live.Version + "</td></tr>";
+        html += "<tr><td>Direction</td><td>" + live.Direction + "</td></tr>";
         html += "</table>";
         html += "-- Click to view details --";
         return html;
@@ -144,10 +152,11 @@ class Map
 
     static toolTip: kendo.ui.Tooltip;
 
-    static AddGateway(x: number, y: number, label: string, width: number = 180, fontSize: number = 18)
+    static AddGateway(x: number, y: number, label: string, width: number = 200, fontSize: number = 18)
     {
+        var h = 12 + fontSize;
         Map.gateways.push({ X: x, Y: y, Name: label, Width: width, Height: 12 + fontSize });
-        var elem = Map.Add("rect", { id: "svg_gw_" + label, fill: "white", stroke_width: 2, stroke: "black", x: x, y: y, width: width, height: 12 + fontSize, cursor: "pointer" });
+        var elem = Map.Add("rect", { id: "svg_gw_" + label, fill: "white", stroke_width: 2, stroke: "black", x: x, y: y, width: width, height: h, cursor: "pointer" });
         elem.onclick = (e) =>
         {
             Main.CurrentGateway = label.toLowerCase();
@@ -171,8 +180,8 @@ class Map
             if (Map.toolTip)
             {
                 // If the placement is too low, then moves the tooltip above
-                if (t + 200 > $(window).innerHeight())
-                    t -= 185 + fontSize;
+                if (t + 230 > $(window).innerHeight())
+                    t -= 215 + fontSize;
                 Map.toolTip.show($("#mapView"));
                 Map.toolTip.refresh();
             }
@@ -201,12 +210,30 @@ class Map
         e2.onclick = elem.onclick;
         e2.onmouseover = elem.onmouseover;
         e2.onmouseout = elem.onmouseout;
+
+        var points = [4, 0, 8, 6, 0, 6, 0, 0, 8, 0, 4, 6];
+        var ps = "";
+        for (var i = 0; i < 3; i++)
+            ps += (i != 0 ? " " : "") + (points[i * 2 + 6] + x + 3) + "," + (points[i * 2 + 1 + 6] + y + h / 2 + 1);
+        e2 = Map.Add("polygon", { points: ps, fill: "#00E000", stroke: "black", stroke_width: 0.5 });
+        e2.onclick = elem.onclick;
+        e2.onmouseover = elem.onmouseover;
+        e2.onmouseout = elem.onmouseout;
+
+        ps = "";
+        for (var i = 0; i < 3; i++)
+            ps += (i != 0 ? " " : "") + (points[i * 2] + x + 3) + "," + (points[i * 2 + 1] + y + h / 2 - 8);
+        e2 = Map.Add("polygon", { points: ps, fill: "#E00000", stroke: "black", stroke_width: 0.5, id: "svg_gw_" + label + "_dir" });
+        e2.onclick = elem.onclick;
+        e2.onmouseover = elem.onmouseover;
+        e2.onmouseout = elem.onmouseout;
     }
 
-    static SetGatewayState(label: string, state: number)
+    static SetGatewayState(label: string, state: number, direction: string)
     {
         var colors: string[] = ["#b8f779", "#fff375", "#ffc942", "#ff9e91"];
         $("#svg_gw_" + label).attr("fill", colors[state]);
+        $("#svg_gw_" + label + "_dir").attr("visibility", direction == "BIDIRECTIONAL" ? "visible" : "hidden");
     }
 
     static Add(tag: string, attrs: {}, content?: string): SVGElement

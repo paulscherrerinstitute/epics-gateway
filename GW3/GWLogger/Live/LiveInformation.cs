@@ -19,6 +19,24 @@ namespace GWLogger.Live
             backgroundUpdater.Start();
         }
 
+        private Dictionary<string, string> RecoverDirectionInventoryInformation()
+        {
+            try
+            {
+                var result = Global.Inventory.FindObjects(new Inventory.SearchDefinition
+                {
+                    Columns = new string[] { "Hostname", "Directions" },
+                    Query = new Inventory.SearchCondition[] { new Inventory.SearchCondition { Field = "Part Type", Operator = "is", Value = "CaGateway" } }
+                });
+                return result.Rows.Where(row => !string.IsNullOrWhiteSpace(row[0])).ToDictionary(key => key[0].ToUpper(), val => val[1]);
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return null;
+        }
+
         private void UpdateGateways()
         {
             var onErrors = new List<string>();
@@ -94,6 +112,8 @@ namespace GWLogger.Live
         {
             lock (Gateways)
             {
+                var ivDirection = RecoverDirectionInventoryInformation();
+
                 return Gateways.Select(row => new GatewayShortInformation
                 {
                     Name = row.Name,
@@ -103,7 +123,8 @@ namespace GWLogger.Live
                     Build = row.BuildTime,
                     State = row.State,
                     Version = row.Version,
-                    RunningTime = row.RunningTime
+                    RunningTime = row.RunningTime,
+                    Direction = (ivDirection != null && ivDirection.ContainsKey(row.Name.ToUpper())) ? ivDirection[row.Name.ToUpper()] : ""
                 }).ToList();
             }
         }

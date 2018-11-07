@@ -10,5 +10,6 @@
         public int State { get; set; }
         public string Version { get; set; }
         public string RunningTime { get; set; }
+        public string Direction { get; set; }
     }
 }
