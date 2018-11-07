@@ -68,9 +68,61 @@ class Live
             showAfter: 200
         });
 
-        Live.cpuChart = new LineGraph("cpuGraph", { Values: [] }, { MinY: 0, MaxY: 100, XLabelWidth: 50, FontSize: 10, PlotColor: '#000080' });
-        Live.searchesChart = new LineGraph("searchesGraph", { Values: [] }, { MinY: 0, XLabelWidth: 50, FontSize: 10, PlotColor: '#000080' });
-        Live.pvsChart = new LineGraph("pvsGraph", { Values: [] }, { MinY: 0, XLabelWidth: 50, FontSize: 10, PlotColor: '#000080' });
+        Live.cpuChart = new LineGraph("cpuGraph", { Values: [] }, {
+            MinY: 0,
+            MaxY: 100,
+            XLabelWidth: 50,
+            FontSize: 10,
+            PlotColor: '#000080',
+            ToolTip: true,
+            LabelFormat: Utils.ShortGWDateFormat,
+            TooltipLabelFormat: Utils.GWDateFormat,
+            OnClick: (label: Date, value) =>
+            {
+                Main.Path = "GW";
+                Main.CurrentTime = label;
+                Main.StartDate = new Date(label.getTime() - 12 * 3600000);
+                Main.EndDate = new Date(label.getTime() + 12 * 3600000);
+                State.Set(true);
+                State.Pop(null);
+            }
+        });
+        Live.searchesChart = new LineGraph("searchesGraph", { Values: [] }, {
+            MinY: 0,
+            XLabelWidth: 50,
+            FontSize: 10,
+            PlotColor: '#000080',
+            ToolTip: true,
+            LabelFormat: Utils.ShortGWDateFormat,
+            TooltipLabelFormat: Utils.GWDateFormat,
+            OnClick: (label: Date, value) =>
+            {
+                Main.Path = "GW";
+                Main.CurrentTime = label;
+                Main.StartDate = new Date(label.getTime() - 12 * 3600000);
+                Main.EndDate = new Date(label.getTime() + 12 * 3600000);
+                State.Set(true);
+                State.Pop(null);
+            }
+        });
+        Live.pvsChart = new LineGraph("pvsGraph", { Values: [] }, {
+            MinY: 0,
+            XLabelWidth: 50,
+            FontSize: 10,
+            PlotColor: '#000080',
+            ToolTip: true,
+            LabelFormat: Utils.ShortGWDateFormat,
+            TooltipLabelFormat: Utils.GWDateFormat,
+            OnClick: (label: Date, value) =>
+            {
+                Main.Path = "GW";
+                Main.CurrentTime = label;
+                Main.StartDate = new Date(label.getTime() - 12 * 3600000);
+                Main.EndDate = new Date(label.getTime() + 12 * 3600000);
+                State.Set(true);
+                State.Pop(null);
+            }
+        });
     }
 
     static ShowDetails(gwName: string)
@@ -177,7 +229,7 @@ class Live
                                     Live.cpuChart.SetDataSource({
                                         Values: data.map((c) =>
                                         {
-                                            return { Label: Utils.ShortGWDateFormat(Utils.DateFromNet(c.Date)), Value: c.Value };
+                                            return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
                                         })
                                     });
                                     break;
@@ -186,7 +238,7 @@ class Live
                                     Live.searchesChart.SetDataSource({
                                         Values: data.map((c) =>
                                         {
-                                            return { Label: Utils.ShortGWDateFormat(Utils.DateFromNet(c.Date)), Value: c.Value };
+                                            return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
                                         })
                                     });
                                     break;
@@ -195,7 +247,7 @@ class Live
                                     Live.pvsChart.SetDataSource({
                                         Values: data.map((c) =>
                                         {
-                                            return { Label: Utils.ShortGWDateFormat(Utils.DateFromNet(c.Date)), Value: c.Value };
+                                            return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
                                         })
                                     });
                                     break;

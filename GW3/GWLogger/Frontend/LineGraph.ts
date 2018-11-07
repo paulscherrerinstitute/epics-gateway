@@ -1,6 +1,6 @@
 ﻿interface GraphPoint
 {
-    Label: string;
+    Label: any;
     Value: number;
 }
 
@@ -16,6 +16,10 @@ interface GraphOptions
     FontSize?: number;
     PlotColor?: string;
     XLabelWidth?: number;
+    ToolTip?: boolean;
+    LabelFormat?: (value: any) => string;
+    TooltipLabelFormat?: (value: any) => string;
+    OnClick?: (label: any, value: number) => void;
 }
 
 interface Math
@@ -39,6 +43,10 @@ class LineGraph
     private plotColor: string;
     private plotLineWidth: number;
     private myResize;
+    private toolTip: kendo.ui.Tooltip;
+    private xLabelWidth: number;
+    private minY: number;
+    private maxY: number;
 
     constructor(elementContainer: string, dataSource: GraphData, graphOptions?: GraphOptions)
     {
@@ -56,6 +64,99 @@ class LineGraph
         };
         $(window).bind("resize", this.myResize);
         this.Resize();
+
+        if (graphOptions && graphOptions.ToolTip === true)
+        {
+            this.toolTip = $("#" + elementContainer).kendoTooltip({
+                position: "centered",
+                content: this.TooltipContent,
+                showOn: "focus"
+            }).data("kendoTooltip");
+            $("#canvas_" + elementContainer).on("mouseover", (evt) => { this.MouseOver(evt); }).on("mouseout", (evt) => { this.MouseOut(evt); });
+        }
+
+        if (graphOptions.OnClick)
+        {
+            $("#canvas_" + elementContainer).css({ cursor: "pointer" }).on("click", (evt) => { this.MouseClick(evt); });
+        }
+    }
+
+    public TooltipContent(): string
+    {
+        return "Works...";
+    }
+
+    public MouseClick(evt: JQueryMouseEventObject)
+    {
+        var p = $("#" + this.elementContainer).position();
+
+        var x = evt.pageX;
+        var y = evt.pageY;
+
+        var gx = x - p.left;
+        var gy = y - p.top;
+
+        var idx = this.TransformCanvasToPos(gx, gy);
+        if (idx === null)
+            return;
+        this.graphOptions.OnClick(this.dataSource.Values[idx].Label, this.dataSource.Values[idx].Value);
+    }
+
+    public MouseOver(evt: JQueryMouseEventObject)
+    {
+        if (!this.toolTip)
+            return;
+        //this.toolTip.show($("#" + this.elementContainer));
+        $("#canvas_" + this.elementContainer).on("mousemove", (evt) => { this.MouseMove(evt); });
+        setTimeout(() =>
+        {
+            this.MouseMove(evt);
+        }, 10);
+    }
+
+    public MouseOut(evt: JQueryMouseEventObject)
+    {
+        if (!this.toolTip)
+            return;
+        this.toolTip.hide();
+        $("#canvas_" + this.elementContainer).off("mousemove");
+    }
+
+    public MouseMove(evt: JQueryMouseEventObject)
+    {
+        if (!this.toolTip)
+            return;
+        var p = $("#" + this.elementContainer).position();
+
+        var x = evt.pageX;
+        var y = evt.pageY;
+
+        var gx = x - p.left;
+        var gy = y - p.top;
+
+        var idx = this.TransformCanvasToPos(gx, gy);
+        if (idx === null)
+        {
+            this.toolTip.hide();
+            return;
+        }
+
+        if ($("#" + this.elementContainer + "_tt_active").length == 0)
+            this.toolTip.show($("#" + this.elementContainer));
+
+        setTimeout(() =>
+        {
+            var v = this.dataSource.Values[idx].Value;
+            var vy = this.TransformY(v);
+
+            $("#" + this.elementContainer + "_tt_active").parent().css({ left: (x - 90) + "px", top: (y + 30) + "px" });
+            var label = this.dataSource.Values[idx].Label;
+            if (this.graphOptions.TooltipLabelFormat)
+                label = this.graphOptions.TooltipLabelFormat(label);
+            else if (this.graphOptions.LabelFormat)
+                label = this.graphOptions.LabelFormat(label);
+            $("#" + this.elementContainer + "_tt_active .k-tooltip-content").html("" + label + ": " + this.dataSource.Values[idx].Value).css({ width: "200px" });
+        }, 10);
     }
 
     public Resize(): void
@@ -88,27 +189,27 @@ class LineGraph
         if (!this.dataSource || !this.dataSource.Values || !this.dataSource.Values.length)
             return;
 
-        var minY = (this.graphOptions && this.graphOptions.MinY != null ? this.graphOptions.MinY : 0);
-        var maxY = (this.graphOptions && this.graphOptions.MaxY != null ? this.graphOptions.MaxY : 100);
+        this.minY = (this.graphOptions && this.graphOptions.MinY != null ? this.graphOptions.MinY : 0);
+        this.maxY = (this.graphOptions && this.graphOptions.MaxY != null ? this.graphOptions.MaxY : 100);
         // Let's calculate the min value
         var values: number[];
         if (!this.graphOptions || this.graphOptions.MinY == null)
         {
             values = this.dataSource.Values.map((row) => { return row.Value });
-            minY = Math.min.apply(null, values);
+            this.minY = Math.min.apply(null, values);
         }
         // Let's calculate the max value
         if (!this.graphOptions || this.graphOptions.MaxY == null)
         {
             if (!values)
                 values = this.dataSource.Values.map((row) => { return row.Value });
-            maxY = Math.max.apply(null, values);
-            var unit = Math.pow(10, Math.floor(Math.log10(maxY)));
-            maxY = Math.ceil(maxY * 2 / unit) * unit / 2;
+            this.maxY = Math.max.apply(null, values);
+            var unit = Math.pow(10, Math.floor(Math.log10(this.maxY)));
+            this.maxY = Math.ceil(this.maxY * 2 / unit) * unit / 2;
         }
         // if the min and the max are the same we must add 1 to make some difference
-        if (maxY == minY)
-            maxY += 1;
+        if (this.maxY == this.minY)
+            this.maxY += 1;
 
         ctx.font = "" + this.fontSize + "pt sans-serif";
         ctx.fillStyle = "#000000";
@@ -118,42 +219,42 @@ class LineGraph
         var nbXLabels = Math.floor((this.height - this.fontSize * 3) / (this.fontSize * 4));
         if (nbXLabels > 2 && nbXLabels % 2 != 0)
             nbXLabels--;
-        var xLabelWidth = this.graphOptions.XLabelWidth ? this.graphOptions.XLabelWidth : 0;
+        this.xLabelWidth = this.graphOptions.XLabelWidth ? this.graphOptions.XLabelWidth : 0;
         if (!this.graphOptions.XLabelWidth)
         {
             // Calculate the width needed for the labels
             for (var i = 0; i <= nbXLabels; i++)
             {
-                var xVal = Math.round((minY + (maxY - minY) * i / nbXLabels) * 100) / 100;
-                if ((maxY - minY) > 10)
+                var xVal = Math.round((this.minY + (this.maxY - this.minY) * i / nbXLabels) * 100) / 100;
+                if ((this.maxY - this.minY) > 10)
                     xVal = Math.round(xVal);
-                xLabelWidth = Math.max(xLabelWidth, ctx.measureText("" + xVal).width);
+                this.xLabelWidth = Math.max(this.xLabelWidth, ctx.measureText("" + xVal).width);
             }
-            xLabelWidth += 3;
+            this.xLabelWidth += 3;
         }
         // Draw the X labels
         for (var i = 0; i <= nbXLabels; i++)
         {
-            var xVal = Math.round((minY + (maxY - minY) * i / nbXLabels) * 100) / 100;
-            if ((maxY - minY) > 10)
+            var xVal = Math.round((this.minY + (this.maxY - this.minY) * i / nbXLabels) * 100) / 100;
+            if ((this.maxY - this.minY) > 10)
                 xVal = Math.round(xVal);
-            ctx.fillText("" + xVal, xLabelWidth - ctx.measureText("" + xVal).width, this.TransformY(xVal, minY, maxY) + (i == 0 ? 0 : 6));
+            ctx.fillText("" + xVal, this.xLabelWidth - ctx.measureText("" + xVal).width, this.TransformY(xVal) + (i == 0 ? 0 : 6));
         }
 
         // Draw the origins
         ctx.strokeStyle = "#000000";
         ctx.beginPath();
-        ctx.moveTo(xLabelWidth + 2.5, 0);
-        ctx.lineTo(xLabelWidth + 2.5, Math.round(this.TransformY(minY, minY, maxY)) + 0.5);
-        ctx.lineTo(this.width, Math.round(this.TransformY(minY, minY, maxY)) + 0.5);
+        ctx.moveTo(this.xLabelWidth + 2.5, 0);
+        ctx.lineTo(this.xLabelWidth + 2.5, Math.round(this.TransformY(this.minY)) + 0.5);
+        ctx.lineTo(this.width, Math.round(this.TransformY(this.minY)) + 0.5);
         ctx.stroke();
         // Draw the horizontal grid
         ctx.beginPath();
         ctx.setLineDash([2, 2]);
         for (var i = 1; i <= nbXLabels; i++)
         {
-            var y = Math.round(this.TransformY(Math.round((minY + (maxY - minY) * i / nbXLabels) * 100) / 100, minY, maxY));
-            ctx.moveTo(xLabelWidth + 2.5, y + 0.5);
+            var y = Math.round(this.TransformY(Math.round((this.minY + (this.maxY - this.minY) * i / nbXLabels) * 100) / 100));
+            ctx.moveTo(this.xLabelWidth + 2.5, y + 0.5);
             ctx.lineTo(this.width, y + 0.5);
         }
         ctx.stroke();
@@ -162,8 +263,10 @@ class LineGraph
         var nbYLabels = 3;
         for (var i = 0; i <= nbYLabels; i++)
         {
-            var x = (this.width - (xLabelWidth + 2)) * i / nbYLabels + xLabelWidth;
+            var x = (this.width - (this.xLabelWidth + 2)) * i / nbYLabels + this.xLabelWidth;
             var label = this.dataSource.Values[Math.round(i * (this.dataSource.Values.length - 1) / nbYLabels)].Label;
+            if (this.graphOptions.LabelFormat)
+                label = this.graphOptions.LabelFormat(label);
             var labelWidth = ctx.measureText(label).width;
             if (i == nbYLabels)
                 x -= labelWidth;
@@ -175,9 +278,9 @@ class LineGraph
         ctx.beginPath();
         for (var i = 1; i <= nbYLabels; i++)
         {
-            var x = Math.round((this.width - (xLabelWidth + 2)) * i / nbYLabels + xLabelWidth);
+            var x = Math.round((this.width - (this.xLabelWidth + 2)) * i / nbYLabels + this.xLabelWidth);
             ctx.moveTo(x + 0.5, 0);
-            ctx.lineTo(x + 0.5, this.TransformY(minY, minY, maxY));
+            ctx.lineTo(x + 0.5, this.TransformY(this.minY));
         }
         ctx.stroke();
 
@@ -187,17 +290,17 @@ class LineGraph
         ctx.fillStyle = this.plotColor;
         for (var i = 0; i < this.dataSource.Values.length; i++)
         {
-            var y = this.TransformY(this.dataSource.Values[i].Value, minY, maxY);
-            var x = this.TransformX(i, xLabelWidth + 2);
+            var y = this.TransformY(this.dataSource.Values[i].Value);
+            var x = this.TransformX(i, this.xLabelWidth + 2);
             if (i == 0)
             {
-                ctx.lineTo(x, this.TransformY(0, minY, maxY));
+                ctx.lineTo(x, this.TransformY(0));
                 ctx.lineTo(x, y);
             }
             else
                 ctx.lineTo(x, y);
             if (i == this.dataSource.Values.length - 1)
-                ctx.lineTo(x, this.TransformY(0, minY, maxY));
+                ctx.lineTo(x, this.TransformY(0));
         }
         ctx.fill();
         ctx.globalAlpha = 1;
@@ -209,8 +312,8 @@ class LineGraph
         ctx.lineWidth = this.plotLineWidth;
         for (var i = 0; i < this.dataSource.Values.length; i++)
         {
-            var y = this.TransformY(this.dataSource.Values[i].Value, minY, maxY);
-            var x = this.TransformX(i, xLabelWidth + 2);
+            var y = this.TransformY(this.dataSource.Values[i].Value);
+            var x = this.TransformX(i, this.xLabelWidth + 2);
             if (i == 0)
                 ctx.moveTo(x, y);
             else
@@ -222,12 +325,22 @@ class LineGraph
     // Transforms the X value in the screen coordinate
     private TransformX(x: number, xLabelWidth: number)
     {
-        return x * (this.width - xLabelWidth) / this.dataSource.Values.length + xLabelWidth;
+        return x * (this.width - this.xLabelWidth) / this.dataSource.Values.length + this.xLabelWidth;
     }
 
     // Transforms the Y value in the screen coordinate
-    private TransformY(y: number, minY: number, maxY: number): number
+    private TransformY(y: number): number
     {
-        return (this.height - (this.fontSize + 1) * 3) - (y - minY) * (this.height - (this.fontSize + 1) * 3) / (maxY - minY) + (this.fontSize + 1) * 1;
+        return (this.height - (this.fontSize + 1) * 3) - (y - this.minY) * (this.height - (this.fontSize + 1) * 3) / (this.maxY - this.minY) + (this.fontSize + 1) * 1;
+    }
+
+    private TransformCanvasToPos(x: number, y: number): number
+    {
+        if (x - this.xLabelWidth < 0 || x >= this.width)
+            return null;
+        var idx = Math.ceil((x - this.xLabelWidth) / ((this.width - this.xLabelWidth) / this.dataSource.Values.length));
+        if (idx < 0 || idx >= this.dataSource.Values.length)
+            return null;
+        return idx;
     }
 }
