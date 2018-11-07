@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
+using GWLogger.Backend;
 
 namespace GWLogger.Live
 {
@@ -12,11 +15,28 @@ namespace GWLogger.Live
 
         private Thread backgroundUpdater;
 
+        private Dictionary<string, GatewayHistory> historicData = null;
+
         public LiveInformation()
         {
             backgroundUpdater = new Thread(UpdateGateways);
             backgroundUpdater.IsBackground = true;
             backgroundUpdater.Start();
+
+            if (File.Exists(Global.StorageDirectory + "\\history.dump"))
+            {
+                try
+                {
+                    using (var stream = File.OpenRead(Global.StorageDirectory + "\\history.dump"))
+                    {
+                        var formatter = new BinaryFormatter();
+                        historicData = (Dictionary<string, GatewayHistory>)formatter.Deserialize(stream);
+                    }
+                }
+                catch
+                {
+                }
+            }
         }
 
         private Dictionary<string, string> RecoverDirectionInventoryInformation()
@@ -44,10 +64,19 @@ namespace GWLogger.Live
             {
                 Thread.Sleep(5000);
                 List<string> newOnErrors;
+                Dictionary<string, GatewayHistory> historyDump;
                 lock (Gateways)
                 {
                     Gateways.ForEach(row => row.UpdateGateway());
                     newOnErrors = Gateways.Where(row => row.State >= 3).OrderBy(row => row.Name).Select(row => row.Name).ToList();
+                    historyDump = Gateways.ToDictionary(key => key.Name, val => val.GetHistory());
+                }
+
+                // Store historyDump
+                using (var stream = File.OpenWrite(Global.StorageDirectory + "\\history.dump"))
+                {
+                    var formatter = new BinaryFormatter();
+                    formatter.Serialize(stream, historyDump);
                 }
 
                 // Check if we have some gateways on errors
@@ -93,7 +122,10 @@ namespace GWLogger.Live
         {
             lock (Gateways)
             {
-                Gateways.Add(new Gateway(this, gatewayName));
+                var gw = new Gateway(this, gatewayName);
+                if (historicData != null && historicData.ContainsKey(gatewayName))
+                    gw.RecoverFromHistory(historicData[gatewayName]);
+                Gateways.Add(gw);
             }
         }
 
@@ -153,19 +185,19 @@ namespace GWLogger.Live
         public List<HistoricData> CpuHistory(string gatewayName)
         {
             lock (Gateways)
-                return Gateways.FirstOrDefault(row => row.Name == gatewayName)?.CpuHistory;
+                return Gateways.FirstOrDefault(row => row.Name == gatewayName)?.CpuHistory.Last(Gateway.GraphPoints).ToList();
         }
 
         public List<HistoricData> SearchHistory(string gatewayName)
         {
             lock (Gateways)
-                return Gateways.FirstOrDefault(row => row.Name == gatewayName)?.SearchHistory;
+                return Gateways.FirstOrDefault(row => row.Name == gatewayName)?.SearchHistory.Last(Gateway.GraphPoints).ToList();
         }
 
         public List<HistoricData> PVsHistory(string gatewayName)
         {
             lock (Gateways)
-                return Gateways.FirstOrDefault(row => row.Name == gatewayName)?.PvsHistory;
+                return Gateways.FirstOrDefault(row => row.Name == gatewayName)?.PvsHistory.Last(Gateway.GraphPoints).ToList();
         }
 
         public void Dispose()

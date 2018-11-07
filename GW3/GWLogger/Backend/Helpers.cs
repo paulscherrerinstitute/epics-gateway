@@ -80,5 +80,10 @@ namespace GWLogger.Backend
             public string Hostname { get; set; }
             public DateTime LastChecked { get; } = DateTime.UtcNow;
         }
+
+        public static IEnumerable<TType> Last<TType>(this IEnumerable<TType> src,int nbElements)
+        {
+            return src.Skip(Math.Max(0, src.Count() - nbElements));
+        }
     }
 }
