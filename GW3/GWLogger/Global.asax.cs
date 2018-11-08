@@ -24,6 +24,8 @@ namespace GWLogger
                 .Where(row => row.Attributes["class"]?.Value == "GWDisplay")
                 .Select(row => row.Attributes["id"]?.Value).ToList()
                 .ForEach(row => Global.LiveInformation.Register(row));
+            if (System.Diagnostics.Debugger.IsAttached) // Debug local
+                Global.LiveInformation.Register("PBGW");
             Backend.Controllers.LogController.CleanLogs();
 
             DataContext.StoreHistory += (file) =>

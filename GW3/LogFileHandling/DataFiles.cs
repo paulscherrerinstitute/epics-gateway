@@ -30,39 +30,57 @@ namespace GWLogger.Backend.DataContext
 
         internal void Flush()
         {
+            List<DataFile> fileList;
             lock (dataFiles)
+                fileList = dataFiles.Values.ToList();
+
+            foreach (var i in fileList)
             {
-                foreach (var i in dataFiles)
-                    i.Value.Flush();
+                using (var l = i.Lock())
+                {
+                    i.Flush();
+                }
             }
         }
 
         public void CleanOlderThan(int nbDays)
         {
+            List<DataFile> fileList;
             lock (dataFiles)
+                fileList = dataFiles.Values.ToList();
+            foreach (var i in fileList)
             {
-                foreach (var i in dataFiles)
-                    i.Value.CleanOlderThan(nbDays);
+                using (var l = i.Lock())
+                {
+                    i.CleanOlderThan(nbDays);
+                }
             }
         }
 
         public void SaveStats()
         {
+            List<DataFile> fileList;
             lock (dataFiles)
+                fileList = dataFiles.Values.ToList();
+            foreach (var i in fileList)
             {
-                foreach (var i in dataFiles)
-                    i.Value.SaveStats(true);
+                using (var l = i.Lock())
+                {
+                    i.SaveStats();
+                }
             }
         }
 
         public void Dispose()
         {
+            List<DataFile> fileList;
             lock (dataFiles)
             {
-                foreach (var i in dataFiles)
-                    i.Value.Dispose();
+                fileList = dataFiles.Values.ToList();
                 dataFiles.Clear();
             }
+            foreach (var i in fileList)
+                i.Dispose();
         }
 
         public bool Exists(string gatewayName)

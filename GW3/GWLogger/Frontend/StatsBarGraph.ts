@@ -2,11 +2,6 @@
 {
     static DrawStats(): void
     {
-        if (!Main.Stats || !Main.Stats.Logs || !Main.Stats.Logs.length)
-            return;
-
-        var end = Main.Stats.Logs[Main.Stats.Logs.length - 1].Date;
-
         var canvas = (<HTMLCanvasElement>$("#timeRangeCanvas")[0]);
         var ctx = canvas.getContext("2d");
         var width = $("#timeRange").width() - 40;
@@ -15,14 +10,18 @@
         canvas.width = width;
         canvas.height = height;
 
+        ctx.fillStyle = "rgba(255,255,255,0)";
+        ctx.fillRect(0, 0, width, height);
+
+        if (!Main.Stats || !Main.Stats.Logs || !Main.Stats.Logs.length)
+            return;
+
+        var end = Main.Stats.Logs[Main.Stats.Logs.length - 1].Date;
+
         //var w = width / 145;
         var w = width / Main.Stats.Logs.length;
         var b = height * 2 / 3;
         var bn = height - b;
-
-        ctx.fillStyle = "rgba(255,255,255,0)";
-        ctx.fillRect(0, 0, width, height);
-
 
         var maxValue = 1;
         for (var i = 0; i < Main.Stats.Logs.length; i++)
@@ -150,6 +149,9 @@
 
     static TimeLineMouse(evt: JQueryMouseEventObject): void
     {
+        if (!Main.Stats || !Main.Stats.Logs || Main.Stats.Logs.length == 0)
+            return;
+
         var width = $("#timeRangeCanvas").width();
         var w = width / Main.Stats.Logs.length;
         //var x = evt.pageX - ($("#timeRange").position().left + $("#timeRange div").width());
@@ -170,6 +172,9 @@
         }
 
         Main.CurrentTime = new Date(Main.Stats.Logs[Main.Stats.Logs.length - 1].Date.getTime() - tx * 10 * 60 * 1000);
+
+        //console.log(Main.CurrentTime);
+
         //Main.CurrentTime = new Date(Main.EndDate.getTime() - tx * 10 * 60 * 1000);
         //Main.CurrentTime = new Date((Main.EndDate.getTime() + Main.EndDate.getTimezoneOffset() * 60000) - tx * 10 * 60 * 1000);
         if (tx == 0 && ((new Date()).getTime() - Main.CurrentTime.getTime()) < 24 * 3600 * 1000)

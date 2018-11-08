@@ -1,10 +1,10 @@
-﻿using System;
+﻿using GWLogger.Backend;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
-using GWLogger.Backend;
 
 namespace GWLogger.Live
 {
@@ -19,7 +19,10 @@ namespace GWLogger.Live
 
         public LiveInformation()
         {
-            backgroundUpdater = new Thread(UpdateGateways);
+            if (System.Diagnostics.Debugger.IsAttached)
+                Client.Configuration.SearchAddress += ";129.129.194.45:5055";
+
+                backgroundUpdater = new Thread(UpdateGateways);
             backgroundUpdater.IsBackground = true;
             backgroundUpdater.Start();
 
@@ -27,15 +30,37 @@ namespace GWLogger.Live
             {
                 try
                 {
-                    using (var stream = File.OpenRead(Global.StorageDirectory + "\\history.dump"))
+                    RecoverHistory(Global.StorageDirectory + "\\history.dump");
+                }
+                catch
+                {
+                    try
                     {
-                        var formatter = new BinaryFormatter();
-                        historicData = (Dictionary<string, GatewayHistory>)formatter.Deserialize(stream);
+                        RecoverHistory(Global.StorageDirectory + "\\history.dump.new");
                     }
+                    catch
+                    {
+                    }
+                }
+            }
+            else if (File.Exists(Global.StorageDirectory + "\\history.dump.new"))
+            {
+                try
+                {
+                    RecoverHistory(Global.StorageDirectory + "\\history.dump.new");
                 }
                 catch
                 {
                 }
+            }
+        }
+
+        private void RecoverHistory(string filename)
+        {
+            using (var stream = File.OpenRead(filename))
+            {
+                var formatter = new BinaryFormatter();
+                historicData = (Dictionary<string, GatewayHistory>)formatter.Deserialize(stream);
             }
         }
 
@@ -73,11 +98,14 @@ namespace GWLogger.Live
                 }
 
                 // Store historyDump
-                using (var stream = File.OpenWrite(Global.StorageDirectory + "\\history.dump"))
+                using (var stream = File.OpenWrite(Global.StorageDirectory + "\\history.dump.new"))
                 {
                     var formatter = new BinaryFormatter();
                     formatter.Serialize(stream, historyDump);
                 }
+                if (File.Exists(Global.StorageDirectory + "\\history.dump"))
+                    File.Delete(Global.StorageDirectory + "\\history.dump");
+                File.Move(Global.StorageDirectory + "\\history.dump.new", Global.StorageDirectory + "\\history.dump");
 
                 // Check if we have some gateways on errors
                 var emails = new Dictionary<string, string>();

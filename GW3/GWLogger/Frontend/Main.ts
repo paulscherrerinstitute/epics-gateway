@@ -180,7 +180,11 @@ class Main
     static ShowStats()
     {
         if (!Main.Stats || !Main.Stats.Logs || Main.Stats.Logs.length == 0)
+        {
+            $("#clientsContent").html("");
+            $("#serversContent").html("");
             return;
+        }
 
         var startDate = Main.Stats.Logs[Main.Stats.Logs.length - 1].Date;
         //var startDate = new Date((new Date()).getTime() - 10 * 60 * 1000);
@@ -212,6 +216,7 @@ class Main
             },
             error: function (msg, textStatus)
             {
+                $("#clientsContent").html("");
                 console.log(msg.responseText);
             }
         });
@@ -241,6 +246,7 @@ class Main
             },
             error: function (msg, textStatus)
             {
+                $("#serversContent").html("");
                 console.log(msg.responseText);
             }
         });
@@ -320,6 +326,8 @@ class Main
                 },
                 error: function (msg, textStatus)
                 {
+                    $("#logsContent").html("");
+
                     if (textStatus == "abort")
                         return;
                     if (textStatus)
@@ -680,6 +688,9 @@ class Main
     {
         /*if (/Trident\/|MSIE /.test("" + window.navigator.userAgent))
             Notifications.Alert("Internet Explorer is not supported!");*/
+
+        if (("" + document.location).startsWith("http://localhost"))
+            $("#gatewayBeamlines").append(`<div class="GWDisplay" id="PBGW"></div>`);
 
         $("*[tooltip]").each((idx, elem) =>
         {

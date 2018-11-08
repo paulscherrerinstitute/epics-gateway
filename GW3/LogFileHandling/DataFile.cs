@@ -8,10 +8,27 @@ using System.Threading;
 
 namespace GWLogger.Backend.DataContext
 {
+    public class LockObject : IDisposable
+    {
+        private SemaphoreSlim locker;
+
+        public LockObject(SemaphoreSlim locker)
+        {
+            this.locker = locker;
+            this.locker.Wait();
+        }
+
+        public void Dispose()
+        {
+            this.locker?.Release();
+            this.locker = null;
+        }
+    }
+
     public class DataFile : IDisposable
     {
         public string Gateway { get; }
-        public SemaphoreSlim LockObject { get; private set; } = new SemaphoreSlim(1);
+        private SemaphoreSlim lockObject = new SemaphoreSlim(1);
 
         private FileStream file;
         private BinaryWriter DataWriter { get; set; }
@@ -37,40 +54,6 @@ namespace GWLogger.Backend.DataContext
         private bool isAtEnd = true;
         private bool mustFlush = false;
 
-        //public static string Context.StorageDirectory => System.Configuration.ConfigurationManager.AppSettings["Context.StorageDirectory"];
-
-        /*static DataFile()
-        {
-            try
-            {
-                using (var stream = File.OpenRead(Context.StorageDirectory + "\\MemberNames.xml"))
-                {
-                    var ser = new XmlSerializer(typeof(List<IdValue>));
-                    var data = (List<IdValue>)ser.Deserialize(stream);
-                    memberNames = data.ToDictionary(key => key.Value, val => val.Id);
-                    reverseMemberNames = data.ToDictionary(key => key.Id, val => val.Value);
-                }
-            }
-            catch
-            {
-                memberNames = new Dictionary<string, int>();
-            }
-            try
-            {
-                using (var stream = File.OpenRead(Context.StorageDirectory + "\\FilePaths.xml"))
-                {
-                    var ser = new XmlSerializer(typeof(List<IdValue>));
-                    var data = (List<IdValue>)ser.Deserialize(stream);
-                    filePaths = data.ToDictionary(key => key.Value, val => val.Id);
-                    reverseFilePaths = data.ToDictionary(key => key.Id, val => val.Value);
-                }
-            }
-            catch
-            {
-                filePaths = new Dictionary<string, int>();
-            }
-        }*/
-
         public static List<string> Gateways(string storageDirectory)
         {
             return Directory.GetFiles(storageDirectory, "*.data")
@@ -83,31 +66,43 @@ namespace GWLogger.Backend.DataContext
         private static HashSet<string> knownFiles = new HashSet<string>();
         private readonly Context Context;
 
+        public void Wait()
+        {
+            lockObject.Wait();
+        }
+
+        public bool Wait(int millisecondsTimeout)
+        {
+            return lockObject.Wait(millisecondsTimeout);
+        }
+
+        public void Release()
+        {
+            lockObject.Release();
+        }
+
+        public LockObject Lock()
+        {
+            return new LockObject(this.lockObject);
+        }
+
         public DataFile(Context context, string gateway)
         {
             this.Context = context;
-            try
-            {
-                LockObject.Wait();
-                this.Gateway = gateway;
-                SetFile();
+            this.Gateway = gateway;
+            SetFile();
 
-                // Recovers how many entries in that last session
-                if (File.Exists(Context.StorageDirectory + "\\" + gateway.ToLower() + ".sessions"))
+            // Recovers how many entries in that last session
+            if (File.Exists(Context.StorageDirectory + "\\" + gateway.ToLower() + ".sessions"))
+            {
+                using (var reader = new BinaryReader(File.Open(Context.StorageDirectory + "\\" + gateway.ToLower() + ".sessions", FileMode.Open, FileAccess.Read)))
                 {
-                    using (var reader = new BinaryReader(File.Open(Context.StorageDirectory + "\\" + gateway.ToLower() + ".sessions", FileMode.Open, FileAccess.Read)))
+                    if (reader.BaseStream.Length > sizeof(long))
                     {
-                        if (reader.BaseStream.Length > sizeof(long))
-                        {
-                            reader.BaseStream.Seek(reader.BaseStream.Length - sizeof(long), SeekOrigin.Begin);
-                            nbLogEntries = reader.ReadInt64();
-                        }
+                        reader.BaseStream.Seek(reader.BaseStream.Length - sizeof(long), SeekOrigin.Begin);
+                        nbLogEntries = reader.ReadInt64();
                     }
                 }
-            }
-            finally
-            {
-                LockObject.Release();
             }
         }
 
@@ -131,25 +126,16 @@ namespace GWLogger.Backend.DataContext
             var toDel = DateTime.UtcNow.AddDays(-nbDays);
 
             var needToClose = true;
-            try
-            {
-                LockObject.Wait();
-                // Delete all the data files
 
-                foreach (var i in Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.*").Where(row => DateOfFile(row) <= toDel))
+            foreach (var i in Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.*").Where(row => DateOfFile(row) <= toDel))
+            {
+                if (needToClose)
                 {
-                    if (needToClose)
-                    {
-                        needToClose = false;
-                        CloseFiles();
-                    }
-
-                    File.Delete(i);
+                    needToClose = false;
+                    CloseFiles();
                 }
-            }
-            finally
-            {
-                LockObject.Release();
+
+                File.Delete(i);
             }
 
             lock (knownFiles)
@@ -172,45 +158,36 @@ namespace GWLogger.Backend.DataContext
 
         public DataFileStats GetLogsStats()
         {
-            try
+            var totSize = Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.data").Sum(row => new FileInfo(row).Length);
+
+            var stats = new List<long>();
+            var dataSize = 0L;
+
+            // Day before
+            SetFile(FileName(DateTime.UtcNow.AddDays(-1)));
+            dataSize += DataReader.BaseStream.Length;
+
+
+            for (var i = 0; i < Stats.GetLength(0); i++)
+                if (Stats[i, 0] != 0)
+                    stats.Add(Stats[i, 0]);
+
+
+            // Today
+            SetFile();
+            dataSize += DataReader.BaseStream.Length;
+
+            for (var i = 0; i < Stats.GetLength(0); i++)
+                if (Stats[i, 0] != 0)
+                    stats.Add(Stats[i, 0]);
+
+            return new DataFileStats
             {
-                LockObject.Wait();
-
-                var totSize = Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.data").Sum(row => new FileInfo(row).Length);
-
-                var stats = new List<long>();
-                var dataSize = 0L;
-
-                // Day before
-                SetFile(FileName(DateTime.UtcNow.AddDays(-1)));
-                dataSize += DataReader.BaseStream.Length;
-
-
-                for (var i = 0; i < Stats.GetLength(0); i++)
-                    if (Stats[i, 0] != 0)
-                        stats.Add(Stats[i, 0]);
-
-
-                // Today
-                SetFile();
-                dataSize += DataReader.BaseStream.Length;
-
-                for (var i = 0; i < Stats.GetLength(0); i++)
-                    if (Stats[i, 0] != 0)
-                        stats.Add(Stats[i, 0]);
-
-                return new DataFileStats
-                {
-                    Name = Gateway,
-                    LogsPerSeconds = stats.Average(row => row / 600.0),
-                    AverageEntryBytes = dataSize / stats.Sum(),
-                    TotalDataSize = totSize
-                };
-            }
-            finally
-            {
-                LockObject.Release();
-            }
+                Name = Gateway,
+                LogsPerSeconds = stats.Average(row => row / 600.0),
+                AverageEntryBytes = dataSize / stats.Sum(),
+                TotalDataSize = totSize
+            };
         }
 
 
@@ -270,12 +247,10 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        public void SaveStats(bool mustLock = false)
+        public void SaveStats()
         {
             try
             {
-                if (mustLock)
-                    LockObject.Wait();
                 var statFileName = FileName(CurrentDate, ".stats");
                 using (var writer = new BinaryWriter(File.Open(statFileName, FileMode.Create, FileAccess.Write)))
                 {
@@ -289,11 +264,6 @@ namespace GWLogger.Backend.DataContext
             catch // Wrong save?
             {
 
-            }
-            finally
-            {
-                if (mustLock)
-                    LockObject.Release();
             }
         }
 
@@ -385,8 +355,6 @@ namespace GWLogger.Backend.DataContext
         {
             try
             {
-                LockObject.Wait();
-
                 var result = new List<GatewaySession>();
 
                 var sessionFile = Context.StorageDirectory + "\\" + Gateway.ToLower() + ".sessions";
@@ -416,78 +384,65 @@ namespace GWLogger.Backend.DataContext
             {
                 return new List<GatewaySession>();
             }
-            finally
-            {
-                LockObject.Release();
-            }
         }
 
         public void Save(LogEntry entry, bool isAnError)
         {
-            try
+            var fileToUse = FileName(entry.EntryDate);
+            if (fileToUse != currentFile)
+                SetFile(fileToUse);
+
+            StartWriting();
+
+            // Check if we must update the index file
+            var idxPos = IndexPosition(entry.EntryDate);
+            // Index is not yet set, then set it
+            if (Index[idxPos] == -1)
             {
-                LockObject.Wait();
+                Index[idxPos] = DataWriter.BaseStream.Position;
 
-                var fileToUse = FileName(entry.EntryDate);
-                if (fileToUse != currentFile)
-                    SetFile(fileToUse);
-
-                StartWriting();
-
-                // Check if we must update the index file
-                var idxPos = IndexPosition(entry.EntryDate);
-                // Index is not yet set, then set it
-                if (Index[idxPos] == -1)
+                var idxFileName = FileName(CurrentDate, ".idx");
+                using (var writer = new BinaryWriter(File.Open(idxFileName, FileMode.OpenOrCreate, FileAccess.Write)))
                 {
-                    Index[idxPos] = DataWriter.BaseStream.Position;
-
-                    var idxFileName = FileName(CurrentDate, ".idx");
-                    using (var writer = new BinaryWriter(File.Open(idxFileName, FileMode.OpenOrCreate, FileAccess.Write)))
-                    {
-                        writer.Seek(sizeof(long) * idxPos, SeekOrigin.Begin);
-                        writer.Write(Index[idxPos]);
-                        writer.Seek(0, SeekOrigin.End);
-                    }
+                    writer.Seek(sizeof(long) * idxPos, SeekOrigin.Begin);
+                    writer.Write(Index[idxPos]);
+                    writer.Seek(0, SeekOrigin.End);
                 }
-
-                if (entry.MessageTypeId < 2) // Skip starting info
-                {
-                }
-                else if (entry.MessageTypeId == 2) // Start new session
-                {
-                    UpdateGatewaySessions(DateTime.UtcNow);
-                    nbLogEntries = 1;
-                    lastLogEntry = DateTime.UtcNow;
-                }
-                else
-                {
-                    nbLogEntries++;
-                    lastLogEntry = DateTime.UtcNow;
-                }
-                WriteEntry(DataWriter, entry);
-
-                /*DataWriter.Write(entry.EntryDate.ToBinary());
-                DataWriter.Write((byte)entry.MessageTypeId);
-                DataWriter.Write(entry.RemoteIpPoint ?? "");
-
-                DataWriter.Write((byte)entry.LogEntryDetails.Count);
-                foreach (var i in entry.LogEntryDetails)
-                {
-                    DataWriter.Write((byte)i.DetailTypeId);
-                    DataWriter.Write(i.Value);
-                }*/
-
-                if (entry.MessageTypeId == 39)
-                    Stats[idxPos, 1]++;
-
-                Stats[idxPos, 0]++;
-                if (isAnError)
-                    Stats[idxPos, 2]++;
             }
-            finally
+
+            if (entry.MessageTypeId < 2) // Skip starting info
             {
-                LockObject.Release();
             }
+            else if (entry.MessageTypeId == 2) // Start new session
+            {
+                UpdateGatewaySessions(DateTime.UtcNow);
+                nbLogEntries = 1;
+                lastLogEntry = DateTime.UtcNow;
+            }
+            else
+            {
+                nbLogEntries++;
+                lastLogEntry = DateTime.UtcNow;
+            }
+            WriteEntry(DataWriter, entry);
+
+            /*DataWriter.Write(entry.EntryDate.ToBinary());
+            DataWriter.Write((byte)entry.MessageTypeId);
+            DataWriter.Write(entry.RemoteIpPoint ?? "");
+
+            DataWriter.Write((byte)entry.LogEntryDetails.Count);
+            foreach (var i in entry.LogEntryDetails)
+            {
+                DataWriter.Write((byte)i.DetailTypeId);
+                DataWriter.Write(i.Value);
+            }*/
+
+            if (entry.MessageTypeId == 39)
+                Stats[idxPos, 1]++;
+
+            Stats[idxPos, 0]++;
+            if (isAnError)
+                Stats[idxPos, 2]++;
         }
 
         private static int SerializedStringLength(int length)
@@ -516,141 +471,117 @@ namespace GWLogger.Backend.DataContext
 
         internal void Flush()
         {
-            try
-            {
-                LockObject.Wait();
-                if (!mustFlush)
-                    return;
-                mustFlush = false;
-                commandIndex?.Flush();
-                DataWriter.Flush();
-            }
-            finally
-            {
-                LockObject.Release();
-            }
+            if (!mustFlush)
+                return;
+            mustFlush = false;
+            commandIndex?.Flush();
+            DataWriter.Flush();
         }
 
         internal List<LogEntry> ReadLog(DateTime start, DateTime end, Query.Statement.QueryNode query = null, int nbMaxEntries = -1, List<int> messageTypes = null, string startFile = null, long offset = 0, CancellationToken cancellationToken = default(CancellationToken))
         {
-            try
+            var result = new List<LogEntry>();
+
+            var currentDate = new DateTime(start.Year, start.Month, start.Day);
+            var firstLoop = true;
+            var firstItem = true;
+
+            while (currentDate < end && (cancellationToken == CancellationToken.None || !cancellationToken.IsCancellationRequested))
             {
-                var result = new List<LogEntry>();
-                LockObject.Wait();
+                var fileToUse = FileName(currentDate);
 
-                var currentDate = new DateTime(start.Year, start.Month, start.Day);
-                var firstLoop = true;
-                var firstItem = true;
+                if (startFile != null)
+                    fileToUse = Path.GetDirectoryName(fileToUse) + "\\" + Path.GetFileName(startFile) + ".data";
 
-                while (currentDate < end && (cancellationToken == CancellationToken.None || !cancellationToken.IsCancellationRequested))
+                if (File.Exists(fileToUse))
                 {
-                    var fileToUse = FileName(currentDate);
+                    if (fileToUse != currentFile)
+                        SetFile(fileToUse);
 
-                    if (startFile != null)
-                        fileToUse = Path.GetDirectoryName(fileToUse) + "\\" + Path.GetFileName(startFile) + ".data";
+                    if (firstLoop && currentFile != null && offset != 0)
+                        Seek(offset);
+                    else if (firstLoop && Index[IndexPosition(start)] != -1)
+                        Seek(Index[IndexPosition(start)]);
+                    else
+                        Seek(0);
+                    isAtEnd = false;
 
-                    if (File.Exists(fileToUse))
+                    var streamLength = DataReader.BaseStream.Length;
+                    while (DataReader.BaseStream.Position < streamLength && (nbMaxEntries < 1 || result.Count < nbMaxEntries) && (cancellationToken == CancellationToken.None || !cancellationToken.IsCancellationRequested))
                     {
-                        if (fileToUse != currentFile)
-                            SetFile(fileToUse);
-
-                        if (firstLoop && currentFile != null && offset != 0)
-                            Seek(offset);
-                        else if (firstLoop && Index[IndexPosition(start)] != -1)
-                            Seek(Index[IndexPosition(start)]);
-                        else
-                            Seek(0);
-                        isAtEnd = false;
-
-                        var streamLength = DataReader.BaseStream.Length;
-                        while (DataReader.BaseStream.Position < streamLength && (nbMaxEntries < 1 || result.Count < nbMaxEntries) && (cancellationToken == CancellationToken.None || !cancellationToken.IsCancellationRequested))
+                        var entry = ReadEntry(DataReader, start, streamLength);
+                        if (firstItem && query != null)
                         {
-                            var entry = ReadEntry(DataReader, start, streamLength);
-                            if (firstItem && query != null)
+                            try
                             {
-                                try
-                                {
-                                    query.CheckCondition(Context, entry);
-                                }
-                                catch
-                                {
-                                    query = null;
-                                }
+                                query.CheckCondition(Context, entry);
                             }
-
-                            if (entry != null && entry.EntryDate >= start && entry.EntryDate <= end && (query == null || query.CheckCondition(Context, entry)) && (messageTypes == null || messageTypes.Contains(entry.MessageTypeId)))
+                            catch
                             {
-                                entry.Gateway = Gateway;
-                                entry.CurrentFile = Path.GetFileName(fileToUse).Replace(".data", "");
-                                result.Add(entry);
+                                query = null;
                             }
-                            firstItem = false;
-                            if (entry != null && entry.EntryDate > end)
-                                break;
                         }
-                    }
 
-                    currentDate = currentDate.AddDays(1);
-                    firstLoop = false;
+                        if (entry != null && entry.EntryDate >= start && entry.EntryDate <= end && (query == null || query.CheckCondition(Context, entry)) && (messageTypes == null || messageTypes.Contains(entry.MessageTypeId)))
+                        {
+                            entry.Gateway = Gateway;
+                            entry.CurrentFile = Path.GetFileName(fileToUse).Replace(".data", "");
+                            result.Add(entry);
+                        }
+                        firstItem = false;
+                        if (entry != null && entry.EntryDate > end)
+                            break;
+                    }
                 }
 
-                return result;
+                currentDate = currentDate.AddDays(1);
+                firstLoop = false;
             }
-            finally
-            {
-                LockObject.Release();
-            }
+
+            return result;
         }
 
         internal List<LogEntry> ReadLastLogs(int nbEntries)
         {
-            try
-            {
-                LockObject.Wait();
-                var files = new Queue<string>(Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.data").OrderByDescending(row => row));
+            var files = new Queue<string>(Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.data").OrderByDescending(row => row));
 
-                var result = new List<LogEntry>();
-                while (result.Count < nbEntries && files.Count > 0)
+            var result = new List<LogEntry>();
+            while (result.Count < nbEntries && files.Count > 0)
+            {
+                var lastFile = files.Dequeue();
+
+                if (lastFile != currentFile)
+                    SetFile(lastFile);
+
+                isAtEnd = false;
+
+                var streamLength = DataReader.BaseStream.Length;
+
+                var chunk = new List<LogEntry>();
+                // 48 being an average of bytes per entries
+                DataReader.BaseStream.Seek(Math.Max(0, DataReader.BaseStream.Length - 57 * nbEntries), SeekOrigin.Begin);
+                while (DataReader.BaseStream.Position < streamLength)
                 {
-                    var lastFile = files.Dequeue();
-
-                    if (lastFile != currentFile)
-                        SetFile(lastFile);
-
-                    isAtEnd = false;
-
-                    var streamLength = DataReader.BaseStream.Length;
-
-                    var chunk = new List<LogEntry>();
-                    // 48 being an average of bytes per entries
-                    DataReader.BaseStream.Seek(Math.Max(0, DataReader.BaseStream.Length - 57 * nbEntries), SeekOrigin.Begin);
-                    while (DataReader.BaseStream.Position < streamLength)
+                    /*if (pos < Index.Length - 1 && DataReader.BaseStream.Position >= Index[pos + 1])
+                        break;*/
+                    try
                     {
-                        /*if (pos < Index.Length - 1 && DataReader.BaseStream.Position >= Index[pos + 1])
-                            break;*/
-                        try
-                        {
-                            chunk.Add(ReadEntry(DataReader, this.CurrentDate.Date, streamLength));
-                        }
-                        catch (EndOfStreamException)
-                        {
-                            break;
-                        }
-                        catch
-                        {
-                        }
+                        chunk.Add(ReadEntry(DataReader, this.CurrentDate.Date, streamLength));
                     }
-                    result.InsertRange(0, chunk);
+                    catch (EndOfStreamException)
+                    {
+                        break;
+                    }
+                    catch
+                    {
+                    }
                 }
+                result.InsertRange(0, chunk);
+            }
 
-                if (result.Count > nbEntries)
-                    return result.Skip(result.Count - nbEntries).ToList();
-                return result;
-            }
-            finally
-            {
-                LockObject.Release();
-            }
+            if (result.Count > nbEntries)
+                return result.Skip(result.Count - nbEntries).ToList();
+            return result;
         }
 
         private void WriteEntry(BinaryWriter stream, LogEntry entry)
@@ -835,55 +766,46 @@ namespace GWLogger.Backend.DataContext
         {
             var result = new List<GatewayStats>();
 
-            try
+            foreach (var i in Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.stats")
+            .OrderBy(row => row))
             {
-                LockObject.Wait();
-
-                foreach (var i in Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.stats")
-                .OrderBy(row => row))
+                var entry = new GatewayStats
                 {
-                    var entry = new GatewayStats
+                    Searches = new List<LogStat>(),
+                    Logs = new List<LogStat>(),
+                    Errors = new List<LogStat>(),
+                    CPU = new List<LogStat>(),
+                    PVs = new List<LogStat>(),
+                    Clients = new List<LogStat>(),
+                    Servers = new List<LogStat>(),
+                    MsgSecs = new List<LogStat>()
+                };
+
+                var stats = new List<LogStat>[] { entry.Logs, entry.Searches, entry.Errors, entry.CPU, entry.PVs, entry.Clients, entry.Servers, entry.MsgSecs };
+
+                using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read)))
+                {
+                    try
                     {
-                        Searches = new List<LogStat>(),
-                        Logs = new List<LogStat>(),
-                        Errors = new List<LogStat>(),
-                        CPU = new List<LogStat>(),
-                        PVs = new List<LogStat>(),
-                        Clients = new List<LogStat>(),
-                        Servers = new List<LogStat>(),
-                        MsgSecs = new List<LogStat>()
-                    };
+                        var nbColsAvailable = reader.BaseStream.Length / (sizeof(long) * Stats.GetLength(0));
 
-                    var stats = new List<LogStat>[] { entry.Logs, entry.Searches, entry.Errors, entry.CPU, entry.PVs, entry.Clients, entry.Servers, entry.MsgSecs };
+                        for (var s = 0; s < Math.Min(nbColsAvailable, Stats.GetLength(1)); s++)
+                            for (var j = 0; j < Stats.GetLength(0); j++)
+                                stats[s].Add(new LogStat { Date = DateOfFile(i).AddMinutes(10 * j), Value = reader.ReadInt64() });
 
-                    using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read)))
-                    {
-                        try
-                        {
-                            var nbColsAvailable = reader.BaseStream.Length / (sizeof(long) * Stats.GetLength(0));
+                        // Fill with 0
+                        for (var s = nbColsAvailable; s < Stats.GetLength(1); s++)
+                            for (var j = 0; j < Stats.GetLength(0); j++)
+                                stats[s].Add(new LogStat { Date = DateOfFile(i).AddMinutes(10 * j), Value = 0 });
 
-                            for (var s = 0; s < Math.Min(nbColsAvailable, Stats.GetLength(1)); s++)
-                                for (var j = 0; j < Stats.GetLength(0); j++)
-                                    stats[s].Add(new LogStat { Date = DateOfFile(i).AddMinutes(10 * j), Value = reader.ReadInt64() });
-
-                            // Fill with 0
-                            for (var s = nbColsAvailable; s < Stats.GetLength(1); s++)
-                                for (var j = 0; j < Stats.GetLength(0); j++)
-                                    stats[s].Add(new LogStat { Date = DateOfFile(i).AddMinutes(10 * j), Value = 0 });
-
-                        }
-                        catch
-                        {
-                        }
                     }
-
-                    result.Add(entry);
-
+                    catch
+                    {
+                    }
                 }
-            }
-            finally
-            {
-                LockObject.Release();
+
+                result.Add(entry);
+
             }
 
             return result;
@@ -905,65 +827,57 @@ namespace GWLogger.Backend.DataContext
 
             var stats = new List<LogStat>[] { result.Logs, result.Searches, result.Errors, result.CPU, result.PVs, result.Clients, result.Servers, result.MsgSecs };
 
-            try
+
+            var dayStart = new DateTime(start.Year, start.Month, start.Day);
+
+            foreach (var i in Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.stats")
+                .OrderBy(row => row)
+                .Where(row => DateOfFile(row) >= dayStart && DateOfFile(row) <= end))
             {
-                LockObject.Wait();
 
-                var dayStart = new DateTime(start.Year, start.Month, start.Day);
-
-                foreach (var i in Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.stats")
-                    .OrderBy(row => row)
-                    .Where(row => DateOfFile(row) >= dayStart && DateOfFile(row) <= end))
+                using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read)))
                 {
-
-                    using (var reader = new BinaryReader(File.Open(i, FileMode.Open, FileAccess.Read)))
+                    try
                     {
-                        try
+                        var nbColsAvailable = reader.BaseStream.Length / (sizeof(long) * Stats.GetLength(0));
+
+                        for (var s = 0; s < Math.Min(nbColsAvailable, Stats.GetLength(1)); s++)
                         {
-                            var nbColsAvailable = reader.BaseStream.Length / (sizeof(long) * Stats.GetLength(0));
-
-                            for (var s = 0; s < Math.Min(nbColsAvailable, Stats.GetLength(1)); s++)
+                            for (var j = 0; j < Stats.GetLength(0); j++)
                             {
-                                for (var j = 0; j < Stats.GetLength(0); j++)
-                                {
-                                    var t = DateOfFile(i).AddMinutes(10 * j);
-                                    var v = reader.ReadInt64();
-                                    if (t >= start && t <= end)
-                                        stats[s].Add(new LogStat { Date = t, Value = v });
-                                }
+                                var t = DateOfFile(i).AddMinutes(10 * j);
+                                var v = reader.ReadInt64();
+                                if (t >= start && t <= end)
+                                    stats[s].Add(new LogStat { Date = t, Value = v });
                             }
-
-                            // Fill with 0
-                            for (var s = nbColsAvailable; s < Stats.GetLength(1); s++)
-                            {
-                                for (var j = 0; j < Stats.GetLength(0); j++)
-                                {
-                                    var t = DateOfFile(i).AddMinutes(10 * j);
-                                    if (t >= start && t <= end)
-                                        stats[s].Add(new LogStat { Date = t, Value = 0 });
-                                }
-                            }
-
-                            /*for (var s = 0; s < Stats.GetLength(1); s++)
-                            {
-                                for (var j = 0; j < Stats.GetLength(0); j++)
-                                {
-                                    var v = reader.ReadInt64();
-                                    var t = DateOfFile(i).AddMinutes(10 * j);
-                                    if (t >= start && t <= end)
-                                        stats[s].Add(new LogStat { Date = t, Value = v });
-                                }
-                            }*/
                         }
-                        catch
+
+                        // Fill with 0
+                        for (var s = nbColsAvailable; s < Stats.GetLength(1); s++)
                         {
+                            for (var j = 0; j < Stats.GetLength(0); j++)
+                            {
+                                var t = DateOfFile(i).AddMinutes(10 * j);
+                                if (t >= start && t <= end)
+                                    stats[s].Add(new LogStat { Date = t, Value = 0 });
+                            }
                         }
+
+                        /*for (var s = 0; s < Stats.GetLength(1); s++)
+                        {
+                            for (var j = 0; j < Stats.GetLength(0); j++)
+                            {
+                                var v = reader.ReadInt64();
+                                var t = DateOfFile(i).AddMinutes(10 * j);
+                                if (t >= start && t <= end)
+                                    stats[s].Add(new LogStat { Date = t, Value = v });
+                            }
+                        }*/
+                    }
+                    catch
+                    {
                     }
                 }
-            }
-            finally
-            {
-                LockObject.Release();
             }
 
             return result;
@@ -993,21 +907,21 @@ namespace GWLogger.Backend.DataContext
 
         public void Dispose()
         {
-            if (LockObject == null)
+            if (lockObject == null)
                 return;
             commandIndex?.Dispose();
             commandIndex = null;
             try
             {
-                LockObject.Wait();
+                lockObject.Wait();
             }
             finally
             {
-                LockObject.Release();
+                lockObject.Release();
             }
             CloseFiles();
-            LockObject.Dispose();
-            LockObject = null;
+            lockObject.Dispose();
+            lockObject = null;
         }
     }
 }

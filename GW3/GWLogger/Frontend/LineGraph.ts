@@ -135,7 +135,7 @@ class LineGraph
         var gy = y - p.top;
 
         var idx = this.TransformCanvasToPos(gx, gy);
-        if (idx === null)
+        if (idx === null || isNaN(idx))
         {
             this.toolTip.hide();
             return;

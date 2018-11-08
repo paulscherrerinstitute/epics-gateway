@@ -21,9 +21,6 @@ namespace GWLogger.Backend.DataContext
         private BufferBlock<LogEntry> bufferedEntries = new BufferBlock<LogEntry>();
         private CancellationTokenSource cancelOperation = new CancellationTokenSource();
 
-        // will be used in reverse as we don't want to parallelize the read
-        private static object accessLock = new object();
-
         public delegate void DataFileEvent(DataFile file);
         public event DataFileEvent StoreHistory;
         public string StorageDirectory { get; }
@@ -158,7 +155,10 @@ namespace GWLogger.Backend.DataContext
         {
             if (!files.Exists(gatewayName))
                 return null;
-            return files[gatewayName].GetStats();
+            using (var l = files[gatewayName].Lock())
+            {
+                return files[gatewayName].GetStats();
+            }
         }
 
 
@@ -166,14 +166,20 @@ namespace GWLogger.Backend.DataContext
         {
             if (!files.Exists(gatewayName))
                 return null;
-            return files[gatewayName].GetStats(start, end);
+            using (var l = files[gatewayName].Lock())
+            {
+                return files[gatewayName].GetStats(start, end);
+            }
         }
 
         public List<GatewaySession> GetGatewaySessions(string gatewayName)
         {
             if (!files.Exists(gatewayName))
                 return null;
-            return files[gatewayName].GetGatewaySessions();
+            using (var l = files[gatewayName].Lock())
+            {
+                return files[gatewayName].GetGatewaySessions();
+            }
         }
 
         public void Save(LogEntry entry)
@@ -203,14 +209,28 @@ namespace GWLogger.Backend.DataContext
                 List<int> knownErrors;
                 lock (messageTypes)
                     knownErrors = errorMessages.ToList();
-                //foreach (var entry in entries.OrderBy(row => row.Gateway))
+
+                // Order entries per gateway then per order or receiving
+                var nextId = 0;
+                entries = entries.Select(row => new KeyValuePair<int, LogEntry>(nextId++, row))
+                    .OrderBy(row => row.Value.Gateway).ThenBy(row => row.Key)
+                    .Select(row => row.Value).ToList();
+
+                DataFile lastGateway = null;
+                
                 foreach (var entry in entries)
                 {
-                    lock (accessLock)
+                    if(lastGateway != null && lastGateway.Gateway != entry.Gateway)
+                        lastGateway.Release();
+                    if (lastGateway == null || lastGateway.Gateway != entry.Gateway)
                     {
-                        files[entry.Gateway].Save(entry, knownErrors.Contains(entry.MessageTypeId));
+                        lastGateway = files[entry.Gateway];
+                        lastGateway.Wait();
                     }
+                    lastGateway.Save(entry, knownErrors.Contains(entry.MessageTypeId));
                 }
+                if (lastGateway != null)
+                    lastGateway.Release();
             }
         }
 
@@ -297,7 +317,7 @@ namespace GWLogger.Backend.DataContext
         {
             if (!files.Exists(gatewayName))
                 return null;
-            lock (accessLock)
+            using (var l = files[gatewayName].Lock())
             {
                 return files[gatewayName].ReadLastLogs(nbEntries);
             }
@@ -316,7 +336,7 @@ namespace GWLogger.Backend.DataContext
             catch
             {
             }
-            lock (accessLock)
+            using (var l = files[gatewayName].Lock())
             {
                 return files[gatewayName].ReadLog(start, end, node, nbMaxEntries, messageTypes, startFile, offset, cancellationToken);
             }
@@ -324,7 +344,13 @@ namespace GWLogger.Backend.DataContext
 
         public List<DataFileStats> GetDataFileStats()
         {
-            return files.Select(row => row.GetLogsStats()).OrderBy(row => row.Name).ToList();
+            return files.Select(row =>
+            {
+                using (var l = row.Lock())
+                {
+                    return row.GetLogsStats();
+                }
+            }).OrderBy(row => row.Name).ToList();
         }
 
         public void CleanOlderThan(int nbDays = 10)

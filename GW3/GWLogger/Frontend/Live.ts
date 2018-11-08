@@ -80,7 +80,8 @@ class Live
             OnClick: (label: Date, value) =>
             {
                 Main.Path = "GW";
-                Main.CurrentTime = label;
+                var now = new Date();
+                Main.CurrentTime = new Date(label.getTime() + now.getTimezoneOffset() * 60000);
                 Main.StartDate = new Date(label.getTime() - 12 * 3600000);
                 Main.EndDate = new Date(label.getTime() + 12 * 3600000);
                 State.Set(true);
@@ -98,7 +99,8 @@ class Live
             OnClick: (label: Date, value) =>
             {
                 Main.Path = "GW";
-                Main.CurrentTime = label;
+                var now = new Date();
+                Main.CurrentTime = new Date(label.getTime() + now.getTimezoneOffset() * 60000);
                 Main.StartDate = new Date(label.getTime() - 12 * 3600000);
                 Main.EndDate = new Date(label.getTime() + 12 * 3600000);
                 State.Set(true);
@@ -116,9 +118,10 @@ class Live
             OnClick: (label: Date, value) =>
             {
                 Main.Path = "GW";
-                Main.CurrentTime = label;
-                Main.StartDate = new Date(label.getTime() - 12 * 3600000);
-                Main.EndDate = new Date(label.getTime() + 12 * 3600000);
+                var now = new Date();
+                Main.CurrentTime = new Date(label.getTime() + now.getTimezoneOffset() * 60000);
+                Main.StartDate = new Date(Main.CurrentTime.getTime() - 12 * 3600000);
+                Main.EndDate = new Date(Main.CurrentTime.getTime() + 12 * 3600000);
                 State.Set(true);
                 State.Pop(null);
             }
@@ -137,12 +140,27 @@ class Live
 
         $("#currentGW").html("Loading...");
         $("#gwInfos").html("");
-        $("#inventoryLink").attr("href", "https://inventory.psi.ch/#action=Part&system=" + encodeURIComponent(Main.CurrentGateway.toUpperCase()));
-        $("#logLink").attr("href", "/GW/" + Main.CurrentGateway);
+        /*$("#inventoryLink").attr("href", "https://inventory.psi.ch/#action=Part&system=" + encodeURIComponent(Main.CurrentGateway.toUpperCase()));
+        $("#logLink").attr("href", "/GW/" + Main.CurrentGateway);*/
 
         Live.cpuChart.SetDataSource({ Values: [] });
         Live.searchesChart.SetDataSource({ Values: [] });
         Live.pvsChart.SetDataSource({ Values: [] });
+    }
+
+    static JumpLogs()
+    {
+        Main.Path = "GW";
+        State.Set(true);
+        State.Pop(null);
+    }
+
+    static JumpList()
+    {
+        Main.Path = "Status";
+        Main.CurrentGateway = null;
+        State.Set(true);
+        State.Pop(null);
     }
 
     static Get(gwName: string): GatewayShortInformation
