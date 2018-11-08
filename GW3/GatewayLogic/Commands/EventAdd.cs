@@ -111,7 +111,6 @@ namespace GatewayLogic.Commands
                     connection.Gateway.MessageLogger.Write(client.Client.ToString(), Services.LogMessageType.EventAddResponseSkipForRead, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = monitor.ChannelInformation.ChannelName } });
                     continue;
                 }
-                var newPacket = (DataPacket)packet.Clone();
                 var conn = connection.Gateway.ClientConnection.Get(client.Client);
                 if (conn == null)
                 {
@@ -119,6 +118,12 @@ namespace GatewayLogic.Commands
                     monitor.RemoveClient(connection.Gateway, client.Client, client.Id);
                     continue;
                 }
+
+                // Events have been disabled
+                if (connection.Gateway.EventsOnHold.Contains(client.Client))
+                    continue;
+
+                var newPacket = (DataPacket)packet.Clone();
                 newPacket.Destination = conn.RemoteEndPoint;
                 newPacket.Parameter2 = client.Id;
                 conn.Send(newPacket);

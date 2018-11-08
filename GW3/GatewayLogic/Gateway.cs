@@ -1,12 +1,9 @@
 ﻿using GatewayLogic.Connections;
 using GatewayLogic.Services;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace GatewayLogic
@@ -31,9 +28,10 @@ namespace GatewayLogic
         internal TcpClientListener tcpSideB;
 
         internal ChannelInformation ChannelInformation { get; }
-        internal MonitorInformation MonitorInformation { get; private set; } = new MonitorInformation();
-        internal ReadNotifyInformation ReadNotifyInformation { get; private set; } = new ReadNotifyInformation();
-        internal WriteNotifyInformation WriteNotifyInformation { get; private set; } = new WriteNotifyInformation();
+        internal MonitorInformation MonitorInformation { get; } = new MonitorInformation();
+        internal ReadNotifyInformation ReadNotifyInformation { get; } = new ReadNotifyInformation();
+        internal WriteNotifyInformation WriteNotifyInformation { get; } = new WriteNotifyInformation();
+        internal EventsOnHold EventsOnHold { get; } = new EventsOnHold();
 
         internal SearchInformation SearchInformation { get; private set; }
         internal ClientConnection ClientConnection { get; }
@@ -65,12 +63,11 @@ namespace GatewayLogic
         private Dictionary<string, int> searchers = new Dictionary<string, int>();
 
 #if SAFE_LOCK
-        Thread checkDeadLock;
+        private Thread checkDeadLock;
 #endif
 
-        bool isDiposed = false;
-
-        Thread updaterThread;
+        private bool isDiposed = false;
+        private Thread updaterThread;
 
         public Gateway()
         {
@@ -104,7 +101,7 @@ namespace GatewayLogic
 #endif
         }
 
-        void Updater()
+        private void Updater()
         {
             int count = 0;
             while (!isDiposed)
@@ -224,25 +221,25 @@ namespace GatewayLogic
 
             /*ThreadPool.QueueUserWorkItem((obj) =>
             {*/
+            Thread.Sleep(Configuration.DelayStartup);
+            if (this.Configuration.ConfigurationType == GatewayLogic.Configuration.ConfigurationType.UNIDIRECTIONAL)
+            {
+                tcpSideA = new TcpClientListener(this, this.Configuration.SideAEndPoint);
+                tcpSideB = new TcpClientListener(this, this.Configuration.SideBEndPoint);
+
                 Thread.Sleep(Configuration.DelayStartup);
-                if (this.Configuration.ConfigurationType == GatewayLogic.Configuration.ConfigurationType.UNIDIRECTIONAL)
-                {
-                    tcpSideA = new TcpClientListener(this, this.Configuration.SideAEndPoint);
-                    tcpSideB = new TcpClientListener(this, this.Configuration.SideBEndPoint);
+                udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
+                udpSideB = new UdpResponseReceiver(this, this.Configuration.SideBEndPoint);
+            }
+            else
+            {
+                tcpSideA = new TcpClientListener(this, this.Configuration.SideAEndPoint);
+                tcpSideB = new TcpClientListener(this, this.Configuration.SideBEndPoint);
 
-                    Thread.Sleep(Configuration.DelayStartup);
-                    udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
-                    udpSideB = new UdpResponseReceiver(this, this.Configuration.SideBEndPoint);
-                }
-                else
-                {
-                    tcpSideA = new TcpClientListener(this, this.Configuration.SideAEndPoint);
-                    tcpSideB = new TcpClientListener(this, this.Configuration.SideBEndPoint);
-
-                    Thread.Sleep(Configuration.DelayStartup);
-                    udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
-                    udpSideB = new UdpReceiver(this, this.Configuration.SideBEndPoint);
-                }
+                Thread.Sleep(Configuration.DelayStartup);
+                udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
+                udpSideB = new UdpReceiver(this, this.Configuration.SideBEndPoint);
+            }
             //});
         }
 

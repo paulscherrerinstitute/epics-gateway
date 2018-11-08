@@ -74,6 +74,8 @@
     <Compile Include="Commands\Echo.cs" />
     <Compile Include="Commands\EventAdd.cs" />
     <Compile Include="Commands\EventCancel.cs" />
+    <Compile Include="Commands\EventOff.cs" />
+    <Compile Include="Commands\EventOn.cs" />
     <Compile Include="Commands\HostName.cs" />
     <Compile Include="Commands\ProtoError.cs" />
     <Compile Include="Commands\ReadNotify.cs" />
@@ -112,6 +114,7 @@
     <Compile Include="Connections\ClientConnection.cs" />
     <Compile Include="Services\Client.cs" />
     <Compile Include="Services\ClientId.cs" />
+    <Compile Include="Services\EventsOnHold.cs" />
     <Compile Include="Services\LogMessageConverter.cs" />
     <Compile Include="Services\LogMessageType.cs" />
     <Compile Include="Services\MessageDetail.cs" />
