@@ -69,6 +69,16 @@ String.prototype.capitalize = function ()
     return this.charAt(0).toUpperCase() + this.substr(1);
 }
 
+interface Date
+{
+    toUtc(): Date
+}
+
+Date.prototype.toUtc = function ()
+{
+    return new Date(this.getTime() + ((new Date()).getTimezoneOffset() * 60000));
+}
+
 /**
 * Transorms the string into a CSS valid ID
 */

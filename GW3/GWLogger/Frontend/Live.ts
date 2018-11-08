@@ -80,8 +80,7 @@ class Live
             OnClick: (label: Date, value) =>
             {
                 Main.Path = "GW";
-                var now = new Date();
-                Main.CurrentTime = new Date(label.getTime() + now.getTimezoneOffset() * 60000);
+                Main.CurrentTime = label.toUtc();
                 Main.StartDate = new Date(label.getTime() - 12 * 3600000);
                 Main.EndDate = new Date(label.getTime() + 12 * 3600000);
                 State.Set(true);
@@ -99,8 +98,7 @@ class Live
             OnClick: (label: Date, value) =>
             {
                 Main.Path = "GW";
-                var now = new Date();
-                Main.CurrentTime = new Date(label.getTime() + now.getTimezoneOffset() * 60000);
+                Main.CurrentTime = label.toUtc();
                 Main.StartDate = new Date(label.getTime() - 12 * 3600000);
                 Main.EndDate = new Date(label.getTime() + 12 * 3600000);
                 State.Set(true);
@@ -118,8 +116,7 @@ class Live
             OnClick: (label: Date, value) =>
             {
                 Main.Path = "GW";
-                var now = new Date();
-                Main.CurrentTime = new Date(label.getTime() + now.getTimezoneOffset() * 60000);
+                Main.CurrentTime = label.toUtc();
                 Main.StartDate = new Date(Main.CurrentTime.getTime() - 12 * 3600000);
                 Main.EndDate = new Date(Main.CurrentTime.getTime() + 12 * 3600000);
                 State.Set(true);

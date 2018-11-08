@@ -163,12 +163,32 @@ class Main
             success: function (msg)
             {
                 Main.Sessions = (msg.d ? (<object[]>msg.d).map(function (c) { return GatewaySession.CreateFromObject(c); }) : []);
-                $("#gatewaySessions").kendoGrid({
+                var grid = $("#gatewaySessions").kendoGrid({
                     columns: [{ title: "Start", field: "StartDate", format: "{0:MM/dd HH:mm:ss}" },
                     { title: "End", field: "EndDate", format: "{0:MM/dd HH:mm:ss}" },
                     { title: "NB&nbsp;Logs", field: "NbEntries", format: "{0:n0}", attributes: { style: "text-align:right;" } }],
-                    dataSource: { data: Main.Sessions }
-                });
+                    dataSource: { data: Main.Sessions },
+                    selectable: "single cell",
+                    change: (arg) =>
+                    {
+                        var selected = arg.sender.select()[0];
+                        var txt = selected.innerText;
+                        var content = selected.textContent;
+                        var uid = $(selected).parent().attr("data-uid");
+                        var row = grid.dataSource.getByUid(uid);
+                        if (row)
+                        {
+                            if (kendo.format(grid.columns[0].format, row['StartDate']) == txt)
+                                Main.CurrentTime = (<Date>row['StartDate']).toUtc();
+                            else if (kendo.format(grid.columns[0].format, row['EndDate']) == txt)
+                                Main.CurrentTime = (<Date>row['EndDate']).toUtc();
+                            Main.StartDate = new Date(Main.CurrentTime.getTime() - 12 * 3600000);
+                            Main.EndDate = new Date(Main.CurrentTime.getTime() + 12 * 3600000);
+                            State.Set(true);
+                            State.Pop(null);
+                        }
+                    }
+                }).data("kendoGrid");
             },
             error: function (msg, textStatus)
             {
