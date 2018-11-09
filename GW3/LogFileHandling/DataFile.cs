@@ -541,6 +541,59 @@ namespace GWLogger.Backend.DataContext
             return result;
         }
 
+        internal IEnumerable<LogEntry> GetLogs(DateTime start, DateTime end, Query.Statement.QueryNode query = null, List<int> messageTypes = null)
+        {
+            var currentDate = new DateTime(start.Year, start.Month, start.Day);
+            var firstLoop = true;
+            var firstItem = true;
+
+            while (currentDate < end)
+            {
+                var fileToUse = FileName(currentDate);
+
+                if (File.Exists(fileToUse))
+                {
+                    if (fileToUse != currentFile)
+                        SetFile(fileToUse);
+
+                    if (firstLoop && Index[IndexPosition(start)] != -1)
+                        Seek(Index[IndexPosition(start)]);
+                    else
+                        Seek(0);
+                    isAtEnd = false;
+                    var streamLength = DataReader.BaseStream.Length;
+                    while (DataReader.BaseStream.Position < streamLength)
+                    {
+                        var entry = ReadEntry(DataReader, start, streamLength);
+                        if (firstItem && query != null)
+                        {
+                            try
+                            {
+                                query.CheckCondition(Context, entry);
+                            }
+                            catch
+                            {
+                                query = null;
+                            }
+                        }
+
+                        if (entry != null && entry.EntryDate >= start && entry.EntryDate <= end && (query == null || query.CheckCondition(Context, entry)) && (messageTypes == null || messageTypes.Contains(entry.MessageTypeId)))
+                        {
+                            entry.Gateway = Gateway;
+                            entry.CurrentFile = Path.GetFileName(fileToUse).Replace(".data", "");
+                            yield return entry;
+                        }
+                        firstItem = false;
+                        if (entry != null && entry.EntryDate > end)
+                            yield break;
+                    }
+                }
+
+                currentDate = currentDate.AddDays(1);
+                firstLoop = false;
+            }
+        }
+
         internal List<LogEntry> ReadLastLogs(int nbEntries)
         {
             var files = new Queue<string>(Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.data").OrderByDescending(row => row));

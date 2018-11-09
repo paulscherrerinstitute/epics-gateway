@@ -346,6 +346,25 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
+        public IEnumerable<LogEntry> GetLogs(string gatewayName, DateTime start, DateTime end, string query, List<int> messageTypes = null)
+        {
+            if (!files.Exists(gatewayName))
+                return null;
+            Query.Statement.QueryNode node = null;
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(query))
+                    node = Query.QueryParser.Parse(query.Trim());
+            }
+            catch
+            {
+            }
+            using (var l = files[gatewayName].Lock())
+            {
+                return files[gatewayName].GetLogs(start, end, node, messageTypes);
+            }
+        }
+
         public List<DataFileStats> GetDataFileStats()
         {
             return files.Select(row =>
