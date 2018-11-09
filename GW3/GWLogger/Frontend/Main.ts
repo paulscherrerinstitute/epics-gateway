@@ -44,7 +44,9 @@ class Main
                     value: Main.CurrentGateway
                 });
 
-                if (Main.CurrentGateway)
+                if (Main.CurrentGateway && gateways.indexOf(Main.CurrentGateway) == -1 && Main.Path == "GW")
+                    Notifications.Alert("The selected gateway doesn't have logs.");
+                if (Main.CurrentGateway && gateways.indexOf(Main.CurrentGateway) != -1)
                 {
                     Main.GatewayChanged();
                 }

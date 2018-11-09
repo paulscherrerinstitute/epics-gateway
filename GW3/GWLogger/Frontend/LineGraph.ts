@@ -89,6 +89,8 @@ class LineGraph
     public MouseClick(evt: JQueryMouseEventObject)
     {
         var p = $("#" + this.elementContainer).position();
+        if (!this.dataSource || !this.dataSource.Values || this.dataSource.Values.length == 0)
+            return;
 
         var x = evt.pageX;
         var y = evt.pageY;
@@ -98,6 +100,8 @@ class LineGraph
 
         var idx = this.TransformCanvasToPos(gx, gy);
         if (idx === null)
+            return;
+        if (this.dataSource.Values.length <= idx)
             return;
         this.graphOptions.OnClick(this.dataSource.Values[idx].Label, this.dataSource.Values[idx].Value);
     }

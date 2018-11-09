@@ -22,7 +22,7 @@ namespace GWLogger.Live
             if (System.Diagnostics.Debugger.IsAttached)
                 Client.Configuration.SearchAddress += ";129.129.194.45:5055";
 
-                backgroundUpdater = new Thread(UpdateGateways);
+            backgroundUpdater = new Thread(UpdateGateways);
             backgroundUpdater.IsBackground = true;
             backgroundUpdater.Start();
 
@@ -103,9 +103,10 @@ namespace GWLogger.Live
                     var formatter = new BinaryFormatter();
                     formatter.Serialize(stream, historyDump);
                 }
-                if (File.Exists(Global.StorageDirectory + "\\history.dump"))
+                File.Copy(Global.StorageDirectory + "\\history.dump.new", Global.StorageDirectory + "\\history.dump", true);
+                /*if (File.Exists(Global.StorageDirectory + "\\history.dump"))
                     File.Delete(Global.StorageDirectory + "\\history.dump");
-                File.Move(Global.StorageDirectory + "\\history.dump.new", Global.StorageDirectory + "\\history.dump");
+                File.Move(Global.StorageDirectory + "\\history.dump.new", Global.StorageDirectory + "\\history.dump");*/
 
                 // Check if we have some gateways on errors
                 var emails = new Dictionary<string, string>();

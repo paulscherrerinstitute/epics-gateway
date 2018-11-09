@@ -8,7 +8,7 @@ namespace GWLogger
     {
         public static string StorageDirectory { get; } = System.Configuration.ConfigurationManager.AppSettings["storageDirectory"];
         public static Backend.DataContext.Context DataContext { get; } = new Backend.DataContext.Context(StorageDirectory);
-        public static Live.LiveInformation LiveInformation { get; } = new Live.LiveInformation();
+        public static Live.LiveInformation LiveInformation { get; private set; } 
 
         public static Inventory.DataAccessSoapClient Inventory { get; } = new Inventory.DataAccessSoapClient();
 
@@ -17,6 +17,8 @@ namespace GWLogger
         protected void Application_Start(object sender, EventArgs e)
         {
             Inventory.ServerName();
+
+            LiveInformation = new Live.LiveInformation();
 
             var doc = new HtmlAgilityPack.HtmlDocument();
             doc.LoadHtml(File.ReadAllText(Server.MapPath("/index.html")));

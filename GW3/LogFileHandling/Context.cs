@@ -164,6 +164,8 @@ namespace GWLogger.Backend.DataContext
 
         public GatewayStats GetStats(string gatewayName, DateTime start, DateTime end)
         {
+            if (start >= DateTime.UtcNow)
+                return null;
             if (!files.Exists(gatewayName))
                 return null;
             using (var l = files[gatewayName].Lock())
@@ -327,6 +329,8 @@ namespace GWLogger.Backend.DataContext
         {
             if (!files.Exists(gatewayName))
                 return null;
+            if (start >= DateTime.UtcNow)
+                return new List<LogEntry>();
             Query.Statement.QueryNode node = null;
             try
             {
