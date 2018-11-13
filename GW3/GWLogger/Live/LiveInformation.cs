@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace GWLogger.Live
 {
@@ -22,37 +23,44 @@ namespace GWLogger.Live
             if (System.Diagnostics.Debugger.IsAttached)
                 Client.Configuration.SearchAddress += ";129.129.194.45:5055";
 
+            Thread taskTread = null;
+            var task = Task.Run(() =>
+             {
+                 taskTread = Thread.CurrentThread;
+                 if (File.Exists(Global.StorageDirectory + "\\history.dump"))
+                 {
+                     try
+                     {
+                         RecoverHistory(Global.StorageDirectory + "\\history.dump");
+                     }
+                     catch
+                     {
+                         try
+                         {
+                             RecoverHistory(Global.StorageDirectory + "\\history.dump.new");
+                         }
+                         catch
+                         {
+                         }
+                     }
+                 }
+                 else if (File.Exists(Global.StorageDirectory + "\\history.dump.new"))
+                 {
+                     try
+                     {
+                         RecoverHistory(Global.StorageDirectory + "\\history.dump.new");
+                     }
+                     catch
+                     {
+                     }
+                 }
+             });
+            if (!task.Wait(2000))
+                taskTread.Abort();
+
             backgroundUpdater = new Thread(UpdateGateways);
             backgroundUpdater.IsBackground = true;
             backgroundUpdater.Start();
-
-            if (File.Exists(Global.StorageDirectory + "\\history.dump"))
-            {
-                try
-                {
-                    RecoverHistory(Global.StorageDirectory + "\\history.dump");
-                }
-                catch
-                {
-                    try
-                    {
-                        RecoverHistory(Global.StorageDirectory + "\\history.dump.new");
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
-            else if (File.Exists(Global.StorageDirectory + "\\history.dump.new"))
-            {
-                try
-                {
-                    RecoverHistory(Global.StorageDirectory + "\\history.dump.new");
-                }
-                catch
-                {
-                }
-            }
         }
 
         private void RecoverHistory(string filename)
@@ -97,13 +105,20 @@ namespace GWLogger.Live
                     historyDump = Gateways.ToDictionary(key => key.Name, val => val.GetHistory());
                 }
 
-                // Store historyDump
-                using (var stream = File.OpenWrite(Global.StorageDirectory + "\\history.dump.new"))
+
+                try
                 {
-                    var formatter = new BinaryFormatter();
-                    formatter.Serialize(stream, historyDump);
+                    // Store historyDump
+                    using (var stream = File.OpenWrite(Global.StorageDirectory + "\\history.dump.new"))
+                    {
+                        var formatter = new BinaryFormatter();
+                        formatter.Serialize(stream, historyDump);
+                    }
+                    File.Copy(Global.StorageDirectory + "\\history.dump.new", Global.StorageDirectory + "\\history.dump", true);
                 }
-                File.Copy(Global.StorageDirectory + "\\history.dump.new", Global.StorageDirectory + "\\history.dump", true);
+                catch
+                {
+                }
                 /*if (File.Exists(Global.StorageDirectory + "\\history.dump"))
                     File.Delete(Global.StorageDirectory + "\\history.dump");
                 File.Move(Global.StorageDirectory + "\\history.dump.new", Global.StorageDirectory + "\\history.dump");*/

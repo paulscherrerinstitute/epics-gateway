@@ -732,6 +732,14 @@ class Main
                 document.location.replace(currentUrl.toLowerCase().replace("http://caesar", "https://caesar"));
             return;
         }
+        if (currentUrl.toLowerCase().startsWith("http://gfaepicslog"))
+        {
+            if (currentUrl.toLowerCase().startsWith("http://gfaepicslog/"))
+                document.location.replace(currentUrl.toLowerCase().replace("http://gfaepicslog/", "https://caesar.psi.ch/"));
+            else
+                document.location.replace(currentUrl.toLowerCase().replace("http://gfaepicslog", "https://caesar"));
+            return;
+        }
 
         Live.InitShortDisplay();
         Main.QueriesHelp();
