@@ -2,8 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -65,11 +65,10 @@ namespace GWLogger.Live
 
         private void RecoverHistory(string filename)
         {
-            using (var stream = File.OpenRead(filename))
+            using (var stream = new StreamReader(new GZipStream(File.OpenRead(filename), CompressionMode.Decompress)))
             {
-                var formatter = new BinaryFormatter();
-                formatter.AssemblyFormat = System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple;
-                historicData = (Dictionary<string, GatewayHistory>)formatter.Deserialize(stream);
+                var serializer = Newtonsoft.Json.JsonSerializer.Create();
+                historicData = (Dictionary<string, GatewayHistory>)serializer.Deserialize(stream, typeof(Dictionary<string, GatewayHistory>));
             }
         }
 
@@ -110,19 +109,16 @@ namespace GWLogger.Live
                 try
                 {
                     // Store historyDump
-                    using (var stream = File.OpenWrite(Global.StorageDirectory + "\\history.dump.new"))
+                    using (var stream = new StreamWriter(new GZipStream(File.OpenWrite(Global.StorageDirectory + "\\history.dump.new"), CompressionLevel.Optimal)))
                     {
-                        var formatter = new BinaryFormatter();
-                        formatter.Serialize(stream, historyDump);
+                        var serializer = Newtonsoft.Json.JsonSerializer.Create();
+                        serializer.Serialize(stream, historyDump);
                     }
                     File.Copy(Global.StorageDirectory + "\\history.dump.new", Global.StorageDirectory + "\\history.dump", true);
                 }
                 catch
                 {
                 }
-                /*if (File.Exists(Global.StorageDirectory + "\\history.dump"))
-                    File.Delete(Global.StorageDirectory + "\\history.dump");
-                File.Move(Global.StorageDirectory + "\\history.dump.new", Global.StorageDirectory + "\\history.dump");*/
 
                 // Check if we have some gateways on errors
                 var emails = new Dictionary<string, string>();
