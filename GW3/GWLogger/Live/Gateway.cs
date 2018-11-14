@@ -75,6 +75,9 @@ namespace GWLogger.Live
 
         internal void RecoverFromHistory(GatewayHistory history)
         {
+            // We have way too many points to recover => useless.
+            if ((DateTime.UtcNow - history.cpuHistory.Last().Date).TotalSeconds / 5 > NbHistoricPoint)
+                return;
             lock (cpuHistory)
             {
                 cpuHistory.Clear();
@@ -92,7 +95,7 @@ namespace GWLogger.Live
                 searchHistory.Clear();
                 searchHistory.AddRange(history.searchHistory);
                 while (searchHistory.Any() && (DateTime.UtcNow - searchHistory.Last().Date).TotalSeconds > 5)
-                { 
+                {
                     searchHistory.Add(new HistoricData { Value = null, Date = searchHistory.Last().Date.AddSeconds(5) });
                     while (searchHistory.Count > NbHistoricPoint)
                         searchHistory.RemoveAt(0);
@@ -104,7 +107,7 @@ namespace GWLogger.Live
                 pvsHistory.Clear();
                 pvsHistory.AddRange(history.pvsHistory);
                 while (pvsHistory.Any() && (DateTime.UtcNow - pvsHistory.Last().Date).TotalSeconds > 5)
-                { 
+                {
                     pvsHistory.Add(new HistoricData { Value = null, Date = pvsHistory.Last().Date.AddSeconds(5) });
                     while (pvsHistory.Count > NbHistoricPoint)
                         pvsHistory.RemoveAt(0);
@@ -116,7 +119,7 @@ namespace GWLogger.Live
                 clientsHistory.Clear();
                 clientsHistory.AddRange(history.clientsHistory);
                 while (clientsHistory.Any() && (DateTime.UtcNow - clientsHistory.Last().Date).TotalSeconds > 5)
-                { 
+                {
                     clientsHistory.Add(new HistoricData { Value = null, Date = clientsHistory.Last().Date.AddSeconds(5) });
                     while (clientsHistory.Count > NbHistoricPoint)
                         clientsHistory.RemoveAt(0);
@@ -128,7 +131,7 @@ namespace GWLogger.Live
                 serversHistory.Clear();
                 serversHistory.AddRange(history.serversHistory);
                 while (serversHistory.Any() && (DateTime.UtcNow - serversHistory.Last().Date).TotalSeconds > 5)
-                { 
+                {
                     serversHistory.Add(new HistoricData { Value = null, Date = serversHistory.Last().Date.AddSeconds(5) });
                     while (serversHistory.Count > NbHistoricPoint)
                         serversHistory.RemoveAt(0);
@@ -140,7 +143,7 @@ namespace GWLogger.Live
                 msgSecHistory.Clear();
                 msgSecHistory.AddRange(history.msgSecHistory);
                 while (msgSecHistory.Any() && (DateTime.UtcNow - msgSecHistory.Last().Date).TotalSeconds > 5)
-                { 
+                {
                     msgSecHistory.Add(new HistoricData { Value = null, Date = msgSecHistory.Last().Date.AddSeconds(5) });
                     while (msgSecHistory.Count > NbHistoricPoint)
                         msgSecHistory.RemoveAt(0);

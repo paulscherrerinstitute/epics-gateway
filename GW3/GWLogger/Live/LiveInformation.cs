@@ -68,6 +68,7 @@ namespace GWLogger.Live
             using (var stream = File.OpenRead(filename))
             {
                 var formatter = new BinaryFormatter();
+                formatter.AssemblyFormat = System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple;
                 historicData = (Dictionary<string, GatewayHistory>)formatter.Deserialize(stream);
             }
         }
