@@ -27,28 +27,28 @@ namespace GWLogger.Live
             var task = Task.Run(() =>
              {
                  taskTread = Thread.CurrentThread;
-                 if (File.Exists(Global.StorageDirectory + "\\history.dump"))
+                 if (File.Exists(Global.HistoryStorage + "\\history.dump"))
                  {
                      try
                      {
-                         RecoverHistory(Global.StorageDirectory + "\\history.dump");
+                         RecoverHistory(Global.HistoryStorage + "\\history.dump");
                      }
                      catch
                      {
                          try
                          {
-                             RecoverHistory(Global.StorageDirectory + "\\history.dump.new");
+                             RecoverHistory(Global.HistoryStorage + "\\history.dump.new");
                          }
                          catch
                          {
                          }
                      }
                  }
-                 else if (File.Exists(Global.StorageDirectory + "\\history.dump.new"))
+                 else if (File.Exists(Global.HistoryStorage + "\\history.dump.new"))
                  {
                      try
                      {
-                         RecoverHistory(Global.StorageDirectory + "\\history.dump.new");
+                         RecoverHistory(Global.HistoryStorage + "\\history.dump.new");
                      }
                      catch
                      {
@@ -93,6 +93,7 @@ namespace GWLogger.Live
         private void UpdateGateways()
         {
             var onErrors = new List<string>();
+            var sleepCounter = 0;
             while (true)
             {
                 Thread.Sleep(5000);
@@ -106,19 +107,25 @@ namespace GWLogger.Live
                 }
 
 
-                try
+                if (sleepCounter > 4)
                 {
-                    // Store historyDump
-                    using (var stream = new StreamWriter(new GZipStream(File.OpenWrite(Global.StorageDirectory + "\\history.dump.new"), CompressionLevel.Optimal)))
+                    try
                     {
-                        var serializer = Newtonsoft.Json.JsonSerializer.Create();
-                        serializer.Serialize(stream, historyDump);
+                        // Store historyDump
+                        using (var stream = new StreamWriter(new GZipStream(File.OpenWrite(Global.HistoryStorage + "\\history.dump.new"), CompressionLevel.Optimal)))
+                        {
+                            var serializer = Newtonsoft.Json.JsonSerializer.Create();
+                            serializer.Serialize(stream, historyDump);
+                        }
+                        File.Copy(Global.HistoryStorage + "\\history.dump.new", Global.HistoryStorage + "\\history.dump", true);
                     }
-                    File.Copy(Global.StorageDirectory + "\\history.dump.new", Global.StorageDirectory + "\\history.dump", true);
+                    catch
+                    {
+                    }
+                    sleepCounter = 0;
                 }
-                catch
-                {
-                }
+                else
+                    sleepCounter++;
 
                 // Check if we have some gateways on errors
                 var emails = new Dictionary<string, string>();
