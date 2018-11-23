@@ -93,7 +93,7 @@ namespace GWLogger.Live
         private void UpdateGateways()
         {
             var onErrors = new List<string>();
-            var sleepCounter = 0;
+            //var sleepCounter = 0;
             while (true)
             {
                 Thread.Sleep(5000);
@@ -107,8 +107,8 @@ namespace GWLogger.Live
                 }
 
 
-                if (sleepCounter > 4)
-                {
+                /*if (sleepCounter > 4)
+                {*/
                     try
                     {
                         // Store historyDump
@@ -122,10 +122,10 @@ namespace GWLogger.Live
                     catch
                     {
                     }
-                    sleepCounter = 0;
+                /*    sleepCounter = 0;
                 }
                 else
-                    sleepCounter++;
+                    sleepCounter++;*/
 
                 // Check if we have some gateways on errors
                 var emails = new Dictionary<string, string>();

@@ -570,8 +570,19 @@ class Main
         Live.RefreshShort();
     }
 
+    static CheckTouch(): boolean
+    {
+        return (('ontouchstart' in window)
+            || ((<any>navigator).MaxTouchPoints > 0)
+            || ((<any>navigator).msMaxTouchPoints > 0));
+    }
+
     static Resize(): void
     {
+        if (Math.abs(window.innerHeight - screen.height) < 10 && Main.CheckTouch())
+            $("#fullScreenMode").attr("media", "");
+        else
+            $("#fullScreenMode").attr("media", "max-width: 1px");
         StatsBarGraph.DrawStats();
         $(".k-grid").each((idx, elem) =>
         {
