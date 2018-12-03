@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace GWLogger.Backend.DataContext.Query
 {
     [Serializable]
-    internal class UnknownConditionException : Exception
+    public class UnknownConditionException : Exception
     {
         public UnknownConditionException()
         {

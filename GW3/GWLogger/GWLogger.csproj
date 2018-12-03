@@ -579,10 +579,23 @@
     <TypeScriptCompile Include="Frontend\Map.ts" />
     <TypeScriptCompile Include="Frontend\Notifications.ts" />
     <TypeScriptCompile Include="Frontend\Patterns.ts" />
+    <TypeScriptCompile Include="Frontend\Query\QueryParser.ts" />
+    <TypeScriptCompile Include="Frontend\Query\Tokenizer.ts" />
+    <TypeScriptCompile Include="Frontend\Query\Tokens\Token.ts" />
+    <TypeScriptCompile Include="Frontend\Query\Tokens\TokenAnd.ts" />
+    <TypeScriptCompile Include="Frontend\Query\Tokens\TokenCloseParenthesis.ts" />
+    <TypeScriptCompile Include="Frontend\Query\Tokens\TokenCompare.ts" />
+    <TypeScriptCompile Include="Frontend\Query\Tokens\TokenEnd.ts" />
+    <TypeScriptCompile Include="Frontend\Query\Tokens\TokenName.ts" />
+    <TypeScriptCompile Include="Frontend\Query\Tokens\TokenNumber.ts" />
+    <TypeScriptCompile Include="Frontend\Query\Tokens\TokenOpenParenthesis.ts" />
+    <TypeScriptCompile Include="Frontend\Query\Tokens\TokenOr.ts" />
+    <TypeScriptCompile Include="Frontend\Query\Tokens\TokenString.ts" />
     <TypeScriptCompile Include="Frontend\StatsBarGraph.ts" />
     <TypeScriptCompile Include="Frontend\Query.ts" />
     <TypeScriptCompile Include="Frontend\State.ts" />
     <TypeScriptCompile Include="Frontend\Subscription.ts" />
+    <TypeScriptCompile Include="Frontend\SuggestionInterface.ts" />
     <TypeScriptCompile Include="Frontend\Utils.ts" />
     <TypeScriptCompile Include="Frontend\WrongChannels.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
@@ -604,6 +617,7 @@
     <WCFMetadataStorage Include="Connected Services\Inventory.Controller\" />
     <WCFMetadataStorage Include="Connected Services\Inventory\" />
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

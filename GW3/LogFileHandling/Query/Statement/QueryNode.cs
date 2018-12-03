@@ -1,4 +1,5 @@
 ﻿using GWLogger.Backend.DataContext.Query.Tokens;
+using System;
 
 namespace GWLogger.Backend.DataContext.Query.Statement
 {
@@ -6,70 +7,96 @@ namespace GWLogger.Backend.DataContext.Query.Statement
     {
         internal static QueryNode Get(QueryParser parser)
         {
-            return And(parser);
-        }
-
-        private static QueryNode And(QueryParser parser)
-        {
-            var node = Or(parser);
-            if (!parser.Tokens.HasToken())
-                return node;
-            if (parser.Tokens.Peek() is TokenAnd)
-            {
-                parser.Tokens.Next();
-                return new AndNode(node, Get(parser));
-            }
-            return node;
+            var root = Or(parser);
+            if (parser.Tokens.HasToken())
+                throw new SpareTokenException();
+            return root;
         }
 
         private static QueryNode Or(QueryParser parser)
         {
-            var node = Condition(parser);
-            if (!parser.Tokens.HasToken())
-                return node;
-            if (parser.Tokens.Peek() is TokenOr)
+            var left = And(parser);
+            while (true)
             {
-                parser.Tokens.Next();
-                return new OrNode(node, Get(parser));
+                if (parser.Tokens.HasToken() && parser.Tokens.Peek() is TokenOr)
+                {
+                    parser.Tokens.Next();
+                    var right = And(parser);
+                    left = new BinaryNode(left, right, (val1, val2) => val1 || val2);
+                }
+                else
+                {
+                    return left;
+                }
             }
-            return node;
+        }
+
+        private static QueryNode And(QueryParser parser)
+        {
+            var left = Condition(parser);
+            while (true)
+            {
+                if (parser.Tokens.HasToken() && parser.Tokens.Peek() is TokenAnd)
+                {
+                    parser.Tokens.Next();
+                    var right = Condition(parser);
+                    left = new BinaryNode(left, right, (val1, val2) => val1 && val2);
+                }
+                else
+                {
+                    return left;
+                }
+            }
         }
 
         private static QueryNode Condition(QueryParser parser)
         {
-            var a = Base(parser);
-            if (!parser.Tokens.HasToken() || !(parser.Tokens.Peek() is TokenCompare))
-                throw new MissingTokenException("Was expecting a condition check.");
-            var condition = parser.Tokens.Next();
-            if (!parser.Tokens.HasToken())
-                throw new MissingTokenException("Was expecting a second value to compare to.");
-            var b = Base(parser);
-            return new ConditionNode(a, condition.Value, b);
+            var left = Base(parser);
+            while (true)
+            {
+                if (parser.Tokens.HasToken() && parser.Tokens.Peek() is TokenCompare)
+                {
+                    var condition = parser.Tokens.Next().Value;
+                    var right = Base(parser);
+                    left = new ConditionNode(left, condition, right);
+                }
+                else
+                {
+                    return left;
+                }
+            }
         }
 
         private static QueryNode Base(QueryParser parser)
         {
-            switch (parser.Tokens.Peek())
+            try
             {
-                case TokenOpenParenthesis tOpen:
-                    var node = Get(parser);
-                    if (!(parser.Tokens.Peek() is TokenCloseParenthesis))
-                        throw new MissingTokenException("Was expecting a ')'");
-                    parser.Tokens.Next();
-                    return node;
-                case TokenString tokenString:
-                    return new ValueNode(parser.Tokens.Next());
-                case TokenNumber tokenValue:
-                    return new ValueNode(parser.Tokens.Next());
-                case TokenName tokenName:
-                    return new VariableNode(parser.Tokens.Next());
-                default:
-                    throw new InvalidTokenException("Wasn't expecting a " + parser.Tokens.Peek().GetType().Name + " here.");
+                switch (parser.Tokens.Peek())
+                {
+                    case TokenOpenParenthesis tOpen:
+                        parser.Tokens.Next();
+                        var node = Or(parser);
+                        if (!(parser.Tokens.Next() is TokenCloseParenthesis))
+                            throw new MissingTokenException("Was expecting a ')'");
+                        return node;
+                    case TokenString tokenString:
+                        return new ValueNode(parser.Tokens.Next());
+                    case TokenNumber tokenValue:
+                        return new ValueNode(parser.Tokens.Next());
+                    case TokenName tokenName:
+                        return new VariableNode(parser.Tokens.Next());
+                    default:
+                        throw new InvalidTokenException("Wasn't expecting a " + parser.Tokens.Peek().GetType().Name + " here.");
+                }
+            }
+            catch(ArgumentOutOfRangeException)
+            {
+                throw new MissingTokenException("There's missing something");
             }
         }
 
-        internal abstract bool CheckCondition(Context context, LogEntry entry);
+        public abstract bool CheckCondition(Context context, LogEntry entry);
 
-        internal abstract string Value(Context context, LogEntry entry);
+        public abstract string Value(Context context, LogEntry entry);
     }
 }

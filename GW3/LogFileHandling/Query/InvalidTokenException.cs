@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace GWLogger.Backend.DataContext.Query
 {
     [Serializable]
-    internal class InvalidTokenException : Exception
+    public class InvalidTokenException : Exception
     {
         public InvalidTokenException()
         {
