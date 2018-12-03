@@ -570,8 +570,19 @@ class Main
         Live.RefreshShort();
     }
 
+    static CheckTouch(): boolean
+    {
+        return (('ontouchstart' in window)
+            || ((<any>navigator).MaxTouchPoints > 0)
+            || ((<any>navigator).msMaxTouchPoints > 0));
+    }
+
     static Resize(): void
     {
+        if (Math.abs(window.innerHeight - screen.height) < 10 && Main.CheckTouch())
+            $("#fullScreenMode").attr("media", "");
+        else
+            $("#fullScreenMode").attr("media", "max-width: 1px");
         StatsBarGraph.DrawStats();
         $(".k-grid").each((idx, elem) =>
         {
@@ -729,6 +740,14 @@ class Main
                 document.location.replace(currentUrl.toLowerCase().replace("http://caesar/", "https://caesar.psi.ch/"));
             else
                 document.location.replace(currentUrl.toLowerCase().replace("http://caesar", "https://caesar"));
+            return;
+        }
+        if (currentUrl.toLowerCase().startsWith("http://gfaepicslog"))
+        {
+            if (currentUrl.toLowerCase().startsWith("http://gfaepicslog/"))
+                document.location.replace(currentUrl.toLowerCase().replace("http://gfaepicslog/", "https://caesar.psi.ch/"));
+            else
+                document.location.replace(currentUrl.toLowerCase().replace("http://gfaepicslog", "https://caesar"));
             return;
         }
 

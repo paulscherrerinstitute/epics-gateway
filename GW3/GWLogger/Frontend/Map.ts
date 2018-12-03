@@ -40,11 +40,6 @@ class Map
         Map.AddGateway(700, 530, "SLS-CAGW02");
         Map.AddGateway(700, 450, "SLS-ARCH-CAGW02");
 
-
-        /*var slsBeamlines = ["X01DC-CAGW02", "X02DA-CAGW02", "X03DA-CAGW02", "X03MA-CAGW02", "X04DB-CAGW02", "X04SA-CAGW02",
-            "X05DA-CAGW02", "X05LA-CAGW02", "X06DA-CAGW02", "X06MX-CAGW", "X06SA-CAGW02", "X07DA-CAGW02", "X07MA-CAGW02",
-            "X09LA-CAGW02", "X09LB-CAGW02", "X10DA-CAGW02", "X10SA-CAGW02", "X11MA-CAGW02", "X12SA-CAGW02"];*/
-
         var slsBeamlines: string[] = [];
         $(".GWDisplay").each((idx, elem) =>
         {
@@ -122,25 +117,36 @@ class Map
             position: "center"
         }).data("kendoTooltip");
         t['_initPopup'](); // With the "position":"center" property avoid to add an "arrow"
+
+        Map.AddGateway(350, 400, "CAESAR");
     }
 
     static GetTooltipText(e: kendo.ui.TooltipEvent): string
     {
-        var live = Live.Get(Map.HoverGateway);
-        if (!live)
-            return;
-        var html = "<b>Gateway " + Map.HoverGateway + "</b><br>";
-        html += "<table style='text-align: left;'>";
-        html += "<tr><td>CPU</td><td>" + Math.round(live.CPU) + "%</td></tr>";
-        html += "<tr><td>Searches</td><td>" + live.Searches + " / Sec</td></tr>";
-        html += "<tr><td>Running Time</td><td>" + (live.RunningTime ? live.RunningTime.substr(0, live.RunningTime.lastIndexOf('.')).replace(".", " day(s) ") : "&nbsp;") + "</td></tr>";
-        html += "<tr><td>State</td><td>" + GatewayStates[live.State] + "</td></tr>";
-        html += "<tr><td>Build</td><td>" + live.Build + "</td></tr>";
-        html += "<tr><td>Version</td><td>" + live.Version + "</td></tr>";
-        html += "<tr><td>Direction</td><td>" + live.Direction + "</td></tr>";
-        html += "</table>";
-        html += "-- Click to view details --";
-        return html;
+        if (Map.HoverGateway == "CAESAR")
+        {
+            var html = "<b>CAESAR Server</b><br>";
+            return html;
+        }
+        else
+        {
+            var live = Live.Get(Map.HoverGateway);
+            if (!live)
+                return;
+
+            var html = "<b>Gateway " + Map.HoverGateway + "</b><br>";
+            html += "<table style='text-align: left;'>";
+            html += "<tr><td>CPU</td><td>" + Math.round(live.CPU) + "%</td></tr>";
+            html += "<tr><td>Searches</td><td>" + live.Searches + " / Sec</td></tr>";
+            html += "<tr><td>Running Time</td><td>" + (live.RunningTime ? live.RunningTime.substr(0, live.RunningTime.lastIndexOf('.')).replace(".", " day(s) ") : "&nbsp;") + "</td></tr>";
+            html += "<tr><td>State</td><td>" + GatewayStates[live.State] + "</td></tr>";
+            html += "<tr><td>Build</td><td>" + live.Build + "</td></tr>";
+            html += "<tr><td>Version</td><td>" + live.Version + "</td></tr>";
+            html += "<tr><td>Direction</td><td>" + live.Direction + "</td></tr>";
+            html += "</table>";
+            html += "-- Click to view details --";
+            return html;
+        }
     }
 
     static AddNetwork(x: number, y: number, label: string, netSize: number = 150, fontSize: number = 30)
@@ -155,17 +161,8 @@ class Map
     static AddGateway(x: number, y: number, label: string, width: number = 200, fontSize: number = 18)
     {
         var h = 12 + fontSize;
-        Map.gateways.push({ X: x, Y: y, Name: label, Width: width, Height: 12 + fontSize });
-        var elem = Map.Add("rect", { id: "svg_gw_" + label, fill: "white", stroke_width: 2, stroke: "black", x: x, y: y, width: width, height: h, cursor: "pointer" });
-        elem.onclick = (e) =>
-        {
-            Main.CurrentGateway = label.toLowerCase();
-            Main.Path = "Status";
-            State.Set(true);
-            State.Pop(null);
 
-        };
-        elem.onmouseover = (e) =>
+        var overFunction = (e) =>
         {
             var j = $("#svg_gw_" + label);
             j.attr("stroke", "#597db7");
@@ -190,8 +187,9 @@ class Map
             {
                 $("#mapView_tt_active").parent().css({ left: (x + p.left - 90 + width / 2 - $("#mapView").scrollLeft()) + "px", top: t + "px" });
             }, 10);
-        }
-        elem.onmouseout = (e) =>
+        };
+
+        var outFunction = (e) =>
         {
             $("#svg_gw_" + label).attr("stroke", "black");
             $("#svg_gw_" + label).attr("stroke-width", "2");
@@ -204,29 +202,58 @@ class Map
                     Map.toolTip = null;
                 }
             }, 10);
+        };
+
+        var elem: SVGElement;
+        if (label == "CAESAR")
+        {
+            elem = Map.Add("rect", { x: x, y: y, rx: 5, ry: 5, width: width, height: 12 + fontSize, stroke_width: 2, stroke: "#E0E0E0", fill: "white" });
+            elem.onmouseover = overFunction;
+            elem.onmouseout = outFunction;
+            elem = Map.Add("rect", { x: x + 3.5, y: y + 3.5, rx: 3, ry: 3, width: width - 6, height: 6 + fontSize, stroke_width: 1, stroke: "#E0E0E0", fill: "white" });
+            elem.onmouseover = overFunction;
+            elem.onmouseout = outFunction;
+            elem = Map.Add("text", { x: x + width / 2, y: 416, alignment_baseline: "central", font_family: "Sans-serif", font_size: 16, style: "text-anchor: middle;", font_weight: "bold", fill: "black" }, "CAESAR");
+            elem.onmouseover = overFunction;
+            elem.onmouseout = outFunction;
         }
+        else
+        {
+            Map.gateways.push({ X: x, Y: y, Name: label, Width: width, Height: 12 + fontSize });
+            elem = Map.Add("rect", { id: "svg_gw_" + label, fill: "white", stroke_width: 2, stroke: "black", x: x, y: y, width: width, height: h, cursor: "pointer" });
+            elem.onclick = (e) =>
+            {
+                Main.CurrentGateway = label.toLowerCase();
+                Main.Path = "Status";
+                State.Set(true);
+                State.Pop(null);
 
-        var e2 = Map.Add("text", { x: x + width / 2, y: y + (12 + fontSize) / 2, alignment_baseline: "central", font_family: "Sans-serif", font_size: fontSize, cursor: "pointer", style: "text-anchor: middle;", font_weight: "bold", fill: "black" }, label);
-        e2.onclick = elem.onclick;
-        e2.onmouseover = elem.onmouseover;
-        e2.onmouseout = elem.onmouseout;
+            };
+            elem.onmouseover = overFunction;
+            elem.onmouseout = outFunction;
 
-        var points = [4, 0, 8, 6, 0, 6, 0, 0, 8, 0, 4, 6];
-        var ps = "";
-        for (var i = 0; i < 3; i++)
-            ps += (i != 0 ? " " : "") + (points[i * 2 + 6] + x + 3) + "," + (points[i * 2 + 1 + 6] + y + h / 2 + 1);
-        e2 = Map.Add("polygon", { points: ps, fill: "#00E000", stroke: "black", stroke_width: 0.5 });
-        e2.onclick = elem.onclick;
-        e2.onmouseover = elem.onmouseover;
-        e2.onmouseout = elem.onmouseout;
+            var e2 = Map.Add("text", { x: x + width / 2, y: y + (12 + fontSize) / 2, alignment_baseline: "central", font_family: "Sans-serif", font_size: fontSize, cursor: "pointer", style: "text-anchor: middle;", font_weight: "bold", fill: "black" }, label);
+            e2.onclick = elem.onclick;
+            e2.onmouseover = elem.onmouseover;
+            e2.onmouseout = elem.onmouseout;
 
-        ps = "";
-        for (var i = 0; i < 3; i++)
-            ps += (i != 0 ? " " : "") + (points[i * 2] + x + 3) + "," + (points[i * 2 + 1] + y + h / 2 - 8);
-        e2 = Map.Add("polygon", { points: ps, fill: "#E00000", stroke: "black", stroke_width: 0.5, id: "svg_gw_" + label + "_dir" });
-        e2.onclick = elem.onclick;
-        e2.onmouseover = elem.onmouseover;
-        e2.onmouseout = elem.onmouseout;
+            var points = [4, 0, 8, 6, 0, 6, 0, 0, 8, 0, 4, 6];
+            var ps = "";
+            for (var i = 0; i < 3; i++)
+                ps += (i != 0 ? " " : "") + (points[i * 2 + 6] + x + 3) + "," + (points[i * 2 + 1 + 6] + y + h / 2 + 1);
+            e2 = Map.Add("polygon", { points: ps, fill: "#00E000", stroke: "black", stroke_width: 0.5 });
+            e2.onclick = elem.onclick;
+            e2.onmouseover = elem.onmouseover;
+            e2.onmouseout = elem.onmouseout;
+
+            ps = "";
+            for (var i = 0; i < 3; i++)
+                ps += (i != 0 ? " " : "") + (points[i * 2] + x + 3) + "," + (points[i * 2 + 1] + y + h / 2 - 8);
+            e2 = Map.Add("polygon", { points: ps, fill: "#E00000", stroke: "black", stroke_width: 0.5, id: "svg_gw_" + label + "_dir" });
+            e2.onclick = elem.onclick;
+            e2.onmouseover = elem.onmouseover;
+            e2.onmouseout = elem.onmouseout;
+        }
     }
 
     static SetGatewayState(label: string, state: number, direction: string)

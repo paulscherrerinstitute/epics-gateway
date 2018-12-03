@@ -37,7 +37,7 @@ namespace GatewayLogic
         /// </summary>
         public bool ReverseAnswer = false;
 
-        bool? extendedMessage;
+        //bool? extendedMessage;
         /// <summary>
         /// Checks if it's an extended message or not.
         /// To check we look at the payload site as well as the datacount.
@@ -46,9 +46,10 @@ namespace GatewayLogic
         {
             get
             {
-                if (!extendedMessage.HasValue)
+                /*if (!extendedMessage.HasValue)
                     extendedMessage = (GetUInt16(2) == 0xFFFF && GetUInt16(6) == 0x0000);
-                return extendedMessage.Value;
+                return extendedMessage.Value;*/
+                return (GetUInt16(2) == 0xFFFF && GetUInt16(6) == 0x0000);
             }
         }
 

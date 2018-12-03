@@ -15,6 +15,20 @@ namespace GWTest
     {
         private static void Main(string[] args)
         {
+            var gateway = new Gateway();
+            gateway.Configuration.GatewayName = "MINIGW";
+            //gateway.Configuration.SideA = "129.129.130.45:5054";
+            gateway.Configuration.SideA = "129.129.194.45:5055";
+            gateway.Configuration.RemoteSideA = "127.0.0.1:5058";
+            gateway.Configuration.RemoteSideB = "129.129.130.255:5064";
+            gateway.Configuration.SideB = "129.129.194.45:5436";
+            gateway.Configuration.ConfigurationType = GatewayLogic.Configuration.ConfigurationType.BIDIRECTIONAL;
+            gateway.Log.Handler += (level, source, message) =>
+                {
+                    Console.WriteLine(message);
+                };
+            gateway.Start();
+
             //Console.WriteLine("Some change");
             //TestDiagnosticServer();
             //Test();
@@ -22,7 +36,7 @@ namespace GWTest
             //S2();
             //Console.ReadKey();
 
-            ReadBrokenLogs();
+            //ReadBrokenLogs();
         }
 
         private static void ReadBrokenLogs()

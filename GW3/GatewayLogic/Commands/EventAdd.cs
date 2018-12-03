@@ -96,7 +96,7 @@ namespace GatewayLogic.Commands
                 monitor = connection.Gateway.MonitorInformation.GetByGatewayId(packet.Parameter2);
                 if (monitor == null)
                 {
-                    connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EventResponseOnUnknown, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.GatewayMonitorId, Value = packet.Parameter2.ToString() } });
+                    //connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EventResponseOnUnknown, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.GatewayMonitorId, Value = packet.Parameter2.ToString() } });
                     return;
                 }
                 monitor.HasReceivedFirstResult = true;
