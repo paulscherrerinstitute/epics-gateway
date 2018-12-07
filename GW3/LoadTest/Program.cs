@@ -21,8 +21,9 @@ namespace LoadTest
 
         private static void Main(string[] args)
         {
-            /*var NbServers = 10;
-            var NbClients = 10;*/
+            var NbServers = 10;
+            var NbClients = 10;
+            var serverChanges = 0;
 
             var servers = new List<CAServer>();
             for (var serverId = 0; serverId < NbServers; serverId++)
@@ -34,8 +35,9 @@ namespace LoadTest
                 record.PrepareRecord += (sender, evt) =>
                 {
                     record.Value = (serverChanges % 100) + serverId;
-                    lock (changeStats)
-                        serverChanges++;
+                    /*lock (changeStats)
+                        serverChanges++;*/
+                    Interlocked.Increment(ref serverChanges);
                 };
                 server.Start();
                 servers.Add(server);

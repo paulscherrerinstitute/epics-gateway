@@ -376,6 +376,7 @@
     <None Include="Connected Services\Inventory.Controller\DirectCommands.wsdl" />
     <None Include="Connected Services\Inventory\DataAccess.wsdl" />
     <None Include="packages.config" />
+    <None Include="Properties\PublishProfiles\EPICSLOG.pubxml" />
     <None Include="Properties\PublishProfiles\GFAEPICSLOG.pubxml" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <Content Include="main.js" />
