@@ -601,7 +601,6 @@ class Main
             if (tabs[i] == evt.target)
             {
                 Main.CurrentTab = i;
-                //console.log("Tab " + i);
                 break;
             }
         }
@@ -916,20 +915,87 @@ class Main
         {
             $("#querySuggestions").hide();
         });*/
-        $("#queryField").on("keyup", (evt: JQueryEventObject) =>
-        {
-            switch (evt.keyCode)
-            {
-                case 27:
-                    $("#queryField").blur();
+
+        jQuery.fn.scrollTo = function (elem) {
+            $(this).scrollTop($(this).scrollTop() - $(this).offset().top + $(elem).offset().top);
+            return this;
+        };
+        $(document).on("keyup", (evt: JQueryEventObject) => {
+            if (evt.keyCode == 27) {
+                $("#querySuggestions").hide();
+            }
+        });
+
+        $("#queryField").on("click", (evt: JQueryEventObject) => {
+            $("#queryField").keyup();
+        });
+
+        $(document).on("click", (evt: JQueryEventObject) => {
+            if (evt.target != document.getElementById("queryField") && !evt.target.classList.contains("suggestion-item")) {
+                $("#querySuggestions").hide();
+            }
+        });
+
+        $("#queryField").on("keydown", (evt: JQueryEventObject) => {
+            var suggestionList = $("#suggestions");
+            switch (evt.keyCode) {
+                case 40:
+                    var el = suggestionList.children(".selected").first();
+                    if (el.next(".suggestion-item").length > 0) {
+                        el.next(".suggestion-item").addClass("selected");
+                        el.removeClass("selected");
+                        suggestionList.scrollTo(".selected");
+                    }
+                    break;
+                case 38:
+                    var el = suggestionList.children(".selected").first();
+                    if (el.prev(".suggestion-item").length > 0) {
+                        el.prev(".suggestion-item").addClass("selected");
+                        el.removeClass("selected");
+                        suggestionList.scrollTo(".selected");
+                    }
+                    break;
+            }
+        });
+
+        $("#queryField").on("keyup", (evt: JQueryEventObject) => {
+            var suggestionBox = $("#querySuggestions");
+            var suggestionList = $("#suggestions");
+            switch (evt.keyCode) {
+                case 40:
+                case 38:
                     break;
                 case 13:
-                    //$("#querySuggestions").hide();
-                    break;
+                    if (suggestionBox.is(":visible")) {
+                        $("#queryField").val(Main.completedText(suggestionList.children(".selected").clone().children("span").remove().end().text()) + " ");
+                    }
                 default:
-                    //$("#querySuggestions").show();
-                    //Main.ShowSuggestion();
-                    break;
+                    suggestionList.empty();
+                    var suggestions = QueryParser.getProposals($("#queryField").val());
+                    if (suggestions.length > 0) {
+                        suggestions.forEach(sug => {
+                            suggestionList.append(`<div class="suggestion-item">${sug.suggestion.replace(sug.input, '<b>' + sug.input + '</b>')}<span class="hint">${sug.hint} ${typeof(sug.dataType) != "undefined" ? ": " + sug.dataType : ""}</span></div>`);
+                        });
+                        suggestionList.children().each(function () {
+                            var element = this;
+                            element.onclick = (evt: JQueryEventObject) => {
+                                if (element.classList.contains("suggestion-item")) {
+                                    $("#queryField").val(Main.completedText($(element).clone().children("span").remove().end().text() + " "));
+                                    var e = jQuery.Event("keyup");
+                                    e.which = 32;
+                                    $("#queryField").trigger(e);
+                                    $("#queryField").focus();
+                                }
+                            }
+                        });
+                        if (suggestionList.children.length > 0) {
+                            suggestionList.children().first().addClass("selected");
+                            suggestionBox.show();
+                            suggestionList.scrollTo(".selected");
+                        }
+                    } else {
+                        suggestionBox.hide();
+                    }
             }
 
             $.ajax({
@@ -954,6 +1020,16 @@ class Main
         $("#logFilter li").click(Main.LogFilter);
 
         State.Pop(null);
+    }
+
+    static completedText(completionText: string): string {
+        var previousText = $("#queryField").val();
+        if (completionText == ")" || completionText == '"' || completionText == "'") {
+            return previousText + completionText;
+        }
+        let brackets: number = previousText.lastIndexOf("(");
+        let space: number = previousText.lastIndexOf(" ");
+        return previousText.substring(0, Math.max(brackets, space) + 1) + completionText;
     }
 
     static QueriesHelp()

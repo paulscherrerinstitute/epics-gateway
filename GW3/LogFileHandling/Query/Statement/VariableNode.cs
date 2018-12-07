@@ -15,12 +15,12 @@ namespace GWLogger.Backend.DataContext.Query.Statement
             Name = token.Value.ToLower();
         }
 
-        internal override bool CheckCondition(Context context, LogEntry entry)
+        public override bool CheckCondition(Context context, LogEntry entry)
         {
             throw new NotImplementedException();
         }
 
-        internal override string Value(Context context, LogEntry entry)
+        public override string Value(Context context, LogEntry entry)
         {
             switch (Name)
             {

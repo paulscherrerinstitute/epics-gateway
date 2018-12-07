@@ -19,7 +19,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
             Right = right;
         }
 
-        internal override bool CheckCondition(Context context, LogEntry entry)
+        public override bool CheckCondition(Context context, LogEntry entry)
         {
             var valA = Left.Value(context, entry);
             var valB = Right.Value(context, entry);
@@ -73,9 +73,9 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                     case "contains":
                         return valA.IndexOf(valB, StringComparison.InvariantCultureIgnoreCase) != -1;
                     case "starts":
-                        return valA.IndexOf(valB, StringComparison.InvariantCultureIgnoreCase) == 0;
+                        return valA.StartsWith(valB, StringComparison.InvariantCultureIgnoreCase);
                     case "ends":
-                        return valA.IndexOf(valB, StringComparison.InvariantCultureIgnoreCase) == valA.Length - valB.Length;
+                        return valA.EndsWith(valB, StringComparison.InvariantCultureIgnoreCase);
                 }
             }
             else switch (Condition)
@@ -95,9 +95,9 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                     case "contains":
                         return valA.IndexOf(valB, StringComparison.InvariantCultureIgnoreCase) != -1;
                     case "starts":
-                        return valA.IndexOf(valB, StringComparison.InvariantCultureIgnoreCase) == 0;
+                        return valA.StartsWith(valB, StringComparison.InvariantCultureIgnoreCase);
                     case "ends":
-                        return valA.IndexOf(valB, StringComparison.InvariantCultureIgnoreCase) == valA.Length - valB.Length;
+                        return valA.EndsWith(valB, StringComparison.InvariantCultureIgnoreCase);
                 }
             throw new UnknownConditionException("Unknown condition '" + Condition + "'");
         }
@@ -147,7 +147,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
             return new DateTime(year, month, day, hour, min, sec, mili, DateTimeKind.Utc);
         }
 
-        internal override string Value(Context context, LogEntry entry)
+        public override string Value(Context context, LogEntry entry)
         {
             throw new NotImplementedException();
         }

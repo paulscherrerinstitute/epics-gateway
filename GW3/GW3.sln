@@ -34,6 +34,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogFileHandling", "LogFileH
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GWConsoleLogger", "GWConsoleLogger\GWConsoleLogger.csproj", "{20E20EE5-B155-4556-85F2-55ECF23E9EE5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParserUnitTests", "ParserUnitTests\ParserUnitTests.csproj", "{9B93D364-086D-4EF8-A4CF-77ABF1C828EC}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadTest", "LoadTest\LoadTest.csproj", "{AB1E1AFF-3E15-4809-8A5F-278874EB8733}"
 EndProject
 Global
@@ -198,6 +200,18 @@ Global
 		{20E20EE5-B155-4556-85F2-55ECF23E9EE5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{20E20EE5-B155-4556-85F2-55ECF23E9EE5}.Release|x86.ActiveCfg = Release|Any CPU
 		{20E20EE5-B155-4556-85F2-55ECF23E9EE5}.Release|x86.Build.0 = Release|Any CPU
+		{9B93D364-086D-4EF8-A4CF-77ABF1C828EC}.Debug Deadlock|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B93D364-086D-4EF8-A4CF-77ABF1C828EC}.Debug Deadlock|Any CPU.Build.0 = Debug|Any CPU
+		{9B93D364-086D-4EF8-A4CF-77ABF1C828EC}.Debug Deadlock|x86.ActiveCfg = Debug|Any CPU
+		{9B93D364-086D-4EF8-A4CF-77ABF1C828EC}.Debug Deadlock|x86.Build.0 = Debug|Any CPU
+		{9B93D364-086D-4EF8-A4CF-77ABF1C828EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B93D364-086D-4EF8-A4CF-77ABF1C828EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B93D364-086D-4EF8-A4CF-77ABF1C828EC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9B93D364-086D-4EF8-A4CF-77ABF1C828EC}.Debug|x86.Build.0 = Debug|Any CPU
+		{9B93D364-086D-4EF8-A4CF-77ABF1C828EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B93D364-086D-4EF8-A4CF-77ABF1C828EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B93D364-086D-4EF8-A4CF-77ABF1C828EC}.Release|x86.ActiveCfg = Release|Any CPU
+		{9B93D364-086D-4EF8-A4CF-77ABF1C828EC}.Release|x86.Build.0 = Release|Any CPU
 		{AB1E1AFF-3E15-4809-8A5F-278874EB8733}.Debug Deadlock|Any CPU.ActiveCfg = Debug|Any CPU
 		{AB1E1AFF-3E15-4809-8A5F-278874EB8733}.Debug Deadlock|Any CPU.Build.0 = Debug|Any CPU
 		{AB1E1AFF-3E15-4809-8A5F-278874EB8733}.Debug Deadlock|x86.ActiveCfg = Debug|Any CPU
