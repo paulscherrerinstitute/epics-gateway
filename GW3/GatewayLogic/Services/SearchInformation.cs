@@ -81,14 +81,14 @@ namespace GatewayLogic.Services
             {
                 if (!dictionary.ContainsKey(channelName))
                 {
-                    gateway.MessageLogger.Write(null, LogMessageType.CreatedSearchInfo, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
+                    //gateway.MessageLogger.Write(null, LogMessageType.CreatedSearchInfo, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
                     var result = new SearchInformationDetail(nextId++);
                     result.Channel = channelName;
                     dictionary.Add(channelName, result);
                     gwIdDictionary.Add(result.GatewayId, result);
                 }
-                else
-                    gateway.MessageLogger.Write(null, LogMessageType.RecoverSearchInfo, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
+                /*else
+                    gateway.MessageLogger.Write(null, LogMessageType.RecoverSearchInfo, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });*/
 
                 return dictionary[channelName];
             }
@@ -128,7 +128,7 @@ namespace GatewayLogic.Services
 
         public void Remove(string channelName)
         {
-            gateway.MessageLogger.Write(null, LogMessageType.RemoveSearchInfo, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
+            //gateway.MessageLogger.Write(null, LogMessageType.RemoveSearchInfo, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
 
             using (dictionaryLock.Aquire())
             {

@@ -277,7 +277,7 @@ namespace GatewayLogic.Services
 
         internal void Remove(Gateway gateway, ChannelInformationDetails channel)
         {
-            gateway.MessageLogger.Write(null, LogMessageType.RemoveChannelInfo, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channel.ChannelName } });
+            //gateway.MessageLogger.Write(null, LogMessageType.RemoveChannelInfo, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channel.ChannelName } });
             gateway.SearchInformation.Remove(channel.ChannelName);
 
             channel.Dispose();

@@ -184,7 +184,7 @@ namespace GatewayLogic
             {
                 var v = NetworkInterface.GetAllNetworkInterfaces().Sum(row => row.GetIPv4Statistics().BytesSent);
                 if (lastBytesOut.HasValue)
-                    networkOut.Value = (int)(v - lastBytesIn.Value);
+                    networkOut.Value = (int)(v - lastBytesOut.Value);
                 lastBytesOut = v;
             };
 
