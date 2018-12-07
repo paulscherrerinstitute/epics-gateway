@@ -19,11 +19,11 @@
     <ServiceContractMappings />
   </ClientOptions>
   <MetadataSources>
-    <MetadataSource Address="http://epics-gw-logger.psi.ch/DataAccess.asmx" Protocol="http" SourceId="1" />
+    <MetadataSource Address="http://caesar.psi.ch/DataAccess.asmx" Protocol="http" SourceId="1" />
   </MetadataSources>
   <Metadata>
-    <MetadataFile FileName="DataAccess.disco" MetadataType="Disco" ID="50b5c8f6-359a-48cd-ad92-ad74653be656" SourceId="1" SourceUrl="http://epics-gw-logger.psi.ch/DataAccess.asmx?disco" />
-    <MetadataFile FileName="DataAccess.wsdl" MetadataType="Wsdl" ID="1abde3c0-594f-4a58-824d-b8395a19ed30" SourceId="1" SourceUrl="http://epics-gw-logger.psi.ch/DataAccess.asmx?wsdl" />
+    <MetadataFile FileName="DataAccess1.disco" MetadataType="Disco" ID="7fa203b5-f894-4316-b5e6-960beb2ee7a5" SourceId="1" SourceUrl="http://caesar.psi.ch/DataAccess.asmx?disco" />
+    <MetadataFile FileName="DataAccess1.wsdl" MetadataType="Wsdl" ID="f6db996d-4a44-449b-a787-90ed6d36f6aa" SourceId="1" SourceUrl="http://caesar.psi.ch/DataAccess.asmx?wsdl" />
   </Metadata>
   <Extensions>
     <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />

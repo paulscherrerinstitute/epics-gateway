@@ -138,11 +138,68 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Connected Services\GWLoggerSoap\DataAccess.wsdl" />
+    <None Include="Connected Services\GWLoggerSoap\DataAccess1.wsdl" />
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.ActiveClientsResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.ActiveServersResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.BinaryLogEntriesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.DataFileStats.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.FreeSpace.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.GatewayInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
     <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.GatewaySession.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
-    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.SearchRequest.datasource">
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.GatewayShortInformation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.GatewayStats.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.GetGatewayNetworksResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.GetHistoricDataResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.GetMessageTypesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.HistoricData.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.HostChannelCount.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.KeyValuePairOfInt32String.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.KeyValuePairOfStringInt32.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.KeyValuePairOfStringListOfHistoricData.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.KeyValuePairOfStringString.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.MostActiveClassesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.SearchesOnChannelsPerformedResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\GWLoggerSoap\GatewayLogic.GWLoggerSoap.SearchesPerformedResponse.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
     <None Include="nuget.config" />
@@ -153,9 +210,6 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadataStorage Include="Connected Services\GWLoggerSoap\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Connected Services\GWLoggerSoap\DataAccess.disco" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Connected Services\GWLoggerSoap\configuration91.svcinfo" />
@@ -169,6 +223,8 @@
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Connected Services\GWLoggerSoap\DataAccess1.disco" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

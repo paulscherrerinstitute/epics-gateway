@@ -1,27 +1,25 @@
-﻿using System;
+﻿using GatewayLogic.GWLoggerSoap;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.ServiceModel;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using GatewayLogic.GWLoggerSoap;
 
 namespace GatewayLogic.Services
 {
-    class SoapLogger : IDisposable
+    internal class SoapLogger : IDisposable
     {
         private static DataAccessSoapClient soapLogger;
         private bool shouldStop;
         private CancellationTokenSource cancelOperation = new CancellationTokenSource();
-        static Thread reconnecter;
-
-        BufferBlock<LogMessage> buffer = new BufferBlock<LogMessage>();
+        private static Thread reconnecter;
+        private BufferBlock<LogMessage> buffer = new BufferBlock<LogMessage>();
         private string gatewayName;
         private Thread bufferFlusher;
-        long nbSaved = 0;
-        long nbTotal = 0;
+        private long nbSaved = 0;
+        private long nbTotal = 0;
 
         static SoapLogger()
         {
@@ -32,7 +30,7 @@ namespace GatewayLogic.Services
               {
                   while (true)
                   {
-                      if(soapLogger != null)
+                      if (soapLogger != null)
                       {
                           Thread.Sleep(30000);
                           continue;
@@ -57,7 +55,7 @@ namespace GatewayLogic.Services
                               soapLogger = null;
                           }
                       }
-                      if(soapLogger == null)
+                      if (soapLogger == null)
                       {
                           Thread.Sleep(30000);
                           continue;
@@ -171,81 +169,61 @@ namespace GatewayLogic.Services
             while (!shouldStop)
             {
                 // Not connected, we wait
-                if(soapLogger == null)
+                if (soapLogger == null)
                 {
                     Thread.Sleep(1000);
                     continue;
                 }
 
                 // Send bunch if there is multiple entries waiting
-                if (buffer.Count > 1)
+                using (var mem = new MemoryStream())
                 {
-                    var toSend = new List<LogEntry>();
-                    while (toSend.Count < 100 && buffer.Count > 0)
+                    using (var writer = new BinaryWriter(mem))
                     {
+
+                        var nb = (uint)Math.Max(1, Math.Min(1000, buffer.Count));
+                        writer.Write(nb);
+
+                        for (var i = 0; i < nb; i++)
+                        {
+                            try
+                            {
+                                message = buffer.Receive(cancelOperation.Token);
+                            }
+                            catch (OperationCanceledException)
+                            {
+                                return;
+                            }
+                            catch
+                            {
+                                throw;
+                            }
+
+                            if (message.RemoteIpPoint == null)
+                                writer.Write(new byte[] { 0, 0, 0, 0, 0, 0 });
+                            else
+                            {
+                                writer.Write(System.Net.IPAddress.Parse(message.RemoteIpPoint.Split(':')[0]).GetAddressBytes());
+                                writer.Write(ushort.Parse(message.RemoteIpPoint.Split(':')[1]));
+                            }
+                            writer.Write((ushort)message.MessageType);
+                            writer.Write((byte)message.Details.Count());
+                            foreach (var detail in message.Details)
+                            {
+                                writer.Write((ushort)detail.TypeId);
+                                writer.Write(detail.Value);
+                            }
+                        }
                         try
                         {
-                            message = buffer.Receive(cancelOperation.Token);
-                        }
-                        catch (OperationCanceledException)
-                        {
-                            break;
+                            soapLogger.BinaryLogEntries(gatewayName, mem.ToArray());
+
+                            //soapLogger.LogEntries(toSend.ToArray());
                         }
                         catch
                         {
-                            throw;
+                            soapLogger = null;
                         }
-
-                        toSend.Add(new LogEntry
-                        {
-                            Gateway = message.Gateway,
-                            Details = message.Details.Select(row => new LogEntryDetail
-                            {
-                                TypeId = (int)row.TypeId,
-                                Value = row.Value
-                            }).ToArray(),
-                            MessageType = message.MessageType,
-                            RemoteIpPoint = message.RemoteIpPoint
-                        });
-                    }
-
-                    try
-                    {
-                        soapLogger.LogEntries(toSend.ToArray());
-                    }
-                    catch
-                    {
-                        soapLogger = null;
-                    }
-                }
-                else
-                {
-
-                    try
-                    {
-                        message = buffer.Receive(cancelOperation.Token);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        break;
-                    }
-                    catch
-                    {
-                        throw;
-                    }
-
-                    try
-                    {
-                        soapLogger.LogEntry(message.Gateway, message.RemoteIpPoint,
-                            message.MessageType, message.Details.Select(row => new LogEntryDetail
-                            {
-                                TypeId = (int)row.TypeId,
-                                Value = row.Value
-                            }).ToArray());
-                    }
-                    catch
-                    {
-                        soapLogger = null;
                     }
                 }
             }
