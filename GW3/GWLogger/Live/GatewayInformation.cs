@@ -13,5 +13,6 @@
         public string RunningTime { get; set; }
         public int? NbClients { get; set; }
         public int? NbServers { get; set; }
+        public int? Network { get; set; }
     }
 }

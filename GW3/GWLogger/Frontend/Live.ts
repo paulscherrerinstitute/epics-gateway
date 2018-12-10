@@ -58,9 +58,10 @@ class Live
             content: (e: kendo.ui.TooltipEvent) =>
             {
                 var html = "<b>Gateway " + e.sender.element[0].id + "</b><br>";
+                var live = Live.Get(e.sender.element[0].id);
                 html += "<table style='text-align: left;'>";
-                html += "<tr><td>Version</td><td>" + Live.Get(e.sender.element[0].id).Version + "</td></tr>";
-                html += "<tr><td>State</td><td>" + GatewayStates[Live.Get(e.sender.element[0].id).State] + "</td></tr>";
+                html += "<tr><td>Version</td><td>" + (live ? live.Version : "") + "</td></tr>";
+                html += "<tr><td>State</td><td>" + (live ? GatewayStates[live.State] : "") + "</td></tr>";
                 html += "</table>";
                 html += "-- Click to view details --";
                 return html;

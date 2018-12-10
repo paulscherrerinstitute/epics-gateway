@@ -17,7 +17,13 @@ namespace GWLogger
 
         protected void Application_Start(object sender, EventArgs e)
         {
-            Inventory.ServerName();
+            try
+            {
+                Inventory.ServerName();
+            }
+            catch
+            {
+            }
 
             LiveInformation = new Live.LiveInformation();
 

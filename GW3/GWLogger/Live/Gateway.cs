@@ -13,6 +13,7 @@ namespace GWLogger.Live
         public List<HistoricData> msgSecHistory { get; set; }
         public List<HistoricData> clientsHistory { get; set; }
         public List<HistoricData> serversHistory { get; set; }
+        public List<HistoricData> networkHistory { get; set; }
     }
 
     public class Gateway
@@ -34,6 +35,8 @@ namespace GWLogger.Live
         private GatewayNullableValue<int> nbMessages;
         private GatewayNullableValue<int> nbClients;
         private GatewayNullableValue<int> nbServers;
+        private GatewayNullableValue<int> netIn;
+        private GatewayNullableValue<int> netOut;
         private GatewayValue<string> runningTime;
         private GatewayValue<string> build;
         private GatewayValue<string> version;
@@ -43,6 +46,7 @@ namespace GWLogger.Live
         private List<HistoricData> msgSecHistory = new List<HistoricData>();
         private List<HistoricData> clientsHistory = new List<HistoricData>();
         private List<HistoricData> serversHistory = new List<HistoricData>();
+        private List<HistoricData> networkHistory = new List<HistoricData>();
 
         public Gateway(LiveInformation liveInformation, string gatewayName)
         {
@@ -58,6 +62,8 @@ namespace GWLogger.Live
             version = new GatewayValue<string>(this.liveInformation.Client, gatewayName + ":VERSION");
             nbClients = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NBCLIENTS");
             nbServers = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NBSERVERS");
+            netIn = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NET-IN");
+            netOut = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NET-OUT");
         }
 
         internal GatewayHistory GetHistory()
@@ -69,7 +75,8 @@ namespace GWLogger.Live
                 msgSecHistory = MsgSecHistory,
                 pvsHistory = PvsHistory,
                 searchHistory = SearchHistory,
-                serversHistory = serversHistory
+                serversHistory = ServersHistory,
+                networkHistory = NetworkHistory
             };
         }
 
@@ -193,6 +200,13 @@ namespace GWLogger.Live
                 msgSecHistory.Add(new HistoricData { Value = nbMessages.Value });
                 while (msgSecHistory.Count > NbHistoricPoint)
                     msgSecHistory.RemoveAt(0);
+            }
+
+            lock (networkHistory)
+            {
+                networkHistory.Add(new HistoricData { Value = netIn.Value + netOut.Value });
+                while (networkHistory.Count > NbHistoricPoint)
+                    networkHistory.RemoveAt(0);
             }
         }
 
@@ -380,6 +394,23 @@ namespace GWLogger.Live
             }
         }
 
+        public List<HistoricData> ServersHistory
+        {
+            get
+            {
+                lock (serversHistory)
+                    return serversHistory.ToList();
+            }
+        }
+
+        public List<HistoricData> NetworkHistory
+        {
+            get
+            {
+                lock (networkHistory)
+                    return networkHistory.ToList();
+            }
+        }
         public List<HistoricData> PvsHistory
         {
             get
@@ -435,5 +466,7 @@ namespace GWLogger.Live
         public int? NbClients => nbClients.Value;
 
         public int? NbServers => nbServers.Value;
+
+        public int? Network => netIn.Value + netOut.Value;
     }
 }

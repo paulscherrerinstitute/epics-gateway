@@ -37,6 +37,12 @@ namespace GWLogger
         }
 
         [WebMethod]
+        public List<HistoricData> NetworkHistory(string gatewayName)
+        {
+            return Global.LiveInformation.NetworkHistory(gatewayName);
+        }
+
+        [WebMethod]
         public List<KeyValuePair<string, List<HistoricData>>> GetHistoricData(string gatewayName)
         {
             return new List<KeyValuePair<string, List<HistoricData>>>()
@@ -44,6 +50,7 @@ namespace GWLogger
                 new KeyValuePair<string, List<HistoricData>>("CPU", CpuHistory(gatewayName)),
                 new KeyValuePair<string, List<HistoricData>>("Searches", SearchHistory(gatewayName)),
                 new KeyValuePair<string, List<HistoricData>>("PVs", PVsHistory(gatewayName)),
+                new KeyValuePair<string, List<HistoricData>>("Network", NetworkHistory(gatewayName))
             };
         }
     }

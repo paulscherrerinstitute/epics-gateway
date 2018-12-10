@@ -109,6 +109,12 @@ namespace GWLogger
                 context.Response.Expires = 0;
                 context.Response.Write("[");
 
+                if(logs == null)
+                {
+                    context.Response.Write("]");
+                    return;
+                }
+
                 var messageDetails = Global.DataContext.MessageDetailTypes.ToDictionary(key => key.Id, val => val.Value);
 
                 var isFirst = true;

@@ -109,19 +109,19 @@ namespace GWLogger.Live
 
                 /*if (sleepCounter > 4)
                 {*/
-                    try
+                try
+                {
+                    // Store historyDump
+                    using (var stream = new StreamWriter(new GZipStream(File.OpenWrite(Global.HistoryStorage + "\\history.dump.new"), CompressionLevel.Optimal)))
                     {
-                        // Store historyDump
-                        using (var stream = new StreamWriter(new GZipStream(File.OpenWrite(Global.HistoryStorage + "\\history.dump.new"), CompressionLevel.Optimal)))
-                        {
-                            var serializer = Newtonsoft.Json.JsonSerializer.Create();
-                            serializer.Serialize(stream, historyDump);
-                        }
-                        File.Copy(Global.HistoryStorage + "\\history.dump.new", Global.HistoryStorage + "\\history.dump", true);
+                        var serializer = Newtonsoft.Json.JsonSerializer.Create();
+                        serializer.Serialize(stream, historyDump);
                     }
-                    catch
-                    {
-                    }
+                    File.Copy(Global.HistoryStorage + "\\history.dump.new", Global.HistoryStorage + "\\history.dump", true);
+                }
+                catch
+                {
+                }
                 /*    sleepCounter = 0;
                 }
                 else
@@ -225,7 +225,8 @@ namespace GWLogger.Live
                     PVs = row.PVs,
                     RunningTime = row.RunningTime,
                     NbClients = row.NbClients,
-                    NbServers = row.NbServers
+                    NbServers = row.NbServers,
+                    Network = row.Network
                 }).FirstOrDefault(row => row.Name.ToLower() == gatewayName.ToLower());
             }
         }
@@ -246,6 +247,12 @@ namespace GWLogger.Live
         {
             lock (Gateways)
                 return Gateways.FirstOrDefault(row => row.Name == gatewayName)?.PvsHistory.Last(Gateway.GraphPoints).ToList();
+        }
+
+        public List<HistoricData> NetworkHistory(string gatewayName)
+        {
+            lock (Gateways)
+                return Gateways.FirstOrDefault(row => row.Name == gatewayName)?.NetworkHistory.Last(Gateway.GraphPoints).ToList();
         }
 
         public void Dispose()
