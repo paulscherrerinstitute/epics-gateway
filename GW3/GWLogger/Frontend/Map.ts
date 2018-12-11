@@ -38,7 +38,7 @@ class Map
         Map.AddNetwork(450, 500, "Office");
         Map.AddNetwork(800, 500, "SLS Machine");
         Map.AddGateway(700, 530, "SLS-CAGW02");
-        Map.AddGateway(700, 450, "SLS-ARCH-CAGW02");
+        //Map.AddGateway(700, 450, "SLS-ARCH-CAGW02");
 
         var slsBeamlines: string[] = [];
         $(".GWDisplay").each((idx, elem) =>
@@ -69,7 +69,7 @@ class Map
         }
 
         Map.AddGatewayLink("SLS-CAGW02", "Office", 0);
-        Map.AddGatewayLink("SLS-ARCH-CAGW02", "Office", 0);
+        //Map.AddGatewayLink("SLS-ARCH-CAGW02", "Office", 0);
 
         Map.AddNetwork(150, 330, "Swiss FEL", 100);
         Map.AddGateway(90, 350, "SF-CAGW", 140, 10);
@@ -286,7 +286,7 @@ class Map
             }
         }
         var net: KnownNetwork;
-        for (var i = 0; i < Map.gateways.length; i++)
+        for (var i = 0; i < Map.nets.length; i++)
         {
             if (network == Map.nets[i].Name)
             {
