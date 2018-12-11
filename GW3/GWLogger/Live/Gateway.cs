@@ -156,6 +156,18 @@ namespace GWLogger.Live
                         msgSecHistory.RemoveAt(0);
                 }
             }
+
+            lock(networkHistory)
+            {
+                networkHistory.Clear();
+                networkHistory.AddRange(history.networkHistory);
+                while (networkHistory.Any() && (DateTime.UtcNow - networkHistory.Last().Date).TotalSeconds > 5)
+                {
+                    networkHistory.Add(new HistoricData { Value = null, Date = networkHistory.Last().Date.AddSeconds(5) });
+                    while (networkHistory.Count > NbHistoricPoint)
+                        networkHistory.RemoveAt(0);
+                }
+            }
         }
 
         internal void UpdateGateway()

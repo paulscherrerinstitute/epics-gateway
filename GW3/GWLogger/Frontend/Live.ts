@@ -19,7 +19,12 @@ interface HistoricData
     Date: Date;
 }
 
-var DebugChannels = { 'CPU': '{0}:CPU', 'Mem': '{0}:MEM-FREE', 'Searches': '{0}:SEARCH-SEC', 'Build': '{0}:BUILD', 'Version': '{0}:VERSION', 'Messages': '{0}:MESSAGES-SEC', 'PVs': '{0}:PVTOTAL', 'RunningTime': '{0}:RUNNING-TIME', 'NbClients': '{0}:NBCLIENTS', 'NbServers': '{0}:NBSERVERS' };
+var DebugChannels = {
+    'CPU': '{0}:CPU', 'Mem': '{0}:MEM-FREE', 'Searches': '{0}:SEARCH-SEC', 'Build': '{0}:BUILD', 'Version': '{0}:VERSION', 'Messages': '{0}:MESSAGES-SEC', 'PVs': '{0}:PVTOTAL', 'RunningTime': '{0}:RUNNING-TIME', 'NbClients': '{0}:NBCLIENTS', 'NbServers': '{0}:NBSERVERS', 'Network': '({0}:NET-IN + {0}:NET-OUT) / (1024 * 1024)'
+};
+var ChannelsUnits = {
+    'CPU': '%', 'Mem': 'Mb', 'Searches': '/ Sec', 'Messages': '/ Sec', 'Network': 'MB/Sec'
+};
 var GatewayStates = { 0: 'All Ok', 1: 'Minor', 2: 'Warning', 3: 'Error' };
 
 class Live
@@ -28,6 +33,7 @@ class Live
     static cpuChart: LineGraph;
     static searchesChart: LineGraph;
     static pvsChart: LineGraph;
+    static networkChart: LineGraph;
     static mustUpdate: number = 0;
     static currentErrors: string[] = [];
 
@@ -124,6 +130,24 @@ class Live
                 State.Pop(null);
             }
         });
+        Live.networkChart = new LineGraph("networkGraph", { Values: [] }, {
+            MinY: 0,
+            XLabelWidth: 50,
+            FontSize: 10,
+            PlotColor: '#000080',
+            ToolTip: true,
+            LabelFormat: Utils.ShortGWDateFormat,
+            TooltipLabelFormat: Utils.GWDateFormat,
+            OnClick: (label: Date, value) =>
+            {
+                Main.Path = "GW";
+                Main.CurrentTime = label.toUtc();
+                Main.StartDate = new Date(Main.CurrentTime.getTime() - 12 * 3600000);
+                Main.EndDate = new Date(Main.CurrentTime.getTime() + 12 * 3600000);
+                State.Set(true);
+                State.Pop(null);
+            }
+        });
     }
 
     static ShowDetails(gwName: string)
@@ -197,7 +221,9 @@ class Live
                         {
                             if (i == "__type" || i == "Name")
                                 continue;
-                            html += "<tr><td>" + i + "</td><td>" + data[i] + "</td></tr>";
+                            html += "<tr><td>" + i + "</td><td" + (ChannelsUnits[i] ? "" : " colspan='2'") + ">" + data[i] + "</td>";
+                            html += ChannelsUnits[i] ? "<td>" + ChannelsUnits[i] + "</td>" : "";
+                            html += "</tr>";
                         }
                         $("#gwInfos").html(html);
 
@@ -212,7 +238,7 @@ class Live
                             },
                             content: (e: kendo.ui.TooltipEvent) =>
                             {
-                                return "EPICS Channel Name:<br>" + DebugChannels[e.sender.element[0].children[0].innerHTML].replace("{0}", Main.CurrentGateway.toUpperCase());
+                                return "EPICS Channel Name:<br>" + DebugChannels[e.sender.element[0].children[0].innerHTML].replace(/\{0\}/g, Main.CurrentGateway.toUpperCase());
                             },
                             showAfter: 200
                         });
@@ -264,6 +290,15 @@ class Live
                                         Values: data.map((c) =>
                                         {
                                             return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
+                                        })
+                                    });
+                                    break;
+                                case "Network":
+                                    data = msg.d[i].Value;
+                                    Live.networkChart.SetDataSource({
+                                        Values: data.map((c) =>
+                                        {
+                                            return { Label: Utils.DateFromNet(c.Date), Value: c.Value / (1024 * 1024) };
                                         })
                                     });
                                     break;
