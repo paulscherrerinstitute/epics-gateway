@@ -1,28 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace GatewayLogic.Services
 {
-    class LogFileWriter : IDisposable
+    internal class LogFileWriter : IDisposable
     {
-        Thread flusher;
-        bool shouldStop = false;
-        SafeLock bufferLock = new SafeLock();
-        MemoryStream buffer = new MemoryStream();
-        string path = null;
-        Regex sourceFilter = null;
-        StreamWriter bufferWriter;
-        bool logRotation = false;
-        int logKeepDays;
-        string lastLogDate = null;
-        string currentLogFilename = null;
+        private Thread flusher;
+        private bool shouldStop = false;
+        private SafeLock bufferLock = new SafeLock();
+        private MemoryStream buffer = new MemoryStream();
+        private string path = null;
+        private Regex sourceFilter = null;
+        private StreamWriter bufferWriter;
+        private int fileLoggerLevel;
+        private bool logRotation = false;
+        private int logKeepDays;
+        private string lastLogDate = null;
+        private string currentLogFilename = null;
 
         public static LogFileWriter CreateIfNeeded(TextLogger logger)
         {
@@ -34,6 +31,7 @@ namespace GatewayLogic.Services
         private LogFileWriter(TextLogger logger)
         {
             bufferWriter = new StreamWriter(buffer);
+            fileLoggerLevel = int.Parse(System.Configuration.ConfigurationManager.AppSettings["fileLoggerLevel"] ?? "0");
 
             bufferWriter.WriteLine("=============================================================================");
             bufferWriter.WriteLine(" Start loggin at " + DateTime.UtcNow.ToString("yyyy\\/MM\\/dd HH:mm:ss.fff"));
@@ -119,6 +117,8 @@ namespace GatewayLogic.Services
         public void LogHandler(LogLevel level, string source, string message)
         {
             if (sourceFilter != null && !sourceFilter.IsMatch(source))
+                return;
+            if ((int)level < fileLoggerLevel)
                 return;
             using (bufferLock.Aquire())
             {

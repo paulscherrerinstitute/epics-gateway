@@ -114,7 +114,7 @@ namespace GatewayLogic.Services
                     toDrop = connectedClients.Where(row => row.Connection == connection).ToList();
                 }
                 foreach (var i in toDrop)
-                    connection.Gateway.MonitorInformation.GetByClientId(i.Connection.RemoteEndPoint, i.Id)?.RemoveClient(connection.Gateway, i.Connection.RemoteEndPoint, i.Id);
+                    connection.Gateway.MonitorInformation.GetByClientId(i.Connection?.RemoteEndPoint, i.Id)?.RemoveClient(connection.Gateway, i.Connection?.RemoteEndPoint, i.Id);
                 using (clientsLock.Aquire())
                 {
                     connectedClients.RemoveAll(row => row.Connection == connection);
