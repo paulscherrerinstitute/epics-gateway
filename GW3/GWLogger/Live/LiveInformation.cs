@@ -112,7 +112,7 @@ namespace GWLogger.Live
                 try
                 {
                     // Store historyDump
-                    using (var stream = new StreamWriter(new GZipStream(File.OpenWrite(Global.HistoryStorage + "\\history.dump.new"), CompressionLevel.Optimal)))
+                    using (var stream = new StreamWriter(new GZipStream(File.Create(Global.HistoryStorage + "\\history.dump.new"), CompressionLevel.Optimal)))
                     {
                         var serializer = Newtonsoft.Json.JsonSerializer.Create();
                         serializer.Serialize(stream, historyDump);
@@ -139,7 +139,7 @@ namespace GWLogger.Live
                     emails[i.EMail] += "The following gateway(s) are in error now:\n" + string.Join("\n", newEntries.Where(row => i.Gateways.Contains(row)).Select(row => "- " + row));
                 }
 
-                var goneEntries = onErrors.Where(row => !newEntries.Contains(row));
+                var goneEntries = onErrors.Where(row => !newEntries.Contains(row) && !newOnErrors.Contains(row));
                 foreach (var i in subscriptions.Where(row => row.Gateways.Any(r2 => goneEntries.Contains(r2))))
                 {
                     if (!emails.ContainsKey(i.EMail))
@@ -149,7 +149,7 @@ namespace GWLogger.Live
 
                 foreach (var i in emails)
                 {
-                    SendEmail(i.Key, "CAESAR Update", i.Value);
+                    //SendEmail(i.Key, "CAESAR Update", i.Value);
                 }
                 onErrors = newOnErrors;
             }

@@ -41,7 +41,7 @@ namespace GWLogger.AuthAccess
         private static void StoreSubscriptions()
         {
             var subs = GetAllSubscriptions();
-            using (var stream = File.OpenWrite(Global.StorageDirectory + "\\AlertSubscriptions.xml"))
+            using (var stream = File.Create(Global.StorageDirectory + "\\AlertSubscriptions.xml"))
             {
                 var ser = new XmlSerializer(typeof(List<AlertSubscription>));
                 ser.Serialize(stream, subs);
