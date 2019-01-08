@@ -110,17 +110,24 @@ namespace GatewayLogic.Services
             {
                 if (connection == null)
                     return;
-                List<Client> toDrop;
-                using (clientsLock.Aquire())
+                try
                 {
-                    toDrop = connectedClients.Where(row => row.Connection == connection).ToList();
+                    List<Client> toDrop;
+                    using (clientsLock.Aquire())
+                    {
+                        toDrop = connectedClients.Where(row => row.Connection == connection).ToList();
+                    }
+                    foreach (var i in toDrop)
+                        connection.Gateway?.MonitorInformation?.GetByClientId(i.Connection?.RemoteEndPoint, i.Id)?.RemoveClient(connection.Gateway, i.Connection?.RemoteEndPoint, i.Id);
+                    using (clientsLock.Aquire())
+                    {
+                        connectedClients.RemoveAll(row => row.Connection == connection);
+                        this.LastUse = DateTime.UtcNow;
+                    }
                 }
-                foreach (var i in toDrop)
-                    connection.Gateway?.MonitorInformation.GetByClientId(i.Connection?.RemoteEndPoint, i.Id)?.RemoveClient(connection.Gateway, i.Connection?.RemoteEndPoint, i.Id);
-                using (clientsLock.Aquire())
+                catch (Exception ex)
                 {
-                    connectedClients.RemoveAll(row => row.Connection == connection);
-                    this.LastUse = DateTime.UtcNow;
+                    connection.Gateway.Log.Write(LogLevel.Error, ex.ToString() + "\n" + ex.StackTrace);
                 }
             }
 

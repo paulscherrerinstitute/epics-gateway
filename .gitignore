@@ -16,4 +16,5 @@
 # Skip nuget imported scripts
 **/GWLogger/Scripts/**/*.*
 **/GWLogger/styles/**/*.*
+**/*.vpp~*
 /GW3/TestResults
