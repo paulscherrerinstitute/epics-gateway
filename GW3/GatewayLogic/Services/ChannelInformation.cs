@@ -127,7 +127,13 @@ namespace GatewayLogic.Services
                 }
                 catch (Exception ex)
                 {
-                    connection.Gateway.Log.Write(LogLevel.Error, ex.ToString() + "\n" + ex.StackTrace);
+                    try
+                    {
+                        connection.Gateway.Log.Write(LogLevel.Error, ex.ToString() + "\n" + ex.StackTrace);
+                    }
+                    catch
+                    {
+                    }
                 }
             }
 
