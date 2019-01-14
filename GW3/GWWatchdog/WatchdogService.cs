@@ -40,7 +40,15 @@ namespace GWWatchdog
         public WatchdogService()
         {
             InitializeComponent();
-            caesar = new Caesar.DataAccessSoapClient();
+            try
+            {
+                caesar = new Caesar.DataAccessSoapClient(new System.ServiceModel.BasicHttpBinding(), new System.ServiceModel.EndpointAddress("http://caesar.psi.ch/DataAccess.asmx"));
+            }
+            catch(Exception ex)
+            {
+                if (Environment.UserInteractive)
+                    Console.WriteLine(ex);
+            }
             gatewayName = ConfigurationManager.AppSettings["gatewayName"];
         }
 
@@ -180,6 +188,7 @@ namespace GWWatchdog
                             }
                             catch
                             {
+                                status = GWStatus.NOT_ANSWERING;
                             }
                         }
 
@@ -241,6 +250,8 @@ namespace GWWatchdog
         {
             try
             {
+                if (Environment.UserInteractive)
+                    Console.WriteLine("Restart due: " + status.ToString());
                 switch (status)
                 {
                     case GWStatus.STARTING:
@@ -259,8 +270,10 @@ namespace GWWatchdog
                         break;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                if (Environment.UserInteractive)
+                    Console.WriteLine(ex);
             }
 
             status = GWStatus.RESTARTING;

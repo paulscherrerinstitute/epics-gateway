@@ -164,11 +164,17 @@ class Main
             dataType: 'json',
             success: function (msg)
             {
+                var restartTypes = [];
+                for (var o in RestartType)
+                    restartTypes.push({
+                        text: o, value: RestartType[o]
+                    });
                 Main.Sessions = (msg.d ? (<object[]>msg.d).map(function (c) { return GatewaySession.CreateFromObject(c); }) : []);
                 var grid = $("#gatewaySessions").kendoGrid({
                     columns: [{ title: "Start", field: "StartDate", format: "{0:MM/dd HH:mm:ss}" },
                     { title: "End", field: "EndDate", format: "{0:MM/dd HH:mm:ss}" },
-                    { title: "NB&nbsp;Logs", field: "NbEntries", format: "{0:n0}", attributes: { style: "text-align:right;" } }],
+                        { title: "NB&nbsp;Logs", field: "NbEntries", format: "{0:n0}", attributes: { style: "text-align:right;" } },
+                        { title: "Reason", field: "RestartType", values: restartTypes }],
                     dataSource: { data: Main.Sessions },
                     selectable: "single cell",
                     change: (arg) =>
@@ -916,32 +922,41 @@ class Main
             $("#querySuggestions").hide();
         });*/
 
-        jQuery.fn.scrollTo = function (elem) {
+        jQuery.fn.scrollTo = function (elem)
+        {
             $(this).scrollTop($(this).scrollTop() - $(this).offset().top + $(elem).offset().top);
             return this;
         };
-        $(document).on("keyup", (evt: JQueryEventObject) => {
-            if (evt.keyCode == 27) {
+        $(document).on("keyup", (evt: JQueryEventObject) =>
+        {
+            if (evt.keyCode == 27)
+            {
                 $("#querySuggestions").hide();
             }
         });
 
-        $("#queryField").on("click", (evt: JQueryEventObject) => {
+        $("#queryField").on("click", (evt: JQueryEventObject) =>
+        {
             $("#queryField").keyup();
         });
 
-        $(document).on("click", (evt: JQueryEventObject) => {
-            if (evt.target != document.getElementById("queryField") && !evt.target.classList.contains("suggestion-item")) {
+        $(document).on("click", (evt: JQueryEventObject) =>
+        {
+            if (evt.target != document.getElementById("queryField") && !evt.target.classList.contains("suggestion-item"))
+            {
                 $("#querySuggestions").hide();
             }
         });
 
-        $("#queryField").on("keydown", (evt: JQueryEventObject) => {
+        $("#queryField").on("keydown", (evt: JQueryEventObject) =>
+        {
             var suggestionList = $("#suggestions");
-            switch (evt.keyCode) {
+            switch (evt.keyCode)
+            {
                 case 40:
                     var el = suggestionList.children(".selected").first();
-                    if (el.next(".suggestion-item").length > 0) {
+                    if (el.next(".suggestion-item").length > 0)
+                    {
                         el.next(".suggestion-item").addClass("selected");
                         el.removeClass("selected");
                         suggestionList.scrollTo(".selected");
@@ -949,7 +964,8 @@ class Main
                     break;
                 case 38:
                     var el = suggestionList.children(".selected").first();
-                    if (el.prev(".suggestion-item").length > 0) {
+                    if (el.prev(".suggestion-item").length > 0)
+                    {
                         el.prev(".suggestion-item").addClass("selected");
                         el.removeClass("selected");
                         suggestionList.scrollTo(".selected");
@@ -958,28 +974,36 @@ class Main
             }
         });
 
-        $("#queryField").on("keyup", (evt: JQueryEventObject) => {
+        $("#queryField").on("keyup", (evt: JQueryEventObject) =>
+        {
             var suggestionBox = $("#querySuggestions");
             var suggestionList = $("#suggestions");
-            switch (evt.keyCode) {
+            switch (evt.keyCode)
+            {
                 case 40:
                 case 38:
                     break;
                 case 13:
-                    if (suggestionBox.is(":visible")) {
+                    if (suggestionBox.is(":visible"))
+                    {
                         $("#queryField").val(Main.completedText(suggestionList.children(".selected").clone().children("span").remove().end().text()) + " ");
                     }
                 default:
                     suggestionList.empty();
                     var suggestions = QueryParser.getProposals($("#queryField").val());
-                    if (suggestions.length > 0) {
-                        suggestions.forEach(sug => {
-                            suggestionList.append(`<div class="suggestion-item">${sug.suggestion.replace(sug.input, '<b>' + sug.input + '</b>')}<span class="hint">${sug.hint} ${typeof(sug.dataType) != "undefined" ? ": " + sug.dataType : ""}</span></div>`);
+                    if (suggestions.length > 0)
+                    {
+                        suggestions.forEach(sug =>
+                        {
+                            suggestionList.append(`<div class="suggestion-item">${sug.suggestion.replace(sug.input, '<b>' + sug.input + '</b>')}<span class="hint">${sug.hint} ${typeof (sug.dataType) != "undefined" ? ": " + sug.dataType : ""}</span></div>`);
                         });
-                        suggestionList.children().each(function () {
+                        suggestionList.children().each(function ()
+                        {
                             var element = this;
-                            element.onclick = (evt: JQueryEventObject) => {
-                                if (element.classList.contains("suggestion-item")) {
+                            element.onclick = (evt: JQueryEventObject) =>
+                            {
+                                if (element.classList.contains("suggestion-item"))
+                                {
                                     $("#queryField").val(Main.completedText($(element).clone().children("span").remove().end().text() + " "));
                                     var e = jQuery.Event("keyup");
                                     e.which = 32;
@@ -988,12 +1012,14 @@ class Main
                                 }
                             }
                         });
-                        if (suggestionList.children.length > 0) {
+                        if (suggestionList.children.length > 0)
+                        {
                             suggestionList.children().first().addClass("selected");
                             suggestionBox.show();
                             suggestionList.scrollTo(".selected");
                         }
-                    } else {
+                    } else
+                    {
                         suggestionBox.hide();
                     }
             }
@@ -1022,9 +1048,11 @@ class Main
         State.Pop(null);
     }
 
-    static completedText(completionText: string): string {
+    static completedText(completionText: string): string
+    {
         var previousText = $("#queryField").val();
-        if (completionText == ")" || completionText == '"' || completionText == "'") {
+        if (completionText == ")" || completionText == '"' || completionText == "'")
+        {
             return previousText + completionText;
         }
         let brackets: number = previousText.lastIndexOf("(");
