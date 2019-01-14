@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Web;
-using System.ComponentModel;
 
 namespace GWLogger
 {
@@ -58,12 +58,12 @@ namespace GWLogger
             context.Response.Write("<script>var method=");
             DescribeMethod(context, method);
             context.Response.Write(";</script>");
-            context.Response.Write("<script src='/Frontend/introspection.js'></script>");
+            context.Response.Write("<script src='/introspection.js'></script>");
             context.Response.Write("<script>showParameters();</script>");
             context.Response.Write("</body></html>");
         }
 
-        class FunctionInformation
+        private class FunctionInformation
         {
             public string Category { get; internal set; }
             public string Name { get; internal set; }
@@ -77,7 +77,7 @@ namespace GWLogger
             }
         }
 
-        void HomeInterface(HttpContext context)
+        private void HomeInterface(HttpContext context)
         {
             context.Response.ContentType = "text/html";
             context.Response.Write("<html><head><title>Inventory - JSON introspection</title><link href='/Less/introspect.css' type='text/css' rel='stylesheet'></head>");
@@ -100,7 +100,7 @@ namespace GWLogger
                 .ToList();
 
             context.Response.Write("<div id='functionList'></div>");
-            context.Response.Write("<script src='/Frontend/introspection.js'></script>");
+            context.Response.Write("<script src='/introspection.js'></script>");
             context.Response.Write("<script>var infos=[" + string.Join(",", functions.Select(row => row.ToJson())) + "];\nshowInfos();</script>");
             context.Response.Write("</body></html>");
         }
@@ -202,6 +202,22 @@ namespace GWLogger
                         knownTypes.Add(type.GetGenericArguments().First().Name);
                 }
                 context.Response.Write("}");
+            }
+            else if (type.IsEnum)
+            {
+                context.Response.Write("{\"Type\":\"enum\"");
+                context.Response.Write(",\"EnumName\":\"" + type.Name + "\"");
+                var names = type.GetEnumNames();
+
+                var values = type.GetEnumValues().Cast<object>().Select(row => Convert.ChangeType(row, typeof(int)).ToString()).ToArray();
+                context.Response.Write(",\"Properties\":[");
+                for (var i = 0; i < names.Length; i++)
+                {
+                    if (i != 0)
+                        context.Response.Write(",");
+                    context.Response.Write("{\"Name\":\"" + names[i] + "\",\"Value\":" + values[i] + "}");
+                }
+                context.Response.Write("]}");
             }
             else
             {

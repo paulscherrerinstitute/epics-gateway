@@ -95,6 +95,8 @@ namespace GWLogger.Backend.DataContext
             // Recovers how many entries in that last session
             if (File.Exists(Context.StorageDirectory + "\\" + gateway.ToLower() + ".sessions"))
             {
+                ConvertSessionFile(Context.StorageDirectory + "\\" + gateway.ToLower() + ".sessions");
+
                 using (var reader = new BinaryReader(File.Open(Context.StorageDirectory + "\\" + gateway.ToLower() + ".sessions", FileMode.Open, FileAccess.Read)))
                 {
                     if (reader.BaseStream.Length > sizeof(long))
@@ -104,6 +106,67 @@ namespace GWLogger.Backend.DataContext
                     }
                 }
             }
+        }
+
+        private void ConvertSessionFile(string sessionFile)
+        {
+            using (var reader = new BinaryReader(File.Open(sessionFile, FileMode.Open, FileAccess.Read)))
+            {
+                bool fileFormat = false;
+                bool fileVersion = false;
+                bool shouldConvert = true;
+
+                try
+                {
+                    fileFormat = (reader.ReadInt64() == 1973);
+                    fileVersion = (reader.ReadInt32() == 1);
+                    if (fileFormat && fileVersion) // Format is correct, we can keep it as is
+                        return;
+                }
+                catch
+                {
+                    using (var writer = new BinaryWriter(File.Open(sessionFile + ".new", FileMode.Create)))
+                    {
+                        writer.Write(1973L); // FILE Signature
+                        writer.Write(1U); // Version format
+                    }
+                    shouldConvert = false;
+                }
+
+                if (shouldConvert)
+                {
+                    using (var writer = new BinaryWriter(File.Open(sessionFile + ".new", FileMode.Create)))
+                    {
+                        writer.Write(1973L); // FILE Signature
+                        writer.Write(1U); // Version format
+
+                        if (!fileFormat) // First version of the file format didn't even had the header
+                        {
+                            reader.BaseStream.Seek(0, SeekOrigin.Begin);
+                            while (reader.BaseStream.Position < reader.BaseStream.Length)
+                            {
+                                writer.Write(reader.ReadInt64()); // Start date
+                                writer.Write(reader.ReadInt64()); // End date
+                                writer.Write(reader.ReadInt64()); // Nb records
+
+                                // Those are fix and set as default
+                                writer.Write((byte)0); // Type of restart
+                                writer.Write((byte)0); // Nb chars of comment
+                                writer.Write(new byte[255]); // Nb chars of comment
+                            }
+                        }
+                        else // We don't have any other file version number supported!
+                        {
+                            throw new Exception("File version not supported!");
+                        }
+                    }
+                }
+            }
+
+            // Delete the old file format
+            File.Delete(sessionFile);
+            // Replace the session file with the new file
+            File.Move(sessionFile + ".new", sessionFile);
         }
 
         public static bool Exists(string storageDirectory, string gatewayName)
@@ -275,19 +338,58 @@ namespace GWLogger.Backend.DataContext
                 if (lastLogEntry.HasValue && nbLogEntries > 0)
                 {
                     if (writer.BaseStream.Length == 0)
-                        writer.Write(0l); // Start date
-                    else
-                        writer.BaseStream.Seek(writer.BaseStream.Length - sizeof(long) * 2, SeekOrigin.Begin); // Move from the end
-                    writer.Write(lastLogEntry.HasValue ? lastLogEntry.Value.ToBinary() : 0l); // End date
+                    {
+                        writer.Write(1973L); // FILE Signature
+                        writer.Write(1U); // Version format
+                        writer.Write(0L); // Start date
+                        writer.Write(0L); // End date
+                        writer.Write(0L); // Nb records
+                        writer.Write((byte)0); // Type of restart
+                        writer.Write((byte)0); // Nb chars of comment
+                        writer.Write(new byte[255]); // Nb chars of comment
+                    }
+
+                    writer.BaseStream.Seek(writer.BaseStream.Length - (sizeof(long) * 2 + 257), SeekOrigin.Begin); // Move from the end
+                    writer.Write(lastLogEntry.HasValue ? lastLogEntry.Value.ToBinary() : 0L); // End date
                     writer.Write(nbLogEntries);
                 }
                 if (startNewSession.HasValue)
                 {
+                    lock (lockCachedGatewaySessions)
+                    {
+                        cachedGatewaySessions = null;
+                    }
+
                     writer.BaseStream.Seek(writer.BaseStream.Length, SeekOrigin.Begin);
-                    writer.Write(startNewSession.Value.ToBinary());
-                    writer.Write(0l); // End date
-                    writer.Write(0l);
+                    writer.Write(startNewSession.Value.ToBinary()); // Start Date
+                    writer.Write(0L); // End date
+                    writer.Write(0L); // Nb records
+                    writer.Write((byte)0); // Type of restart
+                    writer.Write((byte)0); // Nb chars of comment
+                    writer.Write(new byte[255]); // Nb chars of comment
                 }
+            }
+        }
+
+        public void UpdateLastGatewaySessionInformation(RestartType restartType, string comment)
+        {
+            var data = System.Text.Encoding.UTF8.GetBytes(comment);
+            if (data.Length > 255)
+            {
+                var tmp = new byte[255];
+                Array.Copy(data, tmp, 255);
+                data = tmp;
+            }
+
+            var sessionFile = Context.StorageDirectory + "\\" + Gateway.ToLower() + ".sessions";
+            using (var writer = new BinaryWriter(File.Open(sessionFile, FileMode.OpenOrCreate, FileAccess.Write)))
+            {
+                writer.BaseStream.Seek(writer.BaseStream.Length - 257, SeekOrigin.Begin); // Move from the end
+                writer.Write((byte)restartType); // Type of restart
+                writer.Write((byte)data.Length); // Nb chars of comment
+                writer.Write(data);
+                if (data.Length < 255)
+                    writer.Write(new byte[255 - data.Length]);
             }
         }
 
@@ -351,8 +453,19 @@ namespace GWLogger.Backend.DataContext
             return date.Minute / 10 + date.Hour * 6;
         }
 
+        private object lockCachedGatewaySessions = new object();
+        private List<GatewaySession> cachedGatewaySessions = null;
         public List<GatewaySession> GetGatewaySessions()
         {
+            lock (lockCachedGatewaySessions)
+            {
+                if (cachedGatewaySessions != null && cachedGatewaySessions.Count == 0)
+                {
+                    cachedGatewaySessions[0].NbEntries = nbLogEntries;
+                    cachedGatewaySessions[0].EndDate = lastLogEntry;
+                }
+            }
+
             try
             {
                 var result = new List<GatewaySession>();
@@ -360,7 +473,12 @@ namespace GWLogger.Backend.DataContext
                 var sessionFile = Context.StorageDirectory + "\\" + Gateway.ToLower() + ".sessions";
                 using (var reader = new BinaryReader(File.Open(sessionFile, FileMode.Open)))
                 {
-                    var start = Math.Max(reader.BaseStream.Length - 100 * sizeof(long) * 3, 0);
+                    if (reader.ReadInt64() != 1973) // Wrong file signature
+                        throw new Exception("Wrong file signature");
+                    if (reader.ReadInt32() != 1) // Wrong file version
+                        throw new Exception("Wrong file version");
+
+                    var start = Math.Max(reader.BaseStream.Length - 100 * (sizeof(long) * 3 + 257), 12);
 
                     reader.BaseStream.Seek(start, SeekOrigin.Begin);
                     while (reader.BaseStream.Position < reader.BaseStream.Length)
@@ -368,16 +486,26 @@ namespace GWLogger.Backend.DataContext
                         var s = reader.ReadInt64();
                         var e = reader.ReadInt64();
                         var n = reader.ReadInt64();
+                        var restartType = reader.ReadByte();
+                        var nbCharDesc = reader.ReadByte();
+                        var descBytes = reader.ReadBytes(255);
+                        var desc = nbCharDesc == 0 ? "" : System.Text.Encoding.UTF8.GetString(descBytes, 0, nbCharDesc);
 
                         result.Add(new GatewaySession
                         {
                             StartDate = (s == 0 ? null : (DateTime?)DateTime.FromBinary(s)),
                             EndDate = (e == 0 ? null : (DateTime?)DateTime.FromBinary(e)),
-                            NbEntries = n
+                            NbEntries = n,
+                            RestartType = (RestartType)restartType,
+                            Description = desc
                         });
                     }
                 }
                 result.Reverse();
+                lock (lockCachedGatewaySessions)
+                {
+                    cachedGatewaySessions = result;
+                }
                 return result;
             }
             catch
@@ -425,17 +553,6 @@ namespace GWLogger.Backend.DataContext
                 lastLogEntry = DateTime.UtcNow;
             }
             WriteEntry(DataWriter, entry);
-
-            /*DataWriter.Write(entry.EntryDate.ToBinary());
-            DataWriter.Write((byte)entry.MessageTypeId);
-            DataWriter.Write(entry.RemoteIpPoint ?? "");
-
-            DataWriter.Write((byte)entry.LogEntryDetails.Count);
-            foreach (var i in entry.LogEntryDetails)
-            {
-                DataWriter.Write((byte)i.DetailTypeId);
-                DataWriter.Write(i.Value);
-            }*/
 
             if (entry.MessageTypeId == 39)
                 Stats[idxPos, 1]++;

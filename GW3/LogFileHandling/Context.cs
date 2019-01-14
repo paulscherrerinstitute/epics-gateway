@@ -131,6 +131,11 @@ namespace GWLogger.Backend.DataContext
             bufferConsumer.Start();
         }
 
+        public void UpdateLastGatewaySessionInformation(string gateway, RestartType restartType, string comment)
+        {
+            files[gateway].UpdateLastGatewaySessionInformation(restartType, comment);
+        }
+
         internal void StoreFilePaths()
         {
             using (var stream = File.OpenWrite(StorageDirectory + "\\FilePaths.xml"))

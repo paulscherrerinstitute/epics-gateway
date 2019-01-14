@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading;
+using GWLogger.Backend.DTOs;
 
 namespace GWLogger.Backend.Controllers
 {
@@ -60,6 +61,11 @@ namespace GWLogger.Backend.Controllers
         public static void RegisterLogMessageDetailType(List<DTOs.IdValue> types)
         {
             Global.DataContext.MessageDetailTypes = types;
+        }
+
+        public static void UpdateLastGatewaySessionInformation(string gateway, RestartType restartType, string comment)
+        {
+            Global.DataContext.UpdateLastGatewaySessionInformation(gateway, restartType, comment);
         }
     }
 }

@@ -1,0 +1,2475 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://gwlogger.psi.ch/" xmlns:s1="http://gwlogger.psi.ch/AbstractTypes" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://gwlogger.psi.ch/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://gwlogger.psi.ch/">
+      <s:element name="GetGatewaysList">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetGatewaysListResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetGatewaysListResult" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetMessageTypes">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetMessageTypesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetMessageTypesResult" type="tns:ArrayOfKeyValuePairOfInt32String" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfKeyValuePairOfInt32String">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="KeyValuePairOfInt32String" type="tns:KeyValuePairOfInt32String" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="KeyValuePairOfInt32String" />
+      <s:element name="GetGatewaySessionsList">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetGatewaySessionsListResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetGatewaySessionsListResult" type="tns:ArrayOfGatewaySession" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfGatewaySession">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="GatewaySession" nillable="true" type="tns:GatewaySession" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="GatewaySession">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="EndDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="StartDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="NbEntries" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="RestartType" type="tns:RestartType" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="RestartType">
+        <s:restriction base="s:string">
+          <s:enumeration value="Unknown" />
+          <s:enumeration value="WatchdogNoResponse" />
+          <s:enumeration value="WatchdogCPULimit" />
+          <s:enumeration value="GatewayUpdate" />
+          <s:enumeration value="ManualRestart" />
+        </s:restriction>
+      </s:simpleType>
+      <s:element name="GetStats">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="start" type="s:dateTime" />
+            <s:element minOccurs="1" maxOccurs="1" name="end" type="s:dateTime" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetStatsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetStatsResult" type="tns:GatewayStats" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GatewayStats">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Logs" type="tns:ArrayOfLogStat" />
+          <s:element minOccurs="0" maxOccurs="1" name="Searches" type="tns:ArrayOfLogStat" />
+          <s:element minOccurs="0" maxOccurs="1" name="Errors" type="tns:ArrayOfLogStat" />
+          <s:element minOccurs="0" maxOccurs="1" name="CPU" type="tns:ArrayOfLogStat" />
+          <s:element minOccurs="0" maxOccurs="1" name="PVs" type="tns:ArrayOfLogStat" />
+          <s:element minOccurs="0" maxOccurs="1" name="Clients" type="tns:ArrayOfLogStat" />
+          <s:element minOccurs="0" maxOccurs="1" name="Servers" type="tns:ArrayOfLogStat" />
+          <s:element minOccurs="0" maxOccurs="1" name="MsgSecs" type="tns:ArrayOfLogStat" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfLogStat">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="LogStat" nillable="true" type="tns:LogStat" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="LogStat">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Date" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="Value" type="s:long" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="CheckQuery">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="query" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CheckQueryResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="CheckQueryResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SearchesPerformed">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="datePoint" type="s:dateTime" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SearchesPerformedResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SearchesPerformedResult" type="tns:ArrayOfKeyValuePairOfStringInt32" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfKeyValuePairOfStringInt32">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="KeyValuePairOfStringInt32" type="tns:KeyValuePairOfStringInt32" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="KeyValuePairOfStringInt32" />
+      <s:element name="SearchesOnChannelsPerformed">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="datePoint" type="s:dateTime" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SearchesOnChannelsPerformedResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SearchesOnChannelsPerformedResult" type="tns:ArrayOfKeyValuePairOfStringInt32" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="MostActiveClasses">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="datePoint" type="s:dateTime" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="MostActiveClassesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="MostActiveClassesResult" type="tns:ArrayOfKeyValuePairOfStringInt32" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ActiveClients">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="datePoint" type="s:dateTime" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ActiveClientsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ActiveClientsResult" type="tns:ArrayOfKeyValuePairOfStringInt32" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ActiveServers">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="datePoint" type="s:dateTime" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ActiveServersResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ActiveServersResult" type="tns:ArrayOfKeyValuePairOfStringInt32" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetDataFileStats">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetDataFileStatsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetDataFileStatsResult" type="tns:ArrayOfDataFileStats" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfDataFileStats">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="DataFileStats" nillable="true" type="tns:DataFileStats" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="DataFileStats">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="LogsPerSeconds" type="s:double" />
+          <s:element minOccurs="1" maxOccurs="1" name="AverageEntryBytes" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TotalDataSize" type="s:long" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetGatewayNetworks">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetGatewayNetworksResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetGatewayNetworksResult" type="tns:ArrayOfKeyValuePairOfStringString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfKeyValuePairOfStringString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="KeyValuePairOfStringString" type="tns:KeyValuePairOfStringString" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="KeyValuePairOfStringString" />
+      <s:element name="EpicsCheck">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="config" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="channel" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="EpicsCheckResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="EpicsCheckResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="BadClientConfig">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="BadClientConfigResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="BadClientConfigResult" type="tns:ArrayOfHostChannelCount" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfHostChannelCount">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="HostChannelCount" nillable="true" type="tns:HostChannelCount" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="HostChannelCount">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Hostname" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Channel" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Count" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetAllStats">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAllStatsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAllStatsResult" type="tns:ArrayOfGatewayStats" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfGatewayStats">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="GatewayStats" nillable="true" type="tns:GatewayStats" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetShortInformation">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetShortInformationResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetShortInformationResult" type="tns:ArrayOfGatewayShortInformation" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfGatewayShortInformation">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="GatewayShortInformation" nillable="true" type="tns:GatewayShortInformation" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="GatewayShortInformation">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="CPU" nillable="true" type="s:double" />
+          <s:element minOccurs="1" maxOccurs="1" name="Mem" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Searches" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Build" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="State" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Version" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="RunningTime" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Direction" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetGatewayInformation">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetGatewayInformationResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetGatewayInformationResult" type="tns:GatewayInformation" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GatewayInformation">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="CPU" nillable="true" type="s:double" />
+          <s:element minOccurs="1" maxOccurs="1" name="Mem" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Searches" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Build" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Version" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Messages" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="PVs" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="RunningTime" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="NbClients" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="NbServers" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Network" nillable="true" type="s:double" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="CpuHistory">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CpuHistoryResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CpuHistoryResult" type="tns:ArrayOfHistoricData" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfHistoricData">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="HistoricData" nillable="true" type="tns:HistoricData" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="HistoricData">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Value" nillable="true" type="s:double" />
+          <s:element minOccurs="1" maxOccurs="1" name="Date" type="s:dateTime" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SearchHistory">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SearchHistoryResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SearchHistoryResult" type="tns:ArrayOfHistoricData" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="PVsHistory">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="PVsHistoryResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="PVsHistoryResult" type="tns:ArrayOfHistoricData" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="NetworkHistory">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="NetworkHistoryResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="NetworkHistoryResult" type="tns:ArrayOfHistoricData" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetHistoricData">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gatewayName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetHistoricDataResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetHistoricDataResult" type="tns:ArrayOfKeyValuePairOfStringListOfHistoricData" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfKeyValuePairOfStringListOfHistoricData">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="KeyValuePairOfStringListOfHistoricData" type="tns:KeyValuePairOfStringListOfHistoricData" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="KeyValuePairOfStringListOfHistoricData">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Value" type="tns:ArrayOfHistoricData" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="RegisterLogMessageType">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="types" type="tns:ArrayOfMessageType" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfMessageType">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="MessageType" nillable="true" type="tns:MessageType" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="MessageType">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DisplayMask" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="LogLevel" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="RegisterLogMessageTypeResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="RegisterLogMessageDetailType">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="types" type="tns:ArrayOfIdValue" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfIdValue">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="IdValue" nillable="true" type="tns:IdValue" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="IdValue">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Value" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="RegisterLogMessageDetailTypeResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="LogEntries">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="logEntries" type="tns:ArrayOfLogEntry" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfLogEntry">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="LogEntry" nillable="true" type="tns:LogEntry" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="LogEntry">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Gateway" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="RemoteIpPoint" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="MessageType" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Details" type="tns:ArrayOfLogEntryDetail" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfLogEntryDetail">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="LogEntryDetail" nillable="true" type="tns:LogEntryDetail" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="LogEntryDetail">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="TypeId" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Value" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="LogEntriesResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="BinaryLogEntries">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gateway" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="data" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="BinaryLogEntriesResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetBufferUsage">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetBufferUsageResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="GetBufferUsageResult" type="s:double" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="LogEntry">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gateway" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="remoteIpPoint" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="messageType" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="details" type="tns:ArrayOfLogEntryDetail" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="LogEntryResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="UpdateLastGatewaySessionInformation">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="gateway" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="restartType" type="tns:RestartType" />
+            <s:element minOccurs="0" maxOccurs="1" name="comment" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateLastGatewaySessionInformationResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetFreeSpace">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetFreeSpaceResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetFreeSpaceResult" type="tns:FreeSpace" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="FreeSpace">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="TotMB" type="s:unsignedLong" />
+          <s:element minOccurs="1" maxOccurs="1" name="FreeMB" type="s:unsignedLong" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ArrayOfString" nillable="true" type="tns:ArrayOfString" />
+      <s:element name="ArrayOfKeyValuePairOfInt32String" nillable="true" type="tns:ArrayOfKeyValuePairOfInt32String" />
+      <s:element name="ArrayOfGatewaySession" nillable="true" type="tns:ArrayOfGatewaySession" />
+      <s:element name="GatewayStats" nillable="true" type="tns:GatewayStats" />
+      <s:element name="boolean" type="s:boolean" />
+      <s:element name="ArrayOfKeyValuePairOfStringInt32" nillable="true" type="tns:ArrayOfKeyValuePairOfStringInt32" />
+      <s:element name="ArrayOfDataFileStats" nillable="true" type="tns:ArrayOfDataFileStats" />
+      <s:element name="ArrayOfKeyValuePairOfStringString" nillable="true" type="tns:ArrayOfKeyValuePairOfStringString" />
+      <s:element name="string" nillable="true" type="s:string" />
+      <s:element name="ArrayOfHostChannelCount" nillable="true" type="tns:ArrayOfHostChannelCount" />
+      <s:element name="ArrayOfGatewayStats" nillable="true" type="tns:ArrayOfGatewayStats" />
+      <s:element name="ArrayOfGatewayShortInformation" nillable="true" type="tns:ArrayOfGatewayShortInformation" />
+      <s:element name="GatewayInformation" nillable="true" type="tns:GatewayInformation" />
+      <s:element name="ArrayOfHistoricData" nillable="true" type="tns:ArrayOfHistoricData" />
+      <s:element name="ArrayOfKeyValuePairOfStringListOfHistoricData" nillable="true" type="tns:ArrayOfKeyValuePairOfStringListOfHistoricData" />
+      <s:element name="double" type="s:double" />
+      <s:element name="FreeSpace" nillable="true" type="tns:FreeSpace" />
+    </s:schema>
+    <s:schema targetNamespace="http://gwlogger.psi.ch/AbstractTypes">
+      <s:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
+      <s:complexType name="StringArray">
+        <s:complexContent mixed="false">
+          <s:restriction base="soapenc:Array">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="unbounded" name="String" type="s:string" />
+            </s:sequence>
+          </s:restriction>
+        </s:complexContent>
+      </s:complexType>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GetGatewaysListSoapIn">
+    <wsdl:part name="parameters" element="tns:GetGatewaysList" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewaysListSoapOut">
+    <wsdl:part name="parameters" element="tns:GetGatewaysListResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetMessageTypesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetMessageTypes" />
+  </wsdl:message>
+  <wsdl:message name="GetMessageTypesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetMessageTypesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewaySessionsListSoapIn">
+    <wsdl:part name="parameters" element="tns:GetGatewaySessionsList" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewaySessionsListSoapOut">
+    <wsdl:part name="parameters" element="tns:GetGatewaySessionsListResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetStatsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetStats" />
+  </wsdl:message>
+  <wsdl:message name="GetStatsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetStatsResponse" />
+  </wsdl:message>
+  <wsdl:message name="CheckQuerySoapIn">
+    <wsdl:part name="parameters" element="tns:CheckQuery" />
+  </wsdl:message>
+  <wsdl:message name="CheckQuerySoapOut">
+    <wsdl:part name="parameters" element="tns:CheckQueryResponse" />
+  </wsdl:message>
+  <wsdl:message name="SearchesPerformedSoapIn">
+    <wsdl:part name="parameters" element="tns:SearchesPerformed" />
+  </wsdl:message>
+  <wsdl:message name="SearchesPerformedSoapOut">
+    <wsdl:part name="parameters" element="tns:SearchesPerformedResponse" />
+  </wsdl:message>
+  <wsdl:message name="SearchesOnChannelsPerformedSoapIn">
+    <wsdl:part name="parameters" element="tns:SearchesOnChannelsPerformed" />
+  </wsdl:message>
+  <wsdl:message name="SearchesOnChannelsPerformedSoapOut">
+    <wsdl:part name="parameters" element="tns:SearchesOnChannelsPerformedResponse" />
+  </wsdl:message>
+  <wsdl:message name="MostActiveClassesSoapIn">
+    <wsdl:part name="parameters" element="tns:MostActiveClasses" />
+  </wsdl:message>
+  <wsdl:message name="MostActiveClassesSoapOut">
+    <wsdl:part name="parameters" element="tns:MostActiveClassesResponse" />
+  </wsdl:message>
+  <wsdl:message name="ActiveClientsSoapIn">
+    <wsdl:part name="parameters" element="tns:ActiveClients" />
+  </wsdl:message>
+  <wsdl:message name="ActiveClientsSoapOut">
+    <wsdl:part name="parameters" element="tns:ActiveClientsResponse" />
+  </wsdl:message>
+  <wsdl:message name="ActiveServersSoapIn">
+    <wsdl:part name="parameters" element="tns:ActiveServers" />
+  </wsdl:message>
+  <wsdl:message name="ActiveServersSoapOut">
+    <wsdl:part name="parameters" element="tns:ActiveServersResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetDataFileStatsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetDataFileStats" />
+  </wsdl:message>
+  <wsdl:message name="GetDataFileStatsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetDataFileStatsResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewayNetworksSoapIn">
+    <wsdl:part name="parameters" element="tns:GetGatewayNetworks" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewayNetworksSoapOut">
+    <wsdl:part name="parameters" element="tns:GetGatewayNetworksResponse" />
+  </wsdl:message>
+  <wsdl:message name="EpicsCheckSoapIn">
+    <wsdl:part name="parameters" element="tns:EpicsCheck" />
+  </wsdl:message>
+  <wsdl:message name="EpicsCheckSoapOut">
+    <wsdl:part name="parameters" element="tns:EpicsCheckResponse" />
+  </wsdl:message>
+  <wsdl:message name="BadClientConfigSoapIn">
+    <wsdl:part name="parameters" element="tns:BadClientConfig" />
+  </wsdl:message>
+  <wsdl:message name="BadClientConfigSoapOut">
+    <wsdl:part name="parameters" element="tns:BadClientConfigResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllStatsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAllStats" />
+  </wsdl:message>
+  <wsdl:message name="GetAllStatsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAllStatsResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetShortInformationSoapIn">
+    <wsdl:part name="parameters" element="tns:GetShortInformation" />
+  </wsdl:message>
+  <wsdl:message name="GetShortInformationSoapOut">
+    <wsdl:part name="parameters" element="tns:GetShortInformationResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewayInformationSoapIn">
+    <wsdl:part name="parameters" element="tns:GetGatewayInformation" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewayInformationSoapOut">
+    <wsdl:part name="parameters" element="tns:GetGatewayInformationResponse" />
+  </wsdl:message>
+  <wsdl:message name="CpuHistorySoapIn">
+    <wsdl:part name="parameters" element="tns:CpuHistory" />
+  </wsdl:message>
+  <wsdl:message name="CpuHistorySoapOut">
+    <wsdl:part name="parameters" element="tns:CpuHistoryResponse" />
+  </wsdl:message>
+  <wsdl:message name="SearchHistorySoapIn">
+    <wsdl:part name="parameters" element="tns:SearchHistory" />
+  </wsdl:message>
+  <wsdl:message name="SearchHistorySoapOut">
+    <wsdl:part name="parameters" element="tns:SearchHistoryResponse" />
+  </wsdl:message>
+  <wsdl:message name="PVsHistorySoapIn">
+    <wsdl:part name="parameters" element="tns:PVsHistory" />
+  </wsdl:message>
+  <wsdl:message name="PVsHistorySoapOut">
+    <wsdl:part name="parameters" element="tns:PVsHistoryResponse" />
+  </wsdl:message>
+  <wsdl:message name="NetworkHistorySoapIn">
+    <wsdl:part name="parameters" element="tns:NetworkHistory" />
+  </wsdl:message>
+  <wsdl:message name="NetworkHistorySoapOut">
+    <wsdl:part name="parameters" element="tns:NetworkHistoryResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetHistoricDataSoapIn">
+    <wsdl:part name="parameters" element="tns:GetHistoricData" />
+  </wsdl:message>
+  <wsdl:message name="GetHistoricDataSoapOut">
+    <wsdl:part name="parameters" element="tns:GetHistoricDataResponse" />
+  </wsdl:message>
+  <wsdl:message name="RegisterLogMessageTypeSoapIn">
+    <wsdl:part name="parameters" element="tns:RegisterLogMessageType" />
+  </wsdl:message>
+  <wsdl:message name="RegisterLogMessageTypeSoapOut">
+    <wsdl:part name="parameters" element="tns:RegisterLogMessageTypeResponse" />
+  </wsdl:message>
+  <wsdl:message name="RegisterLogMessageDetailTypeSoapIn">
+    <wsdl:part name="parameters" element="tns:RegisterLogMessageDetailType" />
+  </wsdl:message>
+  <wsdl:message name="RegisterLogMessageDetailTypeSoapOut">
+    <wsdl:part name="parameters" element="tns:RegisterLogMessageDetailTypeResponse" />
+  </wsdl:message>
+  <wsdl:message name="LogEntriesSoapIn">
+    <wsdl:part name="parameters" element="tns:LogEntries" />
+  </wsdl:message>
+  <wsdl:message name="LogEntriesSoapOut">
+    <wsdl:part name="parameters" element="tns:LogEntriesResponse" />
+  </wsdl:message>
+  <wsdl:message name="BinaryLogEntriesSoapIn">
+    <wsdl:part name="parameters" element="tns:BinaryLogEntries" />
+  </wsdl:message>
+  <wsdl:message name="BinaryLogEntriesSoapOut">
+    <wsdl:part name="parameters" element="tns:BinaryLogEntriesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetBufferUsageSoapIn">
+    <wsdl:part name="parameters" element="tns:GetBufferUsage" />
+  </wsdl:message>
+  <wsdl:message name="GetBufferUsageSoapOut">
+    <wsdl:part name="parameters" element="tns:GetBufferUsageResponse" />
+  </wsdl:message>
+  <wsdl:message name="LogEntrySoapIn">
+    <wsdl:part name="parameters" element="tns:LogEntry" />
+  </wsdl:message>
+  <wsdl:message name="LogEntrySoapOut">
+    <wsdl:part name="parameters" element="tns:LogEntryResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateLastGatewaySessionInformationSoapIn">
+    <wsdl:part name="parameters" element="tns:UpdateLastGatewaySessionInformation" />
+  </wsdl:message>
+  <wsdl:message name="UpdateLastGatewaySessionInformationSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateLastGatewaySessionInformationResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetFreeSpaceSoapIn">
+    <wsdl:part name="parameters" element="tns:GetFreeSpace" />
+  </wsdl:message>
+  <wsdl:message name="GetFreeSpaceSoapOut">
+    <wsdl:part name="parameters" element="tns:GetFreeSpaceResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewaysListHttpGetIn" />
+  <wsdl:message name="GetGatewaysListHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfString" />
+  </wsdl:message>
+  <wsdl:message name="GetMessageTypesHttpGetIn" />
+  <wsdl:message name="GetMessageTypesHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfKeyValuePairOfInt32String" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewaySessionsListHttpGetIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewaySessionsListHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfGatewaySession" />
+  </wsdl:message>
+  <wsdl:message name="GetStatsHttpGetIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+    <wsdl:part name="start" type="s:string" />
+    <wsdl:part name="end" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetStatsHttpGetOut">
+    <wsdl:part name="Body" element="tns:GatewayStats" />
+  </wsdl:message>
+  <wsdl:message name="CheckQueryHttpGetIn">
+    <wsdl:part name="query" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CheckQueryHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="SearchesPerformedHttpGetIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+    <wsdl:part name="datePoint" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="SearchesPerformedHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfKeyValuePairOfStringInt32" />
+  </wsdl:message>
+  <wsdl:message name="SearchesOnChannelsPerformedHttpGetIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+    <wsdl:part name="datePoint" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="SearchesOnChannelsPerformedHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfKeyValuePairOfStringInt32" />
+  </wsdl:message>
+  <wsdl:message name="MostActiveClassesHttpGetIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+    <wsdl:part name="datePoint" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="MostActiveClassesHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfKeyValuePairOfStringInt32" />
+  </wsdl:message>
+  <wsdl:message name="ActiveClientsHttpGetIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+    <wsdl:part name="datePoint" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="ActiveClientsHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfKeyValuePairOfStringInt32" />
+  </wsdl:message>
+  <wsdl:message name="ActiveServersHttpGetIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+    <wsdl:part name="datePoint" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="ActiveServersHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfKeyValuePairOfStringInt32" />
+  </wsdl:message>
+  <wsdl:message name="GetDataFileStatsHttpGetIn" />
+  <wsdl:message name="GetDataFileStatsHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfDataFileStats" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewayNetworksHttpGetIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewayNetworksHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfKeyValuePairOfStringString" />
+  </wsdl:message>
+  <wsdl:message name="EpicsCheckHttpGetIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+    <wsdl:part name="config" type="s:string" />
+    <wsdl:part name="channel" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="EpicsCheckHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="BadClientConfigHttpGetIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="BadClientConfigHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfHostChannelCount" />
+  </wsdl:message>
+  <wsdl:message name="GetAllStatsHttpGetIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetAllStatsHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfGatewayStats" />
+  </wsdl:message>
+  <wsdl:message name="GetShortInformationHttpGetIn" />
+  <wsdl:message name="GetShortInformationHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfGatewayShortInformation" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewayInformationHttpGetIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewayInformationHttpGetOut">
+    <wsdl:part name="Body" element="tns:GatewayInformation" />
+  </wsdl:message>
+  <wsdl:message name="CpuHistoryHttpGetIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CpuHistoryHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfHistoricData" />
+  </wsdl:message>
+  <wsdl:message name="SearchHistoryHttpGetIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="SearchHistoryHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfHistoricData" />
+  </wsdl:message>
+  <wsdl:message name="PVsHistoryHttpGetIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="PVsHistoryHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfHistoricData" />
+  </wsdl:message>
+  <wsdl:message name="NetworkHistoryHttpGetIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="NetworkHistoryHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfHistoricData" />
+  </wsdl:message>
+  <wsdl:message name="GetHistoricDataHttpGetIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetHistoricDataHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfKeyValuePairOfStringListOfHistoricData" />
+  </wsdl:message>
+  <wsdl:message name="BinaryLogEntriesHttpGetIn">
+    <wsdl:part name="gateway" type="s:string" />
+    <wsdl:part name="data" type="s1:StringArray" />
+  </wsdl:message>
+  <wsdl:message name="BinaryLogEntriesHttpGetOut" />
+  <wsdl:message name="GetBufferUsageHttpGetIn" />
+  <wsdl:message name="GetBufferUsageHttpGetOut">
+    <wsdl:part name="Body" element="tns:double" />
+  </wsdl:message>
+  <wsdl:message name="UpdateLastGatewaySessionInformationHttpGetIn">
+    <wsdl:part name="gateway" type="s:string" />
+    <wsdl:part name="restartType" type="s:string" />
+    <wsdl:part name="comment" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="UpdateLastGatewaySessionInformationHttpGetOut" />
+  <wsdl:message name="GetFreeSpaceHttpGetIn" />
+  <wsdl:message name="GetFreeSpaceHttpGetOut">
+    <wsdl:part name="Body" element="tns:FreeSpace" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewaysListHttpPostIn" />
+  <wsdl:message name="GetGatewaysListHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfString" />
+  </wsdl:message>
+  <wsdl:message name="GetMessageTypesHttpPostIn" />
+  <wsdl:message name="GetMessageTypesHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfKeyValuePairOfInt32String" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewaySessionsListHttpPostIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewaySessionsListHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfGatewaySession" />
+  </wsdl:message>
+  <wsdl:message name="GetStatsHttpPostIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+    <wsdl:part name="start" type="s:string" />
+    <wsdl:part name="end" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetStatsHttpPostOut">
+    <wsdl:part name="Body" element="tns:GatewayStats" />
+  </wsdl:message>
+  <wsdl:message name="CheckQueryHttpPostIn">
+    <wsdl:part name="query" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CheckQueryHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="SearchesPerformedHttpPostIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+    <wsdl:part name="datePoint" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="SearchesPerformedHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfKeyValuePairOfStringInt32" />
+  </wsdl:message>
+  <wsdl:message name="SearchesOnChannelsPerformedHttpPostIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+    <wsdl:part name="datePoint" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="SearchesOnChannelsPerformedHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfKeyValuePairOfStringInt32" />
+  </wsdl:message>
+  <wsdl:message name="MostActiveClassesHttpPostIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+    <wsdl:part name="datePoint" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="MostActiveClassesHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfKeyValuePairOfStringInt32" />
+  </wsdl:message>
+  <wsdl:message name="ActiveClientsHttpPostIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+    <wsdl:part name="datePoint" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="ActiveClientsHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfKeyValuePairOfStringInt32" />
+  </wsdl:message>
+  <wsdl:message name="ActiveServersHttpPostIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+    <wsdl:part name="datePoint" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="ActiveServersHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfKeyValuePairOfStringInt32" />
+  </wsdl:message>
+  <wsdl:message name="GetDataFileStatsHttpPostIn" />
+  <wsdl:message name="GetDataFileStatsHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfDataFileStats" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewayNetworksHttpPostIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewayNetworksHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfKeyValuePairOfStringString" />
+  </wsdl:message>
+  <wsdl:message name="EpicsCheckHttpPostIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+    <wsdl:part name="config" type="s:string" />
+    <wsdl:part name="channel" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="EpicsCheckHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="BadClientConfigHttpPostIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="BadClientConfigHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfHostChannelCount" />
+  </wsdl:message>
+  <wsdl:message name="GetAllStatsHttpPostIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetAllStatsHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfGatewayStats" />
+  </wsdl:message>
+  <wsdl:message name="GetShortInformationHttpPostIn" />
+  <wsdl:message name="GetShortInformationHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfGatewayShortInformation" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewayInformationHttpPostIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetGatewayInformationHttpPostOut">
+    <wsdl:part name="Body" element="tns:GatewayInformation" />
+  </wsdl:message>
+  <wsdl:message name="CpuHistoryHttpPostIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CpuHistoryHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfHistoricData" />
+  </wsdl:message>
+  <wsdl:message name="SearchHistoryHttpPostIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="SearchHistoryHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfHistoricData" />
+  </wsdl:message>
+  <wsdl:message name="PVsHistoryHttpPostIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="PVsHistoryHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfHistoricData" />
+  </wsdl:message>
+  <wsdl:message name="NetworkHistoryHttpPostIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="NetworkHistoryHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfHistoricData" />
+  </wsdl:message>
+  <wsdl:message name="GetHistoricDataHttpPostIn">
+    <wsdl:part name="gatewayName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetHistoricDataHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfKeyValuePairOfStringListOfHistoricData" />
+  </wsdl:message>
+  <wsdl:message name="BinaryLogEntriesHttpPostIn">
+    <wsdl:part name="gateway" type="s:string" />
+    <wsdl:part name="data" type="s1:StringArray" />
+  </wsdl:message>
+  <wsdl:message name="BinaryLogEntriesHttpPostOut" />
+  <wsdl:message name="GetBufferUsageHttpPostIn" />
+  <wsdl:message name="GetBufferUsageHttpPostOut">
+    <wsdl:part name="Body" element="tns:double" />
+  </wsdl:message>
+  <wsdl:message name="UpdateLastGatewaySessionInformationHttpPostIn">
+    <wsdl:part name="gateway" type="s:string" />
+    <wsdl:part name="restartType" type="s:string" />
+    <wsdl:part name="comment" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="UpdateLastGatewaySessionInformationHttpPostOut" />
+  <wsdl:message name="GetFreeSpaceHttpPostIn" />
+  <wsdl:message name="GetFreeSpaceHttpPostOut">
+    <wsdl:part name="Body" element="tns:FreeSpace" />
+  </wsdl:message>
+  <wsdl:portType name="DataAccessSoap">
+    <wsdl:operation name="GetGatewaysList">
+      <wsdl:input message="tns:GetGatewaysListSoapIn" />
+      <wsdl:output message="tns:GetGatewaysListSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetMessageTypes">
+      <wsdl:input message="tns:GetMessageTypesSoapIn" />
+      <wsdl:output message="tns:GetMessageTypesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewaySessionsList">
+      <wsdl:input message="tns:GetGatewaySessionsListSoapIn" />
+      <wsdl:output message="tns:GetGatewaySessionsListSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetStats">
+      <wsdl:input message="tns:GetStatsSoapIn" />
+      <wsdl:output message="tns:GetStatsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CheckQuery">
+      <wsdl:input message="tns:CheckQuerySoapIn" />
+      <wsdl:output message="tns:CheckQuerySoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SearchesPerformed">
+      <wsdl:input message="tns:SearchesPerformedSoapIn" />
+      <wsdl:output message="tns:SearchesPerformedSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SearchesOnChannelsPerformed">
+      <wsdl:input message="tns:SearchesOnChannelsPerformedSoapIn" />
+      <wsdl:output message="tns:SearchesOnChannelsPerformedSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MostActiveClasses">
+      <wsdl:input message="tns:MostActiveClassesSoapIn" />
+      <wsdl:output message="tns:MostActiveClassesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ActiveClients">
+      <wsdl:input message="tns:ActiveClientsSoapIn" />
+      <wsdl:output message="tns:ActiveClientsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ActiveServers">
+      <wsdl:input message="tns:ActiveServersSoapIn" />
+      <wsdl:output message="tns:ActiveServersSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetDataFileStats">
+      <wsdl:input message="tns:GetDataFileStatsSoapIn" />
+      <wsdl:output message="tns:GetDataFileStatsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewayNetworks">
+      <wsdl:input message="tns:GetGatewayNetworksSoapIn" />
+      <wsdl:output message="tns:GetGatewayNetworksSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="EpicsCheck">
+      <wsdl:input message="tns:EpicsCheckSoapIn" />
+      <wsdl:output message="tns:EpicsCheckSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="BadClientConfig">
+      <wsdl:input message="tns:BadClientConfigSoapIn" />
+      <wsdl:output message="tns:BadClientConfigSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllStats">
+      <wsdl:input message="tns:GetAllStatsSoapIn" />
+      <wsdl:output message="tns:GetAllStatsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetShortInformation">
+      <wsdl:input message="tns:GetShortInformationSoapIn" />
+      <wsdl:output message="tns:GetShortInformationSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewayInformation">
+      <wsdl:input message="tns:GetGatewayInformationSoapIn" />
+      <wsdl:output message="tns:GetGatewayInformationSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CpuHistory">
+      <wsdl:input message="tns:CpuHistorySoapIn" />
+      <wsdl:output message="tns:CpuHistorySoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SearchHistory">
+      <wsdl:input message="tns:SearchHistorySoapIn" />
+      <wsdl:output message="tns:SearchHistorySoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="PVsHistory">
+      <wsdl:input message="tns:PVsHistorySoapIn" />
+      <wsdl:output message="tns:PVsHistorySoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="NetworkHistory">
+      <wsdl:input message="tns:NetworkHistorySoapIn" />
+      <wsdl:output message="tns:NetworkHistorySoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetHistoricData">
+      <wsdl:input message="tns:GetHistoricDataSoapIn" />
+      <wsdl:output message="tns:GetHistoricDataSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RegisterLogMessageType">
+      <wsdl:input message="tns:RegisterLogMessageTypeSoapIn" />
+      <wsdl:output message="tns:RegisterLogMessageTypeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RegisterLogMessageDetailType">
+      <wsdl:input message="tns:RegisterLogMessageDetailTypeSoapIn" />
+      <wsdl:output message="tns:RegisterLogMessageDetailTypeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="LogEntries">
+      <wsdl:input message="tns:LogEntriesSoapIn" />
+      <wsdl:output message="tns:LogEntriesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="BinaryLogEntries">
+      <wsdl:input message="tns:BinaryLogEntriesSoapIn" />
+      <wsdl:output message="tns:BinaryLogEntriesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetBufferUsage">
+      <wsdl:input message="tns:GetBufferUsageSoapIn" />
+      <wsdl:output message="tns:GetBufferUsageSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="LogEntry">
+      <wsdl:input message="tns:LogEntrySoapIn" />
+      <wsdl:output message="tns:LogEntrySoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateLastGatewaySessionInformation">
+      <wsdl:input message="tns:UpdateLastGatewaySessionInformationSoapIn" />
+      <wsdl:output message="tns:UpdateLastGatewaySessionInformationSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetFreeSpace">
+      <wsdl:input message="tns:GetFreeSpaceSoapIn" />
+      <wsdl:output message="tns:GetFreeSpaceSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="DataAccessHttpGet">
+    <wsdl:operation name="GetGatewaysList">
+      <wsdl:input message="tns:GetGatewaysListHttpGetIn" />
+      <wsdl:output message="tns:GetGatewaysListHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetMessageTypes">
+      <wsdl:input message="tns:GetMessageTypesHttpGetIn" />
+      <wsdl:output message="tns:GetMessageTypesHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewaySessionsList">
+      <wsdl:input message="tns:GetGatewaySessionsListHttpGetIn" />
+      <wsdl:output message="tns:GetGatewaySessionsListHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetStats">
+      <wsdl:input message="tns:GetStatsHttpGetIn" />
+      <wsdl:output message="tns:GetStatsHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CheckQuery">
+      <wsdl:input message="tns:CheckQueryHttpGetIn" />
+      <wsdl:output message="tns:CheckQueryHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SearchesPerformed">
+      <wsdl:input message="tns:SearchesPerformedHttpGetIn" />
+      <wsdl:output message="tns:SearchesPerformedHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SearchesOnChannelsPerformed">
+      <wsdl:input message="tns:SearchesOnChannelsPerformedHttpGetIn" />
+      <wsdl:output message="tns:SearchesOnChannelsPerformedHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MostActiveClasses">
+      <wsdl:input message="tns:MostActiveClassesHttpGetIn" />
+      <wsdl:output message="tns:MostActiveClassesHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ActiveClients">
+      <wsdl:input message="tns:ActiveClientsHttpGetIn" />
+      <wsdl:output message="tns:ActiveClientsHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ActiveServers">
+      <wsdl:input message="tns:ActiveServersHttpGetIn" />
+      <wsdl:output message="tns:ActiveServersHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetDataFileStats">
+      <wsdl:input message="tns:GetDataFileStatsHttpGetIn" />
+      <wsdl:output message="tns:GetDataFileStatsHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewayNetworks">
+      <wsdl:input message="tns:GetGatewayNetworksHttpGetIn" />
+      <wsdl:output message="tns:GetGatewayNetworksHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="EpicsCheck">
+      <wsdl:input message="tns:EpicsCheckHttpGetIn" />
+      <wsdl:output message="tns:EpicsCheckHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="BadClientConfig">
+      <wsdl:input message="tns:BadClientConfigHttpGetIn" />
+      <wsdl:output message="tns:BadClientConfigHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllStats">
+      <wsdl:input message="tns:GetAllStatsHttpGetIn" />
+      <wsdl:output message="tns:GetAllStatsHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetShortInformation">
+      <wsdl:input message="tns:GetShortInformationHttpGetIn" />
+      <wsdl:output message="tns:GetShortInformationHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewayInformation">
+      <wsdl:input message="tns:GetGatewayInformationHttpGetIn" />
+      <wsdl:output message="tns:GetGatewayInformationHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CpuHistory">
+      <wsdl:input message="tns:CpuHistoryHttpGetIn" />
+      <wsdl:output message="tns:CpuHistoryHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SearchHistory">
+      <wsdl:input message="tns:SearchHistoryHttpGetIn" />
+      <wsdl:output message="tns:SearchHistoryHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="PVsHistory">
+      <wsdl:input message="tns:PVsHistoryHttpGetIn" />
+      <wsdl:output message="tns:PVsHistoryHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="NetworkHistory">
+      <wsdl:input message="tns:NetworkHistoryHttpGetIn" />
+      <wsdl:output message="tns:NetworkHistoryHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetHistoricData">
+      <wsdl:input message="tns:GetHistoricDataHttpGetIn" />
+      <wsdl:output message="tns:GetHistoricDataHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="BinaryLogEntries">
+      <wsdl:input message="tns:BinaryLogEntriesHttpGetIn" />
+      <wsdl:output message="tns:BinaryLogEntriesHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetBufferUsage">
+      <wsdl:input message="tns:GetBufferUsageHttpGetIn" />
+      <wsdl:output message="tns:GetBufferUsageHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateLastGatewaySessionInformation">
+      <wsdl:input message="tns:UpdateLastGatewaySessionInformationHttpGetIn" />
+      <wsdl:output message="tns:UpdateLastGatewaySessionInformationHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetFreeSpace">
+      <wsdl:input message="tns:GetFreeSpaceHttpGetIn" />
+      <wsdl:output message="tns:GetFreeSpaceHttpGetOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="DataAccessHttpPost">
+    <wsdl:operation name="GetGatewaysList">
+      <wsdl:input message="tns:GetGatewaysListHttpPostIn" />
+      <wsdl:output message="tns:GetGatewaysListHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetMessageTypes">
+      <wsdl:input message="tns:GetMessageTypesHttpPostIn" />
+      <wsdl:output message="tns:GetMessageTypesHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewaySessionsList">
+      <wsdl:input message="tns:GetGatewaySessionsListHttpPostIn" />
+      <wsdl:output message="tns:GetGatewaySessionsListHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetStats">
+      <wsdl:input message="tns:GetStatsHttpPostIn" />
+      <wsdl:output message="tns:GetStatsHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CheckQuery">
+      <wsdl:input message="tns:CheckQueryHttpPostIn" />
+      <wsdl:output message="tns:CheckQueryHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SearchesPerformed">
+      <wsdl:input message="tns:SearchesPerformedHttpPostIn" />
+      <wsdl:output message="tns:SearchesPerformedHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SearchesOnChannelsPerformed">
+      <wsdl:input message="tns:SearchesOnChannelsPerformedHttpPostIn" />
+      <wsdl:output message="tns:SearchesOnChannelsPerformedHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MostActiveClasses">
+      <wsdl:input message="tns:MostActiveClassesHttpPostIn" />
+      <wsdl:output message="tns:MostActiveClassesHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ActiveClients">
+      <wsdl:input message="tns:ActiveClientsHttpPostIn" />
+      <wsdl:output message="tns:ActiveClientsHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ActiveServers">
+      <wsdl:input message="tns:ActiveServersHttpPostIn" />
+      <wsdl:output message="tns:ActiveServersHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetDataFileStats">
+      <wsdl:input message="tns:GetDataFileStatsHttpPostIn" />
+      <wsdl:output message="tns:GetDataFileStatsHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewayNetworks">
+      <wsdl:input message="tns:GetGatewayNetworksHttpPostIn" />
+      <wsdl:output message="tns:GetGatewayNetworksHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="EpicsCheck">
+      <wsdl:input message="tns:EpicsCheckHttpPostIn" />
+      <wsdl:output message="tns:EpicsCheckHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="BadClientConfig">
+      <wsdl:input message="tns:BadClientConfigHttpPostIn" />
+      <wsdl:output message="tns:BadClientConfigHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllStats">
+      <wsdl:input message="tns:GetAllStatsHttpPostIn" />
+      <wsdl:output message="tns:GetAllStatsHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetShortInformation">
+      <wsdl:input message="tns:GetShortInformationHttpPostIn" />
+      <wsdl:output message="tns:GetShortInformationHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewayInformation">
+      <wsdl:input message="tns:GetGatewayInformationHttpPostIn" />
+      <wsdl:output message="tns:GetGatewayInformationHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CpuHistory">
+      <wsdl:input message="tns:CpuHistoryHttpPostIn" />
+      <wsdl:output message="tns:CpuHistoryHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SearchHistory">
+      <wsdl:input message="tns:SearchHistoryHttpPostIn" />
+      <wsdl:output message="tns:SearchHistoryHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="PVsHistory">
+      <wsdl:input message="tns:PVsHistoryHttpPostIn" />
+      <wsdl:output message="tns:PVsHistoryHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="NetworkHistory">
+      <wsdl:input message="tns:NetworkHistoryHttpPostIn" />
+      <wsdl:output message="tns:NetworkHistoryHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetHistoricData">
+      <wsdl:input message="tns:GetHistoricDataHttpPostIn" />
+      <wsdl:output message="tns:GetHistoricDataHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="BinaryLogEntries">
+      <wsdl:input message="tns:BinaryLogEntriesHttpPostIn" />
+      <wsdl:output message="tns:BinaryLogEntriesHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetBufferUsage">
+      <wsdl:input message="tns:GetBufferUsageHttpPostIn" />
+      <wsdl:output message="tns:GetBufferUsageHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateLastGatewaySessionInformation">
+      <wsdl:input message="tns:UpdateLastGatewaySessionInformationHttpPostIn" />
+      <wsdl:output message="tns:UpdateLastGatewaySessionInformationHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetFreeSpace">
+      <wsdl:input message="tns:GetFreeSpaceHttpPostIn" />
+      <wsdl:output message="tns:GetFreeSpaceHttpPostOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="DataAccessSoap" type="tns:DataAccessSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetGatewaysList">
+      <soap:operation soapAction="http://gwlogger.psi.ch/GetGatewaysList" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetMessageTypes">
+      <soap:operation soapAction="http://gwlogger.psi.ch/GetMessageTypes" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewaySessionsList">
+      <soap:operation soapAction="http://gwlogger.psi.ch/GetGatewaySessionsList" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetStats">
+      <soap:operation soapAction="http://gwlogger.psi.ch/GetStats" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CheckQuery">
+      <soap:operation soapAction="http://gwlogger.psi.ch/CheckQuery" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchesPerformed">
+      <soap:operation soapAction="http://gwlogger.psi.ch/SearchesPerformed" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchesOnChannelsPerformed">
+      <soap:operation soapAction="http://gwlogger.psi.ch/SearchesOnChannelsPerformed" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MostActiveClasses">
+      <soap:operation soapAction="http://gwlogger.psi.ch/MostActiveClasses" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ActiveClients">
+      <soap:operation soapAction="http://gwlogger.psi.ch/ActiveClients" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ActiveServers">
+      <soap:operation soapAction="http://gwlogger.psi.ch/ActiveServers" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDataFileStats">
+      <soap:operation soapAction="http://gwlogger.psi.ch/GetDataFileStats" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewayNetworks">
+      <soap:operation soapAction="http://gwlogger.psi.ch/GetGatewayNetworks" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EpicsCheck">
+      <soap:operation soapAction="http://gwlogger.psi.ch/EpicsCheck" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="BadClientConfig">
+      <soap:operation soapAction="http://gwlogger.psi.ch/BadClientConfig" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllStats">
+      <soap:operation soapAction="http://gwlogger.psi.ch/GetAllStats" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetShortInformation">
+      <soap:operation soapAction="http://gwlogger.psi.ch/GetShortInformation" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewayInformation">
+      <soap:operation soapAction="http://gwlogger.psi.ch/GetGatewayInformation" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CpuHistory">
+      <soap:operation soapAction="http://gwlogger.psi.ch/CpuHistory" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchHistory">
+      <soap:operation soapAction="http://gwlogger.psi.ch/SearchHistory" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PVsHistory">
+      <soap:operation soapAction="http://gwlogger.psi.ch/PVsHistory" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="NetworkHistory">
+      <soap:operation soapAction="http://gwlogger.psi.ch/NetworkHistory" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetHistoricData">
+      <soap:operation soapAction="http://gwlogger.psi.ch/GetHistoricData" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RegisterLogMessageType">
+      <soap:operation soapAction="http://gwlogger.psi.ch/RegisterLogMessageType" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RegisterLogMessageDetailType">
+      <soap:operation soapAction="http://gwlogger.psi.ch/RegisterLogMessageDetailType" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="LogEntries">
+      <soap:operation soapAction="http://gwlogger.psi.ch/LogEntries" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="BinaryLogEntries">
+      <soap:operation soapAction="http://gwlogger.psi.ch/BinaryLogEntries" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetBufferUsage">
+      <soap:operation soapAction="http://gwlogger.psi.ch/GetBufferUsage" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="LogEntry">
+      <soap:operation soapAction="http://gwlogger.psi.ch/LogEntry" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateLastGatewaySessionInformation">
+      <soap:operation soapAction="http://gwlogger.psi.ch/UpdateLastGatewaySessionInformation" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetFreeSpace">
+      <soap:operation soapAction="http://gwlogger.psi.ch/GetFreeSpace" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="DataAccessSoap12" type="tns:DataAccessSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetGatewaysList">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/GetGatewaysList" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetMessageTypes">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/GetMessageTypes" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewaySessionsList">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/GetGatewaySessionsList" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetStats">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/GetStats" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CheckQuery">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/CheckQuery" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchesPerformed">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/SearchesPerformed" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchesOnChannelsPerformed">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/SearchesOnChannelsPerformed" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MostActiveClasses">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/MostActiveClasses" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ActiveClients">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/ActiveClients" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ActiveServers">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/ActiveServers" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDataFileStats">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/GetDataFileStats" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewayNetworks">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/GetGatewayNetworks" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EpicsCheck">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/EpicsCheck" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="BadClientConfig">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/BadClientConfig" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllStats">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/GetAllStats" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetShortInformation">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/GetShortInformation" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewayInformation">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/GetGatewayInformation" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CpuHistory">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/CpuHistory" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchHistory">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/SearchHistory" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PVsHistory">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/PVsHistory" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="NetworkHistory">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/NetworkHistory" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetHistoricData">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/GetHistoricData" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RegisterLogMessageType">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/RegisterLogMessageType" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RegisterLogMessageDetailType">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/RegisterLogMessageDetailType" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="LogEntries">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/LogEntries" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="BinaryLogEntries">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/BinaryLogEntries" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetBufferUsage">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/GetBufferUsage" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="LogEntry">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/LogEntry" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateLastGatewaySessionInformation">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/UpdateLastGatewaySessionInformation" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetFreeSpace">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/GetFreeSpace" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="DataAccessHttpGet" type="tns:DataAccessHttpGet">
+    <http:binding verb="GET" />
+    <wsdl:operation name="GetGatewaysList">
+      <http:operation location="/GetGatewaysList" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetMessageTypes">
+      <http:operation location="/GetMessageTypes" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewaySessionsList">
+      <http:operation location="/GetGatewaySessionsList" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetStats">
+      <http:operation location="/GetStats" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CheckQuery">
+      <http:operation location="/CheckQuery" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchesPerformed">
+      <http:operation location="/SearchesPerformed" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchesOnChannelsPerformed">
+      <http:operation location="/SearchesOnChannelsPerformed" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MostActiveClasses">
+      <http:operation location="/MostActiveClasses" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ActiveClients">
+      <http:operation location="/ActiveClients" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ActiveServers">
+      <http:operation location="/ActiveServers" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDataFileStats">
+      <http:operation location="/GetDataFileStats" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewayNetworks">
+      <http:operation location="/GetGatewayNetworks" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EpicsCheck">
+      <http:operation location="/EpicsCheck" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="BadClientConfig">
+      <http:operation location="/BadClientConfig" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllStats">
+      <http:operation location="/GetAllStats" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetShortInformation">
+      <http:operation location="/GetShortInformation" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewayInformation">
+      <http:operation location="/GetGatewayInformation" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CpuHistory">
+      <http:operation location="/CpuHistory" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchHistory">
+      <http:operation location="/SearchHistory" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PVsHistory">
+      <http:operation location="/PVsHistory" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="NetworkHistory">
+      <http:operation location="/NetworkHistory" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetHistoricData">
+      <http:operation location="/GetHistoricData" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="BinaryLogEntries">
+      <http:operation location="/BinaryLogEntries" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output />
+    </wsdl:operation>
+    <wsdl:operation name="GetBufferUsage">
+      <http:operation location="/GetBufferUsage" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateLastGatewaySessionInformation">
+      <http:operation location="/UpdateLastGatewaySessionInformation" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output />
+    </wsdl:operation>
+    <wsdl:operation name="GetFreeSpace">
+      <http:operation location="/GetFreeSpace" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="DataAccessHttpPost" type="tns:DataAccessHttpPost">
+    <http:binding verb="POST" />
+    <wsdl:operation name="GetGatewaysList">
+      <http:operation location="/GetGatewaysList" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetMessageTypes">
+      <http:operation location="/GetMessageTypes" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewaySessionsList">
+      <http:operation location="/GetGatewaySessionsList" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetStats">
+      <http:operation location="/GetStats" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CheckQuery">
+      <http:operation location="/CheckQuery" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchesPerformed">
+      <http:operation location="/SearchesPerformed" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchesOnChannelsPerformed">
+      <http:operation location="/SearchesOnChannelsPerformed" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MostActiveClasses">
+      <http:operation location="/MostActiveClasses" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ActiveClients">
+      <http:operation location="/ActiveClients" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ActiveServers">
+      <http:operation location="/ActiveServers" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDataFileStats">
+      <http:operation location="/GetDataFileStats" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewayNetworks">
+      <http:operation location="/GetGatewayNetworks" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EpicsCheck">
+      <http:operation location="/EpicsCheck" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="BadClientConfig">
+      <http:operation location="/BadClientConfig" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllStats">
+      <http:operation location="/GetAllStats" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetShortInformation">
+      <http:operation location="/GetShortInformation" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGatewayInformation">
+      <http:operation location="/GetGatewayInformation" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CpuHistory">
+      <http:operation location="/CpuHistory" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchHistory">
+      <http:operation location="/SearchHistory" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PVsHistory">
+      <http:operation location="/PVsHistory" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="NetworkHistory">
+      <http:operation location="/NetworkHistory" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetHistoricData">
+      <http:operation location="/GetHistoricData" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="BinaryLogEntries">
+      <http:operation location="/BinaryLogEntries" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output />
+    </wsdl:operation>
+    <wsdl:operation name="GetBufferUsage">
+      <http:operation location="/GetBufferUsage" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateLastGatewaySessionInformation">
+      <http:operation location="/UpdateLastGatewaySessionInformation" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output />
+    </wsdl:operation>
+    <wsdl:operation name="GetFreeSpace">
+      <http:operation location="/GetFreeSpace" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="DataAccess">
+    <wsdl:port name="DataAccessSoap" binding="tns:DataAccessSoap">
+      <soap:address location="http://caesar.psi.ch/DataAccess.asmx" />
+    </wsdl:port>
+    <wsdl:port name="DataAccessSoap12" binding="tns:DataAccessSoap12">
+      <soap12:address location="http://caesar.psi.ch/DataAccess.asmx" />
+    </wsdl:port>
+    <wsdl:port name="DataAccessHttpGet" binding="tns:DataAccessHttpGet">
+      <http:address location="http://caesar.psi.ch/DataAccess.asmx" />
+    </wsdl:port>
+    <wsdl:port name="DataAccessHttpPost" binding="tns:DataAccessHttpPost">
+      <http:address location="http://caesar.psi.ch/DataAccess.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

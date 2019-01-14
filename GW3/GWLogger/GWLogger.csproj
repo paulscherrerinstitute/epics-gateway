@@ -367,6 +367,7 @@
     <Content Include="Frontend\tsconfig.json" />
     <Content Include="graphtest.html" />
     <Content Include="Images\fine.png" />
+    <Content Include="introspection.js" />
     <Content Include="Less\introspect.css" />
     <Content Include="Less\main.css" />
     <Content Include="Less\main.less" />

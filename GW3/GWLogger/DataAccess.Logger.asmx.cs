@@ -64,6 +64,12 @@ namespace GWLogger
         }
 
         [WebMethod]
+        public void UpdateLastGatewaySessionInformation(string gateway, Backend.DTOs.RestartType restartType, string comment)
+        {
+            Backend.Controllers.LogController.UpdateLastGatewaySessionInformation(gateway, restartType, comment);
+        }
+
+        [WebMethod]
         public FreeSpace GetFreeSpace()
         {
             ulong FreeBytesAvailable;

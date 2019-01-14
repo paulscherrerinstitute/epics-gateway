@@ -1,8 +1,8 @@
 ﻿using EpicsSharp.ChannelAccess.Client;
+using GWWatchdog.Caesar;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
@@ -11,13 +11,11 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.ServiceProcess;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace GWWatchdog
 {
-    enum GWStatus
+    internal enum GWStatus
     {
         STARTING,
         ALL_OK,
@@ -28,17 +26,22 @@ namespace GWWatchdog
 
     public partial class WatchdogService : ServiceBase
     {
-        Thread checkGateway;
-        bool shouldStop = false;
-        const int nbCPUAvg = 120;
-        TcpListener tcpListener = null;
-        GWStatus status = GWStatus.STARTING;
-        double currentAVG = 0;
-        List<double> lastCPUVals = new List<double>();
+        private Thread checkGateway;
+        private bool shouldStop = false;
+        private const int nbCPUAvg = 120;
+        private TcpListener tcpListener = null;
+        private GWStatus status = GWStatus.STARTING;
+        private double currentAVG = 0;
+        private List<double> lastCPUVals = new List<double>();
+
+        private readonly DataAccessSoapClient caesar;
+        private readonly string gatewayName;
 
         public WatchdogService()
         {
             InitializeComponent();
+            caesar = new Caesar.DataAccessSoapClient();
+            gatewayName = ConfigurationManager.AppSettings["gatewayName"];
         }
 
         public void Start()
@@ -58,7 +61,7 @@ namespace GWWatchdog
             }
         }
 
-        void ReceiveConn(IAsyncResult result)
+        private void ReceiveConn(IAsyncResult result)
         {
             TcpListener listener = null;
             Socket client = null;
@@ -87,7 +90,7 @@ namespace GWWatchdog
                         writer.WriteLine("Expires: now");
                         writer.WriteLine();
                         writer.WriteLine("<html>");
-                        writer.WriteLine("<head><title>Gateway Watchdog - " + ConfigurationManager.AppSettings["GatewayName"] + "</title></head>");
+                        writer.WriteLine("<head><title>Gateway Watchdog - " + gatewayName + "</title></head>");
                         writer.WriteLine("<body>");
                         writer.WriteLine("Status: " + status + "<br>");
                         writer.WriteLine("CPU Average: " + currentAVG.ToString("0.00") + "%<br>");
@@ -135,7 +138,7 @@ namespace GWWatchdog
             }
         }
 
-        void CheckGateway()
+        private void CheckGateway()
         {
             if (!Environment.UserInteractive)
                 Thread.Sleep(40000);
@@ -157,7 +160,7 @@ namespace GWWatchdog
                         using (var client = new CAClient())
                         {
                             client.Configuration.WaitTimeout = 3000;
-                            var cpuInfo = client.CreateChannel<double>(ConfigurationManager.AppSettings["gatewayName"] + ":CPU");
+                            var cpuInfo = client.CreateChannel<double>(gatewayName + ":CPU");
                             try
                             {
                                 double v = cpuInfo.Get();
@@ -225,7 +228,7 @@ namespace GWWatchdog
                             Console.WriteLine("All ok");
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     if (Environment.UserInteractive)
                         Console.WriteLine(ex.ToString());
@@ -234,15 +237,39 @@ namespace GWWatchdog
             }
         }
 
-        void RestartGW()
+        private void RestartGW()
         {
+            try
+            {
+                switch (status)
+                {
+                    case GWStatus.STARTING:
+                        break;
+                    case GWStatus.ALL_OK:
+                        break;
+                    case GWStatus.HIGH_CPU:
+                        caesar.UpdateLastGatewaySessionInformation(gatewayName, RestartType.WatchdogCPULimit, "Automatic restart due to CPU load.");
+                        break;
+                    case GWStatus.NOT_ANSWERING:
+                        caesar.UpdateLastGatewaySessionInformation(gatewayName, RestartType.WatchdogNoResponse, "Automatic restart due to missing answers.");
+                        break;
+                    case GWStatus.RESTARTING:
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch
+            {
+            }
+
             status = GWStatus.RESTARTING;
             StopGateway();
             lastCPUVals.Clear();
             StartGateway();
         }
 
-        void StopGateway()
+        private void StopGateway()
         {
             try
             {
@@ -269,7 +296,7 @@ namespace GWWatchdog
             }
         }
 
-        void StartGateway()
+        private void StartGateway()
         {
             try
             {
@@ -279,7 +306,7 @@ namespace GWWatchdog
                 service.Start();
                 service.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromMilliseconds(5000));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 if (Environment.UserInteractive)
                     Console.WriteLine(ex.ToString());
