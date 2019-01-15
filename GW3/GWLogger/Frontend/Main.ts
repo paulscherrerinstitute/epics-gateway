@@ -212,7 +212,7 @@ class Main
                         html += "<tr><td>Start&nbsp;Date:</td><td>" + Utils.ShortGWDateFormat(d.StartDate) + "</td></tr>";
                         html += "<tr><td>End&nbsp;Date:</td><td>" + Utils.ShortGWDateFormat(d.EndDate) + "</td></tr>";
                         html += "<tr><td>Restart&nbsp;Reason:</td><td>" + (d.RestartType == 0 ? "" : RestartType[d.RestartType]) + "</td></tr>";
-                        html += "<tr><td>Restart&nbsp;Comment:</td><td>" + d.Description + "</td></tr>";
+                        html += "<tr><td>Restart&nbsp;Comment:</td><td>" + (!<string>d.Description ? "" : <string>d.Description).htmlEntities() + "</td></tr>";
                         html += "</table>";
                         return html;
                     },

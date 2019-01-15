@@ -24,10 +24,10 @@ namespace GWLogger.Inventory.Controller {
         
         [System.ServiceModel.OperationContractAttribute(Action="https://inventory.psi.ch/manage/DirectCommands.asmx/StartTask", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
-        string StartTask(string slave, string task);
+        string StartTask(string slave, string user, string task);
         
         [System.ServiceModel.OperationContractAttribute(Action="https://inventory.psi.ch/manage/DirectCommands.asmx/StartTask", ReplyAction="*")]
-        System.Threading.Tasks.Task<string> StartTaskAsync(string slave, string task);
+        System.Threading.Tasks.Task<string> StartTaskAsync(string slave, string user, string task);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -65,12 +65,12 @@ namespace GWLogger.Inventory.Controller {
             return base.Channel.SendEpicsCommandAsync(config, channel, slave);
         }
         
-        public string StartTask(string slave, string task) {
-            return base.Channel.StartTask(slave, task);
+        public string StartTask(string slave, string user, string task) {
+            return base.Channel.StartTask(slave, user, task);
         }
         
-        public System.Threading.Tasks.Task<string> StartTaskAsync(string slave, string task) {
-            return base.Channel.StartTaskAsync(slave, task);
+        public System.Threading.Tasks.Task<string> StartTaskAsync(string slave, string user, string task) {
+            return base.Channel.StartTaskAsync(slave, user, task);
         }
     }
 }

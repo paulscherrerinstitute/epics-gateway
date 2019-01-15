@@ -22,6 +22,7 @@
         <s:complexType>
           <s:sequence>
             <s:element minOccurs="0" maxOccurs="1" name="slave" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="s:string" />
             <s:element minOccurs="0" maxOccurs="1" name="task" type="s:string" />
           </s:sequence>
         </s:complexType>
@@ -58,6 +59,7 @@
   </wsdl:message>
   <wsdl:message name="StartTaskHttpGetIn">
     <wsdl:part name="slave" type="s:string" />
+    <wsdl:part name="user" type="s:string" />
     <wsdl:part name="task" type="s:string" />
   </wsdl:message>
   <wsdl:message name="StartTaskHttpGetOut">
@@ -73,6 +75,7 @@
   </wsdl:message>
   <wsdl:message name="StartTaskHttpPostIn">
     <wsdl:part name="slave" type="s:string" />
+    <wsdl:part name="user" type="s:string" />
     <wsdl:part name="task" type="s:string" />
   </wsdl:message>
   <wsdl:message name="StartTaskHttpPostOut">

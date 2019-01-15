@@ -143,7 +143,7 @@ namespace GWLogger.AuthAccess
             var allowedCommands = new string[] { "UpdateGateway", "UpdateGateway3", "RestartGateway", "RestartGateway3" };
             if (!allowedCommands.Contains(command))
                 throw new System.Security.SecurityException("Command not allowed.");
-            return Global.DirectCommands.StartTask(gatewayName, command);
+            return Global.DirectCommands.StartTask(gatewayName, CurrentUser(), command);
         }
     }
 }
