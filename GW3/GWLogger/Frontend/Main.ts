@@ -167,14 +167,15 @@ class Main
                 var restartTypes = [];
                 for (var o in RestartType)
                     restartTypes.push({
-                        text: o, value: RestartType[o]
+                        text: o, value: (o == "0" || o == "Unknown" ? "" : RestartType[o])
                     });
+
                 Main.Sessions = (msg.d ? (<object[]>msg.d).map(function (c) { return GatewaySession.CreateFromObject(c); }) : []);
                 var grid = $("#gatewaySessions").kendoGrid({
                     columns: [{ title: "Start", field: "StartDate", format: "{0:MM/dd HH:mm:ss}" },
                     { title: "End", field: "EndDate", format: "{0:MM/dd HH:mm:ss}" },
-                        { title: "NB&nbsp;Logs", field: "NbEntries", format: "{0:n0}", attributes: { style: "text-align:right;" } },
-                        { title: "Reason", field: "RestartType", values: restartTypes }],
+                    { title: "NB&nbsp;Logs", field: "NbEntries", format: "{0:n0}", attributes: { style: "text-align:right;" } },
+                    { title: "Reason", field: "RestartType", values: restartTypes }],
                     dataSource: { data: Main.Sessions },
                     selectable: "single cell",
                     change: (arg) =>
@@ -197,6 +198,31 @@ class Main
                         }
                     }
                 }).data("kendoGrid");
+                $("#gatewaySessions tbody tr").kendoTooltip({
+                    showOn: "mouseenter",
+                    content: (e) =>
+                    {
+                        var d: any = grid.dataItem(e.target[0]);
+                        if (!d || !d.EndDate)
+                        {
+                            $(".k-tooltip").hide();
+                            return;
+                        }
+                        var html = "<table>";
+                        html += "<tr><td>Start&nbsp;Date:</td><td>" + Utils.ShortGWDateFormat(d.StartDate) + "</td></tr>";
+                        html += "<tr><td>End&nbsp;Date:</td><td>" + Utils.ShortGWDateFormat(d.EndDate) + "</td></tr>";
+                        html += "<tr><td>Restart&nbsp;Reason:</td><td>" + (d.RestartType == 0 ? "" : RestartType[d.RestartType]) + "</td></tr>";
+                        html += "<tr><td>Restart&nbsp;Comment:</td><td>" + d.Description + "</td></tr>";
+                        html += "</table>";
+                        return html;
+                    },
+                    position: "right"
+                });
+                $("#gatewaySessions tbody tr").on("mouseleave", (evt) =>
+                {
+                    //$(evt.target.parentElement).data("kendoTooltip").hide();
+                    $(".k-tooltip").hide();
+                });
             },
             error: function (msg, textStatus)
             {
