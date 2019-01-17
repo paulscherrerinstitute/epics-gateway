@@ -26,7 +26,12 @@ namespace GatewayLogic.Commands
                 return;
             }
 
-            connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.Write, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channel.ChannelName } });
+            connection.Gateway.MessageLogger.Write(packet.Sender.ToString(),
+                Services.LogMessageType.Write,
+                new LogMessageDetail[] {
+                    new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channel.ChannelName },
+                    new LogMessageDetail { TypeId = MessageDetail.PacketSize, Value = packet.MessageSize.ToString() }
+                });
             //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Write on " + channel.ChannelName);
             packet.Parameter1 = channel.ServerId.Value;
             packet.Destination = channel.TcpConnection.RemoteEndPoint;

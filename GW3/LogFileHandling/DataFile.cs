@@ -658,7 +658,7 @@ namespace GWLogger.Backend.DataContext
             return result;
         }
 
-        internal IEnumerable<LogEntry> GetLogs(DateTime start, DateTime end, Query.Statement.QueryNode query = null, List<int> messageTypes = null)
+        internal IEnumerable<LogEntry> GetLogs(DateTime start, DateTime end, Query.Statement.QueryNode query = null, List<int> messageTypes = null, bool onlyErrors = false)
         {
             var currentDate = new DateTime(start.Year, start.Month, start.Day);
             var firstLoop = true;
@@ -760,6 +760,17 @@ namespace GWLogger.Backend.DataContext
                 sourceMemberNameId = Context.MessageDetailTypes.First(row => row.Value == "SourceMemberName").Id;
             if (sourceFilePathId == -1)
                 sourceFilePathId = Context.MessageDetailTypes.First(row => row.Value == "SourceFilePath").Id;
+
+            // Adds current position in case it's an error
+            if (this.Context.errorMessages.Contains(entry.MessageTypeId))
+            {
+                using (var errIndex = new BinaryWriter(File.OpenWrite(currentFile + ".errs")))
+                {
+                    // Move to the end
+                    errIndex.BaseStream.Seek(errIndex.BaseStream.Length, SeekOrigin.Begin);
+                    errIndex.Write(stream.BaseStream.Length);
+                }
+            }
 
 #warning Disabled due to poor performances
             /*if (commandIndex == null || commandIndex.Filename != FileName(entry.EntryDate, ".cmd_idx"))

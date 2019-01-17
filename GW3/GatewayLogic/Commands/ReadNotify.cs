@@ -1,14 +1,10 @@
 ﻿using GatewayLogic.Connections;
 using GatewayLogic.Services;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GatewayLogic.Commands
 {
-    class ReadNotify : CommandHandler
+    internal class ReadNotify : CommandHandler
     {
         public override void DoRequest(GatewayConnection connection, DataPacket packet)
         {
@@ -42,7 +38,13 @@ namespace GatewayLogic.Commands
                     return;
                 }
 
-                connection.Gateway.MessageLogger.Write(client.Client.ToString(), Services.LogMessageType.ReadNotifyResponseMonitor, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.CID, Value = read.EventClientId.ToString() }, new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = read.ChannelInformation.ChannelName } });
+                connection.Gateway.MessageLogger.Write(client.Client.ToString(),
+                    Services.LogMessageType.ReadNotifyResponseMonitor,
+                    new LogMessageDetail[] {
+                        new LogMessageDetail { TypeId = MessageDetail.CID, Value = read.EventClientId.ToString() },
+                        new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = read.ChannelInformation.ChannelName },
+                        new LogMessageDetail { TypeId = MessageDetail.PacketSize, Value = packet.MessageSize.ToString() }
+                    });
                 packet.Command = 1;
                 packet.Parameter1 = 1;
                 packet.Parameter2 = read.ClientId;
@@ -52,7 +54,11 @@ namespace GatewayLogic.Commands
             }
             else
             {
-                connection.Gateway.MessageLogger.Write(read.Client.RemoteEndPoint.ToString(), Services.LogMessageType.ReadNotifyResponse, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = read.ChannelInformation.ChannelName } });
+                connection.Gateway.MessageLogger.Write(read.Client.RemoteEndPoint.ToString(), Services.LogMessageType.ReadNotifyResponse,
+                    new LogMessageDetail[] {
+                        new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = read.ChannelInformation.ChannelName },
+                        new LogMessageDetail { TypeId = MessageDetail.PacketSize, Value = packet.MessageSize.ToString() }
+                    });
                 packet.Parameter2 = read.ClientId;
                 read.Client.Send(packet);
             }

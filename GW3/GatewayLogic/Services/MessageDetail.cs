@@ -25,6 +25,7 @@ namespace GatewayLogic.Services
         ClientIoId,
         Version,
         ClientCounts,
-        Origin
+        Origin,
+        PacketSize
     }
 }
