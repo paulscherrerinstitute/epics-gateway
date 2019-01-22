@@ -154,7 +154,7 @@ body {
     width: ~"calc(100% - 40px)";
 }
 
-#helpView {
+#helpView, #operationView {
     .container;
     top: 35px;
     left: 0px;
@@ -169,7 +169,7 @@ body {
     }
 }
 
-#helpContent {
+#helpContent, #operationContent {
     padding: 10px;
     position: absolute;
     top: 15px;
@@ -182,9 +182,26 @@ body {
     & table tr {
         vertical-align: central;
     }
+
+    & a {
+        color: blue;
+        text-decoration: none;
+        font-weight: bold;
+    }
 }
 
-#gatewaySessions {
+#operationContent img
+{
+    display: block;
+    border: 1px solid black;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+#gatewaySessions
+{
     font-size: 12px;
     top: 90px;
     left: 0px;
@@ -194,11 +211,13 @@ body {
     .scrollbarStyle;
     height: ~"calc(100% - 90px)";
 
-    & table {
+    & table
+    {
         .dataTable;
     }
 
-    & table.k-selectable tbody > tr > td:nth-child(1), table.k-selectable tbody > tr > td:nth-child(2) {
+    & table.k-selectable tbody > tr > td:nth-child(1), table.k-selectable tbody > tr > td:nth-child(2)
+    {
         cursor: pointer;
     }
 }

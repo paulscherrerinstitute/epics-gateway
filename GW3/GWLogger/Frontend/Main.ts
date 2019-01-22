@@ -310,9 +310,9 @@ class Main
     {
         StatsBarGraph.DrawStats();
 
-        if ($("#closeHelp").css("display") == "none")
+        if ($("#closeHelp, #closeOperation").css("display") == "none")
         {
-            $("#help").hide();
+            $("#helpView, #operationView").hide();
             $("#clients, #servers, #logs").show();
         }
 
@@ -645,7 +645,7 @@ class Main
     static GWVersions(): void
     {
         $("#reportView").show();
-        $('#helpView').hide();
+        $('#helpView, #operationView').hide();
         $("#reportContent").removeClass().addClass("fixed").removeAttr('style').html("Loading...");
 
         if ($("#reportContent").data("kendoGrid"))
@@ -685,7 +685,7 @@ class Main
     static LogStatistics(): void
     {
         $("#reportView").show();
-        $('#helpView').hide();
+        $('#helpView, #operationView').hide();
         $("#reportContent").removeClass().addClass("fixed").removeAttr('style').html("Loading...");
 
         if ($("#reportContent").data("kendoGrid"))
@@ -816,6 +816,8 @@ class Main
                     $("#reportView").hide();
                     if ($("#helpView").is(":visible"))
                         $("#helpView").hide();
+                    if ($("#operationView").is(":visible"))
+                        $("#operationView").hide();
                     if (Main.Path == "Status")
                         Main.CurrentGateway = null;
                     Main.Path = "Status";
@@ -826,6 +828,8 @@ class Main
                     $("#reportView").hide();
                     if ($("#helpView").is(":visible"))
                         $("#helpView").hide();
+                    if ($("#operationView").is(":visible"))
+                        $("#operationView").hide();
                     if (Main.Path == "GW")
                         break;
                     Main.Path = "GW";
@@ -836,6 +840,8 @@ class Main
                     $("#reportView").hide();
                     if ($("#helpView").is(":visible"))
                         $("#helpView").hide();
+                    if ($("#operationView").is(":visible"))
+                        $("#operationView").hide();
                     if (Main.Path == "Map")
                         break;
                     Main.Path = "Map";
@@ -843,11 +849,22 @@ class Main
                     State.Pop(null);
                     break;
                 case "Help":
+                    if ($("#operationView").is(":visible"))
+                        $("#operationView").hide();
                     $("#reportView").hide();
                     if ($("#helpView").is(":visible"))
                         $("#helpView").hide();
                     else
                         $("#helpView").show();
+                    break;
+                case "Operations":
+                    if ($("#helpView").is(":visible"))
+                        $("#helpView").hide();
+                    $("#reportView").hide();
+                    if ($("#operationView").is(":visible"))
+                        $("#operationView").hide();
+                    else
+                        $("#operationView").show();
                     break;
                 case "": // Hambuger
                     $("#hamburgerMenu").toggleClass("visibleHamburger");

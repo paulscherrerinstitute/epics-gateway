@@ -366,7 +366,14 @@
     <Content Include="favicon.ico" />
     <Content Include="Frontend\tsconfig.json" />
     <Content Include="graphtest.html" />
+    <Content Include="Images\all_green_map.png" />
+    <Content Include="Images\bad_cycles.png" />
+    <Content Include="Images\bad_gateway.png" />
+    <Content Include="Images\details.png" />
     <Content Include="Images\fine.png" />
+    <Content Include="Images\high_cpu.png" />
+    <Content Include="Images\proscan_red.png" />
+    <Content Include="Images\sf_red.png" />
     <Content Include="introspection.js" />
     <Content Include="Less\introspect.css" />
     <Content Include="Less\main.css" />

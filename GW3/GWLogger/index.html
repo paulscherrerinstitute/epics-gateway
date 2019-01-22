@@ -27,6 +27,7 @@
         <li>Logs</li>
         <li>Map</li>
         <li style="float: right;">Help</li>
+        <li style="float: right;">Operations</li>
     </ul>
     <div id="gatewayView">
         <div id="gatewayBeamlines">
@@ -140,6 +141,66 @@
     <div id="bufferSpace" tooltip="Shows the % of memory buffer is used before blocking new log entries." tooltip-position="left"></div>
     <div id="freeSpace" tooltip="Shows how much storage is free on the DB disk." tooltip-position="left"></div>
     <div id="currentTime" tooltip="Current time in UTC (as log are stored)." tooltip-position="left"></div>
+    <div id="operationView">
+        <div id="operationContent">
+            <h1>Operation Manual</h1>
+            <h2>Topics</h2>
+
+            <h2>A gateway doesn't respond</h2>
+            Follow the following procedure:
+            <ol>
+                <li><a href="#identify_gateway">Identify the true gateway having issues</a></li>
+                <li><a href="#identify_issue">Identify the kind of issue</a></li>
+                <li><a href="#standard_restart">Restart the needed gateway from CAESAR</a></li>
+                <li><a href="#wont_restart">If CAESAR restart doesn't work restart VM</a></li>
+            </ol>
+
+            <h2 id="identify_gateway">Identify the true gateway having issues</h2>
+            To identify issues with gateways the easiest way is by using the CAESAR map (from the top bar => Map).
+            The map should look like this one in case everything works as expected.<br />
+            <img src="/Images/all_green_map.png" /><br />
+            If one gateway is not working as expected it will be displayed with a RED background:
+            <img src="/Images/proscan_red.png" /><br />
+            Due to the position of CAESAR (this monitoring tool) within the network, if a machine gateway fails, not only the machine
+            gateway will be shown in red but all the gateways behind it:<br />
+            <img src="/Images/sf_red.png" /><br />
+            In this case, take the gateway nearest the CAESAR server as the gulty one.<br />
+            <br />
+            By clicking on one of the gateways on the map, the view will change and the Gateway details will be displayed.
+            <h2 id="identify_issue">Identify the kind of issue</h2>
+            It is possible to view the gateway details by:
+            <ul>
+                <li>From the status page and selecting one gateway.</li>
+                <li>From the map page and selecting one gateway.</li>
+                <li>Selecting the gateway in error on the "Errors" pane.</li>
+            </ul>
+
+            <img src="/Images/details.png" /><br />
+            The details page contains 4 graphs allowing to have an overview  of the last minutes of the gateway as well
+            as the current values on the right side.<br />
+            <br />
+            A non responding gateway will show all the 4 graphs with the values set at 0 as well as the current values set either to 0 or to null:<br />
+            <img src="/Images/bad_gateway.png" /><br />
+
+            If the graph shows continous up &amp; down of the gateway, then it is usually sign a client is killing the gateway: in this case create a
+            "Service Now" ticket with as much details as possible.
+            <img src="/Images/bad_cycles.png" /><br />
+
+            In case of high CPU load, the watchdog running on the gateway will trigger a restart every now and then.
+            <img src="/Images/high_cpu.png" /><br />
+            In case of high CPU load, which repeats itself in cycles, it's again a sign of one or more clients requesting too much from the gateway.
+            As before, in this case, create a ticket in "Service Now" with as much details as possible.
+
+            <h2 id="standard_restart">Restart the needed gateway from CAESAR</h2>
+            From the corresponding getway detail page, it's possible to restart the gateway. Press simply the "Restart Gateway" button
+            and wait a couple of seconds. The "RunningTime" should reset and start counting again.
+
+            <h2 id="wont_restart">If CAESAR restart doesn't work restart VM</h2>
+            If the standard CAESAR restart doesn't work and either the gateway doesn't come back or the timer doesn't reset, then a full VM restart is
+            required. Check the Picket information for a full VM restart. Gateway VMs have the same name as the gateways on CAESAR.
+            <div class="button topClose" onclick="$('#operationView').hide();">Close</div>
+        </div>
+    </div>
     <div id="helpView">
         <div id="helpContent">
             <h1>Welcome to the CAESAR</h1>
