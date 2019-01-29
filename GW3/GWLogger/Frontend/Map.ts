@@ -114,7 +114,8 @@ class Map
         var t = $("#mapView").kendoTooltip({
             showOn: "focus",
             content: Map.GetTooltipText,
-            position: "center"
+            position: "center",
+            animation: false
         }).data("kendoTooltip");
         t['_initPopup'](); // With the "position":"center" property avoid to add an "arrow"
 

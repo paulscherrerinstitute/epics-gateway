@@ -337,7 +337,7 @@ namespace GWLogger.Backend.DataContext
             {
                 if (lastLogEntry.HasValue && nbLogEntries > 0)
                 {
-                    if (writer.BaseStream.Length == 0)
+                    if (writer.BaseStream.Length == 0 || writer.BaseStream.Length < (sizeof(long) * 4 + sizeof(uint) + 257))
                     {
                         writer.Write(1973L); // FILE Signature
                         writer.Write(1U); // Version format

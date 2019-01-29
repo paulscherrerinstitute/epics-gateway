@@ -216,12 +216,14 @@ class Main
                         html += "</table>";
                         return html;
                     },
-                    position: "right"
+                    position: "right",
+                    animation: false
                 });
                 $("#gatewaySessions tbody tr").on("mouseleave", (evt) =>
                 {
                     //$(evt.target.parentElement).data("kendoTooltip").hide();
                     $(".k-tooltip").hide();
+                    $(".k-animation-container").remove();
                 });
             },
             error: function (msg, textStatus)
@@ -756,13 +758,20 @@ class Main
         if (("" + document.location).startsWith("http://localhost"))
             $("#gatewayBeamlines").append(`<div class="GWDisplay" id="PBGW"></div>`);
 
+        $(".helpMiddleContainer a").on("click", (elem) =>
+        {
+            var href: string = elem.target.attributes["href"].value;
+            $(href)[0].scrollIntoView();
+            return false;
+        });
+
         $("*[tooltip]").each((idx, elem) =>
         {
             var text = $(elem).attr("tooltip");
             var position = $(elem).attr("tooltip-position");
             if (!position)
                 position = "bottom";
-            $(elem).kendoTooltip({ position: position, content: text });
+            $(elem).kendoTooltip({ position: position, content: text, animation: false });
         });
 
         var currentUrl = (document.location + "");
@@ -823,6 +832,7 @@ class Main
                     Main.Path = "Status";
                     State.Set(true);
                     State.Pop(null);
+                    $(".inset").removeClass("inset");
                     break;
                 case "Logs":
                     $("#reportView").hide();
@@ -835,6 +845,7 @@ class Main
                     Main.Path = "GW";
                     State.Set(true);
                     State.Pop(null);
+                    $(".inset").removeClass("inset");
                     break;
                 case "Map":
                     $("#reportView").hide();
@@ -847,24 +858,33 @@ class Main
                     Main.Path = "Map";
                     State.Set(true);
                     State.Pop(null);
+                    $(".inset").removeClass("inset");
                     break;
                 case "Help":
+                    $(".inset").removeClass("inset");
                     if ($("#operationView").is(":visible"))
                         $("#operationView").hide();
                     $("#reportView").hide();
                     if ($("#helpView").is(":visible"))
                         $("#helpView").hide();
                     else
+                    {
                         $("#helpView").show();
+                        $(evt.target).addClass("inset");
+                    }
                     break;
-                case "Operations":
+                case "SOP":
+                    $(".inset").removeClass("inset");
                     if ($("#helpView").is(":visible"))
                         $("#helpView").hide();
                     $("#reportView").hide();
                     if ($("#operationView").is(":visible"))
                         $("#operationView").hide();
                     else
+                    {
                         $("#operationView").show();
+                        $(evt.target).addClass("inset");
+                    }
                     break;
                 case "": // Hambuger
                     $("#hamburgerMenu").toggleClass("visibleHamburger");

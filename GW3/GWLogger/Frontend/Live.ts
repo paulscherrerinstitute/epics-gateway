@@ -72,7 +72,8 @@ class Live
                 html += "-- Click to view details --";
                 return html;
             },
-            showAfter: 200
+            showAfter: 200,
+            animation: false
         });
 
         Live.cpuChart = new LineGraph("cpuGraph", { Values: [] }, {
@@ -240,7 +241,8 @@ class Live
                             {
                                 return "EPICS Channel Name:<br>" + DebugChannels[e.sender.element[0].children[0].innerHTML].replace(/\{0\}/g, Main.CurrentGateway.toUpperCase());
                             },
-                            showAfter: 200
+                            showAfter: 200,
+                            animation: false
                         });
                     }
                     catch (ex)

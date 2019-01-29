@@ -70,7 +70,8 @@ class LineGraph
             this.toolTip = $("#" + elementContainer).kendoTooltip({
                 position: "centered",
                 content: this.TooltipContent,
-                showOn: "focus"
+                showOn: "focus",
+                animation: false
             }).data("kendoTooltip");
             $("#canvas_" + elementContainer).on("mouseover", (evt) => { this.MouseOver(evt); }).on("mouseout", (evt) => { this.MouseOut(evt); });
         }
