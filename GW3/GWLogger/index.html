@@ -144,84 +144,6 @@
     <div id="operationView">
         <div id="operationContent">
             <div class="helpMiddleContainer">
-                <h1>Operation Manual</h1>
-                <h2>Topics</h2>
-
-                <h2>A gateway doesn't respond</h2>
-                Follow the following procedure:
-                <ol>
-                    <li><a href="#identify_gateway">Identify the true gateway having issues</a></li>
-                    <li><a href="#identify_issue">Identify the kind of issue</a></li>
-                    <li><a href="#standard_restart">Restart the needed gateway from CAESAR</a></li>
-                    <li><a href="#wont_restart">If CAESAR restart doesn't work restart VM</a></li>
-                </ol>
-
-                <h2 id="identify_gateway">Identify the true gateway having issues</h2>
-                To identify issues with gateways the easiest way is by using the CAESAR map (from the top bar &rArr; Map).
-                The map should look like this one <span class="fig">1</span> in case everything works as expected.<br />
-                <figure>
-                    <img src="/Images/all_green_map.png" />
-                    <figcaption>Fig 1. - All ok</figcaption>
-                </figure>
-                If one gateway is not working as expected it will be displayed with a RED background <span class="fig">2</span>.
-                <figure>
-                    <img src="/Images/proscan_red.png" />
-                    <figcaption>Fig 2. - Gateway error</figcaption>
-                </figure>
-                Due to the position of CAESAR (this monitoring tool) within the network, if a machine gateway fails, not only the machine
-                gateway will be shown in red but all the gateways behind it <span class="fig">3</span>.<br />
-                <figure>
-                    <img src="/Images/sf_red.png" />
-                    <figcaption>Fig 3. - Cascading errors</figcaption>
-                </figure>
-                In this case, take the gateway nearest the CAESAR server as the gulty one.<br />
-                <br />
-                By clicking on one of the gateways on the map, the view will change and the Gateway details will be displayed.
-                <h2 id="identify_issue">Identify the kind of issue</h2>
-                It is possible to view the gateway details by:
-                <ul>
-                    <li>From the status page and selecting one gateway.</li>
-                    <li>From the map page and selecting one gateway.</li>
-                    <li>Selecting the gateway in error on the "Errors" pane.</li>
-                </ul>
-
-                <figure>
-                    <img src="/Images/details.png" />
-                    <figcaption>Fig. 4 - Detailed Graphs</figcaption>
-                </figure>
-
-                The details page contains 4 graphs allowing to have an overview  of the last minutes of the gateway as well
-                as the current values on the right side.<br />
-                <br />
-                A non responding gateway will show all the 4 graphs with the values set at 0 as well as the current values set either to 0 or to null <span class="fig">5</span> <span class="actionToDo">Either wait for an automatic restart or restart manually.</span><br />
-                <figure>
-                    <img src="/Images/bad_gateway.png" />
-                    <figcaption>Fig. 5 - Bad gateway</figcaption>
-                </figure>
-
-                If the graph shows continous up &amp; down of the gateway <span class="fig">6</span>, then it is usually sign a client is killing the gateway: <span class="actionToDo">in this case create a
-                "Service Now" ticket with as much details as possible.</span>
-
-                <figure>
-                    <img src="/Images/bad_cycles.png" />
-                    <figcaption>Fig. 6 - Restart in cycles</figcaption>
-                </figure>
-
-                In case of high CPU load, the watchdog running on the gateway will trigger a restart every now and then <span class="fig">7</span>.
-                <figure>
-                    <img src="/Images/high_cpu.png" />
-                    <figcaption>Fig 7. - High CPU</figcaption>
-                </figure>
-                In case of high CPU load, which repeats itself in cycles, it's again a sign of one or more clients requesting too much from the gateway.
-                <span class="actionToDo">As before, in this case, create a ticket in "Service Now" with as much details as possible.</span>
-
-                <h2 id="standard_restart">Restart the needed gateway from CAESAR</h2>
-                From the corresponding getway detail page, it's possible to restart the gateway. Press simply the "Restart Gateway" button
-                and wait a couple of seconds. The "RunningTime" should reset and start counting again.
-
-                <h2 id="wont_restart">If CAESAR restart doesn't work restart VM</h2>
-                If the standard CAESAR restart doesn't work and either the gateway doesn't come back or the timer doesn't reset, then a full VM restart is
-                required. Check the Picket information for a full VM restart. Gateway VMs have the same name as the gateways on CAESAR.
             </div>
             <div class="button topClose" onclick="$('#operationView').hide();$('.inset').removeClass('inset');">Close</div>
         </div>
@@ -229,116 +151,6 @@
     <div id="helpView">
         <div id="helpContent">
             <div class="helpMiddleContainer">
-                <h1>Welcome to the CAESAR</h1>
-                <h2>Why CAESAR?</h2>
-                CAESAR stands for <b>CA</b> <b>E</b>PICS <b>S</b>py <b>A</b>nd <b>R</b>eport.
-                <h2>How to use it:</h2>
-                On top most of the interface some tabs are available (Status, Logs, Help). By clicking on them the interface switch in the different modes.
-
-                <h3>Status</h3>
-                The status page allows to get an overview in near real time (updates every 2 seconds) of all the EPICS gateways.
-                Each gateway is displayed with a gray circle and some values in the middle, as well as the gateway name under the circle.
-                Over the gray circle 2 arcs may appear of different colors. The most external one shows the CPU in percent form, while
-                the inner arc one shows number of searches per seconds the gateway receives (up to 100).<br />
-
-                <table>
-                    <tr>
-                        <td><canvas id='canvas_all_fine' width='100' height='100'></canvas></td>
-                        <td>A display like this shows that everything is within the nominal range.</td>
-                    </tr>
-                    <tr>
-                        <td><canvas id='canvas_high_search' width='100' height='100'></canvas></td>
-                        <td>
-                            A display like this shows an high number of searches, but the gateway is not in error as it takes 2 minutes of high number
-                            of searches before the gateway is considered in error.
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><canvas id='canvas_high_cpu' width='100' height='100'></canvas></td>
-                        <td>
-                            A display like this shows an high CPU usage, but the gateway is not in error as it takes 2 minutes of high CPU load
-                            before the gateway is considered in error.
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><canvas id='canvas_error' width='100' height='100'></canvas></td>
-                        <td>A display like this shows an high CPU usage and the gateway in error (see the red background in the middle).</td>
-                    </tr>
-                </table>
-
-                <br />
-                By clicking on the gateway, more details of the gateway will be displayed. On this page it's possible (for the authorized people) to restart
-                the gateway or upgrade the gateway to the latest build. The "Logs" button will switch to the "Logs" view and the "Check Configuration" will open
-                the inventory website showing the Gateway configuration.
-                <h3>Errors</h3>
-                On the right most of the interface a column contains either a green button with the text "No errors" or one or more red buttons.
-                In case a red button replaces the green one, the red button text will be the gateway which is currently on an error state.
-                It's possible to click on the red button to directly jump on the live details view of that particular gateway.
-                <h3>Logs</h3>
-                <ul>
-                    <li>
-                        Select the gateway you want to check on the top left side. The gateway sessions are then loaded and displayed on the left bar,
-                        as well as the statistics are displayed on the time range widget.
-                    </li>
-                    <li>You can click (and drag) the time range widget to check out more details on that time.</li>
-                    <li>
-                        The time range shows 3 values: top light green bars are the number of event logs, bottom dark green bars are the number of searches,
-                        red lines are the number of errors. The graphs uses 3 different scales.
-                    </li>
-                    <li>Logs uses UTC time (avoiding issue with day light saving time).</li>
-                    <li>The current UTC time is displayed on the bottom left corner of the screen.</li>
-                    <li>Each bar of the time range is a 10 min range.</li>
-                </ul>
-                <h2>Map</h2>
-                The map view allows to have an overview of all the gateways used at PSI and their current status. This view allows also to see which gateway
-                will be used while crossing multiple networks.
-                <h2>Queries:</h2>
-                <div id="queriesHelp"></div>
-                <h2>EPICS Debug tool:</h2>
-                By clicking on the hamburger menu (on the top left) and then on the entry "EPICS Debug" it is possible to try to debug if
-                there is an error with a gateway or if the gateway seems to react in an abnormal way.<br />
-                <br />
-                To use the tool, an EPICS channel name must be given and a gateway selected. Once this is done, by pressing the button "Run test"
-                a couple of tests will be run on the gateway machine. At the end of the tests, a summary displays what seems to be the state of the gateway.<br />
-                <br />
-                In case of error as status, it's advice to re-run the test, and only then if the error persist contact the support.
-                <h2>Check Wrong Channels</h2>
-                By clicking on the hamburger menu (on the top left) and then on the entry "Check Wrong Channels" it is possible to check which
-                channels has been searched on a given gateway and didn't returned any result. The result is grouped by client hostname where the top most
-                demanding client is shown on top. To expand a group you have to click on the triangle which will then show all the channels requested by that
-                particular client.
-                <h2>Web Notifications</h2>
-                It is possible to let the web application emit a sound and a notification in case of error. To enable it, use the hamburger menu
-                (on the top left) and then the "Enable Notifications".
-                <h2>Alert Subscription</h2>
-                The site allows to subscribe to alerts. To enable it, use the hamburder menu (on the top left) and then the "Alert Subscription" page.
-                Choose all the gateways you are interested in, and press the "Save" button at the bottom.
-                <h2>Data retention:</h2>
-                Data is kept for a max. time of 5 days.
-                <h1>How to debug EPICS</h1>
-                Due to the distributed nature of EPICS, the problem can be on one or more of the following point:
-                <ul>
-                    <li>EPICS Client configuration (environement variables)</li>
-                    <li>Client side (Eg. caQtDM)</li>
-                    <li>EPICS Gateway</li>
-                    <li>EPICS Server (Eg. IOC)</li>
-                </ul>
-                In some case a single request will need to pass multiple gateways, and therefore makes the debugging yet even more complex.<br />
-                <br />
-                Therefore to debug an EPICS issue follow the following checklist:
-                <ul>
-                    <li>Make sure the environement variables are set correctly (Eg. cam / cao / cahipa etc.)</li>
-                    <li>Make sure the channel you want to connect to really exists (check it on the same network as the IOC)</li>
-                    <li>Make sure the channel is not blocked by the gateway due to some naming issue.</li>
-                    <li>Use the Debug tool included in this web site.</li>
-                    <li>Make sure you are using a gateway to reach that channel (if the IOC runs on the same network as you are, then no gateways are involved)</li>
-                    <li>If it still doesn't work report the issue specifying which channel doesn't work, on which network you are and on which network the IOC running the channel is.</li>
-                </ul>
-                <h1>Authors</h1>
-                <table>
-                    <tr><td>Concept and Main development:</td><td>A. Bertrand</td></tr>
-                    <tr><td>Query auto-completion:</td><td>S. L&uuml;scher</td></tr>
-                </table>
             </div>
             <div class="button topClose" onclick="$('#helpView').hide();$('.inset').removeClass('inset');">Close</div>
         </div>
@@ -360,5 +172,8 @@
     <script src="Scripts/jquery-3.3.1.min.js"></script>
     <script src="Scripts/kendo.all.min.js"></script>
     <script src="main.js"></script>
+    <script>
+        $(Main.Init); // Starting Main GUI tasks
+    </script>
 </body>
 </html>

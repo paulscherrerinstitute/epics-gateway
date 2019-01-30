@@ -366,6 +366,7 @@
     <Content Include="favicon.ico" />
     <Content Include="Frontend\tsconfig.json" />
     <Content Include="graphtest.html" />
+    <Content Include="help.html" />
     <Content Include="Images\all_green_map.png" />
     <Content Include="Images\bad_cycles.png" />
     <Content Include="Images\bad_gateway.png" />
@@ -397,6 +398,7 @@
     <Content Include="Scripts\Kendo-EULA.txt" />
     <Content Include="Scripts\kendo.all.min.js" />
     <Content Include="Scripts\kendo.angular.min.js" />
+    <Content Include="sop.html" />
     <Content Include="styles\Bootstrap\editor.png" />
     <Content Include="styles\Bootstrap\imagebrowser.png" />
     <Content Include="styles\Bootstrap\indeterminate.gif" />

@@ -810,12 +810,6 @@ class Main
             }
         });
 
-
-        Live.DisplayPaint("#canvas_all_fine", { CPU: 10, Searches: 20, State: 0 });
-        Live.DisplayPaint("#canvas_high_search", { CPU: 10, Searches: 291, State: 0 });
-        Live.DisplayPaint("#canvas_high_cpu", { CPU: 90, Searches: 20, State: 0 });
-        Live.DisplayPaint("#canvas_error", { CPU: 90, Searches: 20, State: 3 });
-
         $("#mainTabs li").click((evt) =>
         {
             var tab = evt.target.textContent;
@@ -861,7 +855,8 @@ class Main
                     $(".inset").removeClass("inset");
                     break;
                 case "Help":
-                    $(".inset").removeClass("inset");
+                    window.open("/help.html", "help", "menubar=no,location=no,status=no,toolbar=no,width=800,height=600,scrollbars=yes");
+                    /*$(".inset").removeClass("inset");
                     if ($("#operationView").is(":visible"))
                         $("#operationView").hide();
                     $("#reportView").hide();
@@ -871,10 +866,11 @@ class Main
                     {
                         $("#helpView").show();
                         $(evt.target).addClass("inset");
-                    }
+                    }*/
                     break;
                 case "SOP":
-                    $(".inset").removeClass("inset");
+                    window.open("/sop.html", "help", "menubar=no,location=no,status=no,toolbar=no,width=800,height=600,scrollbars=yes");
+                    /*$(".inset").removeClass("inset");
                     if ($("#helpView").is(":visible"))
                         $("#helpView").hide();
                     $("#reportView").hide();
@@ -884,7 +880,7 @@ class Main
                     {
                         $("#operationView").show();
                         $(evt.target).addClass("inset");
-                    }
+                    }*/
                     break;
                 case "": // Hambuger
                     $("#hamburgerMenu").toggleClass("visibleHamburger");
@@ -1172,5 +1168,3 @@ class Main
         }, 500);
     }
 }
-
-$(Main.Init); // Starting Main GUI tasks
