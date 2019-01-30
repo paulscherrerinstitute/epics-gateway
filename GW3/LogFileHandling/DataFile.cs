@@ -461,6 +461,7 @@ namespace GWLogger.Backend.DataContext
             {
                 if (cachedGatewaySessions != null && cachedGatewaySessions.Count == 0)
                 {
+                    cachedGatewaySessions.Add(new GatewaySession { });
                     cachedGatewaySessions[0].NbEntries = nbLogEntries;
                     cachedGatewaySessions[0].EndDate = lastLogEntry;
                 }
@@ -667,8 +668,47 @@ namespace GWLogger.Backend.DataContext
             while (currentDate < end)
             {
                 var fileToUse = FileName(currentDate);
+                if (onlyErrors && File.Exists(fileToUse + ".errs") && File.Exists(fileToUse))
+                {
+                    if (fileToUse != currentFile)
+                        SetFile(fileToUse);
 
-                if (File.Exists(fileToUse))
+                    var streamLength = DataReader.BaseStream.Length;
+                    using (var errors = new BinaryReader(File.OpenRead(fileToUse + ".errs")))
+                    {
+                        while (errors.BaseStream.Position < errors.BaseStream.Length)
+                        {
+                            Seek(errors.ReadInt64());
+                            var entry = ReadEntry(DataReader, start, streamLength);
+
+                            if (firstItem && query != null)
+                            {
+                                try
+                                {
+                                    query.CheckCondition(Context, entry);
+                                }
+                                catch
+                                {
+                                    query = null;
+                                }
+                            }
+
+                            if (entry != null && entry.EntryDate >= start && entry.EntryDate <= end && (query == null || query.CheckCondition(Context, entry)) && (messageTypes == null || messageTypes.Contains(entry.MessageTypeId)))
+                            {
+                                entry.Gateway = Gateway;
+                                entry.CurrentFile = Path.GetFileName(fileToUse).Replace(".data", "");
+                                yield return entry;
+                            }
+                            firstItem = false;
+                            if (entry != null && entry.EntryDate > end)
+                                yield break;
+                        }
+                    }
+                }
+                else if (onlyErrors && !File.Exists(fileToUse + ".errs"))
+                {
+                }
+                else if (File.Exists(fileToUse))
                 {
                     if (fileToUse != currentFile)
                         SetFile(fileToUse);

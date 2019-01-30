@@ -224,10 +224,10 @@ namespace GWLogger.Backend.DataContext
                     .Select(row => row.Value).ToList();
 
                 DataFile lastGateway = null;
-                
+
                 foreach (var entry in entries)
                 {
-                    if(lastGateway != null && lastGateway.Gateway != entry.Gateway)
+                    if (lastGateway != null && lastGateway.Gateway != entry.Gateway)
                         lastGateway.Release();
                     if (lastGateway == null || lastGateway.Gateway != entry.Gateway)
                     {
@@ -292,17 +292,20 @@ namespace GWLogger.Backend.DataContext
             }
             set
             {
-                if (messageDetailTypes.Any(row => !value.Select(r2 => r2.Id).Contains(row.Id)) ||
-                    value.Any(row => !messageDetailTypes.Select(r2 => r2.Id).Contains(row.Id)))
+                lock (messageDetailTypes)
                 {
-                    using (var stream = File.OpenWrite(StorageDirectory + "\\MessageDetails.xml"))
+                    if (messageDetailTypes.Any(row => !value.Select(r2 => r2.Id).Contains(row.Id)) ||
+                    value.Any(row => !messageDetailTypes.Select(r2 => r2.Id).Contains(row.Id)))
                     {
-                        XmlSerializer ser = new XmlSerializer(typeof(List<IdValue>));
-                        ser.Serialize(stream, value);
+                        using (var stream = File.OpenWrite(StorageDirectory + "\\MessageDetails.xml"))
+                        {
+                            XmlSerializer ser = new XmlSerializer(typeof(List<IdValue>));
+                            ser.Serialize(stream, value);
+                        }
+                        messageDetailTypes.Clear();
+                        messageDetailTypes.AddRange(value);
+                        maxMessageTypes = -1;
                     }
-                    messageDetailTypes.Clear();
-                    messageDetailTypes.AddRange(value);
-                    maxMessageTypes = -1;
                 }
             }
         }
@@ -351,7 +354,7 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        public IEnumerable<LogEntry> GetLogs(string gatewayName, DateTime start, DateTime end, string query, List<int> messageTypes = null)
+        public IEnumerable<LogEntry> GetLogs(string gatewayName, DateTime start, DateTime end, string query, List<int> messageTypes = null, bool onlyErrors = false)
         {
             if (!files.Exists(gatewayName))
                 return null;
@@ -366,7 +369,7 @@ namespace GWLogger.Backend.DataContext
             }
             using (var l = files[gatewayName].Lock())
             {
-                return files[gatewayName].GetLogs(start, end, node, messageTypes);
+                return files[gatewayName].GetLogs(start, end, node, messageTypes, onlyErrors);
             }
         }
 

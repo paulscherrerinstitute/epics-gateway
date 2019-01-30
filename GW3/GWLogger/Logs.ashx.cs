@@ -98,8 +98,14 @@ namespace GWLogger
                     if (path.Length > 2)
                     {
                         var end = long.Parse(path[2]).ToNetDate().Trim();
-                        logs = Global.DataContext.ReadLog(gateway, start, end, query, 100, msgTypes, startFile, offset, cancel);
+                        if (context.Request["levels"] == "3,4") // Show errors
+                            logs = Global.DataContext.GetLogs(gateway, start, end, query, null, true).Take(100).ToList();
+                        else
+                            logs = Global.DataContext.ReadLog(gateway, start, end, query, 100, msgTypes, startFile, offset, cancel);
                     }
+                    else
+                        if (context.Request["levels"] == "3,4") // Show errors
+                        logs = Global.DataContext.GetLogs(gateway, start, start.AddMinutes(20), query, null, true).Take(100).ToList();
                     else
                         logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, 100, msgTypes, startFile, offset, cancel);
                 }
@@ -109,7 +115,7 @@ namespace GWLogger
                 context.Response.Expires = 0;
                 context.Response.Write("[");
 
-                if(logs == null)
+                if (logs == null)
                 {
                     context.Response.Write("]");
                     return;
