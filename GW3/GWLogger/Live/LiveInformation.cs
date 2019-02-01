@@ -93,7 +93,7 @@ namespace GWLogger.Live
         private void UpdateGateways()
         {
             var onErrors = new List<string>();
-            //var sleepCounter = 0;
+            var sleepCounter = 0;
             while (true)
             {
                 Thread.Sleep(5000);
@@ -107,25 +107,25 @@ namespace GWLogger.Live
                 }
 
 
-                /*if (sleepCounter > 4)
-                {*/
-                try
+                if (sleepCounter > 6)
                 {
-                    // Store historyDump
-                    using (var stream = new StreamWriter(new GZipStream(File.Create(Global.HistoryStorage + "\\history.dump.new"), CompressionLevel.Optimal)))
+                    try
                     {
-                        var serializer = Newtonsoft.Json.JsonSerializer.Create();
-                        serializer.Serialize(stream, historyDump);
+                        // Store historyDump
+                        using (var stream = new StreamWriter(new GZipStream(File.Create(Global.HistoryStorage + "\\history.dump.new"), CompressionLevel.Fastest)))
+                        {
+                            var serializer = Newtonsoft.Json.JsonSerializer.Create();
+                            serializer.Serialize(stream, historyDump);
+                        }
+                        File.Copy(Global.HistoryStorage + "\\history.dump.new", Global.HistoryStorage + "\\history.dump", true);
                     }
-                    File.Copy(Global.HistoryStorage + "\\history.dump.new", Global.HistoryStorage + "\\history.dump", true);
-                }
-                catch
-                {
-                }
-                /*    sleepCounter = 0;
+                    catch
+                    {
+                    }
+                    sleepCounter = 0;
                 }
                 else
-                    sleepCounter++;*/
+                    sleepCounter++;
 
                 // Check if we have some gateways on errors
                 var emails = new Dictionary<string, string>();

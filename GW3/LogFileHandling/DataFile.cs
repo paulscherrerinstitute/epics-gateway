@@ -101,7 +101,7 @@ namespace GWLogger.Backend.DataContext
                 {
                     if (reader.BaseStream.Length > sizeof(long))
                     {
-                        reader.BaseStream.Seek(reader.BaseStream.Length - sizeof(long), SeekOrigin.Begin);
+                        reader.BaseStream.Seek(reader.BaseStream.Length - (sizeof(long) + 257), SeekOrigin.Begin);
                         nbLogEntries = reader.ReadInt64();
                     }
                 }
