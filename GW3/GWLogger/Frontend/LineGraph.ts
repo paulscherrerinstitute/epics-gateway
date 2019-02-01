@@ -43,7 +43,6 @@ class LineGraph
     private plotColor: string;
     private plotLineWidth: number;
     private myResize;
-    private toolTip: kendo.ui.Tooltip;
     private xLabelWidth: number;
     private minY: number;
     private maxY: number;
@@ -66,20 +65,10 @@ class LineGraph
         this.Resize();
 
         if (graphOptions && graphOptions.ToolTip === true)
-        {
-            this.toolTip = $("#" + elementContainer).kendoTooltip({
-                position: "centered",
-                content: this.TooltipContent,
-                showOn: "focus",
-                animation: false
-            }).data("kendoTooltip");
             $("#canvas_" + elementContainer).on("mouseover", (evt) => { this.MouseOver(evt); }).on("mouseout", (evt) => { this.MouseOut(evt); });
-        }
 
         if (graphOptions.OnClick)
-        {
             $("#canvas_" + elementContainer).css({ cursor: "pointer" }).on("click", (evt) => { this.MouseClick(evt); });
-        }
     }
 
     public TooltipContent(): string
@@ -109,9 +98,8 @@ class LineGraph
 
     public MouseOver(evt: JQueryMouseEventObject)
     {
-        if (!this.toolTip)
+        if (!this.graphOptions.ToolTip)
             return;
-        //this.toolTip.show($("#" + this.elementContainer));
         $("#canvas_" + this.elementContainer).on("mousemove", (evt) => { this.MouseMove(evt); });
         setTimeout(() =>
         {
@@ -121,15 +109,16 @@ class LineGraph
 
     public MouseOut(evt: JQueryMouseEventObject)
     {
-        if (!this.toolTip)
+        if (!this.graphOptions.ToolTip)
             return;
-        this.toolTip.hide();
+        $("#toolTip").css({ width: "" });
+        ToolTip.Hide();
         $("#canvas_" + this.elementContainer).off("mousemove");
     }
 
     public MouseMove(evt: JQueryMouseEventObject)
     {
-        if (!this.toolTip)
+        if (!this.graphOptions.ToolTip)
             return;
         var p = $("#" + this.elementContainer).position();
 
@@ -142,25 +131,22 @@ class LineGraph
         var idx = this.TransformCanvasToPos(gx, gy);
         if (idx === null || isNaN(idx))
         {
-            this.toolTip.hide();
+            //this.toolTip.hide();
             return;
         }
 
-        if ($("#" + this.elementContainer + "_tt_active").length == 0)
-            this.toolTip.show($("#" + this.elementContainer));
+        var v = this.dataSource.Values[idx].Value;
+        var vy = this.TransformY(v);
 
+        var label = this.dataSource.Values[idx].Label;
+        if (this.graphOptions.TooltipLabelFormat)
+            label = this.graphOptions.TooltipLabelFormat(label);
+        else if (this.graphOptions.LabelFormat)
+            label = this.graphOptions.LabelFormat(label);
+        ToolTip.Show(document.getElementById(this.elementContainer), "bottom", "" + label + ": " + this.dataSource.Values[idx].Value);
         setTimeout(() =>
         {
-            var v = this.dataSource.Values[idx].Value;
-            var vy = this.TransformY(v);
-
-            $("#" + this.elementContainer + "_tt_active").parent().css({ left: (x - 90) + "px", top: (y + 30) + "px" });
-            var label = this.dataSource.Values[idx].Label;
-            if (this.graphOptions.TooltipLabelFormat)
-                label = this.graphOptions.TooltipLabelFormat(label);
-            else if (this.graphOptions.LabelFormat)
-                label = this.graphOptions.LabelFormat(label);
-            $("#" + this.elementContainer + "_tt_active .k-tooltip-content").html("" + label + ": " + this.dataSource.Values[idx].Value).css({ width: "200px" });
+            $("#toolTip").css({ width: "200px", left: (x - 90) + "px", top: (y + 30) + "px" });
         }, 10);
     }
 

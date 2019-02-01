@@ -111,18 +111,18 @@ class Map
         Map.Add("polygon", { points: ps, fill: "#00E000", stroke: "black", stroke_width: 0.5 });
         Map.Add("text", { x: 1100 - 20, y: 60 + 40 + 45 + 22, alignment_baseline: "central", font_family: "Sans-serif", font_size: 16, style: "text-anchor: left;", font_weight: "bold", fill: "black" }, "Direction");
 
-        var t = $("#mapView").kendoTooltip({
+        /*var t = $("#mapView").kendoTooltip({
             showOn: "focus",
             content: Map.GetTooltipText,
             position: "center",
             animation: false
         }).data("kendoTooltip");
-        t['_initPopup'](); // With the "position":"center" property avoid to add an "arrow"
+        t['_initPopup'](); // With the "position":"center" property avoid to add an "arrow"*/
 
         Map.AddGateway(350, 400, "CAESAR");
     }
 
-    static GetTooltipText(e: kendo.ui.TooltipEvent): string
+    static GetTooltipText(): string
     {
         if (Map.HoverGateway == "CAESAR")
         {
@@ -157,7 +157,7 @@ class Map
         Map.Add("text", { x: x, y: y, alignment_baseline: "central", font_family: "Sans-serif", font_size: fontSize, style: "text-anchor: middle;", font_weight: "bold", fill: "#A0A0A0" }, label);
     }
 
-    static toolTip: kendo.ui.Tooltip;
+    //static toolTip: kendo.ui.Tooltip;
 
     static AddGateway(x: number, y: number, label: string, width: number = 200, fontSize: number = 18)
     {
@@ -168,21 +168,18 @@ class Map
             var j = $("#svg_gw_" + label);
             j.attr("stroke", "#597db7");
             j.attr("stroke-width", "4");
-            Map.toolTip = $("#mapView").data("kendoTooltip");
+            //Map.toolTip = $("#mapView").data("kendoTooltip");
             Map.HoverGateway = label;
 
             var p = $("#mapView").position();
             // Calculates the position on screen
             var t = (y + p.top + fontSize + 53 - $("#mapView").scrollTop());
 
-            if (Map.toolTip)
-            {
-                // If the placement is too low, then moves the tooltip above
-                if (t + 230 > $(window).innerHeight())
-                    t -= 215 + fontSize;
-                Map.toolTip.show($("#mapView"));
-                Map.toolTip.refresh();
-            }
+            // If the placement is too low, then moves the tooltip above
+            if (t + 230 > $(window).innerHeight())
+                t -= 215 + fontSize;
+
+            ToolTip.Show(document.getElementById("svg_gw_" + label), "bottom", Map.GetTooltipText());
             // Workaround to place the tooltip at the wished position
             setTimeout(() =>
             {
@@ -195,14 +192,14 @@ class Map
             $("#svg_gw_" + label).attr("stroke", "black");
             $("#svg_gw_" + label).attr("stroke-width", "2");
             // Workaround to avoids to close the tooltip while we are on a child element for example
-            setTimeout(() =>
+            /*setTimeout(() =>
             {
                 if (Map.toolTip && $("#svg_gw_" + label).attr("stroke-width") == "2")
                 {
                     Map.toolTip.hide();
                     Map.toolTip = null;
                 }
-            }, 10);
+            }, 10);*/
         };
 
         var elem: SVGElement;

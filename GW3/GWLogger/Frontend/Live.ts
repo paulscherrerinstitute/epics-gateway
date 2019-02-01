@@ -37,7 +37,6 @@ class Live
     static mustUpdate: number = 0;
     static currentErrors: string[] = [];
 
-    static lastStatusTooltip: kendo.ui.Tooltip = null;
     static InitShortDisplay()
     {
         $(".GWDisplay").each((idx, elem) =>
@@ -52,28 +51,22 @@ class Live
             }).html("<canvas id='canvas_" + elem.id + "' width='100' height='100'></canvas><br>" + elem.id);
         });
 
-        $(".GWDisplay").kendoTooltip({
-            position: "bottom",
-            show: (e: kendo.ui.TooltipEvent) =>
-            {
-                if (Live.lastStatusTooltip)
-                    Live.lastStatusTooltip.hide();
-                Live.lastStatusTooltip = e.sender;
-                e.sender.refresh();
-            },
-            content: (e: kendo.ui.TooltipEvent) =>
-            {
-                var html = "<b>Gateway " + e.sender.element[0].id + "</b><br>";
-                var live = Live.Get(e.sender.element[0].id);
-                html += "<table style='text-align: left;'>";
-                html += "<tr><td>Version</td><td>" + (live ? live.Version : "") + "</td></tr>";
-                html += "<tr><td>State</td><td>" + (live ? GatewayStates[live.State] : "") + "</td></tr>";
-                html += "</table>";
-                html += "-- Click to view details --";
-                return html;
-            },
-            showAfter: 200,
-            animation: false
+        $(".GWDisplay").on("mouseenter", (e) =>
+        {
+            var target = e.target
+
+            while (target.className != "GWDisplay")
+                target = target.parentElement;
+
+            var html = "<b>Gateway " + target.id + "</b><br>";
+            var live = Live.Get(target.id);
+            html += "<table style='text-align: left;'>";
+            html += "<tr><td>Version</td><td>" + (live ? live.Version : "") + "</td></tr>";
+            html += "<tr><td>State</td><td>" + (live ? GatewayStates[live.State] : "") + "</td></tr>";
+            html += "</table>";
+            html += "-- Click to view details --";
+
+            ToolTip.Show(target, "bottom", html);
         });
 
         Live.cpuChart = new LineGraph("cpuGraph", { Values: [] }, {
@@ -194,8 +187,6 @@ class Live
         return null;
     }
 
-    static lastToolTip: kendo.ui.Tooltip = null;
-
     static RefreshShort()
     {
         if (Main.CurrentGateway)
@@ -228,21 +219,12 @@ class Live
                         }
                         $("#gwInfos").html(html);
 
-                        $("#gwInfos tr").kendoTooltip({
-                            position: "bottom",
-                            show: (e: kendo.ui.TooltipEvent) =>
-                            {
-                                if (Live.lastToolTip)
-                                    Live.lastToolTip.hide();
-                                Live.lastToolTip = e.sender;
-                                e.sender.refresh();
-                            },
-                            content: (e: kendo.ui.TooltipEvent) =>
-                            {
-                                return "EPICS Channel Name:<br>" + DebugChannels[e.sender.element[0].children[0].innerHTML].replace(/\{0\}/g, Main.CurrentGateway.toUpperCase());
-                            },
-                            showAfter: 200,
-                            animation: false
+                        $("#gwInfos tr").on("mouseenter",null, (e) =>
+                        {
+                            var target = e.target;
+                            if (target.nodeName == "TD")
+                                target = target.parentElement;
+                            ToolTip.Show(target, "bottom", "EPICS Channel Name:<br>" + DebugChannels[target.children[0].innerHTML].replace(/\{0\}/g, Main.CurrentGateway.toUpperCase()));
                         });
                     }
                     catch (ex)
@@ -340,7 +322,8 @@ class Live
                 for (var i = 0; i < Live.shortInfo.length; i++)
                 {
                     Map.SetGatewayState(Live.shortInfo[i].Name, Live.shortInfo[i].State, Live.shortInfo[i].Direction);
-                    $("#mapView_tt_active .k-tooltip-content").html(Map.GetTooltipText(null));
+                    if (ToolTip.currentElement && ToolTip.currentElement.id && ToolTip.currentElement.id.startsWith("svg_gw"))
+                        $("#toolTip").html(Map.GetTooltipText());
 
                     if (Live.shortInfo[i].State < 3)
                         continue;

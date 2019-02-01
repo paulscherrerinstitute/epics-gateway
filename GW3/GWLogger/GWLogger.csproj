@@ -610,6 +610,7 @@
     <TypeScriptCompile Include="Frontend\State.ts" />
     <TypeScriptCompile Include="Frontend\Subscription.ts" />
     <TypeScriptCompile Include="Frontend\SuggestionInterface.ts" />
+    <TypeScriptCompile Include="Frontend\ToolTip.ts" />
     <TypeScriptCompile Include="Frontend\Utils.ts" />
     <TypeScriptCompile Include="Frontend\WrongChannels.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />

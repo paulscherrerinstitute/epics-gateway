@@ -198,7 +198,7 @@ class Main
                         }
                     }
                 }).data("kendoGrid");
-                $("#gatewaySessions tbody tr").kendoTooltip({
+                /*$("#gatewaySessions tbody tr").kendoTooltip({
                     showOn: "mouseenter",
                     content: (e) =>
                     {
@@ -224,6 +224,22 @@ class Main
                     //$(evt.target.parentElement).data("kendoTooltip").hide();
                     $(".k-tooltip").hide();
                     $(".k-animation-container").remove();
+                });*/
+
+                $("#gatewaySessions tbody tr").on("mouseenter", (e) =>
+                {
+                    var d: any = grid.dataItem(e.target);
+                    if (!d || !d.EndDate)
+                        return;
+
+                    var html = "<table>";
+                    html += "<tr><td>Start&nbsp;Date:</td><td>" + Utils.ShortGWDateFormat(d.StartDate) + "</td></tr>";
+                    html += "<tr><td>End&nbsp;Date:</td><td>" + Utils.ShortGWDateFormat(d.EndDate) + "</td></tr>";
+                    html += "<tr><td>Restart&nbsp;Reason:</td><td>" + (d.RestartType == 0 ? "" : RestartType[d.RestartType]) + "</td></tr>";
+                    html += "<tr><td>Restart&nbsp;Comment:</td><td>" + (!<string>d.Description ? "" : <string>d.Description).htmlEntities() + "</td></tr>";
+                    html += "</table>";
+                    
+                    ToolTip.Show(e.target, "bottom", html);
                 });
             },
             error: function (msg, textStatus)
@@ -767,11 +783,15 @@ class Main
 
         $("*[tooltip]").each((idx, elem) =>
         {
-            var text = $(elem).attr("tooltip");
-            var position = $(elem).attr("tooltip-position");
-            if (!position)
-                position = "bottom";
-            $(elem).kendoTooltip({ position: position, content: text, animation: false });
+            $(elem).on("mouseover", (e) =>
+            {
+                var text = $(e.target).attr("tooltip");
+                var position = $(e.target).attr("tooltip-position");
+                if (!position)
+                    position = "bottom";
+                //$(elem).kendoTooltip({ position: position, content: text, animation: false });
+                ToolTip.Show(e.target, (<any>position), text);
+            });
         });
 
         var currentUrl = (document.location + "");
