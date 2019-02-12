@@ -198,37 +198,12 @@ class Main
                         }
                     }
                 }).data("kendoGrid");
-                /*$("#gatewaySessions tbody tr").kendoTooltip({
-                    showOn: "mouseenter",
-                    content: (e) =>
-                    {
-                        var d: any = grid.dataItem(e.target[0]);
-                        if (!d || !d.EndDate)
-                        {
-                            $(".k-tooltip").hide();
-                            return;
-                        }
-                        var html = "<table>";
-                        html += "<tr><td>Start&nbsp;Date:</td><td>" + Utils.ShortGWDateFormat(d.StartDate) + "</td></tr>";
-                        html += "<tr><td>End&nbsp;Date:</td><td>" + Utils.ShortGWDateFormat(d.EndDate) + "</td></tr>";
-                        html += "<tr><td>Restart&nbsp;Reason:</td><td>" + (d.RestartType == 0 ? "" : RestartType[d.RestartType]) + "</td></tr>";
-                        html += "<tr><td>Restart&nbsp;Comment:</td><td>" + (!<string>d.Description ? "" : <string>d.Description).htmlEntities() + "</td></tr>";
-                        html += "</table>";
-                        return html;
-                    },
-                    position: "right",
-                    animation: false
-                });
-                $("#gatewaySessions tbody tr").on("mouseleave", (evt) =>
-                {
-                    //$(evt.target.parentElement).data("kendoTooltip").hide();
-                    $(".k-tooltip").hide();
-                    $(".k-animation-container").remove();
-                });*/
 
-                $("#gatewaySessions tbody tr").on("mouseenter", (e) =>
+                $("#gatewaySessions tbody tr").on("mouseover", (e) =>
                 {
                     var d: any = grid.dataItem(e.target);
+                    if (!d)
+                        d = grid.dataItem(e.target.parentElement);
                     if (!d || !d.EndDate)
                         return;
 
@@ -238,7 +213,7 @@ class Main
                     html += "<tr><td>Restart&nbsp;Reason:</td><td>" + (d.RestartType == 0 ? "" : RestartType[d.RestartType]) + "</td></tr>";
                     html += "<tr><td>Restart&nbsp;Comment:</td><td>" + (!<string>d.Description ? "" : <string>d.Description).htmlEntities() + "</td></tr>";
                     html += "</table>";
-                    
+
                     ToolTip.Show(e.target, "bottom", html);
                 });
             },

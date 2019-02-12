@@ -12,6 +12,33 @@ var less = require("gulp-less");
 var util = require("gulp-util");
 var sourcemaps = require('gulp-sourcemaps');
 
+function CompileFrontend()
+{
+    process.chdir(__dirname);
+
+    /*tsMain = typescript.createProject({
+        out: "main.js",
+        module: "system",
+        target: "es5",
+        experimentalDecorators: true,
+        sourceMap: true
+    });*/
+
+    return gulp.src(['./Frontend/**/*.ts', './Scripts/typings/**/*.d.ts'])
+        .pipe(sourcemaps.init())
+        .pipe(sourcemaps.identityMap())
+        .pipe(tsMain())
+        .pipe(sourcemaps.write(".", {
+            includeContent: false, addComment: true
+        }))
+        .pipe(gulp.dest("."))
+        .on('error', swallowError)
+        .on('finish', function ()
+        {
+            util.log(util.colors.cyan("Frontend compilation complete"));
+        });
+}
+
 function clean(path)
 {
     var fs = require("fs");
@@ -40,7 +67,8 @@ gulp.task("watcher", function ()
     process.chdir(__dirname);
     console.log("I will watch for you all the TS and LESS files and compile them as needed.");
     console.log(" ");
-    gulp.watch("Frontend/**/*.ts", gulp.series(["compile:frontend"]));
+    //gulp.watch("Frontend/**/*.ts", gulp.series(["compile:frontend"]));
+    gulp.watch("Frontend/**/*.ts", CompileFrontend);
     gulp.watch("**/*.less", gulp.series(["compile:less"]));
 });
 
@@ -72,32 +100,7 @@ gulp.task("clean:js", function (cb)
     cb();
 });
 
-gulp.task('compile:frontend', function ()
-{
-    process.chdir(__dirname);
-
-    /*tsMain = typescript.createProject({
-        out: "main.js",
-        module: "system",
-        target: "es5",
-        experimentalDecorators: true,
-        sourceMap: true
-    });*/
-
-    return gulp.src(['./Frontend/**/*.ts', './Scripts/typings/**/*.d.ts'])
-        .pipe(sourcemaps.init())
-        .pipe(sourcemaps.identityMap())
-        .pipe(tsMain())
-        .pipe(sourcemaps.write(".", {
-            includeContent: false, addComment: true
-        }))
-        .pipe(gulp.dest("."))
-        .on('error', swallowError)
-        .on('finish', function ()
-        {
-            util.log(util.colors.cyan("Frontend compilation complete"));
-        });
-});
+gulp.task('compile:frontend', CompileFrontend);
 
 gulp.task("compile:all", gulp.series(["compile:less", "compile:frontend"]));
 gulp.task("clean:all", gulp.series(["clean:css", "clean:js"]));

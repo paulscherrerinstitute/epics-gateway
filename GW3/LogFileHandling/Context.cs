@@ -183,10 +183,10 @@ namespace GWLogger.Backend.DataContext
         {
             if (!files.Exists(gatewayName))
                 return null;
-            using (var l = files[gatewayName].Lock())
-            {
+            /*using (var l = files[gatewayName].Lock())
+            {*/
                 return files[gatewayName].GetGatewaySessions();
-            }
+            //}
         }
 
         public void Save(LogEntry entry)
@@ -224,20 +224,25 @@ namespace GWLogger.Backend.DataContext
                     .Select(row => row.Value).ToList();
 
                 DataFile lastGateway = null;
-
-                foreach (var entry in entries)
+                try
                 {
-                    if (lastGateway != null && lastGateway.Gateway != entry.Gateway)
-                        lastGateway.Release();
-                    if (lastGateway == null || lastGateway.Gateway != entry.Gateway)
+                    foreach (var entry in entries)
                     {
-                        lastGateway = files[entry.Gateway];
-                        lastGateway.Wait();
+                        if (lastGateway != null && lastGateway.Gateway != entry.Gateway)
+                            lastGateway.Release();
+                        if (lastGateway == null || lastGateway.Gateway != entry.Gateway)
+                        {
+                            lastGateway = files[entry.Gateway];
+                            lastGateway.Wait();
+                        }
+                        lastGateway.Save(entry, knownErrors.Contains(entry.MessageTypeId));
                     }
-                    lastGateway.Save(entry, knownErrors.Contains(entry.MessageTypeId));
                 }
-                if (lastGateway != null)
-                    lastGateway.Release();
+                finally
+                {
+                    if (lastGateway != null)
+                        lastGateway.Release();
+                }
             }
         }
 

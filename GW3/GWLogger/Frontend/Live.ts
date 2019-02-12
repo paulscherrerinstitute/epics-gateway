@@ -51,7 +51,7 @@ class Live
             }).html("<canvas id='canvas_" + elem.id + "' width='100' height='100'></canvas><br>" + elem.id);
         });
 
-        $(".GWDisplay").on("mouseenter", (e) =>
+        $(".GWDisplay").on("mouseover", (e) =>
         {
             var target = e.target
 

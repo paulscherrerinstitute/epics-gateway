@@ -1,4 +1,6 @@
-﻿using GWLogger.Backend.DTOs;
+﻿#define LOCKINFO
+
+using GWLogger.Backend.DTOs;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,17 +13,41 @@ namespace GWLogger.Backend.DataContext
     public class LockObject : IDisposable
     {
         private SemaphoreSlim locker;
+#if LOCKINFO
+        private static Dictionary<SemaphoreSlim, string> allOpenLocks = new Dictionary<SemaphoreSlim, string>();
+#endif
 
-        public LockObject(SemaphoreSlim locker)
+        public LockObject(SemaphoreSlim locker, [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
+                    [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
+                    [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
         {
-            this.locker = locker;
-            this.locker.Wait();
+#if LOCKINFO
+            lock (allOpenLocks)
+            {
+#endif
+                locker.Wait();
+                this.locker = locker;
+
+#if LOCKINFO
+                if (!allOpenLocks.ContainsKey(locker))
+                    allOpenLocks.Add(locker, sourceFilePath + "@" + memberName + ":" + sourceLineNumber);
+            }
+#endif
         }
 
         public void Dispose()
         {
-            this.locker?.Release();
-            this.locker = null;
+#if LOCKINFO
+            lock (allOpenLocks)
+            {
+                if (this.locker != null)
+                    allOpenLocks.Remove(this.locker);
+#endif
+                this.locker?.Release();
+                this.locker = null;
+#if LOCKINFO
+            }
+#endif
         }
     }
 
@@ -81,9 +107,11 @@ namespace GWLogger.Backend.DataContext
             lockObject.Release();
         }
 
-        public LockObject Lock()
+        public LockObject Lock([System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
+                    [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
+                    [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
         {
-            return new LockObject(this.lockObject);
+            return new LockObject(this.lockObject, memberName, sourceFilePath, sourceLineNumber);
         }
 
         public DataFile(Context context, string gateway)
@@ -173,15 +201,15 @@ namespace GWLogger.Backend.DataContext
         {
             if (string.IsNullOrWhiteSpace(gatewayName))
                 return false;
-            lock (knownFiles)
-            {
-                if (knownFiles.Contains(gatewayName.ToLower()))
-                    return true;
-                var res = Directory.GetFiles(storageDirectory, gatewayName.ToLower() + ".*.data").Any();
-                if (res)
-                    knownFiles.Add(gatewayName.ToLower());
-                return res;
-            }
+            /*lock (knownFiles)
+            {*/
+            if (knownFiles.Contains(gatewayName.ToLower()))
+                return true;
+            var res = Directory.GetFiles(storageDirectory, gatewayName.ToLower() + ".*.data").Any();
+            if (res)
+                knownFiles.Add(gatewayName.ToLower());
+            return res;
+            //}
         }
 
         public void CleanOlderThan(int nbDays)
@@ -201,10 +229,10 @@ namespace GWLogger.Backend.DataContext
                 File.Delete(i);
             }
 
-            lock (knownFiles)
-            {
-                knownFiles.Clear();
-            }
+            /*lock (knownFiles)
+            {*/
+            knownFiles.Clear();
+            //}
         }
 
         public static void DeleteFiles(string storageDirectory, string gateway)
@@ -213,10 +241,10 @@ namespace GWLogger.Backend.DataContext
             foreach (var i in Directory.GetFiles(storageDirectory, gateway.ToLower() + ".*.*"))
                 File.Delete(i);
 
-            lock (knownFiles)
-            {
-                knownFiles.Clear();
-            }
+            /*lock (knownFiles)
+            {*/
+            knownFiles.Clear();
+            //}
         }
 
         public DataFileStats GetLogsStats()
@@ -465,6 +493,8 @@ namespace GWLogger.Backend.DataContext
                     cachedGatewaySessions[0].NbEntries = nbLogEntries;
                     cachedGatewaySessions[0].EndDate = lastLogEntry;
                 }
+                if (cachedGatewaySessions != null)
+                    return cachedGatewaySessions;
             }
 
             try
