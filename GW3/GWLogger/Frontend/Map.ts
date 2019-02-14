@@ -111,6 +111,9 @@ class Map
         Map.Add("polygon", { points: ps, fill: "#00E000", stroke: "black", stroke_width: 0.5 });
         Map.Add("text", { x: 1100 - 20, y: 60 + 40 + 45 + 22, alignment_baseline: "central", font_family: "Sans-serif", font_size: 16, style: "text-anchor: left;", font_weight: "bold", fill: "black" }, "Direction");
 
+        //<use xlink: href = "#one" />
+        //Map.Add("use", { "xlink:href": "", id: "use_hover" });
+
         /*var t = $("#mapView").kendoTooltip({
             showOn: "focus",
             content: Map.GetTooltipText,

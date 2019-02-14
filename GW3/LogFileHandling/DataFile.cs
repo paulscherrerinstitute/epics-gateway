@@ -92,7 +92,7 @@ namespace GWLogger.Backend.DataContext
         private static HashSet<string> knownFiles = new HashSet<string>();
         private readonly Context Context;
 
-        public void Wait()
+        /*public void Wait()
         {
             lockObject.Wait();
         }
@@ -105,14 +105,14 @@ namespace GWLogger.Backend.DataContext
         public void Release()
         {
             lockObject.Release();
-        }
+        }*/
 
-        public LockObject Lock([System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
+        /*public LockObject Lock([System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
                     [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
                     [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
         {
             return new LockObject(this.lockObject, memberName, sourceFilePath, sourceLineNumber);
-        }
+        }*/
 
         public DataFile(Context context, string gateway)
         {
@@ -127,7 +127,7 @@ namespace GWLogger.Backend.DataContext
 
                 using (var reader = new BinaryReader(File.Open(Context.StorageDirectory + "\\" + gateway.ToLower() + ".sessions", FileMode.Open, FileAccess.Read)))
                 {
-                    if (reader.BaseStream.Length > sizeof(long))
+                    if (reader.BaseStream.Length > sizeof(long) * 4 + sizeof(uint) + 257)
                     {
                         reader.BaseStream.Seek(reader.BaseStream.Length - (sizeof(long) + 257), SeekOrigin.Begin);
                         nbLogEntries = reader.ReadInt64();

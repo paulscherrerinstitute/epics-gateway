@@ -261,6 +261,29 @@ namespace GWLogger
         }
 
         [WebMethod]
+        public List<KeyValuePair<string, int>> MostConsumingChannel(string gatewayName, DateTime datePoint)
+        {
+            // Retrieves up to 20K lines of logs
+            var logs = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), null, 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
+            if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
+                return null;
+
+            // Find the different details IDs
+            var channelName = Global.DataContext.MessageDetailTypes.FirstOrDefault(row => row.Value == "ChannelName")?.Id;
+            var packetSize = Global.DataContext.MessageDetailTypes.FirstOrDefault(row => row.Value == "PacketSize")?.Id;
+
+            return logs.Select(row => new
+            {
+                Channel = row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == channelName)?.Value,
+                Size = Math.Max(16, int.Parse(row.LogEntryDetails.FirstOrDefault(r2 => r2.DetailTypeId == packetSize)?.Value ?? "0"))
+            })
+            .GroupBy(row => row.Channel)
+            .Select(row => new KeyValuePair<string, int>(row.Key, row.Sum(r2 => r2.Size)))
+            .OrderByDescending(row => row.Value)
+            .ToList();
+        }
+
+        [WebMethod]
         public List<Backend.DTOs.GatewayStats> GetAllStats(string gatewayName)
         {
             return Global.DataContext.GetStats(gatewayName);

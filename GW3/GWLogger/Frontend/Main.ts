@@ -328,7 +328,15 @@ class Main
             var FirstColumn = {
                 'SearchesPerformed': 'Client',
                 'SearchesOnChannelsPerformed': 'Channel',
-                'MostActiveClasses': 'Class'
+                'MostActiveClasses': 'Class',
+                'MostConsumingChannel': 'Channel'
+            };
+
+            var SecondColumn = {
+                'SearchesPerformed': 'Searches',
+                'SearchesOnChannelsPerformed': 'Searches',
+                'MostActiveClasses': 'Calls',
+                'MostConsumingChannel': 'NbBytes'
             };
 
             Main.loadingLogs = $.ajax({
@@ -349,7 +357,7 @@ class Main
                     $("#logsContent").html("").kendoGrid({
                         columns: [
                             { title: (FirstColumn[tab.getAttribute("report")]), field: "Key" },
-                            { title: "Searches", field: "Value", width: "80px", format: "{0:n0}", attributes: { style: "text-align:right;" } }],
+                            { title: (SecondColumn[tab.getAttribute("report")]), field: "Value", width: "80px", format: "{0:n0}", attributes: { style: "text-align:right;" } }],
                         dataSource:
                         {
                             data: data

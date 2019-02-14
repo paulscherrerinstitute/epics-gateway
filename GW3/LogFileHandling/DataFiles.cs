@@ -36,10 +36,10 @@ namespace GWLogger.Backend.DataContext
 
             foreach (var i in fileList)
             {
-                using (var l = i.Lock())
-                {
+                /*using (var l = i.Lock())
+                {*/
                     i.Flush();
-                }
+                //}
             }
         }
 
@@ -50,10 +50,10 @@ namespace GWLogger.Backend.DataContext
                 fileList = dataFiles.Values.ToList();
             foreach (var i in fileList)
             {
-                using (var l = i.Lock())
-                {
+                /*using (var l = i.Lock())
+                {*/
                     i.CleanOlderThan(nbDays);
-                }
+                //}
             }
         }
 
@@ -64,10 +64,10 @@ namespace GWLogger.Backend.DataContext
                 fileList = dataFiles.Values.ToList();
             foreach (var i in fileList)
             {
-                using (var l = i.Lock())
-                {
+                /*using (var l = i.Lock())
+                {*/
                     i.SaveStats();
-                }
+                //}
             }
         }
 

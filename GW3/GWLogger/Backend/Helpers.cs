@@ -52,7 +52,7 @@ namespace GWLogger.Backend
 
         public static string JsEscape(this string source)
         {
-            return source.Replace("\\", "\\\\").Replace("\"", "\\\"");
+            return source.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n","\\n").Replace("\r","\\r");
         }
 
         public static string Hostname(this string ip)

@@ -160,7 +160,7 @@ namespace GWLogger
                     context.Response.Write("\",");
 
                     context.Response.Write("\"Details\":{");
-                    context.Response.Write(string.Join(",", i.LogEntryDetails.Select(row => "\"" + (messageDetails.ContainsKey(row.DetailTypeId) ? messageDetails[row.DetailTypeId] : row.DetailTypeId.ToString()) + "\":\"" + row.Value.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"")));
+                    context.Response.Write(string.Join(",", i.LogEntryDetails.Select(row => "\"" + (messageDetails.ContainsKey(row.DetailTypeId) ? messageDetails[row.DetailTypeId] : row.DetailTypeId.ToString()) + "\":\"" + row.Value.JsEscape() + "\"")));
                     context.Response.Write("}");
 
                     context.Response.Write("}");

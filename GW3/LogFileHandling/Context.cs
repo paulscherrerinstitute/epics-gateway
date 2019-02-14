@@ -20,6 +20,7 @@ namespace GWLogger.Backend.DataContext
         private Thread bufferConsumer;
         private BufferBlock<LogEntry> bufferedEntries = new BufferBlock<LogEntry>();
         private CancellationTokenSource cancelOperation = new CancellationTokenSource();
+        private object lockObject = new object();
 
         public delegate void DataFileEvent(DataFile file);
         public event DataFileEvent StoreHistory;
@@ -119,7 +120,10 @@ namespace GWLogger.Backend.DataContext
                           Flush();
                       }
                       else
-                          files.SaveStats();
+                      {
+                          lock (lockObject)
+                              files.SaveStats();
+                      }
                   }
               });
 
@@ -158,35 +162,44 @@ namespace GWLogger.Backend.DataContext
 
         public List<GatewayStats> GetStats(string gatewayName)
         {
-            if (!files.Exists(gatewayName))
-                return null;
-            using (var l = files[gatewayName].Lock())
+            lock (lockObject)
             {
+                if (!files.Exists(gatewayName))
+                    return null;
+                /*using (var l = files[gatewayName].Lock())
+                {*/
                 return files[gatewayName].GetStats();
+                //}
             }
         }
 
 
         public GatewayStats GetStats(string gatewayName, DateTime start, DateTime end)
         {
-            if (start >= DateTime.UtcNow)
-                return null;
-            if (!files.Exists(gatewayName))
-                return null;
-            using (var l = files[gatewayName].Lock())
+            lock (lockObject)
             {
+                if (start >= DateTime.UtcNow)
+                    return null;
+                if (!files.Exists(gatewayName))
+                    return null;
+                /*using (var l = files[gatewayName].Lock())
+                {*/
                 return files[gatewayName].GetStats(start, end);
+                //}
             }
         }
 
         public List<GatewaySession> GetGatewaySessions(string gatewayName)
         {
-            if (!files.Exists(gatewayName))
-                return null;
-            /*using (var l = files[gatewayName].Lock())
-            {*/
+            lock (lockObject)
+            {
+                if (!files.Exists(gatewayName))
+                    return null;
+                /*using (var l = files[gatewayName].Lock())
+                {*/
                 return files[gatewayName].GetGatewaySessions();
-            //}
+                //}
+            }
         }
 
         public void Save(LogEntry entry)
@@ -224,24 +237,27 @@ namespace GWLogger.Backend.DataContext
                     .Select(row => row.Value).ToList();
 
                 DataFile lastGateway = null;
-                try
+                lock (lockObject)
                 {
-                    foreach (var entry in entries)
+                    try
                     {
-                        if (lastGateway != null && lastGateway.Gateway != entry.Gateway)
-                            lastGateway.Release();
-                        if (lastGateway == null || lastGateway.Gateway != entry.Gateway)
+                        foreach (var entry in entries)
                         {
-                            lastGateway = files[entry.Gateway];
-                            lastGateway.Wait();
+                            /*if (lastGateway != null && lastGateway.Gateway != entry.Gateway)
+                                lastGateway.Release();*/
+                            if (lastGateway == null || lastGateway.Gateway != entry.Gateway)
+                            {
+                                lastGateway = files[entry.Gateway];
+                                //lastGateway.Wait();
+                            }
+                            lastGateway.Save(entry, knownErrors.Contains(entry.MessageTypeId));
                         }
-                        lastGateway.Save(entry, knownErrors.Contains(entry.MessageTypeId));
                     }
-                }
-                finally
-                {
-                    if (lastGateway != null)
-                        lastGateway.Release();
+                    finally
+                    {
+                        /*if (lastGateway != null)
+                            lastGateway.Release();*/
+                    }
                 }
             }
         }
@@ -272,13 +288,14 @@ namespace GWLogger.Backend.DataContext
                     if (messageTypes.Any(row => !value.Select(r2 => r2.Id).Contains(row.Id)) ||
                         value.Any(row => !messageTypes.Select(r2 => r2.Id).Contains(row.Id)))
                     {
-                        using (var stream = File.OpenWrite(StorageDirectory + "\\MessageTypes.xml"))
+                        using (var stream = File.Open(StorageDirectory + "\\MessageTypes.xml", FileMode.Create, FileAccess.Write))
                         {
                             XmlSerializer ser = new XmlSerializer(typeof(List<DTOs.MessageType>));
                             ser.Serialize(stream, value);
                         }
                         messageTypes.Clear();
                         messageTypes.AddRange(value);
+                        maxMessageTypes = -1;
 
                         errorMessages = messageTypes.Where(row => row.LogLevel >= 3).Select(row => row.Id).ToList();
                     }
@@ -299,16 +316,29 @@ namespace GWLogger.Backend.DataContext
             {
                 lock (messageDetailTypes)
                 {
-                    if (messageDetailTypes.Any(row => !value.Select(r2 => r2.Id).Contains(row.Id)) ||
+                    /*if (messageDetailTypes.Any(row => !value.Select(r2 => r2.Id).Contains(row.Id)) ||
                     value.Any(row => !messageDetailTypes.Select(r2 => r2.Id).Contains(row.Id)))
                     {
-                        using (var stream = File.OpenWrite(StorageDirectory + "\\MessageDetails.xml"))
+                        if (File.Exists(StorageDirectory + "\\MessageDetails.xml"))
+                            File.Delete(StorageDirectory + "\\MessageDetails.xml");
+                        using (var stream = File.Open(StorageDirectory + "\\MessageDetails.xml", FileMode.Create, FileAccess.Write))
                         {
                             XmlSerializer ser = new XmlSerializer(typeof(List<IdValue>));
                             ser.Serialize(stream, value);
                         }
                         messageDetailTypes.Clear();
                         messageDetailTypes.AddRange(value);
+                        maxMessageTypes = -1;
+                    }*/
+
+                    if (value.Any(row => !messageDetailTypes.Select(r2 => r2.Id).Contains(row.Id)))
+                    {
+                        messageDetailTypes.AddRange(value.Where(row => !messageDetailTypes.Select(r2 => r2.Id).Contains(row.Id)));
+                        using (var stream = File.Open(StorageDirectory + "\\MessageDetails.xml", FileMode.Create, FileAccess.Write))
+                        {
+                            XmlSerializer ser = new XmlSerializer(typeof(List<IdValue>));
+                            ser.Serialize(stream, messageDetailTypes);
+                        }
                         maxMessageTypes = -1;
                     }
                 }
@@ -330,63 +360,75 @@ namespace GWLogger.Backend.DataContext
 
         public List<LogEntry> ReadLastLogs(string gatewayName, int nbEntries = 100)
         {
-            if (!files.Exists(gatewayName))
-                return null;
-            using (var l = files[gatewayName].Lock())
+            lock (lockObject)
             {
+                if (!files.Exists(gatewayName))
+                    return null;
+                /*using (var l = files[gatewayName].Lock())
+                {*/
                 return files[gatewayName].ReadLastLogs(nbEntries);
+                //}
             }
         }
 
         public List<LogEntry> ReadLog(string gatewayName, DateTime start, DateTime end, string query, int nbMaxEntries = -1, List<int> messageTypes = null, string startFile = null, long offset = 0, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (!files.Exists(gatewayName))
-                return null;
-            if (start >= DateTime.UtcNow)
-                return new List<LogEntry>();
-            Query.Statement.QueryNode node = null;
-            try
+            lock (lockObject)
             {
-                if (!string.IsNullOrWhiteSpace(query))
-                    node = Query.QueryParser.Parse(query.Trim());
-            }
-            catch
-            {
-            }
-            using (var l = files[gatewayName].Lock())
-            {
+                if (!files.Exists(gatewayName))
+                    return null;
+                if (start >= DateTime.UtcNow)
+                    return new List<LogEntry>();
+                Query.Statement.QueryNode node = null;
+                try
+                {
+                    if (!string.IsNullOrWhiteSpace(query))
+                        node = Query.QueryParser.Parse(query.Trim());
+                }
+                catch
+                {
+                }
+                /*using (var l = files[gatewayName].Lock())
+                {*/
                 return files[gatewayName].ReadLog(start, end, node, nbMaxEntries, messageTypes, startFile, offset, cancellationToken);
+                //}
             }
         }
 
         public IEnumerable<LogEntry> GetLogs(string gatewayName, DateTime start, DateTime end, string query, List<int> messageTypes = null, bool onlyErrors = false)
         {
-            if (!files.Exists(gatewayName))
-                return null;
-            Query.Statement.QueryNode node = null;
-            try
+            lock (lockObject)
             {
-                if (!string.IsNullOrWhiteSpace(query))
-                    node = Query.QueryParser.Parse(query.Trim());
-            }
-            catch
-            {
-            }
-            using (var l = files[gatewayName].Lock())
-            {
+                if (!files.Exists(gatewayName))
+                    return null;
+                Query.Statement.QueryNode node = null;
+                try
+                {
+                    if (!string.IsNullOrWhiteSpace(query))
+                        node = Query.QueryParser.Parse(query.Trim());
+                }
+                catch
+                {
+                }
+                /*using (var l = files[gatewayName].Lock())
+                {*/
                 return files[gatewayName].GetLogs(start, end, node, messageTypes, onlyErrors);
+                //}
             }
         }
 
         public List<DataFileStats> GetDataFileStats()
         {
-            return files.Select(row =>
+            lock (lockObject)
             {
-                using (var l = row.Lock())
-                {
-                    return row.GetLogsStats();
-                }
+                return files.Select(row =>
+            {
+                /*using (var l = row.Lock())
+                {*/
+                return row.GetLogsStats();
+                /*}*/
             }).OrderBy(row => row.Name).ToList();
+            }
         }
 
         public void CleanOlderThan(int nbDays = 10)
@@ -397,18 +439,24 @@ namespace GWLogger.Backend.DataContext
 
         public void Flush()
         {
-            files.Flush();
-            files.SaveStats();
+            lock (lockObject)
+            {
+                files.Flush();
+                files.SaveStats();
+            }
         }
 
         public void Dispose()
         {
-            if (isDisposed)
-                return;
-            cancelOperation.Cancel();
-            isDisposed = true;
-            files.SaveStats();
-            files.Dispose();
+            lock (lockObject)
+            {
+                if (isDisposed)
+                    return;
+                cancelOperation.Cancel();
+                isDisposed = true;
+                files.SaveStats();
+                files.Dispose();
+            }
         }
     }
 }
