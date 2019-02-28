@@ -93,7 +93,7 @@ namespace GatewayLogic
                           if (System.IO.Directory.Exists(@"C:\Logs"))
                               System.IO.File.AppendAllText(@"C:\logs\deadlock.log", string.Format("{0:G} - {1}@{2}:{3}\n\r", DateTime.Now, i.SourceFilePath, i.MemberName, i.SourceLineNumber));
 
-                          MessageLogger.Write(null, LogMessageType.DeadLock, null, i.MemberName, i.SourceFilePath, i.SourceLineNumber);
+                          MessageLogger.Write(null, LogMessageType.DeadLock, null, i?.MemberName, i?.SourceFilePath, (i?.SourceLineNumber) ?? 0);
                           MessageLogger.Dispose();
                           throw new DeadLockException("Locked by " + i.SourceFilePath + " " + i.MemberName + ":" + i.SourceLineNumber);
                       }

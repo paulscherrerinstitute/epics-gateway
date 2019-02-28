@@ -14,7 +14,7 @@ namespace LoadPerformance
         private byte[] buffer = new byte[10240];
         private Thread runnerThread;
         private bool needToStop = false;
-        private List<ChannelSubscription> subscriptions;
+        private List<ChannelSubscription> subscriptions=new List<ChannelSubscription>();
         private DataPacket intArray = DataPacket.Create(Program.ArraySize * 4);
 
         public ServerConnection(LoadServer server, Socket socket)
@@ -55,9 +55,11 @@ namespace LoadPerformance
 
         public void Dispose()
         {
-            Console.WriteLine("Dispose " + socket.RemoteEndPoint.ToString());
+            //Console.WriteLine("Dispose " + socket.RemoteEndPoint.ToString());
             needToStop = true;
             server.RemoveConnection(this);
+            socket.Disconnect(false);
+            socket.Dispose();
         }
 
         private void ReceiveData(IAsyncResult ar)
@@ -76,7 +78,7 @@ namespace LoadPerformance
                 {
                     case (ushort)EpicsCommand.CREATE_CHANNEL: // Connect to a channel
                         string channelName = p.GetDataAsString();
-                        var id = int.Parse(channelName.Split(new char[] { ':' })[0]);
+                        var id = int.Parse(channelName.Split(new char[] { ':' })[1]);
 
                         DataPacket resPacket = DataPacket.Create(0);
                         resPacket.Command = 22;
@@ -127,7 +129,13 @@ namespace LoadPerformance
                 }
             }
 
-            socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveData, null);
+            try
+            {
+                socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveData, null);
+            }
+            catch
+            {
+            }
         }
 
         private void Send(DataPacket packet)

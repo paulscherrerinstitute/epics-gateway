@@ -16,6 +16,7 @@ namespace LoadPerformance
         {
             this.port = port;
             listener = new TcpListener(IPAddress.Parse(ip), port);
+            listener.Start();
             listener.BeginAcceptSocket(ConnectionReceived, null);
 
             udpListener = new UdpClient();
@@ -48,11 +49,11 @@ namespace LoadPerformance
                                 var newPacket = DataPacket.Create(8);
 
                                 newPacket.Command = 6;
-                                    newPacket.DataType = (UInt16) this.port;
+                                newPacket.DataType = (UInt16)this.port;
                                 newPacket.DataCount = 0;
                                 newPacket.Parameter1 = 0xffffffff;
                                 newPacket.Parameter2 = p.Parameter1;
-                                newPacket.Destination = p.Sender;
+                                newPacket.Destination = endPoint;
                                 newPacket.SetUInt16(16, Program.CA_PROTO_VERSION);
                                 newPacket.ReverseAnswer = true;
                                 UdpSend(newPacket);

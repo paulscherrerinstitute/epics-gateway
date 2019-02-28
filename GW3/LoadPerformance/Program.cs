@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 
 namespace LoadPerformance
@@ -28,8 +27,8 @@ namespace LoadPerformance
             var threads = new List<Thread>();
             var cancel = new CancellationTokenSource();
 
-            var servers = new LoadServer[NbServers];
-            var clients = new LoadClient[NbClients];
+            LoadServer server = null;
+            LoadClient client = null;
 
             if (args.Length < 1)
             {
@@ -53,40 +52,14 @@ namespace LoadPerformance
             if (args[0] == "--server" || args[0] == "--both")
             {
                 didSomething = true;
-                Console.WriteLine("Starting servers...");
-                for (var i = 0; i < servers.Length; i++)
-                {
-                    var thread = new Thread((obj) =>
-                      {
-                          var idx = (int)obj;
-                          var nb = NbArrays / NbServers;
-                          if (idx == servers.Length - 1 && idx != 0) // Lets take all the left overs
-                              nb += NbArrays % NbServers;
-                          servers[idx] = new LoadServer(ServerAddress, 5064);
-                          cancel.Token.WaitHandle.WaitOne();
-                      });
-                    thread.Start(i);
-                    threads.Add(thread);
-                }
+                Console.WriteLine("Starting server...");
+                server = new LoadServer(ServerAddress, 5064);
             }
             if (args[0] == "--client" || args[0] == "--both")
             {
                 didSomething = true;
-                Console.WriteLine("Starting clients... (will monitor " + nbMons + " channels of " + ArraySize + ")");
-                for (var i = 0; i < clients.Length; i++)
-                {
-                    var thread = new Thread((obj) =>
-                      {
-                          var idx = (int)obj;
-                          var nb = nbMons / NbClients;
-                          if (idx == clients.Length - 1 && idx != 0) // Lets take all the left overs
-                              nb += nbMons % clients.Length;
-                          clients[idx] = new LoadClient();
-                          cancel.Token.WaitHandle.WaitOne();
-                      });
-                    thread.Start(i);
-                    threads.Add(thread);
-                }
+                Console.WriteLine("Starting client... (will monitor " + nbMons + " channels of " + ArraySize + ")");
+                client = new LoadClient(ClientSearchAddress, nbMons, 5066);
 
                 Thread.Sleep(1000);
                 var totIdeal = 0L;
@@ -100,9 +73,7 @@ namespace LoadPerformance
                         {
                             totIdeal += nbMons * ArraySize * 4 * 10;
                             var idealPerSec = (long)(totIdeal / (DateTime.UtcNow - startTime).TotalSeconds);
-                            //var connected = clients.Sum(r => (r?.Connected) ?? 0);
-                            //Console.Write("" + HumanSize(clients.Sum(r => r.NbBytesSec)) + " / " + HumanSize(idealPerSec) + " (" + (clients.Sum(r => r.NbBytesSec) * 100 / idealPerSec) + " %, connected: " + connected + ")                              \r");
-                            //Console.Write("" + HumanSize(clients.Sum(r => r.NbBytesSec)) + " / " + HumanSize(servers.Sum(r => r.NbChangedPerSec)) + " (" + (clients.Sum(r => r.NbBytesSec) * 100 / servers.Sum(r => r.NbChangedPerSec)) + " %)                              \r");
+                            Console.Write("Data: " + HumanSize(client.DataPerSeconds) + " / " + HumanSize(idealPerSec) + " (" + (client.DataPerSeconds * 100 / idealPerSec) + "%)                          \r");
                         }
                         catch (DivideByZeroException)
                         {
@@ -120,6 +91,8 @@ namespace LoadPerformance
             Console.WriteLine("Press any key to stop...");
             Console.ReadKey();
             cancel.Cancel();
+            client?.Dispose();
+            server?.Dispose();
             Console.WriteLine("Stopping...");
         }
 
