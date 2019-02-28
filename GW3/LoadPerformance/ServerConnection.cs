@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace LoadPerformance
 {
@@ -9,6 +12,10 @@ namespace LoadPerformance
         private readonly LoadServer server;
         private readonly Splitter splitter;
         private byte[] buffer = new byte[10240];
+        private Thread runnerThread;
+        private bool needToStop = false;
+        private List<ChannelSubscription> subscriptions;
+        private DataPacket intArray = DataPacket.Create(Program.ArraySize * 4);
 
         public ServerConnection(LoadServer server, Socket socket)
         {
@@ -17,11 +24,39 @@ namespace LoadPerformance
             this.server = server;
             this.splitter = new Splitter();
             socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveData, null);
+            runnerThread = new Thread(DataSender);
+            runnerThread.IsBackground = true;
+            runnerThread.Start();
+
+            intArray.Command = 1; // Event add
+            intArray.DataType = 5; // Int
+            intArray.Parameter1 = 1;
+        }
+
+        private void DataSender()
+        {
+            while (!needToStop)
+            {
+                Thread.Sleep(100);
+                List<ChannelSubscription> allSubs;
+                lock (subscriptions) // Make a local copy
+                    allSubs = subscriptions.ToList();
+                foreach (var subs in allSubs)
+                {
+                    if (subs.ChannelId >= 10000) // Int array
+                    {
+                        intArray.Parameter2 = subs.ClientId;
+                        intArray.DataCount = (subs.DataCount == 0 ? (uint)Program.ArraySize : subs.DataCount);
+                        Send(intArray.Data, intArray.DataCount * 4 + 16);
+                    }
+                }
+            }
         }
 
         public void Dispose()
         {
             Console.WriteLine("Dispose " + socket.RemoteEndPoint.ToString());
+            needToStop = true;
             server.RemoveConnection(this);
         }
 
@@ -39,7 +74,7 @@ namespace LoadPerformance
             {
                 switch (p.Command)
                 {
-                    case (ushort)EpicsCommand.CREATE_CHANNEL:
+                    case (ushort)EpicsCommand.CREATE_CHANNEL: // Connect to a channel
                         string channelName = p.GetDataAsString();
                         var id = int.Parse(channelName.Split(new char[] { ':' })[0]);
 
@@ -52,18 +87,40 @@ namespace LoadPerformance
                         resPacket.Destination = p.Sender;
                         Send(resPacket);
 
-                        //resPacket = (DataPacket)packet.Clone();
                         resPacket = DataPacket.Create(0);
                         resPacket.Command = 18;
                         resPacket.Destination = p.Sender;
-                        resPacket.DataType = channelInfo.DataType;
+                        resPacket.DataType = 5; // Int
                         resPacket.DataCount = (uint)Program.ArraySize;
                         resPacket.Parameter1 = p.Parameter1;
-                        resPacket.Parameter2 = id;
+                        resPacket.Parameter2 = (uint)(10000 + id);
                         Send(resPacket);
-
                         break;
-                    case (ushort)EpicsCommand.EVENT_ADD:
+                    case (ushort)EpicsCommand.EVENT_ADD: // Subscribe to a channel
+                        lock (subscriptions)
+                        {
+                            subscriptions.Add(new ChannelSubscription
+                            {
+                                ChannelId = p.Parameter1,
+                                ClientId = p.Parameter2,
+                                DataCount = p.DataCount
+                            });
+                        }
+                        break;
+                    case (ushort)EpicsCommand.EVENT_CANCEL:
+                        lock(subscriptions)
+                        {
+                            subscriptions.RemoveAll(row => row.ClientId == p.Parameter2);
+
+                            resPacket = DataPacket.Create(0);
+                            newPacket.Command = 1;
+                            newPacket.Destination = p.Sender;
+                            newPacket.DataType = 5; // int
+                            newPacket.DataCount = 0;
+                            newPacket.Parameter1 = p.Parameter1;
+                            newPacket.Parameter2 = p.Parameter2;
+                            Send(newPacket);
+                        }
                         break;
                     default:
                         break;
@@ -73,8 +130,28 @@ namespace LoadPerformance
             socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveData, null);
         }
 
-        private void Send(DataPacket resPacket)
+        private void Send(DataPacket packet)
         {
+            try
+            {
+                this.socket.Send(packet.Data, SocketFlags.None);
+            }
+            catch
+            {
+                Dispose();
+            }
         }
+        private void Send(byte[] data, uint nb)
+        {
+            try
+            {
+                this.socket.Send(data, (int)nb, SocketFlags.None);
+            }
+            catch
+            {
+                Dispose();
+            }
+        }
+
     }
 }

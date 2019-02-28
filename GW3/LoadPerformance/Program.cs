@@ -62,7 +62,7 @@ namespace LoadPerformance
                           var nb = NbArrays / NbServers;
                           if (idx == servers.Length - 1 && idx != 0) // Lets take all the left overs
                               nb += NbArrays % NbServers;
-                          servers[idx] = new LoadServer(ServerAddress, NbArrays * idx / servers.Length, nb, idx * 2);
+                          servers[idx] = new LoadServer(ServerAddress, 5064);
                           cancel.Token.WaitHandle.WaitOne();
                       });
                     thread.Start(i);
@@ -81,7 +81,7 @@ namespace LoadPerformance
                           var nb = nbMons / NbClients;
                           if (idx == clients.Length - 1 && idx != 0) // Lets take all the left overs
                               nb += nbMons % clients.Length;
-                          clients[idx] = new LoadClient(ClientSearchAddress, NbArrays * idx / clients.Length, nb, idx + 100);
+                          clients[idx] = new LoadClient();
                           cancel.Token.WaitHandle.WaitOne();
                       });
                     thread.Start(i);
@@ -100,8 +100,8 @@ namespace LoadPerformance
                         {
                             totIdeal += nbMons * ArraySize * 4 * 10;
                             var idealPerSec = (long)(totIdeal / (DateTime.UtcNow - startTime).TotalSeconds);
-                            var connected = clients.Sum(r => (r?.Connected) ?? 0);
-                            Console.Write("" + HumanSize(clients.Sum(r => r.NbBytesSec)) + " / " + HumanSize(idealPerSec) + " (" + (clients.Sum(r => r.NbBytesSec) * 100 / idealPerSec) + " %, connected: " + connected + ")                              \r");
+                            //var connected = clients.Sum(r => (r?.Connected) ?? 0);
+                            //Console.Write("" + HumanSize(clients.Sum(r => r.NbBytesSec)) + " / " + HumanSize(idealPerSec) + " (" + (clients.Sum(r => r.NbBytesSec) * 100 / idealPerSec) + " %, connected: " + connected + ")                              \r");
                             //Console.Write("" + HumanSize(clients.Sum(r => r.NbBytesSec)) + " / " + HumanSize(servers.Sum(r => r.NbChangedPerSec)) + " (" + (clients.Sum(r => r.NbBytesSec) * 100 / servers.Sum(r => r.NbChangedPerSec)) + " %)                              \r");
                         }
                         catch (DivideByZeroException)
