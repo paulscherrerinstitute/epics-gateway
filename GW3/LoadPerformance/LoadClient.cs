@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace LoadPerformance
 {
@@ -17,6 +18,7 @@ namespace LoadPerformance
         private long totCount = 0;
         private long dataCount = 0;
         private DateTime start = DateTime.UtcNow;
+        private bool firstAnswer = true;
 
         public long DataPerSeconds
         {
@@ -32,6 +34,8 @@ namespace LoadPerformance
                 }
             }
         }
+
+        public int NbConnected { get; private set; } = 0;
 
         public LoadClient(string searchAddress, int nbMons, int udpPort)
         {
@@ -117,7 +121,7 @@ namespace LoadPerformance
             {
                 tcpClient.Client.Send(packet.Data);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Dispose();
             }
@@ -140,12 +144,15 @@ namespace LoadPerformance
                 return;
             }
 
-            var newPacket = DataPacket.Create(receiveBuffer, n);
+            var newPacket = DataPacket.Create(receiveBuffer, n, false);
 
             foreach (var p in splitter.Split(newPacket))
             {
+                //Console.WriteLine("Cmd: " + p.Command + ", " + p.MessageSize);
                 switch (p.Command)
                 {
+                    case (ushort)EpicsCommand.ACCESS_RIGHTS:
+                        break;
                     case (ushort)EpicsCommand.CREATE_CHANNEL:
                         var toSend = DataPacket.Create(16 + 16);
                         toSend.Command = 1;
@@ -153,13 +160,23 @@ namespace LoadPerformance
                         toSend.DataCount = p.DataCount;
                         toSend.Parameter1 = p.Parameter2;
                         toSend.Parameter2 = p.Parameter1;
+                        NbConnected++;
                         TcpSend(toSend);
                         break;
                     case (ushort)EpicsCommand.EVENT_ADD:
-                        totCount += newPacket.MessageSize;
-                        dataCount += newPacket.PayloadSize;
+                        if (firstAnswer)
+                        {
+                            firstAnswer = false;
+                            start = DateTime.UtcNow;
+                            Console.WriteLine("Payload: " + p.PayloadSize);
+                        }
+                        if (p.PayloadSize != Program.ArraySize * 4)
+                            Console.WriteLine("Size error: " + p.PayloadSize);
+                        Interlocked.Add(ref totCount, p.MessageSize);
+                        Interlocked.Add(ref dataCount, p.PayloadSize);
                         break;
                     default:
+                        Console.WriteLine("Odd message: " + p.Command);
                         break;
                 }
             }
@@ -169,6 +186,7 @@ namespace LoadPerformance
             }
             catch
             {
+                Dispose();
             }
         }
 

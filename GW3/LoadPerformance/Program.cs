@@ -73,7 +73,7 @@ namespace LoadPerformance
                         {
                             totIdeal += nbMons * ArraySize * 4 * 10;
                             var idealPerSec = (long)(totIdeal / (DateTime.UtcNow - startTime).TotalSeconds);
-                            Console.Write("Data: " + HumanSize(client.DataPerSeconds) + " / " + HumanSize(idealPerSec) + " (" + (client.DataPerSeconds * 100 / idealPerSec) + "%)                          \r");
+                            Console.Write("Data: " + HumanSize(client.DataPerSeconds) + " / " + HumanSize(idealPerSec) + " (" + (client.DataPerSeconds * 100 / idealPerSec) + "%, conn " + client.NbConnected + ")                          \r");
                         }
                         catch (DivideByZeroException)
                         {

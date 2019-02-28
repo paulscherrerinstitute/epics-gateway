@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
@@ -14,7 +15,7 @@ namespace LoadPerformance
         private byte[] buffer = new byte[10240];
         private Thread runnerThread;
         private bool needToStop = false;
-        private List<ChannelSubscription> subscriptions=new List<ChannelSubscription>();
+        private List<ChannelSubscription> subscriptions = new List<ChannelSubscription>();
         private DataPacket intArray = DataPacket.Create(Program.ArraySize * 4);
 
         public ServerConnection(LoadServer server, Socket socket)
@@ -35,9 +36,10 @@ namespace LoadPerformance
 
         private void DataSender()
         {
+            Stopwatch sw = new Stopwatch();
             while (!needToStop)
             {
-                Thread.Sleep(100);
+                sw.Restart();
                 List<ChannelSubscription> allSubs;
                 lock (subscriptions) // Make a local copy
                     allSubs = subscriptions.ToList();
@@ -47,9 +49,14 @@ namespace LoadPerformance
                     {
                         intArray.Parameter2 = subs.ClientId;
                         intArray.DataCount = (subs.DataCount == 0 ? (uint)Program.ArraySize : subs.DataCount);
-                        Send(intArray.Data, intArray.DataCount * 4 + 16);
+                        //Send(intArray.Data, intArray.DataCount * 4 + 16);
+                        Send(intArray);
                     }
                 }
+                sw.Stop();
+                var toWait = 100 - (int)sw.ElapsedMilliseconds;
+                if (toWait > 0)
+                    Thread.Sleep(toWait);
             }
         }
 
@@ -58,14 +65,28 @@ namespace LoadPerformance
             //Console.WriteLine("Dispose " + socket.RemoteEndPoint.ToString());
             needToStop = true;
             server.RemoveConnection(this);
-            socket.Disconnect(false);
-            socket.Dispose();
+            try
+            {
+                socket.Disconnect(false);
+                socket.Dispose();
+            }
+            catch
+            {
+            }
         }
 
         private void ReceiveData(IAsyncResult ar)
         {
-            int n = socket.EndReceive(ar);
-            if (n == 0) // End of the socket
+            int n = 0;
+            try
+            {
+                n = socket.EndReceive(ar);
+                if (n == 0) // End of the socket
+                {
+                    Dispose();
+                }
+            }
+            catch
             {
                 Dispose();
             }
@@ -110,7 +131,7 @@ namespace LoadPerformance
                         }
                         break;
                     case (ushort)EpicsCommand.EVENT_CANCEL:
-                        lock(subscriptions)
+                        lock (subscriptions)
                         {
                             subscriptions.RemoveAll(row => row.ClientId == p.Parameter2);
 
@@ -142,7 +163,10 @@ namespace LoadPerformance
         {
             try
             {
-                this.socket.Send(packet.Data, SocketFlags.None);
+                //this.socket.Send(packet.Data, SocketFlags.None);
+                if(packet.BufferSize > 40 && packet.BufferSize != 8208)
+                    Console.WriteLine("Wrong size");
+                socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
             }
             catch
             {
