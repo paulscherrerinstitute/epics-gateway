@@ -7,17 +7,21 @@ namespace LoadPerformance
 {
     internal class LoadServer : IDisposable
     {
-        private int port;
-        private TcpListener listener;
+        private int basePort;
+        private List<TcpListener> listeners=new List<TcpListener>();
         private UdpClient udpListener;
         private List<ServerConnection> connections = new List<ServerConnection>();
 
-        public LoadServer(string ip, int port)
+        public LoadServer(string ip, int port, int nbListeners)
         {
-            this.port = port;
-            listener = new TcpListener(IPAddress.Parse(ip), port);
-            listener.Start();
-            listener.BeginAcceptSocket(ConnectionReceived, null);
+            this.basePort = port;
+            for (var i = 0; i < nbListeners; i++)
+            {
+                var listener = new TcpListener(IPAddress.Parse(ip), port + i);
+                listener.Start();
+                listener.BeginAcceptSocket(ConnectionReceived, listener);
+                listeners.Add(listener);
+            }
 
             udpListener = new UdpClient();
             udpListener.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
@@ -44,12 +48,14 @@ namespace LoadPerformance
                         if (!(p.PayloadSize == 8 && p.DataCount == 0))
                         {
                             var channel = p.GetDataAsString();
+                            //Console.WriteLine("Search for " + channel);
                             if (channel.StartsWith("PERF-CHECK-IARR:"))
                             {
+                                var id = int.Parse(channel.Split(new char[] { ':' })[1]);
                                 var newPacket = DataPacket.Create(8);
 
                                 newPacket.Command = 6;
-                                newPacket.DataType = (UInt16)this.port;
+                                newPacket.DataType = (UInt16)(this.basePort + id % listeners.Count);
                                 newPacket.DataCount = 0;
                                 newPacket.Parameter1 = 0xffffffff;
                                 newPacket.Parameter2 = p.Parameter1;
@@ -73,8 +79,9 @@ namespace LoadPerformance
 
         private void ConnectionReceived(IAsyncResult ar)
         {
+            var listener = (TcpListener)ar.AsyncState;
             var socket = listener.EndAcceptSocket(ar);
-            listener.BeginAcceptSocket(ConnectionReceived, null);
+            listener.BeginAcceptSocket(ConnectionReceived, listener);
             lock (connections)
             {
                 connections.Add(new ServerConnection(this, socket));

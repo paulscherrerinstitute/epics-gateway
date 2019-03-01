@@ -20,7 +20,7 @@ namespace LoadPerformance
 
         public ServerConnection(LoadServer server, Socket socket)
         {
-            Console.WriteLine("Connection received " + socket.RemoteEndPoint.ToString());
+            //Console.WriteLine("Connection received " + socket.RemoteEndPoint.ToString());
             this.socket = socket;
             this.server = server;
             this.splitter = new Splitter();
@@ -51,6 +51,10 @@ namespace LoadPerformance
                         intArray.DataCount = (subs.DataCount == 0 ? (uint)Program.ArraySize : subs.DataCount);
                         //Send(intArray.Data, intArray.DataCount * 4 + 16);
                         Send(intArray);
+                    }
+                    else
+                    {
+
                     }
                 }
                 sw.Stop();
@@ -164,8 +168,8 @@ namespace LoadPerformance
             try
             {
                 //this.socket.Send(packet.Data, SocketFlags.None);
-                if(packet.BufferSize > 40 && packet.BufferSize != 8208)
-                    Console.WriteLine("Wrong size");
+                /*if(packet.BufferSize > 40 && packet.BufferSize != 8208)
+                    Console.WriteLine("Wrong size");*/
                 socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
             }
             catch

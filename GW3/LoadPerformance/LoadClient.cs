@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 
 namespace LoadPerformance
 {
@@ -17,23 +16,9 @@ namespace LoadPerformance
         private Splitter splitter = new Splitter();
         private long totCount = 0;
         private long dataCount = 0;
+        private object counterLock = new object();
         private DateTime start = DateTime.UtcNow;
         private bool firstAnswer = true;
-
-        public long DataPerSeconds
-        {
-            get
-            {
-                try
-                {
-                    return (long)(dataCount / (DateTime.UtcNow - start).TotalSeconds);
-                }
-                catch
-                {
-                    return 0;
-                }
-            }
-        }
 
         public int NbConnected { get; private set; } = 0;
 
@@ -52,8 +37,8 @@ namespace LoadPerformance
                 search.Command = 6; // CA_PROTO_SEARCH
                 search.DataType = 4; // DONT_REPLY
                 search.DataCount = 11; // MINOR PROTO VERSION
-                search.Parameter1 = 1; // CID
-                search.Parameter2 = 1; // CID
+                search.Parameter1 = (uint)i; // CID
+                search.Parameter2 = (uint)i; // CID
                 search.SetDataAsString(channelName);
 
                 udpClient.Connect(ParseAddress(searchAddress));
@@ -95,6 +80,9 @@ namespace LoadPerformance
                                     tcpClient.Connect(new IPEndPoint(endPoint.Address, p.DataType));
                                     tcpClient.Client.BeginReceive(receiveBuffer, 0, receiveBuffer.Length, SocketFlags.None, TcpReceive, null);
                                 }
+
+                                //Console.WriteLine("Search answer for "+ p.Parameter2);
+
                                 // Just go to the create & add
                                 var channelName = "PERF-CHECK-IARR:" + p.Parameter2;
                                 var packet = DataPacket.Create(channelName.Length + 8 - channelName.Length % 8);
@@ -167,16 +155,20 @@ namespace LoadPerformance
                         if (firstAnswer)
                         {
                             firstAnswer = false;
-                            start = DateTime.UtcNow;
+                            lock (counterLock)
+                                start = DateTime.UtcNow;
                             Console.WriteLine("Payload: " + p.PayloadSize);
                         }
-                        if (p.PayloadSize != Program.ArraySize * 4)
-                            Console.WriteLine("Size error: " + p.PayloadSize);
-                        Interlocked.Add(ref totCount, p.MessageSize);
-                        Interlocked.Add(ref dataCount, p.PayloadSize);
+                        /*if (p.PayloadSize != Program.ArraySize * 4)
+                            Console.WriteLine("Size error: " + p.PayloadSize);*/
+                        lock (counterLock)
+                        {
+                            totCount += p.MessageSize;
+                            dataCount += p.PayloadSize;
+                        }
                         break;
                     default:
-                        Console.WriteLine("Odd message: " + p.Command);
+                        //Console.WriteLine("Odd message: " + p.Command);
                         break;
                 }
             }
@@ -189,6 +181,43 @@ namespace LoadPerformance
                 Dispose();
             }
         }
+
+        public void ResetCounter()
+        {
+            lock (counterLock)
+            {
+                start = DateTime.UtcNow;
+                totCount = 0;
+                dataCount = 0;
+            }
+        }
+
+        public long DataPerSeconds
+        {
+            get
+            {
+                lock (counterLock)
+                {
+                    try
+                    {
+                        return (long)(dataCount / (DateTime.UtcNow - start).TotalSeconds);
+                    }
+                    catch
+                    {
+                        return 0;
+                    }
+                }
+            }
+        }
+
+        public long ExpectedDataPerSeconds
+        {
+            get
+            {
+                return Program.ArraySize * 4 * 10 * nbMons;
+            }
+        }
+
 
         public void Dispose()
         {

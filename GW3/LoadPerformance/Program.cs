@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 
 namespace LoadPerformance
 {
     internal class Program
     {
-        static public int NbArrays = 300;
         static public int ArraySize = 1024 * 2;
-        static public int NbClients = 15;
-        static public int NbServers = 15;
         static public string ServerAddress = "127.0.0.1";
         static public string ClientSearchAddress = "127.0.0.1:5064";
+        static public int NbServers = 40;
 
         public const int CA_PROTO_VERSION = 13;
 
@@ -19,10 +18,6 @@ namespace LoadPerformance
         {
             ServerAddress = System.Configuration.ConfigurationManager.AppSettings["serverAddress"];
             ClientSearchAddress = System.Configuration.ConfigurationManager.AppSettings["clientSearchAddress"];
-            NbClients = int.Parse(System.Configuration.ConfigurationManager.AppSettings["nbClients"]);
-            NbServers = int.Parse(System.Configuration.ConfigurationManager.AppSettings["nbServers"]); ;
-            ArraySize = int.Parse(System.Configuration.ConfigurationManager.AppSettings["arraySize"]); ;
-            NbArrays = int.Parse(System.Configuration.ConfigurationManager.AppSettings["nbArrays"]);
 
             var threads = new List<Thread>();
             var cancel = new CancellationTokenSource();
@@ -36,7 +31,7 @@ namespace LoadPerformance
                 Environment.Exit(1);
             }
 
-            var nbMons = NbArrays;
+            var nbMons = 100;
 
             for (var i = 0; i < args.Length; i++)
             {
@@ -53,7 +48,30 @@ namespace LoadPerformance
             {
                 didSomething = true;
                 Console.WriteLine("Starting server...");
-                server = new LoadServer(ServerAddress, 5064);
+                server = new LoadServer(ServerAddress, 5064,NbServers);
+            }
+            if (args[0] == "--report")
+            {
+                didSomething = true;
+                Console.WriteLine("Starting server...");
+                server = new LoadServer(ServerAddress, 5064, NbServers);
+
+                using (var writer = new StreamWriter(File.Create(args[1])))
+                {
+
+                    for (var i = 0; i < 100; i++)
+                    {
+                        var nb = Math.Max(1, i * 10);
+                        Console.WriteLine("Starting client... (will monitor " + nb + " channels of " + ArraySize + ")");
+                        using (client = new LoadClient(ClientSearchAddress, nb, 5066))
+                        {
+                            Thread.Sleep(3000);
+                            client.ResetCounter();
+                            Thread.Sleep(3000);
+                            writer.WriteLine(nb + ";" + client.DataPerSeconds + ";" + client.ExpectedDataPerSeconds);
+                        }
+                    }
+                }
             }
             if (args[0] == "--client" || args[0] == "--both")
             {
@@ -62,21 +80,24 @@ namespace LoadPerformance
                 client = new LoadClient(ClientSearchAddress, nbMons, 5066);
 
                 Thread.Sleep(1000);
-                var totIdeal = 0L;
-                var startTime = DateTime.UtcNow;
                 var t = new Thread(() =>
                 {
+                    var resetCounter = 10;
                     while (!cancel.IsCancellationRequested)
                     {
                         Thread.Sleep(1000);
                         try
                         {
-                            totIdeal += nbMons * ArraySize * 4 * 10;
-                            var idealPerSec = (long)(totIdeal / (DateTime.UtcNow - startTime).TotalSeconds);
-                            Console.Write("Data: " + HumanSize(client.DataPerSeconds) + " / " + HumanSize(idealPerSec) + " (" + (client.DataPerSeconds * 100 / idealPerSec) + "%, conn " + client.NbConnected + ")                          \r");
+                            Console.Write("Data: " + HumanSize(client.DataPerSeconds) + " / " + HumanSize(client.ExpectedDataPerSeconds) + " (" + (client.DataPerSeconds * 100 / client.ExpectedDataPerSeconds) + "%, conn " + client.NbConnected + ")                          \r");
                         }
                         catch (DivideByZeroException)
                         {
+                        }
+                        resetCounter--;
+                        if (resetCounter < 1)
+                        {
+                            resetCounter = 10;
+                            client.ResetCounter();
                         }
                     }
                 });
