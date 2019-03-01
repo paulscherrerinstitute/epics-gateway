@@ -157,7 +157,7 @@ namespace LoadPerformance
                             firstAnswer = false;
                             lock (counterLock)
                                 start = DateTime.UtcNow;
-                            Console.WriteLine("Payload: " + p.PayloadSize);
+                            //Console.WriteLine("Payload: " + p.PayloadSize);
                         }
                         /*if (p.PayloadSize != Program.ArraySize * 4)
                             Console.WriteLine("Size error: " + p.PayloadSize);*/

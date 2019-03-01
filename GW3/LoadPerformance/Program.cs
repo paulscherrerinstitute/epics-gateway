@@ -7,7 +7,7 @@ namespace LoadPerformance
 {
     internal class Program
     {
-        static public int ArraySize = 1024 * 2;
+        static public int ArraySize = 1024 * 4;
         static public string ServerAddress = "127.0.0.1";
         static public string ClientSearchAddress = "127.0.0.1:5064";
         static public int NbServers = 40;
@@ -32,6 +32,7 @@ namespace LoadPerformance
             }
 
             var nbMons = 100;
+            int nbSteps = 105;
 
             for (var i = 0; i < args.Length; i++)
             {
@@ -39,6 +40,16 @@ namespace LoadPerformance
                 {
                     i++;
                     nbMons = int.Parse(args[i]);
+                }
+                else if(args[i] == "--nbsteps")
+                {
+                    i++;
+                    nbSteps = int.Parse(args[i]);
+                }
+                else if (args[i] == "--size")
+                {
+                    i++;
+                    ArraySize = int.Parse(args[i]);
                 }
             }
 
@@ -48,7 +59,7 @@ namespace LoadPerformance
             {
                 didSomething = true;
                 Console.WriteLine("Starting server...");
-                server = new LoadServer(ServerAddress, 5064,NbServers);
+                server = new LoadServer(ServerAddress, 5064, NbServers);
             }
             if (args[0] == "--report")
             {
@@ -59,19 +70,35 @@ namespace LoadPerformance
                 using (var writer = new StreamWriter(File.Create(args[1])))
                 {
 
-                    for (var i = 0; i < 100; i++)
+                    for (var i = 0; i < nbSteps; i++)
                     {
                         var nb = Math.Max(1, i * 10);
-                        Console.WriteLine("Starting client... (will monitor " + nb + " channels of " + ArraySize + ")");
-                        using (client = new LoadClient(ClientSearchAddress, nb, 5066))
+                        long dataPerSec = 0;
+                        long expectedPerSec = 0;
+
+                        for (var j = 0; j < 4; j++)
                         {
-                            Thread.Sleep(3000);
-                            client.ResetCounter();
-                            Thread.Sleep(3000);
-                            writer.WriteLine(nb + ";" + client.DataPerSeconds + ";" + client.ExpectedDataPerSeconds);
+                            Console.WriteLine("Starting client... (will monitor " + nb + " channels of " + ArraySize + ")");
+                            using (client = new LoadClient(ClientSearchAddress, nb, 5066))
+                            {
+                                Thread.Sleep(3000);
+                                client.ResetCounter();
+                                Thread.Sleep(3000);
+                                dataPerSec = client.DataPerSeconds;
+                                expectedPerSec = client.ExpectedDataPerSeconds;
+                            }
+
+                            // Data is valid?
+                            if (dataPerSec > 0 && dataPerSec >= expectedPerSec * 4 / 10)
+                                break;
                         }
+                        writer.WriteLine(nb + ";" + dataPerSec + ";" + expectedPerSec);
                     }
                 }
+                Console.WriteLine("Run report done");
+                cancel.Cancel();
+                client?.Dispose();
+                server?.Dispose();
             }
             if (args[0] == "--client" || args[0] == "--both")
             {
@@ -123,9 +150,12 @@ namespace LoadPerformance
             Console.WriteLine("--client               starts the clients");
             Console.WriteLine("--server               starts the servers");
             Console.WriteLine("--both                 starts both the clients and the servers");
+            Console.WriteLine("--report <filename>    starts both the clients and the servers and run a reporting test");
             Console.WriteLine("");
             Console.WriteLine("Can optionally specifiy the following options:");
             Console.WriteLine("--nbmon <nb>           specifies how many monitors must be started");
+            Console.WriteLine("--nbsteps <nb>         specifies how steps for the report");
+            Console.WriteLine("--size <nb>            specifies the array size");
         }
 
         private static string HumanSize(long nb)
