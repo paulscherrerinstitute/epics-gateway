@@ -815,83 +815,85 @@ class Main
 
         $("#mainTabs li").click((evt) =>
         {
-            var tab = evt.target.textContent;
-            switch (tab)
+            if (evt.target.tagName != "INPUT")
             {
-                case "Status":
-                    $("#reportView").hide();
-                    if ($("#helpView").is(":visible"))
-                        $("#helpView").hide();
-                    if ($("#operationView").is(":visible"))
-                        $("#operationView").hide();
-                    if (Main.Path == "Status")
-                        Main.CurrentGateway = null;
-                    Main.Path = "Status";
-                    State.Set(true);
-                    State.Pop(null);
-                    $(".inset").removeClass("inset");
-                    break;
-                case "Logs":
-                    $("#reportView").hide();
-                    if ($("#helpView").is(":visible"))
-                        $("#helpView").hide();
-                    if ($("#operationView").is(":visible"))
-                        $("#operationView").hide();
-                    if (Main.Path == "GW")
+                var tab = evt.target.textContent;
+                switch (tab) {
+                    case "Status":
+                        $("#reportView").hide();
+                        if ($("#helpView").is(":visible"))
+                            $("#helpView").hide();
+                        if ($("#operationView").is(":visible"))
+                            $("#operationView").hide();
+                        if (Main.Path == "Status")
+                            Main.CurrentGateway = null;
+                        Main.Path = "Status";
+                        State.Set(true);
+                        State.Pop(null);
+                        $(".inset").removeClass("inset");
                         break;
-                    Main.Path = "GW";
-                    State.Set(true);
-                    State.Pop(null);
-                    $(".inset").removeClass("inset");
-                    break;
-                case "Map":
-                    $("#reportView").hide();
-                    if ($("#helpView").is(":visible"))
-                        $("#helpView").hide();
-                    if ($("#operationView").is(":visible"))
-                        $("#operationView").hide();
-                    if (Main.Path == "Map")
+                    case "Logs":
+                        $("#reportView").hide();
+                        if ($("#helpView").is(":visible"))
+                            $("#helpView").hide();
+                        if ($("#operationView").is(":visible"))
+                            $("#operationView").hide();
+                        if (Main.Path == "GW")
+                            break;
+                        Main.Path = "GW";
+                        State.Set(true);
+                        State.Pop(null);
+                        $(".inset").removeClass("inset");
                         break;
-                    Main.Path = "Map";
-                    State.Set(true);
-                    State.Pop(null);
-                    $(".inset").removeClass("inset");
-                    break;
-                case "Help":
-                    window.open("/help.html", "help", "menubar=no,location=no,status=no,toolbar=no,width=800,height=600,scrollbars=yes");
-                    /*$(".inset").removeClass("inset");
-                    if ($("#operationView").is(":visible"))
-                        $("#operationView").hide();
-                    $("#reportView").hide();
-                    if ($("#helpView").is(":visible"))
-                        $("#helpView").hide();
-                    else
-                    {
-                        $("#helpView").show();
-                        $(evt.target).addClass("inset");
-                    }*/
-                    break;
-                case "SOP":
-                    window.open("/sop.html", "help", "menubar=no,location=no,status=no,toolbar=no,width=800,height=600,scrollbars=yes");
-                    /*$(".inset").removeClass("inset");
-                    if ($("#helpView").is(":visible"))
-                        $("#helpView").hide();
-                    $("#reportView").hide();
-                    if ($("#operationView").is(":visible"))
-                        $("#operationView").hide();
-                    else
-                    {
-                        $("#operationView").show();
-                        $(evt.target).addClass("inset");
-                    }*/
-                    break;
-                case "": // Hambuger
-                    $("#hamburgerMenu").toggleClass("visibleHamburger");
-                    break;
-                default:
-                    State.Set(true);
-                    State.Pop(null);
-                    break;
+                    case "Map":
+                        $("#reportView").hide();
+                        if ($("#helpView").is(":visible"))
+                            $("#helpView").hide();
+                        if ($("#operationView").is(":visible"))
+                            $("#operationView").hide();
+                        if (Main.Path == "Map")
+                            break;
+                        Main.Path = "Map";
+                        State.Set(true);
+                        State.Pop(null);
+                        $(".inset").removeClass("inset");
+                        break;
+                    case "Help":
+                        window.open("/help.html", "help", "menubar=no,location=no,status=no,toolbar=no,width=800,height=600,scrollbars=yes");
+                        /*$(".inset").removeClass("inset");
+                        if ($("#operationView").is(":visible"))
+                            $("#operationView").hide();
+                        $("#reportView").hide();
+                        if ($("#helpView").is(":visible"))
+                            $("#helpView").hide();
+                        else
+                        {
+                            $("#helpView").show();
+                            $(evt.target).addClass("inset");
+                        }*/
+                        break;
+                    case "SOP":
+                        window.open("/sop.html", "help", "menubar=no,location=no,status=no,toolbar=no,width=800,height=600,scrollbars=yes");
+                        /*$(".inset").removeClass("inset");
+                        if ($("#helpView").is(":visible"))
+                            $("#helpView").hide();
+                        $("#reportView").hide();
+                        if ($("#operationView").is(":visible"))
+                            $("#operationView").hide();
+                        else
+                        {
+                            $("#operationView").show();
+                            $(evt.target).addClass("inset");
+                        }*/
+                        break;
+                    case "": // Hambuger
+                        $("#hamburgerMenu").toggleClass("visibleHamburger");
+                        break;
+                    default:
+                        State.Set(true);
+                        State.Pop(null);
+                        break;
+                }
             }
         });
 
@@ -1106,6 +1108,18 @@ class Main
         });
 
         $("#logFilter li").click(Main.LogFilter);
+
+        var gateways: string[] = [];
+        $('.GWDisplay').each(function () {
+            gateways.push($(this).attr('id'));
+        });
+        var autocomplete = $("#searchInput").kendoAutoComplete({
+            minLength: 1,
+            select: (e) => window.location.href = "Status/" + e.dataItem.toLowerCase(),
+            dataSource: gateways,
+            placeholder: "Search",
+            filter: "contains"
+        }).data("kendoAutoComplete");
 
         State.Pop(null);
     }
