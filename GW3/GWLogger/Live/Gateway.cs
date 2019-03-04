@@ -373,11 +373,11 @@ namespace GWLogger.Live
                 try
                 {
                     var avg = lasts.Where(row => row.Value.HasValue).Average(row => Math.Min(150, row.Value.Value));
-                    if (avg > 290)
+                    if (avg > 3000)
                         return 3;
-                    if (avg > 190)
+                    if (avg > 2000)
                         return 2;
-                    if (avg > 90)
+                    if (avg > 1000)
                         return 1;
                     return 0;
                 }
