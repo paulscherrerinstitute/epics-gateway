@@ -16,7 +16,8 @@ namespace LoadPerformance
         private Thread runnerThread;
         private bool needToStop = false;
         private List<ChannelSubscription> subscriptions = new List<ChannelSubscription>();
-        private DataPacket intArray = DataPacket.Create(Program.ArraySize * 4);
+        private DataPacket intArray = DataPacket.Create(Program.ArraySize * 4 + 200);
+        private int step = 1;
 
         public ServerConnection(LoadServer server, Socket socket)
         {
@@ -47,10 +48,21 @@ namespace LoadPerformance
                 {
                     if (subs.ChannelId >= 10000) // Int array
                     {
+                        intArray.Command = (ushort)EpicsCommand.EVENT_ADD;
+                        intArray.Parameter1 = 1;
                         intArray.Parameter2 = subs.ClientId;
                         intArray.DataCount = (subs.DataCount == 0 ? (uint)Program.ArraySize : subs.DataCount);
-                        //Send(intArray.Data, intArray.DataCount * 4 + 16);
-                        Send(intArray);
+                        intArray.DataType = subs.DataType;
+
+                        if (subs.DataType == 19)
+                            intArray.SetDateTime(16 + 4, DateTime.Now);
+
+                        var offset = 16 + (subs.DataType == 33 ? 80 : (subs.DataType == 19 ? 12 : 0));
+                        intArray.Data[offset] = (byte)(step & 0xFF);
+                        intArray.Data[offset+1] = (byte)((step >> 8) | 0xFF);
+                        Send(intArray, PaddedSize((int)(intArray.DataCount * 4 + offset)));
+
+                        step = (step + 1) % 30000;
                     }
                     else
                     {
@@ -99,6 +111,7 @@ namespace LoadPerformance
 
             foreach (var p in splitter.Split(newPacket))
             {
+                //Console.WriteLine("Server Cmd: " + p.Command + ", " + p.MessageSize);
                 switch (p.Command)
                 {
                     case (ushort)EpicsCommand.CREATE_CHANNEL: // Connect to a channel
@@ -123,15 +136,46 @@ namespace LoadPerformance
                         resPacket.Parameter2 = (uint)(10000 + id);
                         Send(resPacket);
                         break;
+                    case (ushort)EpicsCommand.READ_NOTIFY: // CAGET
+                        if (p.DataType != 5 && p.DataType != 33 && p.DataType != 19) // Wrong data type
+                        {
+                            Console.WriteLine("Wrong data type: " + p.DataType);
+                            break;
+                        }
+                        //Console.WriteLine("Send get");
+                        intArray.Command = (ushort)EpicsCommand.READ_NOTIFY;
+                        intArray.Parameter2 = p.Parameter2;
+                        intArray.Parameter1 = p.Parameter1;
+                        intArray.DataCount = p.DataCount;
+                        intArray.DataType = p.DataType;
+                        if (p.DataType == 19)
+                            intArray.SetDateTime(16 + 4, DateTime.Now);
+
+                        var offset = 16 + (p.DataType == 33 ? 80 : (p.DataType == 19 ? 12 : 0));
+                        intArray.Data[offset] = (byte)(step & 0xFF);
+                        intArray.Data[offset + 1] = (byte)((step >> 8) | 0xFF);
+                        Send(intArray, PaddedSize((int)(intArray.DataCount * 4 + offset)));
+                        step++;
+                        break;
                     case (ushort)EpicsCommand.EVENT_ADD: // Subscribe to a channel
                         lock (subscriptions)
                         {
-                            subscriptions.Add(new ChannelSubscription
+                            if (p.DataType != 5 && p.DataType != 33 && p.DataType != 19) // Wrong data type
                             {
-                                ChannelId = p.Parameter1,
-                                ClientId = p.Parameter2,
-                                DataCount = p.DataCount
-                            });
+                                Console.WriteLine("Wrong data type: " + p.DataType);
+                                break;
+                            }
+                            //Console.WriteLine("New subscription...");
+                            if (!subscriptions.Any(row => row.ChannelId == p.Parameter1))
+                            {
+                                subscriptions.Add(new ChannelSubscription
+                                {
+                                    ChannelId = p.Parameter1,
+                                    ClientId = p.Parameter2,
+                                    DataCount = p.DataCount,
+                                    DataType = p.DataType
+                                });
+                            }
                         }
                         break;
                     case (ushort)EpicsCommand.EVENT_CANCEL:
@@ -149,7 +193,15 @@ namespace LoadPerformance
                             Send(newPacket);
                         }
                         break;
+                    case (ushort)EpicsCommand.ECHO:
+                        Send(p);
+                        break;
+                    case (ushort)EpicsCommand.HOST:
+                        break;
+                    case (ushort)EpicsCommand.USER:
+                        break;
                     default:
+                        Console.WriteLine("Command " + p.Command);
                         break;
                 }
             }
@@ -167,9 +219,6 @@ namespace LoadPerformance
         {
             try
             {
-                //this.socket.Send(packet.Data, SocketFlags.None);
-                /*if(packet.BufferSize > 40 && packet.BufferSize != 8208)
-                    Console.WriteLine("Wrong size");*/
                 socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
             }
             catch
@@ -177,6 +226,19 @@ namespace LoadPerformance
                 Dispose();
             }
         }
+        private void Send(DataPacket packet, int messageSize)
+        {
+            try
+            {
+                packet.MessageSize = (ushort)messageSize;
+                socket.Send(packet.Data, packet.Offset, messageSize, SocketFlags.None);
+            }
+            catch
+            {
+                Dispose();
+            }
+        }
+
         private void Send(byte[] data, uint nb)
         {
             try
@@ -189,5 +251,9 @@ namespace LoadPerformance
             }
         }
 
+        private int PaddedSize(int size)
+        {
+            return (8 - (size % 8)) + size;
+        }
     }
 }

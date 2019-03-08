@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace LoadPerformance
 {
@@ -25,6 +22,8 @@ namespace LoadPerformance
     /// </summary>
     public class DataPacket : ICloneable /*, IDisposable */
     {
+        private static DateTime TimestampBase = new DateTime(1990, 1, 1, 0, 0, 0);
+
         public DataPacketKind Kind = DataPacketKind.RAW;
         public byte[] Data;
         //public bool NeedToFlush = false;
@@ -53,7 +52,7 @@ namespace LoadPerformance
             }
         }
 
-        ushort? command;
+        private ushort? command;
         /// <summary>
         /// The ChannelAccess command
         /// </summary>
@@ -72,7 +71,7 @@ namespace LoadPerformance
             }
         }
 
-        uint? payloadSize;
+        private uint? payloadSize;
         /// <summary>
         /// Payload size either on bytes 2-4 or 16-20
         /// </summary>
@@ -186,6 +185,10 @@ namespace LoadPerformance
             {
                 return PayloadSize + HeaderSize;
             }
+            set
+            {
+                this.SetUInt16(2, (ushort)(value - 16));
+            }
         }
 
         /// <summary>
@@ -292,6 +295,17 @@ namespace LoadPerformance
             Data[position + 3 + Offset] = (byte)(value & 0x000000FFu);
         }
 
+        internal void SetDateTime(int position, DateTime time)
+        {
+            long Diff = time.Ticks - TimestampBase.ToLocalTime().Ticks;
+
+            UInt32 secs = (UInt32)Math.Round((double)(Diff / 10000000));
+            UInt32 nanosecs = (UInt32)(Diff - (secs * 10000000)) * 100;
+
+            this.SetUInt32(position, secs);
+            this.SetUInt32(position + 4, nanosecs);
+        }
+
         /// <summary>
         /// Skips a given size from the data block
         /// </summary>
@@ -374,7 +388,7 @@ namespace LoadPerformance
 
         public int Offset { get; private set; }
 
-        int bufferSize = 0;
+        private int bufferSize = 0;
         public int BufferSize
         {
             get

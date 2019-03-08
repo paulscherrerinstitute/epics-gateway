@@ -88,14 +88,19 @@ namespace GatewayLogic
                   while (!isDiposed)
                   {
                       Thread.Sleep(1000);
-                      foreach (var i in SafeLock.DeadLockCheck(span))
+                      var deadLocked = SafeLock.DeadLockCheck(span);
+                      if (deadLocked.Count > 0)
                       {
                           if (System.IO.Directory.Exists(@"C:\Logs"))
-                              System.IO.File.AppendAllText(@"C:\logs\deadlock.log", string.Format("{0:G} - {1}@{2}:{3}\n\r", DateTime.Now, i.SourceFilePath, i.MemberName, i.SourceLineNumber));
+                              foreach (var i in deadLocked)
+                                  System.IO.File.AppendAllText(@"C:\logs\deadlock.log", string.Format("{0:G} - {1}@{2}:{3}\n\r", DateTime.Now, i?.SourceFilePath, i?.MemberName, (i?.SourceLineNumber) ?? 0));
 
-                          MessageLogger.Write(null, LogMessageType.DeadLock, null, i?.MemberName, i?.SourceFilePath, (i?.SourceLineNumber) ?? 0);
-                          MessageLogger.Dispose();
-                          throw new DeadLockException("Locked by " + i.SourceFilePath + " " + i.MemberName + ":" + i.SourceLineNumber);
+                          foreach (var i in deadLocked)
+                          {
+                              MessageLogger.Write(null, LogMessageType.DeadLock, null, i?.MemberName, i?.SourceFilePath, (i?.SourceLineNumber) ?? 0);
+                              MessageLogger.Dispose();
+                              throw new DeadLockException("Locked by " + i.SourceFilePath + " " + i.MemberName + ":" + i.SourceLineNumber);
+                          }
                       }
                   }
               });

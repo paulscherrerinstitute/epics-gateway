@@ -17,26 +17,26 @@ namespace GatewayLogic.Connections
         {
             if (client.RemoteEndPoint == null)
                 return;
-            lockDictionary.Wait();
+            //lockDictionary.Wait();
             if(dictionary.ContainsKey(client.RemoteEndPoint))
             {
-                lockDictionary.Release();
+                //lockDictionary.Release();
                 return;
             }
-            dictionary.Add(client.RemoteEndPoint, client);
-            lockDictionary.Release();
+            base.Add(client.RemoteEndPoint, client);
+            //lockDictionary.Release();
         }
 
         public GatewayTcpConnection Get(IPEndPoint client)
         {
-            lockDictionary.Wait();
+            //lockDictionary.Wait();
             if (!dictionary.ContainsKey(client))
             {
-                lockDictionary.Release();
+                //lockDictionary.Release();
                 return null;
             }
             var result = dictionary[client];
-            lockDictionary.Release();
+            //lockDictionary.Release();
             return result;
         }
     }

@@ -129,7 +129,6 @@ namespace GatewayLogic.Connections
             }
             catch
             {
-                //Gateway.Log.Write(Services.LogLevel.Error, ex.ToString());
                 this.Dispose();
                 // Stop receiving
                 return;
@@ -140,19 +139,17 @@ namespace GatewayLogic.Connections
                 this.Dispose();
                 return;
             }
-            //Console.WriteLine("Server received " + size + " bytes from " + this.RemoteEndPoint);
 
             this.LastMessage = DateTime.UtcNow;
             var mainPacket = DataPacket.Create(buffer, size, false);
+            //var mainPacket = DataPacket.Create(buffer, size, true);
 
             foreach (var p in splitter.Split(mainPacket))
             {
                 Gateway.DiagnosticServer.NbMessages++;
 
-                //Console.WriteLine("+> Packet size " + p.MessageSize + " (command " + p.Command + ")");
                 p.Sender = RemoteEndPoint;
                 Commands.CommandHandler.ExecuteResponseHandler(p.Command, this, p);
-                //Console.WriteLine(" ++> End of packet");
             }
 
             try
@@ -199,21 +196,17 @@ namespace GatewayLogic.Connections
             Gateway.DiagnosticServer.NbNewData++;
             this.LastMessage = DateTime.UtcNow;
 
-            /*lock (lockObject)
-            {*/
             try
             {
-                using (socketLock.Aquire(3000))
-                {
+                /*using (socketLock.Aquire(3000))
+                {*/
                     socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
-                }
-                //Console.WriteLine("Sending data to server: " + packet.Command + " size " + packet.BufferSize);
+                //}
             }
             catch
             {
                 ThreadPool.QueueUserWorkItem((obj) => { this.Dispose(); });
             }
-            //}
         }
 
         ~TcpServerConnection()

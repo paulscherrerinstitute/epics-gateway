@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace LoadPerformance
 {
@@ -136,7 +137,7 @@ namespace LoadPerformance
 
             foreach (var p in splitter.Split(newPacket))
             {
-                //Console.WriteLine("Cmd: " + p.Command + ", " + p.MessageSize);
+                //Console.WriteLine("Client Cmd: " + p.Command + ", " + p.MessageSize);
                 switch (p.Command)
                 {
                     case (ushort)EpicsCommand.ACCESS_RIGHTS:
@@ -148,7 +149,9 @@ namespace LoadPerformance
                         toSend.DataCount = p.DataCount;
                         toSend.Parameter1 = p.Parameter2;
                         toSend.Parameter2 = p.Parameter1;
+                        toSend.SetUInt16(12 + 16, (ushort)1);
                         NbConnected++;
+                        //Thread.Sleep(100);
                         TcpSend(toSend);
                         break;
                     case (ushort)EpicsCommand.EVENT_ADD:

@@ -24,11 +24,11 @@ namespace GatewayLogic.Connections
                 gateway.MessageLogger.Write(null, Services.LogMessageType.EndPointCannotBeNull);
                 return;
             }
-            lockDictionary.Wait();
+            //lockDictionary.Wait();
             if (dictionary.ContainsKey(endPoint))
             {
                 var result = dictionary[endPoint];
-                lockDictionary.Release();
+                //lockDictionary.Release();
                 result.WhenConnected(() =>
                 {
                     connectionReady(result);
@@ -36,8 +36,8 @@ namespace GatewayLogic.Connections
                 return;
             }
             var conn = new TcpServerConnection(gateway, endPoint);
-            dictionary.Add(endPoint, conn);
-            lockDictionary.Release();
+            base.Add(endPoint, conn);
+            //lockDictionary.Release();
 
             conn.WhenConnected(() =>
             {

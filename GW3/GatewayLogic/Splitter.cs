@@ -62,6 +62,7 @@ namespace GatewayLogic
                             int s = remainingPacket.BufferSize - currentPos;
                             Buffer.BlockCopy(packet.Data, 0, remainingPacket.Data, currentPos, s);
                             remainingPacket.Kind = DataPacketKind.COMPLETE;
+                            //var result = remainingPacket;
                             var result = (DataPacket)remainingPacket.Clone();
                             remainingPacket = null;
                             currentPos = 0;
@@ -117,6 +118,7 @@ namespace GatewayLogic
                     //Log.Write("Complete packet...");
                     packet.Kind = DataPacketKind.COMPLETE;
                     var result = (DataPacket)packet.Clone();
+                    //var result = packet;
                     lockSplitter.Release();
                     yield return result;
                     /*DataPacket p = DataPacket.Create(packet, (uint)packet.BufferSize);

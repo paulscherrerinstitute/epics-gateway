@@ -1,16 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Concurrent;
 using System.Net;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace GatewayLogic.Services
 {
-    class EventsOnHold
+    internal class EventsOnHold
     {
-        SemaphoreSlim locker = new SemaphoreSlim(1);
+        private ConcurrentDictionary<IPEndPoint, bool> disabledEndPoints = new ConcurrentDictionary<IPEndPoint, bool>();
+        internal void Remove(IPEndPoint sender)
+        {
+            bool outVal;
+            disabledEndPoints.TryRemove(sender, out outVal);
+        }
+
+        internal void Add(IPEndPoint sender)
+        {
+            disabledEndPoints.TryAdd(sender, true);
+        }
+
+        internal bool Contains(IPEndPoint sender)
+        {
+            return disabledEndPoints.ContainsKey(sender);
+        }
+
+
+        /*SemaphoreSlim locker = new SemaphoreSlim(1);
         HashSet<IPEndPoint> disabledEndPoints = new HashSet<IPEndPoint>();
 
         internal void Remove(IPEndPoint sender)
@@ -50,6 +63,6 @@ namespace GatewayLogic.Services
             {
                 locker.Release();
             }
-        }
+        }*/
     }
 }

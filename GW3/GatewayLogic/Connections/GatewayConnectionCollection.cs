@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -12,6 +13,76 @@ namespace GatewayLogic.Connections
     class GatewayConnectionCollection<TType> : IEnumerable<TType> where TType : GatewayTcpConnection
     {
         public Gateway Gateway { get; }
+
+        protected readonly ConcurrentDictionary<IPEndPoint, TType> dictionary = new ConcurrentDictionary<IPEndPoint, TType>();
+
+        internal GatewayConnectionCollection(Gateway gateway)
+        {
+            Gateway = gateway;
+            Gateway.OneSecUpdate += Gateway_OneSecUpdate;
+        }
+
+        private void Gateway_OneSecUpdate(object sender, EventArgs e)
+        {
+            // Dispose old one
+            List<TType> toDelete;
+            List<TType> toCheck;
+
+            toDelete = dictionary.Values.Where(row => (DateTime.UtcNow - row.LastMessage).TotalSeconds > 90).ToList();
+            toCheck = dictionary.Values.Where(row => (DateTime.UtcNow - row.LastMessage).TotalSeconds > 35 && !toDelete.Contains(row)).ToList();
+
+            toDelete.ForEach(row => row.Dispose());
+
+            var echoPacket = DataPacket.Create(0);
+            echoPacket.Command = 23;
+
+            foreach (var conn in toCheck)
+            {
+                conn.HasSentEcho = true;
+                conn.LastEcho = DateTime.UtcNow;
+                try
+                {
+                    conn.Send(echoPacket);
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        internal void Add(IPEndPoint endPoint, TType value)
+        {
+            dictionary.TryAdd(endPoint, value);
+        }
+
+        public void Dispose()
+        {
+            var toClean = dictionary.Values.ToList();
+            dictionary.Clear();
+
+            foreach (var i in toClean)
+                i.Dispose();
+        }
+
+        internal void Remove(TType tcpClientConnection)
+        {
+            if (tcpClientConnection.RemoteEndPoint == null)
+                return;
+            TType outVal;
+            dictionary.TryRemove(tcpClientConnection.RemoteEndPoint, out outVal);
+        }
+
+
+        public IEnumerator<TType> GetEnumerator() => dictionary.Values.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int Count => dictionary.Count;
+
+        /*public Gateway Gateway { get; }
 
         internal GatewayConnectionCollection(Gateway gateway)
         {
@@ -109,6 +180,6 @@ namespace GatewayLogic.Connections
                 lockDictionary.Release();
                 return result;
             }
-        }
+        }*/
     }
 }

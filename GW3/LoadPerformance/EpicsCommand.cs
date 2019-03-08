@@ -6,6 +6,10 @@
         EVENT_CANCEL = 2,
         SEARCH = 6,
         CREATE_CHANNEL = 18,
-        ACCESS_RIGHTS = 22
+        ACCESS_RIGHTS = 22,
+        ECHO = 0,
+        HOST = 21,
+        USER = 20,
+        READ_NOTIFY = 15
     }
 }

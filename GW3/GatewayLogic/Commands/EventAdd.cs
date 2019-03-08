@@ -125,10 +125,16 @@ namespace GatewayLogic.Commands
                 if (connection.Gateway.EventsOnHold.Contains(client.Client))
                     continue;
 
-                var newPacket = (DataPacket)packet.Clone();
+                /*var newPacket = (DataPacket)packet.Clone();
                 newPacket.Destination = conn.RemoteEndPoint;
                 newPacket.Parameter2 = client.Id;
-                conn.Send(newPacket);
+                conn.Send(newPacket);*/
+
+                packet.Destination = conn.RemoteEndPoint;
+                packet.Parameter2 = client.Id;
+                conn.Send(packet);
+
+
                 //connection.Gateway.MessageLogger.Write(client.Client.ToString(), Services.LogMessageType.EventAddResponseSending, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = monitor.ChannelInformation.ChannelName }, new LogMessageDetail { TypeId = MessageDetail.CID, Value = client.Id.ToString() } });
             }
         }

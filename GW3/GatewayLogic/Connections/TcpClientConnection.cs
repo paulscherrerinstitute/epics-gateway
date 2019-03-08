@@ -84,20 +84,13 @@ namespace GatewayLogic.Connections
 
             try
             {
-                using (socketLock.Aquire())
-                {
+                //using (socketLock.Aquire())
+                //{
                     socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
-                }
-                /*lock (stream)
-                {
-                    stream.Write(packet.Data, packet.Offset, packet.BufferSize);
-                    isDirty = true;
-                    stream.Flush();
-                }*/
+                //}
             }
             catch
             {
-                //Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
                 Dispose();
             }
         }
