@@ -15,6 +15,8 @@ namespace GatewayLogic
         //SemaphoreSlim lockSplitter = new SemaphoreSlim(1);
         SafeLock lockSplitter = new SafeLock();
 
+        public bool HasRemainingData => remainingPacket != null && remainingPacket.BufferSize > 0;
+
         public IEnumerable<DataPacket> Split(DataPacket packet)
         {
             lockSplitter.Wait();

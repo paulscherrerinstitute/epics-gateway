@@ -198,6 +198,15 @@ namespace GatewayLogic.Connections
 
             try
             {
+                MessageVerifier.Verify(packet.Data, false);
+            }
+            catch (Exception ex)
+            {
+                ThreadPool.QueueUserWorkItem((obj) => { this.Dispose(); });
+            }
+
+            try
+            {
                 /*using (socketLock.Aquire(3000))
                 {*/
                     socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);

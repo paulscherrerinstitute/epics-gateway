@@ -119,6 +119,7 @@
     <Compile Include="Services\LogMessageType.cs" />
     <Compile Include="Services\MessageDetail.cs" />
     <Compile Include="Services\MessageLogger.cs" />
+    <Compile Include="Services\MessageVerifier.cs" />
     <Compile Include="Services\TextLogger.cs" />
     <Compile Include="Services\LogFileWriter.cs" />
     <Compile Include="Services\LogMessage.cs" />

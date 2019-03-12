@@ -1,24 +1,19 @@
 ﻿using GatewayLogic.Services;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace GatewayLogic.Connections
 {
     /// <summary>
     /// Receives data from the TCP connection
     /// </summary>
-    class TcpClientConnection : GatewayTcpConnection
+    internal class TcpClientConnection : GatewayTcpConnection
     {
-        readonly byte[] buffer = new byte[Gateway.BUFFER_SIZE];
-        object disposedLock = new object();
-        bool disposed = false;
+        private readonly byte[] buffer = new byte[Gateway.BUFFER_SIZE];
+        private object disposedLock = new object();
+        private bool disposed = false;
 
         private Splitter splitter;
 
@@ -35,8 +30,8 @@ namespace GatewayLogic.Connections
             //gateway.Log.Write(LogLevel.Connection, "Start TCP client connection on " + endPoint);
         }
 
-        SafeLock socketLock = new SafeLock();
-        Socket socket;
+        private SafeLock socketLock = new SafeLock();
+        private Socket socket;
         /// <summary>
         /// Defines the socket linked on the receiver.
         /// Once defined, the code will start to monitor the TCP socket for incoming data.
@@ -84,9 +79,18 @@ namespace GatewayLogic.Connections
 
             try
             {
+                MessageVerifier.Verify(packet.Data, false);
+            }
+            catch(Exception ex)
+            {
+                Dispose();
+            }
+
+            try
+            {
                 //using (socketLock.Aquire())
                 //{
-                    socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
+                socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
                 //}
             }
             catch
@@ -104,7 +108,7 @@ namespace GatewayLogic.Connections
         /// Got data from the TCP connection
         /// </summary>
         /// <param name="ar"></param>
-        void ReceiveTcpData(IAsyncResult ar)
+        private void ReceiveTcpData(IAsyncResult ar)
         {
             if (disposed)
                 return;
