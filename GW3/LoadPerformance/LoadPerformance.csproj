@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChannelSubscription.cs" />
+    <Compile Include="ClientConnection.cs" />
     <Compile Include="DataPacket.cs" />
     <Compile Include="EpicsCommand.cs" />
     <Compile Include="LoadClient.cs" />

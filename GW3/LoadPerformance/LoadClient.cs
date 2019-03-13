@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -11,31 +12,21 @@ namespace LoadPerformance
         private int nbMons;
         private readonly int nbClients;
         private UdpClient udpClient = null;
-        private TcpClient[] tcpClients;
         private object clientLock = new object();
-        private byte[][] receiveBuffers;
-        private Splitter[] splitters;
         private long totCount = 0;
         private long dataCount = 0;
         private object counterLock = new object();
         private DateTime start = DateTime.UtcNow;
-        private bool firstAnswer = true;
+        private ClientConnection[] connections;
 
-        public int NbConnected { get; private set; } = 0;
+        public int NbConnected { get; set; } = 0;
 
         public LoadClient(string searchAddress, int nbMons, int nbClients, int udpPort)
         {
             this.searchAddress = searchAddress;
             this.nbMons = nbMons;
             this.nbClients = nbClients;
-            tcpClients = new TcpClient[nbClients];
-            receiveBuffers = new byte[nbClients][];
-            splitters = new Splitter[nbClients];
-            for (var i = 0; i < nbClients; i++)
-            {
-                receiveBuffers[i] = new byte[10240];
-                splitters[i] = new Splitter();
-            }
+            connections = new ClientConnection[nbClients];
 
             udpClient = new UdpClient(udpPort);
             udpClient.BeginReceive(UdpReceive, null);
@@ -85,27 +76,10 @@ namespace LoadPerformance
                             {
                                 // First answer => we need to connect
                                 var clientId = (int)p.Parameter2 % nbClients;
-                                if (tcpClients[clientId] == null)
-                                {
-                                    var tcpClient = new TcpClient();
-                                    tcpClient.Connect(new IPEndPoint(endPoint.Address, p.DataType));
-                                    tcpClient.Client.BeginReceive(receiveBuffers[clientId], 0, receiveBuffers[clientId].Length, SocketFlags.None, TcpReceive, clientId);
-                                    tcpClients[p.Parameter2 % nbClients] = tcpClient;
-                                }
+                                if (connections[clientId] == null)
+                                    connections[clientId] = new ClientConnection(this, new IPEndPoint(endPoint.Address, p.DataType));
 
-                                //Console.WriteLine("Search answer for "+ p.Parameter2);
-
-                                // Just go to the create & add
-                                var channelName = "PERF-CHECK-IARR:" + p.Parameter2;
-                                var packet = DataPacket.Create(channelName.Length + 8 - channelName.Length % 8);
-                                packet.Command = 18; //CA_PROTO_CREATE_CHAN;
-                                packet.DataType = 0;
-                                packet.DataCount = 0;
-                                packet.Parameter1 = p.Parameter2; // CID
-                                packet.Parameter2 = Program.CA_PROTO_VERSION; // CA_MINOR_PROTOCOL_REVISION;
-                                packet.SetDataAsString(channelName);
-
-                                TcpSend(packet, clientId);
+                                connections[clientId].ChannelConnect((int)p.Parameter2);
                             }
                         }
                         break;
@@ -115,89 +89,30 @@ namespace LoadPerformance
             }
         }
 
-        private void TcpSend(DataPacket packet, int clientId)
+        internal void Disconnect(ClientConnection clientConnection)
         {
-            try
+            lock (clientLock)
             {
-                tcpClients[clientId].Client.Send(packet.Data);
-            }
-            catch (Exception ex)
-            {
-                Dispose();
-            }
-        }
-
-        private void TcpReceive(IAsyncResult ar)
-        {
-            int n;
-            var clientId = (int)ar.AsyncState;
-            try
-            {
-                n = tcpClients[clientId].Client.EndReceive(ar);
-            }
-            catch
-            {
-                return;
-            }
-            if (n == 0)
-            {
-                Dispose();
-                return;
-            }
-
-            var newPacket = DataPacket.Create(receiveBuffers[clientId], n, false);
-
-            foreach (var p in splitters[clientId].Split(newPacket))
-            {
-                //Console.WriteLine("Client Cmd: " + p.Command + ", " + p.MessageSize);
-                MessageVerifier.Verify(p, false);
-
-                switch (p.Command)
+                for (var i = 0; i < connections.Length; i++)
                 {
-                    case (ushort)EpicsCommand.ACCESS_RIGHTS:
+                    if (connections[i] == clientConnection)
+                    {
+                        connections[i] = null;
                         break;
-                    case (ushort)EpicsCommand.CREATE_CHANNEL:
-                        var toSend = DataPacket.Create(16);
-                        toSend.Command = 1;
-                        toSend.DataType = 5;
-                        toSend.DataCount = p.DataCount;
-                        toSend.Parameter1 = p.Parameter2;
-                        toSend.Parameter2 = p.Parameter1;
-                        toSend.SetUInt16(12 + 16, (ushort)1);
-                        NbConnected++;
-                        //Thread.Sleep(100);
-                        TcpSend(toSend, clientId);
-                        break;
-                    case (ushort)EpicsCommand.EVENT_ADD:
-                        if (firstAnswer)
-                        {
-                            firstAnswer = false;
-                            lock (counterLock)
-                                start = DateTime.UtcNow;
-                            //Console.WriteLine("Payload: " + p.PayloadSize);
-                        }
-                        /*if (p.PayloadSize != Program.ArraySize * 4)
-                            Console.WriteLine("Size error: " + p.PayloadSize);*/
-                        lock (counterLock)
-                        {
-                            totCount += p.MessageSize;
-                            dataCount += p.PayloadSize;
-                        }
-                        break;
-                    default:
-                        //Console.WriteLine("Odd message: " + p.Command);
-                        break;
+                    }
                 }
             }
-            try
+        }
+
+        internal void Increment(long totCount, long dataCount)
+        {
+            lock(counterLock)
             {
-                tcpClients[clientId].Client.BeginReceive(receiveBuffers[clientId], 0, receiveBuffers[clientId].Length, SocketFlags.None, TcpReceive, clientId);
-            }
-            catch
-            {
-                Dispose();
+                this.totCount += totCount;
+                this.dataCount += dataCount;
             }
         }
+
 
         public void ResetCounter()
         {
@@ -239,8 +154,8 @@ namespace LoadPerformance
         public void Dispose()
         {
             udpClient?.Dispose();
-            foreach (var tcpClient in tcpClients)
-                tcpClient?.Dispose();
+            foreach (var c in connections)
+                c?.Dispose();
         }
 
         static public IPEndPoint ParseAddress(string addr)
