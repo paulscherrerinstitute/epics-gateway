@@ -14,7 +14,7 @@ namespace LoadPerformance
         private TcpClient[] tcpClients;
         private object clientLock = new object();
         private byte[][] receiveBuffers;
-        private Splitter splitter = new Splitter();
+        private Splitter[] splitters;
         private long totCount = 0;
         private long dataCount = 0;
         private object counterLock = new object();
@@ -30,8 +30,12 @@ namespace LoadPerformance
             this.nbClients = nbClients;
             tcpClients = new TcpClient[nbClients];
             receiveBuffers = new byte[nbClients][];
-            for(var i=0;i < nbClients;i++)
+            splitters = new Splitter[nbClients];
+            for (var i = 0; i < nbClients; i++)
+            {
                 receiveBuffers[i] = new byte[10240];
+                splitters[i] = new Splitter();
+            }
 
             udpClient = new UdpClient(udpPort);
             udpClient.BeginReceive(UdpReceive, null);
@@ -143,7 +147,7 @@ namespace LoadPerformance
 
             var newPacket = DataPacket.Create(receiveBuffers[clientId], n, false);
 
-            foreach (var p in splitter.Split(newPacket))
+            foreach (var p in splitters[clientId].Split(newPacket))
             {
                 //Console.WriteLine("Client Cmd: " + p.Command + ", " + p.MessageSize);
                 MessageVerifier.Verify(p, false);
