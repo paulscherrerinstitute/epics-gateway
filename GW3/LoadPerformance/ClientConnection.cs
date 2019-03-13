@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -14,6 +15,17 @@ namespace LoadPerformance
         private readonly TcpClient tcpClient;
         private readonly byte[] receiveBuffer = new byte[10240];
         private readonly Splitter splitter = new Splitter();
+
+        public IEnumerable<int> Connected
+        {
+            get
+            {
+                lock (channelIds)
+                {
+                    return channelIds.ToList();
+                }
+            }
+        }
 
         public ClientConnection(LoadClient loadClient, IPEndPoint endPoint)
         {
@@ -96,6 +108,8 @@ namespace LoadPerformance
                         TcpSend(toSend);
                         break;
                     case (ushort)EpicsCommand.EVENT_ADD:
+                        if (p.DataType != 5)
+                            throw new WrongDataTypeException("Expected type 5 received type " + p.DataType);
                         loadClient.Increment(p.MessageSize, p.PayloadSize);
                         break;
                     default:

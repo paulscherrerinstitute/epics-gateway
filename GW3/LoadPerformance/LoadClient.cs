@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace LoadPerformance
 {
@@ -11,6 +11,7 @@ namespace LoadPerformance
         private string searchAddress;
         private int nbMons;
         private readonly int nbClients;
+        private readonly DataPacket search;
         private UdpClient udpClient = null;
         private object clientLock = new object();
         private long totCount = 0;
@@ -18,6 +19,9 @@ namespace LoadPerformance
         private object counterLock = new object();
         private DateTime start = DateTime.UtcNow;
         private ClientConnection[] connections;
+        private IPEndPoint tcpServerAddress;
+        private Thread reconnectingThread;
+        private CancellationTokenSource cancel;
 
         public int NbConnected { get; set; } = 0;
 
@@ -30,11 +34,12 @@ namespace LoadPerformance
 
             udpClient = new UdpClient(udpPort);
             udpClient.BeginReceive(UdpReceive, null);
+            udpClient.Connect(ParseAddress(searchAddress));
 
             for (var i = 0; i < nbMons; i++)
             {
                 var channelName = "PERF-CHECK-IARR:" + i;
-                var search = DataPacket.Create(channelName.Length + 8 - channelName.Length % 8);
+                search = DataPacket.Create(channelName.Length + 8 - channelName.Length % 8);
                 search.Command = 6; // CA_PROTO_SEARCH
                 search.DataType = 4; // DONT_REPLY
                 search.DataCount = 11; // MINOR PROTO VERSION
@@ -42,8 +47,43 @@ namespace LoadPerformance
                 search.Parameter2 = (uint)i; // CID
                 search.SetDataAsString(channelName);
 
-                udpClient.Connect(ParseAddress(searchAddress));
                 udpClient.Send(search.Data, search.Data.Length);
+            }
+
+            cancel = new CancellationTokenSource();
+            reconnectingThread = new Thread(Reconnect);
+            reconnectingThread.Start();
+        }
+
+        private void Reconnect()
+        {
+            while (!cancel.IsCancellationRequested)
+            {
+                Thread.Sleep(1000);
+
+                try
+                {
+                    lock (clientLock)
+                    {
+                        var connected = connections.Where(row => row != null).SelectMany(row => row.Connected).ToList();
+                        var toConnect = Enumerable.Range(0, nbMons).Where(row => !connected.Contains(row)).ToList();
+                        toConnect.ForEach(row =>
+                        {
+                            var channelName = "PERF-CHECK-IARR:" + row;
+                            search.Command = 6; // CA_PROTO_SEARCH
+                            search.DataType = 4; // DONT_REPLY
+                            search.DataCount = 11; // MINOR PROTO VERSION
+                            search.Parameter1 = (uint)row; // CID
+                            search.Parameter2 = (uint)row; // CID
+                            search.SetDataAsString(channelName);
+
+                            udpClient.Send(search.Data, search.Data.Length);
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                }
             }
         }
 
@@ -76,8 +116,9 @@ namespace LoadPerformance
                             {
                                 // First answer => we need to connect
                                 var clientId = (int)p.Parameter2 % nbClients;
+                                this.tcpServerAddress = new IPEndPoint(endPoint.Address, p.DataType);
                                 if (connections[clientId] == null)
-                                    connections[clientId] = new ClientConnection(this, new IPEndPoint(endPoint.Address, p.DataType));
+                                    connections[clientId] = new ClientConnection(this, this.tcpServerAddress);
 
                                 connections[clientId].ChannelConnect((int)p.Parameter2);
                             }
@@ -106,7 +147,7 @@ namespace LoadPerformance
 
         internal void Increment(long totCount, long dataCount)
         {
-            lock(counterLock)
+            lock (counterLock)
             {
                 this.totCount += totCount;
                 this.dataCount += dataCount;
@@ -153,9 +194,11 @@ namespace LoadPerformance
 
         public void Dispose()
         {
+            cancel.Cancel();
             udpClient?.Dispose();
             foreach (var c in connections)
                 c?.Dispose();
+            reconnectingThread.Join();
         }
 
         static public IPEndPoint ParseAddress(string addr)
