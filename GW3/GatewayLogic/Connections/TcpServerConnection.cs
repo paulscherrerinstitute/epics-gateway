@@ -198,7 +198,7 @@ namespace GatewayLogic.Connections
 
             try
             {
-                MessageVerifier.Verify(packet.Data, false);
+                MessageVerifier.Verify(packet.Data, true);
             }
             catch (Exception ex)
             {

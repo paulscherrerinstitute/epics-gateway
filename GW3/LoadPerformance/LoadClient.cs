@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 
 namespace LoadPerformance
 {
@@ -10,10 +9,11 @@ namespace LoadPerformance
     {
         private string searchAddress;
         private int nbMons;
+        private readonly int nbClients;
         private UdpClient udpClient = null;
-        private TcpClient tcpClient = null;
+        private TcpClient[] tcpClients;
         private object clientLock = new object();
-        private byte[] receiveBuffer = new byte[10240];
+        private byte[][] receiveBuffers;
         private Splitter splitter = new Splitter();
         private long totCount = 0;
         private long dataCount = 0;
@@ -23,10 +23,15 @@ namespace LoadPerformance
 
         public int NbConnected { get; private set; } = 0;
 
-        public LoadClient(string searchAddress, int nbMons, int udpPort)
+        public LoadClient(string searchAddress, int nbMons, int nbClients, int udpPort)
         {
             this.searchAddress = searchAddress;
             this.nbMons = nbMons;
+            this.nbClients = nbClients;
+            tcpClients = new TcpClient[nbClients];
+            receiveBuffers = new byte[nbClients][];
+            for(var i=0;i < nbClients;i++)
+                receiveBuffers[i] = new byte[10240];
 
             udpClient = new UdpClient(udpPort);
             udpClient.BeginReceive(UdpReceive, null);
@@ -75,11 +80,13 @@ namespace LoadPerformance
                             lock (clientLock)
                             {
                                 // First answer => we need to connect
-                                if (tcpClient == null)
+                                var clientId = (int)p.Parameter2 % nbClients;
+                                if (tcpClients[clientId] == null)
                                 {
-                                    tcpClient = new TcpClient();
+                                    var tcpClient = new TcpClient();
                                     tcpClient.Connect(new IPEndPoint(endPoint.Address, p.DataType));
-                                    tcpClient.Client.BeginReceive(receiveBuffer, 0, receiveBuffer.Length, SocketFlags.None, TcpReceive, null);
+                                    tcpClient.Client.BeginReceive(receiveBuffers[clientId], 0, receiveBuffers[clientId].Length, SocketFlags.None, TcpReceive, clientId);
+                                    tcpClients[p.Parameter2 % nbClients] = tcpClient;
                                 }
 
                                 //Console.WriteLine("Search answer for "+ p.Parameter2);
@@ -94,7 +101,7 @@ namespace LoadPerformance
                                 packet.Parameter2 = Program.CA_PROTO_VERSION; // CA_MINOR_PROTOCOL_REVISION;
                                 packet.SetDataAsString(channelName);
 
-                                TcpSend(packet);
+                                TcpSend(packet, clientId);
                             }
                         }
                         break;
@@ -104,11 +111,11 @@ namespace LoadPerformance
             }
         }
 
-        private void TcpSend(DataPacket packet)
+        private void TcpSend(DataPacket packet, int clientId)
         {
             try
             {
-                tcpClient.Client.Send(packet.Data);
+                tcpClients[clientId].Client.Send(packet.Data);
             }
             catch (Exception ex)
             {
@@ -119,9 +126,10 @@ namespace LoadPerformance
         private void TcpReceive(IAsyncResult ar)
         {
             int n;
+            var clientId = (int)ar.AsyncState;
             try
             {
-                n = tcpClient.Client.EndReceive(ar);
+                n = tcpClients[clientId].Client.EndReceive(ar);
             }
             catch
             {
@@ -133,17 +141,19 @@ namespace LoadPerformance
                 return;
             }
 
-            var newPacket = DataPacket.Create(receiveBuffer, n, false);
+            var newPacket = DataPacket.Create(receiveBuffers[clientId], n, false);
 
             foreach (var p in splitter.Split(newPacket))
             {
                 //Console.WriteLine("Client Cmd: " + p.Command + ", " + p.MessageSize);
+                MessageVerifier.Verify(p, false);
+
                 switch (p.Command)
                 {
                     case (ushort)EpicsCommand.ACCESS_RIGHTS:
                         break;
                     case (ushort)EpicsCommand.CREATE_CHANNEL:
-                        var toSend = DataPacket.Create(16 + 16);
+                        var toSend = DataPacket.Create(16);
                         toSend.Command = 1;
                         toSend.DataType = 5;
                         toSend.DataCount = p.DataCount;
@@ -152,7 +162,7 @@ namespace LoadPerformance
                         toSend.SetUInt16(12 + 16, (ushort)1);
                         NbConnected++;
                         //Thread.Sleep(100);
-                        TcpSend(toSend);
+                        TcpSend(toSend, clientId);
                         break;
                     case (ushort)EpicsCommand.EVENT_ADD:
                         if (firstAnswer)
@@ -177,7 +187,7 @@ namespace LoadPerformance
             }
             try
             {
-                tcpClient.Client.BeginReceive(receiveBuffer, 0, receiveBuffer.Length, SocketFlags.None, TcpReceive, null);
+                tcpClients[clientId].Client.BeginReceive(receiveBuffers[clientId], 0, receiveBuffers[clientId].Length, SocketFlags.None, TcpReceive, clientId);
             }
             catch
             {
@@ -225,7 +235,8 @@ namespace LoadPerformance
         public void Dispose()
         {
             udpClient?.Dispose();
-            tcpClient?.Dispose();
+            foreach (var tcpClient in tcpClients)
+                tcpClient?.Dispose();
         }
 
         static public IPEndPoint ParseAddress(string addr)

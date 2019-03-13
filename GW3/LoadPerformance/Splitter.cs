@@ -12,6 +12,9 @@ namespace LoadPerformance
         private SemaphoreSlim lockSplitter = new SemaphoreSlim(1);
         private bool disposed = false;
 
+        public bool HasRemainingData => remainingPacket != null && remainingPacket.BufferSize > 0;
+
+
         public IEnumerable<DataPacket> Split(DataPacket packet)
         {
             lockSplitter.Wait();

@@ -25,7 +25,15 @@ namespace LoadPerformance
             this.socket = socket;
             this.server = server;
             this.splitter = new Splitter();
-            socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveData, null);
+            try
+            {
+                socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveData, null);
+            }
+            catch(Exception ex)
+            {
+                ThreadPool.QueueUserWorkItem((obj) => { this.Dispose(); });
+                Console.WriteLine("Server connection closed at start");
+            }
             runnerThread = new Thread(DataSender);
             runnerThread.IsBackground = true;
             runnerThread.Start();

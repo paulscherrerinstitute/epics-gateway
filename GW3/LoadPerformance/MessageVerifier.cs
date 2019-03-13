@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace GatewayLogic.Services
+namespace LoadPerformance
 {
     internal static class MessageVerifier
     {
