@@ -16,7 +16,8 @@ namespace GatewayLogic.Connections
 
         Socket socket;
         SafeLock lockObject = new SafeLock();
-        SafeLock socketLock = new SafeLock();
+        //SafeLock socketLock = new SafeLock();
+        SemaphoreSlim socketLock = new SemaphoreSlim(1);
         bool isConnected = false;
         List<Action> toCallWhenReady = new List<Action>();
         readonly byte[] buffer = new byte[Gateway.BUFFER_SIZE];
@@ -207,14 +208,19 @@ namespace GatewayLogic.Connections
 
             try
             {
-                /*using (socketLock.Aquire(3000))
-                {*/
+                socketLock.Wait();
+                //using (socketLock.Aquire())
+                //{
                     socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
                 //}
             }
             catch
             {
                 ThreadPool.QueueUserWorkItem((obj) => { this.Dispose(); });
+            }
+            finally
+            {
+                socketLock.Release();
             }
         }
 

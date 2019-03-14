@@ -15,6 +15,7 @@ namespace LoadPerformance
         private readonly TcpClient tcpClient;
         private readonly byte[] receiveBuffer = new byte[10240];
         private readonly Splitter splitter = new Splitter();
+        SemaphoreSlim socketLock = new SemaphoreSlim(1);
 
         public IEnumerable<int> Connected
         {
@@ -33,9 +34,9 @@ namespace LoadPerformance
             this.endPoint = endPoint;
 
             tcpClient = new TcpClient();
-            tcpClient.Connect(endPoint);
             try
             {
+                tcpClient.Connect(endPoint);
                 tcpClient.Client.BeginReceive(receiveBuffer, 0, receiveBuffer.Length, SocketFlags.None, TcpReceive, null);
             }
             catch
@@ -104,7 +105,6 @@ namespace LoadPerformance
                         toSend.Parameter1 = p.Parameter2;
                         toSend.Parameter2 = p.Parameter1;
                         toSend.SetUInt16(12 + 16, (ushort)1);
-                        loadClient.NbConnected++;
                         TcpSend(toSend);
                         break;
                     case (ushort)EpicsCommand.EVENT_ADD:
@@ -130,11 +130,16 @@ namespace LoadPerformance
         {
             try
             {
+                socketLock.Wait();
                 tcpClient.Client.Send(packet.Data);
             }
             catch (Exception ex)
             {
                 Dispose();
+            }
+            finally
+            {
+                socketLock.Release();
             }
         }
 

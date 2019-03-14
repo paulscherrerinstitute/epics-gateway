@@ -10,6 +10,7 @@
         ECHO = 0,
         HOST = 21,
         USER = 20,
-        READ_NOTIFY = 15
+        READ_NOTIFY = 15,
+        CLEAR_CHANNEL = 12
     }
 }

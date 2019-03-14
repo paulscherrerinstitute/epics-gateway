@@ -275,7 +275,7 @@ namespace GatewayLogic.Services
             using (dictionaryLock.Aquire())
                 list = dictionary.Values.ToList();
             foreach (var i in list)
-                i.DisconnectClient(connection);
+                i?.DisconnectClient(connection);
         }
 
         public void Dispose()

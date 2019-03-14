@@ -14,6 +14,8 @@ namespace GatewayLogic.Connections
         private readonly byte[] buffer = new byte[Gateway.BUFFER_SIZE];
         private object disposedLock = new object();
         private bool disposed = false;
+        //private SafeLock socketLock = new SafeLock();
+        private SemaphoreSlim socketLock = new SemaphoreSlim(1);
 
         private Splitter splitter;
 
@@ -30,7 +32,6 @@ namespace GatewayLogic.Connections
             //gateway.Log.Write(LogLevel.Connection, "Start TCP client connection on " + endPoint);
         }
 
-        private SafeLock socketLock = new SafeLock();
         private Socket socket;
         /// <summary>
         /// Defines the socket linked on the receiver.
@@ -88,6 +89,7 @@ namespace GatewayLogic.Connections
 
             try
             {
+                socketLock.Wait();
                 //using (socketLock.Aquire())
                 //{
                 socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
@@ -96,6 +98,10 @@ namespace GatewayLogic.Connections
             catch
             {
                 Dispose();
+            }
+            finally
+            {
+                socketLock.Release();
             }
         }
 

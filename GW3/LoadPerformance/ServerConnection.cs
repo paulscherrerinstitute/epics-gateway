@@ -18,6 +18,7 @@ namespace LoadPerformance
         private List<ChannelSubscription> subscriptions = new List<ChannelSubscription>();
         private DataPacket intArray = DataPacket.Create(Program.ArraySize * 4 + 200);
         private int step = 1;
+        private SemaphoreSlim socketLock = new SemaphoreSlim(1);
 
         public ServerConnection(LoadServer server, Socket socket)
         {
@@ -29,7 +30,7 @@ namespace LoadPerformance
             {
                 socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveData, null);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ThreadPool.QueueUserWorkItem((obj) => { this.Dispose(); });
                 Console.WriteLine("Server connection closed at start");
@@ -56,19 +57,20 @@ namespace LoadPerformance
                 {
                     if (subs.ChannelId >= 10000) // Int array
                     {
-                        intArray.Command = (ushort)EpicsCommand.EVENT_ADD;
-                        intArray.Parameter1 = 1;
-                        intArray.Parameter2 = subs.ClientId;
-                        intArray.DataCount = (subs.DataCount == 0 ? (uint)Program.ArraySize : subs.DataCount);
-                        intArray.DataType = subs.DataType;
+                        var res = (DataPacket)intArray.Clone();
+                        res.Command = (ushort)EpicsCommand.EVENT_ADD;
+                        res.Parameter1 = 1;
+                        res.Parameter2 = subs.ClientId;
+                        res.DataCount = (subs.DataCount == 0 ? (uint)Program.ArraySize : subs.DataCount);
+                        res.DataType = subs.DataType;
 
                         if (subs.DataType == 19)
-                            intArray.SetDateTime(16 + 4, DateTime.Now);
+                            res.SetDateTime(16 + 4, DateTime.Now);
 
                         var offset = 16 + (subs.DataType == 33 ? 80 : (subs.DataType == 19 ? 12 : 0));
-                        intArray.Data[offset] = (byte)(step & 0xFF);
-                        intArray.Data[offset+1] = (byte)((step >> 8) | 0xFF);
-                        Send(intArray, PaddedSize((int)(intArray.DataCount * 4 + offset)));
+                        res.Data[offset] = (byte)(step & 0xFF);
+                        res.Data[offset + 1] = (byte)((step >> 8) | 0xFF);
+                        Send(res, PaddedSize((int)(res.DataCount * 4 + offset)));
 
                         step = (step + 1) % 30000;
                     }
@@ -151,18 +153,20 @@ namespace LoadPerformance
                             break;
                         }
                         //Console.WriteLine("Send get");
-                        intArray.Command = (ushort)EpicsCommand.READ_NOTIFY;
-                        intArray.Parameter2 = p.Parameter2;
-                        intArray.Parameter1 = p.Parameter1;
-                        intArray.DataCount = p.DataCount;
-                        intArray.DataType = p.DataType;
+                        var res = (DataPacket)intArray.Clone();
+
+                        res.Command = (ushort)EpicsCommand.READ_NOTIFY;
+                        res.Parameter2 = p.Parameter2;
+                        res.Parameter1 = p.Parameter1;
+                        res.DataCount = p.DataCount;
+                        res.DataType = p.DataType;
                         if (p.DataType == 19)
-                            intArray.SetDateTime(16 + 4, DateTime.Now);
+                            res.SetDateTime(16 + 4, DateTime.Now);
 
                         var offset = 16 + (p.DataType == 33 ? 80 : (p.DataType == 19 ? 12 : 0));
-                        intArray.Data[offset] = (byte)(step & 0xFF);
-                        intArray.Data[offset + 1] = (byte)((step >> 8) | 0xFF);
-                        Send(intArray, PaddedSize((int)(intArray.DataCount * 4 + offset)));
+                        res.Data[offset] = (byte)(step & 0xFF);
+                        res.Data[offset + 1] = (byte)((step >> 8) | 0xFF);
+                        Send(res, PaddedSize((int)(intArray.DataCount * 4 + offset)));
                         step++;
                         break;
                     case (ushort)EpicsCommand.EVENT_ADD: // Subscribe to a channel
@@ -192,13 +196,13 @@ namespace LoadPerformance
                             subscriptions.RemoveAll(row => row.ClientId == p.Parameter2);
 
                             resPacket = DataPacket.Create(0);
-                            newPacket.Command = 1;
-                            newPacket.Destination = p.Sender;
-                            newPacket.DataType = 5; // int
-                            newPacket.DataCount = 0;
-                            newPacket.Parameter1 = p.Parameter1;
-                            newPacket.Parameter2 = p.Parameter2;
-                            Send(newPacket);
+                            resPacket.Command = 1;
+                            resPacket.Destination = p.Sender;
+                            resPacket.DataType = 5; // int
+                            resPacket.DataCount = 0;
+                            resPacket.Parameter1 = p.Parameter1;
+                            resPacket.Parameter2 = p.Parameter2;
+                            Send(resPacket);
                         }
                         break;
                     case (ushort)EpicsCommand.ECHO:
@@ -207,6 +211,8 @@ namespace LoadPerformance
                     case (ushort)EpicsCommand.HOST:
                         break;
                     case (ushort)EpicsCommand.USER:
+                        break;
+                    case (ushort)EpicsCommand.CLEAR_CHANNEL:
                         break;
                     default:
                         Console.WriteLine("Command " + p.Command);
@@ -236,8 +242,18 @@ namespace LoadPerformance
         }
         private void Send(DataPacket packet, int messageSize)
         {
+            /*try
+            {
+                MessageVerifier.Verify(packet, false);
+            }
+            catch (Exception ex)
+            {
+
+            }*/
+
             try
             {
+                socketLock.Wait();
                 packet.MessageSize = (ushort)messageSize;
                 socket.Send(packet.Data, packet.Offset, messageSize, SocketFlags.None);
             }
@@ -245,17 +261,35 @@ namespace LoadPerformance
             {
                 Dispose();
             }
+            finally
+            {
+                socketLock.Release();
+            }
         }
 
         private void Send(byte[] data, uint nb)
         {
+            /*try
+            {
+                MessageVerifier.Verify(data, false);
+            }
+            catch(Exception ex)
+            {
+
+            }*/
+            
             try
             {
+                socketLock.Wait();
                 this.socket.Send(data, (int)nb, SocketFlags.None);
             }
             catch
             {
                 Dispose();
+            }
+            finally
+            {
+                socketLock.Release();
             }
         }
 

@@ -23,7 +23,14 @@ namespace LoadPerformance
         private Thread reconnectingThread;
         private CancellationTokenSource cancel;
 
-        public int NbConnected { get; set; } = 0;
+        public int NbConnected
+        {
+            get
+            {
+                lock (connections)
+                    return connections.Where(row => row != null).Sum(row => row.Connected.Count());
+            }
+        }
 
         public LoadClient(string searchAddress, int nbMons, int nbClients, int udpPort)
         {
