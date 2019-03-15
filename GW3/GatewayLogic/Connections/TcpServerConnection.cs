@@ -197,14 +197,14 @@ namespace GatewayLogic.Connections
             Gateway.DiagnosticServer.NbNewData++;
             this.LastMessage = DateTime.UtcNow;
 
-            try
+            /*try
             {
                 MessageVerifier.Verify(packet.Data, true);
             }
             catch (Exception ex)
             {
                 ThreadPool.QueueUserWorkItem((obj) => { this.Dispose(); });
-            }
+            }*/
 
             try
             {

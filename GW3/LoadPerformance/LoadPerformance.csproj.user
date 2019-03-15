@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>--both --nbmon 1000 --nbclients 1000 --caddr 129.129.230.157:5062</StartArguments>
+    <StartArguments>--both --nbmon 1000 --nbclients 1000 --caddr 129.129.194.45:5062</StartArguments>
   </PropertyGroup>
 </Project>

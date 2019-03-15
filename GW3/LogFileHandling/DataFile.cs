@@ -995,7 +995,7 @@ namespace GWLogger.Backend.DataContext
                         detail.Value = stream.ReadString();
                         // oddies as string, we may have an issue with the record
                         //if (detail.Value.Length > 128 || !specialChars.IsMatch(detail.Value))
-                        if (detail.Value.Length > 128)
+                        if (detail.Value.Length > 1280)
                         {
                             stream.BaseStream.Seek(pos, SeekOrigin.Begin);
                             break;

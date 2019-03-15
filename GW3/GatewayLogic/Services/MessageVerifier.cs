@@ -46,8 +46,10 @@ namespace GatewayLogic.Services
                     VerifyDataType(p.DataType);
                     break;
                 case 2: // EventCancel
+                    if (!isRequest)
+                        throw new WrongMessageCommandException("EventCancel cannot be sent as answer");
                     if (p.PayloadSize != 0)
-                        throw new WrongMessageSizeException("Version messages must have size 0");
+                        throw new WrongMessageSizeException("EventCancel messages must have size 0");
                     VerifyDataType(p.DataType);
                     break;
                 case 4: // EventWrite

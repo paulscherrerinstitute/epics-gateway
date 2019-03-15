@@ -78,14 +78,14 @@ namespace GatewayLogic.Connections
             Interlocked.Increment(ref Gateway.DiagnosticServer.NbNewData);
             this.LastMessage = DateTime.UtcNow;
 
-            try
+            /*try
             {
                 MessageVerifier.Verify(packet.Data, false);
             }
             catch(Exception ex)
             {
                 Dispose();
-            }
+            }*/
 
             try
             {

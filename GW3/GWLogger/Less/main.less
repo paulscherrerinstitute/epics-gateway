@@ -582,10 +582,16 @@ select
     border: solid 1px #606060;
     padding: 3px;
     display: none;
+    overflow: hidden;
 
     table
     {
         width: 100%;
+    }
+
+    table tr
+    {
+        vertical-align: top;
     }
 
     table td:nth-child(1), table td:nth-child(3)
@@ -1209,12 +1215,17 @@ select
     box-sizing: border-box;
 }
 
-#searchLi {
-    &:hover {
+#searchLi
+{
+    &:hover
+    {
         background-color: #3f51b5;
     }
+
     padding-top: 4px;
-    #searchInput {
+
+    #searchInput
+    {
         height: 16px;
         line-height: 16px;
     }
