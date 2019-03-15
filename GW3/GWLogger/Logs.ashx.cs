@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -110,6 +111,9 @@ namespace GWLogger
                         logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, 100, msgTypes, startFile, offset, cancel);
                 }
 
+                foreach (var l in logs)
+                    l.RemoteIpPoint = Hostname(l.RemoteIpPoint) + " (" + l.RemoteIpPoint + ")";
+
                 context.Response.ContentType = "application/json";
                 context.Response.CacheControl = "no-cache";
                 context.Response.Expires = 0;
@@ -136,7 +140,7 @@ namespace GWLogger
                     context.Response.Write(",");
 
                     context.Response.Write("\"Remote\":\"");
-                    context.Response.Write(i.RemoteIpPoint);
+                    context.Response.Write(i.RemoteIpPoint?.JsEscape());
                     context.Response.Write("\",");
 
                     context.Response.Write("\"Type\":");
@@ -167,6 +171,28 @@ namespace GWLogger
                 }
             }
             context.Response.Write("]");
+        }
+
+        private Dictionary<string, string> knownIps = new Dictionary<string, string>();
+        private string Hostname(string remoteIpPoint)
+        {
+            var ip = remoteIpPoint.Split(new char[] { ':' }).First();
+            lock (knownIps)
+            {
+                if (!knownIps.ContainsKey(ip))
+                {
+                    string host = ip;
+                    try
+                    {
+                        host = Dns.GetHostEntry(ip).HostName;
+                    }
+                    catch
+                    {
+                    }
+                    knownIps.Add(ip, host);
+                }
+                return knownIps[ip];
+            }
         }
 
         public bool IsReusable

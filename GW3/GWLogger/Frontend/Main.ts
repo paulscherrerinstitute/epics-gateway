@@ -539,6 +539,10 @@ class Main
     static AddFilter(evt: MouseEvent, prop: string)
     {
         var value = (<HTMLElement>evt.target).innerText;
+
+        if (prop == "remote")
+            value = (value.split('(')[1]).replace(")", "");
+
         if ($("#queryField").val().trim() != "")
             $("#queryField").val($("#queryField").val() + " and ");
         if (prop == "date")
@@ -818,7 +822,8 @@ class Main
             if (evt.target.tagName != "INPUT")
             {
                 var tab = evt.target.textContent;
-                switch (tab) {
+                switch (tab)
+                {
                     case "Status":
                         $("#reportView").hide();
                         if ($("#helpView").is(":visible"))
@@ -1110,7 +1115,8 @@ class Main
         $("#logFilter li").click(Main.LogFilter);
 
         var gateways: string[] = [];
-        $('.GWDisplay').each(function () {
+        $('.GWDisplay').each(function ()
+        {
             gateways.push($(this).attr('id'));
         });
         var autocomplete = $("#searchInput").kendoAutoComplete({
