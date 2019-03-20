@@ -54,6 +54,7 @@
     <Compile Include="ConditionTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ASTTest.cs" />
+    <Compile Include="SelectTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

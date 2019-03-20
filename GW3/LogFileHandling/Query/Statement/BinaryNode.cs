@@ -19,9 +19,6 @@ namespace GWLogger.Backend.DataContext.Query.Statement
             return Operator(StatementA.CheckCondition(context, entry), StatementB.CheckCondition(context, entry));
         }
 
-        public override string Value(Context context, LogEntry entry)
-        {
-            throw new NotImplementedException();
-        }
+        public override string Value(Context context, LogEntry entry) => throw new System.NotImplementedException();
     }
 }

@@ -147,9 +147,6 @@ namespace GWLogger.Backend.DataContext.Query.Statement
             return new DateTime(year, month, day, hour, min, sec, mili, DateTimeKind.Utc);
         }
 
-        public override string Value(Context context, LogEntry entry)
-        {
-            throw new NotImplementedException();
-        }
+        public override string Value(Context context, LogEntry entry) => throw new System.NotImplementedException();
     }
 }

@@ -388,10 +388,15 @@ namespace GWLogger.Backend.DataContext
                 catch
                 {
                 }
-                /*using (var l = files[gatewayName].Lock())
-                {*/
-                return files[gatewayName].ReadLog(start, end, node, nbMaxEntries, messageTypes, startFile, offset, cancellationToken);
-                //}
+
+                var result = new List<LogEntry>();
+                foreach(var entry in files[gatewayName].ReadLog(start, end, node, messageTypes, false, startFile, offset))
+                {
+                    if (result.Count >= nbMaxEntries || cancellationToken.IsCancellationRequested)
+                        break;
+                    result.Add(entry);
+                }
+                return result;
             }
         }
 
@@ -410,10 +415,7 @@ namespace GWLogger.Backend.DataContext
                 catch
                 {
                 }
-                /*using (var l = files[gatewayName].Lock())
-                {*/
-                return files[gatewayName].GetLogs(start, end, node, messageTypes, onlyErrors);
-                //}
+                return files[gatewayName].ReadLog(start, end, node, messageTypes, onlyErrors);
             }
         }
 
@@ -421,13 +423,7 @@ namespace GWLogger.Backend.DataContext
         {
             lock (lockObject)
             {
-                return files.Select(row =>
-            {
-                /*using (var l = row.Lock())
-                {*/
-                return row.GetLogsStats();
-                /*}*/
-            }).OrderBy(row => row.Name).ToList();
+                return files.Select(row =>row.GetLogsStats()).OrderBy(row => row.Name).ToList();
             }
         }
 

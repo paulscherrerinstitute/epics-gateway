@@ -7,6 +7,10 @@ namespace GWLogger.Backend.DataContext.Query.Statement
     {
         internal static QueryNode Get(QueryParser parser)
         {
+            var next = parser.Tokens.Peek();
+            if (next is TokenSelect)
+                return new SelectNode(parser);
+
             var root = Or(parser);
             if (parser.Tokens.HasToken())
                 throw new SpareTokenException();
@@ -89,7 +93,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                         throw new InvalidTokenException("Wasn't expecting a " + parser.Tokens.Peek().GetType().Name + " here.");
                 }
             }
-            catch(ArgumentOutOfRangeException)
+            catch (ArgumentOutOfRangeException)
             {
                 throw new MissingTokenException("There's missing something");
             }

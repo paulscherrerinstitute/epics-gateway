@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 
 namespace GWLogger.Backend.DataContext.Query.Tokens
 {
     internal class TokenName : Token
     {
-        const string allowedChar = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
-        const string secondChar = "0123456789";
-        readonly static string[] keywords = new string[] { "and", "or", "contains", "starts", "ends" };
+        private const string allowedChar = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
+        private const string secondChar = "0123456789";
+        private static readonly string[] keywords = new string[] { "and", "or", "contains", "starts", "ends", "select", "where", "group" };
 
         public override bool CanBeUsed(QueryParser parser)
         {
