@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>CAESAR - Standard Operations</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link href="/Less/main.css" rel="stylesheet" />
+    <style>
+        body
+        {
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="helpMiddleContainer">
+        <h1>Bedienungsanleitung</h1>
+        <h2>Themen:</h2>
+
+        <h2>Ein Gateway antwortet nicht</h2>
+        Gehen sie folgendermasse vor:
+        <ol>
+            <li><a href="#identify_gateway">Das Gateway mit Problemen identifizieren</a></li>
+            <li><a href="#identify_issue">Die Art des Problems erkennen</a></li>
+            <li><a href="#standard_restart">Neustart des Gateways mit CAESAR</a></li>
+            <li><a href="#report_incident">Ein Incident melden</a></li>
+        </ol>
+
+        <h2 id="identify_gateway">Das Gateway mit Problemen identifizieren</h2>
+        Der einfachste Weg Probleme mit Gatways zu identifizieren ist mit CAESAR map (obere Menüleiste &rArr; Map).
+        Die Map sollte so aussehen <span class="fig">1</span> wenn alles in Ordnung ist.<br />
+        <figure>
+            <img src="/Images/all_green_map.png" />
+            <figcaption>Fig 1. - Alles Okay</figcaption>
+        </figure>
+        Eine Störung eines Gateways wird mit einem roten Hintergrund angezeigt. <span class="fig">2</span>.
+        <figure>
+            <img src="/Images/proscan_red.png" />
+            <figcaption>Fig 2. - Gateway Fehler</figcaption>
+        </figure>
+        Durch die Position des CAESAER (dieses Monitoring Tool) im Netzwerk, wird bei einem Problem bei einem Maschinen Gateway nicht nur dieses Gateway in rot angezeigt, 
+        sondern auch alle Gateways hinter dem defekten Gateway  <span class="fig">3</span>.<br />
+        <figure>
+            <img src="/Images/sf_red.png" />
+            <figcaption>Fig 3. - Kaskadierender Fehler </figcaption>
+        </figure>
+        In diesem Fall liegt der Fehler am Gateway, das dem CAESAR am nächsten ist.<br />
+        <br />
+        Mit einem Klick auf ein Gateay auf der Map wird zur Detailansicht umgeschlatet.
+        <h2 id="identify_issue">Die Art des Fehlers erkennen</h2>
+        Die Gateway Details lassen sich anzeigen, indem man:
+        <ul>
+            <li>Auf der Status Seite ein Gateway anklickt.</li>
+            <li>Auf der Map ein Gateway anklickt.</li>
+            <li>Das fehlerhafte Gateway auf dem "Errors" Feld anklickt.</li>
+        </ul>
+
+        <figure>
+            <img src="/Images/details.png" />
+            <figcaption>Fig. 4 - Detailansicht</figcaption>
+        </figure>
+        Auf der Detailseite gibt es vier Grafiken, die einen Überblick über die letzten Minuten des Gateways geben, und die aktuellen Werte auf der rechten Seite anzeigen. 
+        <br />
+        <br />
+        Bei einem Gateway, das nicht mehr antwortet, zeigen die Kurven eine Nulllinie und die aktuellen Werten zeigen eine 0 oder NULL. <span class="fig">5</span> <span class="actionToDo">Either wait for an automatic restart or restart manually.</span><br />
+        <figure>
+            <img src="/Images/bad_gateway.png" />
+            <figcaption>Fig. 5 - Gateway mit einem Problem</figcaption>
+        </figure>
+        Zeigt die Grafik ein ständiges auf und ab <span class="fig">6</span>, dann ist dies meist ein Anzeichen dafür, dass ein Client das Gateway stört: <span class="actionToDo">
+           erstellen sie in so einem Fall bitte ein 
+            "Service Now" Ticket mit so vielen Datails wie möglich.
+        </span>
+
+        <figure>
+            <img src="/Images/bad_cycles.png" />
+            <figcaption>Fig. 6 - Wiederkehrende Neustarts</figcaption>
+        </figure>
+        Bei hoher CPU Belastung des Gateways, wird ein Watchdog, der auf dem Gateway läuft, von Zeit zu Zeit einen Restart verursachen. <span class="fig">7</span>.
+        <figure>
+            <img src="/Images/high_cpu.png" />
+            <figcaption>Fig 7. - Hohe CPU-Last</figcaption>
+        </figure>
+        Im Falle einer CPU Last, die sich zyklisch wiederholt, ist das wiederum ein Zeichen für eine zu hohe Belastung durch einen Client.
+        <span class="actionToDo">Wie zuvor sollten sie ein "Service Now" Ticket mit so vielen Details wie möglich erstellen.</span>
+
+        <h2 id="standard_restart">Lösen sie in so einem Fall einen Restart mit CAESAR aus.</h2>
+        Von der entsprechenden Detail Seite kann ein Restart mit einem Klick auf den Button "Restart Gateway" ausgelöst werden. Warten sie danach einige Sekunden, dann 
+        sollte die "RunningTime" auf 0 gesetzt werden und wieder zu zählen beginnen. 
+        <h2 id="report_incident">Ein Incident melden:</h2>
+        <a href="https://psi.service-now.com/psisp?id=psi_new_report_incident" target="_blank">Benutzen sie "Service Now" (css.psi.ch) um einen Incident zu melden.</a>
+        Folgende Informationen sind erforderlich:<br />
+        <ol>
+            <li>Im Titel: EPICS Gateway &lt;Name des Gateways&gt;</li>
+            <li>Gateway Name</li>
+            <li>Datum und Zeit des Vorfalls</li>
+            <li>Wer hat das Problem bemerkt</li>
+            <li>Was scheint nicht zu funktionieren</li>
+            <li>Was wurde bereits unternommen</li>
+        </ol>
+    </div>
+</body>
+</html>
