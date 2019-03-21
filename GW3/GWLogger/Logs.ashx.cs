@@ -84,12 +84,12 @@ namespace GWLogger
 
                 //context.Request;
                 var path = context.Request.Path.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).ToArray();
-                IEnumerable<Backend.DataContext.LogEntry> logs = null;
+                List<object> logs = null;
                 //var t = ctx.LogEntries.ToList();
                 var gateway = path[0];
                 if (path.Length == 1 || path[1] == "NaN")
                 {
-                    logs = Global.DataContext.ReadLastLogs(gateway);
+                    logs = Global.DataContext.ReadLastLogs(gateway).Cast<object>().ToList();
                 }
                 else
                 {
@@ -100,26 +100,25 @@ namespace GWLogger
                     {
                         var end = long.Parse(path[2]).ToNetDate().Trim();
                         if (context.Request["levels"] == "3,4") // Show errors
-                            logs = Global.DataContext.GetLogs(gateway, start, end, query, null, true).Take(100).ToList();
+                            logs = Global.DataContext.GetLogs(gateway, start, end, query, null, true).Take(100).Cast<object>().ToList();
                         else
                             logs = Global.DataContext.ReadLog(gateway, start, end, query, 100, msgTypes, startFile, offset, cancel);
                     }
                     else
                         if (context.Request["levels"] == "3,4") // Show errors
-                        logs = Global.DataContext.GetLogs(gateway, start, start.AddMinutes(20), query, null, true).Take(100).ToList();
+                        logs = Global.DataContext.GetLogs(gateway, start, start.AddMinutes(20), query, null, true).Take(100).Cast<object>().ToList();
                     else
                         logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, 100, msgTypes, startFile, offset, cancel);
                 }
 
-                foreach (var l in logs)
-                    l.RemoteIpPoint = Hostname(l.RemoteIpPoint) + " (" + l.RemoteIpPoint + ")";
+                var elementType = (logs.Count == 0 ? null : logs.First().GetType());
 
                 context.Response.ContentType = "application/json";
                 context.Response.CacheControl = "no-cache";
                 context.Response.Expires = 0;
                 context.Response.Write("[");
 
-                if (logs == null)
+                if (logs == null || logs.Count == 0)
                 {
                     context.Response.Write("]");
                     return;
@@ -127,47 +126,75 @@ namespace GWLogger
 
                 var messageDetails = Global.DataContext.MessageDetailTypes.ToDictionary(key => key.Id, val => val.Value);
 
-                var isFirst = true;
-                foreach (var i in logs)
+                if (elementType == typeof(Backend.DataContext.LogEntry))
                 {
-                    if (!isFirst)
+                    var entryLogs = logs.Cast<Backend.DataContext.LogEntry>();
+                    var isFirst = true;
+                    foreach (var i in entryLogs)
+                    {
+                        if (!isFirst)
+                            context.Response.Write(",");
+                        if (i.RemoteIpPoint != null)
+                            i.RemoteIpPoint = Hostname(i.RemoteIpPoint) + " (" + i.RemoteIpPoint + ")";
+                        isFirst = false;
+                        context.Response.Write("{");
+
+                        context.Response.Write("\"Date\":");
+                        context.Response.Write(i.EntryDate.ToUniversalTime().ToJsDate());
                         context.Response.Write(",");
-                    isFirst = false;
-                    context.Response.Write("{");
 
-                    context.Response.Write("\"Date\":");
-                    context.Response.Write(i.EntryDate.ToUniversalTime().ToJsDate());
-                    context.Response.Write(",");
+                        context.Response.Write("\"Remote\":\"");
+                        context.Response.Write(i.RemoteIpPoint?.JsEscape());
+                        context.Response.Write("\",");
 
-                    context.Response.Write("\"Remote\":\"");
-                    context.Response.Write(i.RemoteIpPoint?.JsEscape());
-                    context.Response.Write("\",");
+                        context.Response.Write("\"Type\":");
+                        context.Response.Write(i.MessageTypeId);
+                        context.Response.Write(",");
 
-                    context.Response.Write("\"Type\":");
-                    context.Response.Write(i.MessageTypeId);
-                    context.Response.Write(",");
+                        context.Response.Write("\"Level\":");
+                        context.Response.Write(logLevels.ContainsKey(i.MessageTypeId) ? logLevels[i.MessageTypeId] : 0);
+                        context.Response.Write(",");
 
-                    context.Response.Write("\"Level\":");
-                    context.Response.Write(logLevels.ContainsKey(i.MessageTypeId) ? logLevels[i.MessageTypeId] : 0);
-                    context.Response.Write(",");
+                        context.Response.Write("\"Message\":\"");
+                        context.Response.Write(Convert(i.RemoteIpPoint, i.MessageTypeId, i.LogEntryDetails).JsEscape());
+                        context.Response.Write("\",");
 
-                    context.Response.Write("\"Message\":\"");
-                    context.Response.Write(Convert(i.RemoteIpPoint, i.MessageTypeId, i.LogEntryDetails).JsEscape());
-                    context.Response.Write("\",");
+                        context.Response.Write("\"Position\":");
+                        context.Response.Write(i.Position);
+                        context.Response.Write(",");
 
-                    context.Response.Write("\"Position\":");
-                    context.Response.Write(i.Position);
-                    context.Response.Write(",");
+                        context.Response.Write("\"CurrentFile\":\"");
+                        context.Response.Write(i.CurrentFile);
+                        context.Response.Write("\",");
 
-                    context.Response.Write("\"CurrentFile\":\"");
-                    context.Response.Write(i.CurrentFile);
-                    context.Response.Write("\",");
+                        context.Response.Write("\"Details\":{");
+                        context.Response.Write(string.Join(",", i.LogEntryDetails.Select(row => "\"" + (messageDetails.ContainsKey(row.DetailTypeId) ? messageDetails[row.DetailTypeId] : row.DetailTypeId.ToString()) + "\":\"" + row.Value.JsEscape() + "\"")));
+                        context.Response.Write("}");
 
-                    context.Response.Write("\"Details\":{");
-                    context.Response.Write(string.Join(",", i.LogEntryDetails.Select(row => "\"" + (messageDetails.ContainsKey(row.DetailTypeId) ? messageDetails[row.DetailTypeId] : row.DetailTypeId.ToString()) + "\":\"" + row.Value.JsEscape() + "\"")));
-                    context.Response.Write("}");
+                        context.Response.Write("}");
+                    }
+                }
+                else
+                {
+                    var isFirst = true;
+                    var queryNode = (Backend.DataContext.Query.Statement.SelectNode)Backend.DataContext.Query.QueryParser.Parse(query);
 
-                    context.Response.Write("}");
+                    foreach (var i in logs.Cast<object[]>())
+                    {
+                        if (!isFirst)
+                            context.Response.Write(",");
+                        isFirst = false;
+                        context.Response.Write("{");
+                        for (var j = 0; j < i.Length; j++)
+                        {
+                            if (j != 0)
+                                context.Response.Write(",");
+                            context.Response.Write("\"" + (queryNode.Columns[j].DisplayTitle ?? queryNode.Columns[j].Field) + "\"");
+                            context.Response.Write(":");
+                            context.Response.Write(i[j].ToJs());
+                        }
+                        context.Response.Write("}");
+                    }
                 }
             }
             context.Response.Write("]");

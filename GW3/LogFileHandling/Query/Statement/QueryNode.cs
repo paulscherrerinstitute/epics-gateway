@@ -73,6 +73,9 @@ namespace GWLogger.Backend.DataContext.Query.Statement
 
         private static QueryNode Base(QueryParser parser)
         {
+            if (!parser.Tokens.HasToken())
+                throw new MissingTokenException("There's missing something");
+
             try
             {
                 switch (parser.Tokens.Peek())
@@ -88,6 +91,9 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                     case TokenNumber tokenValue:
                         return new ValueNode(parser.Tokens.Next());
                     case TokenName tokenName:
+                        var after = parser.Tokens.Peek(1);
+                        if (after != null && after is TokenOpenParenthesis)
+                            return new FunctionNode(parser);
                         return new VariableNode(parser.Tokens.Next());
                     default:
                         throw new InvalidTokenException("Wasn't expecting a " + parser.Tokens.Peek().GetType().Name + " here.");

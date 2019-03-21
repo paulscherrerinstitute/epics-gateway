@@ -429,63 +429,98 @@ class Main
                 Main.ShowStats();
 
                 Main.loadingLogs = null;
-                var logs: LogEntry[] = data;
-                Main.Logs = logs;
                 var tz = (new Date()).getTimezoneOffset() * 60000;
-                Main.Logs.forEach((r) =>
-                {
-                    r.Date = new Date(<number>r.Date + tz);
-                });
+
                 if ($("#logsContent").data("kendoGrid"))
                     $("#logsContent").data("kendoGrid").destroy();
-                $("#logsContent").html("").kendoGrid({
-                    columns: [
-                        { title: "Date", field: "Date", format: "{0:MM/dd HH:mm:ss.fff}", width: "160px" },
-                        { title: "Type", field: "Type", width: "80px", attributes: { style: "text-align:right;" } },
-                        { title: "Level", field: "Level", width: "80px", attributes: { style: "text-align:right;" } },
-                        { title: "Message", field: "Message" }],
-                    dataSource:
+
+                if (data && data.length && !data[0].Details)
+                {
+                    var columns = [];
+                    for (var j in data[0])
                     {
-                        data: Main.Logs
+                        var c = { field: j };
+                        if (typeof data[0][j] == "number" && Math.abs((new Date()).getTime() - new Date(data[0][j]).getTime()) < 4320000000)
+                            c['format'] = "{0:MM/dd HH:mm:ss.fff}";
+                        columns.push(c);
                     }
-                });
 
-                $("#logsContent").data("kendoGrid").table.on("mouseover",
-                    (evt) =>
+                    data.forEach((r) =>
                     {
-                        if (Main.KeepOpenDetails)
-                            return;
-                        var row = <LogEntry>(<object>$("#logsContent").data("kendoGrid").dataItem($(evt.target).parent()));
-                        var html = Main.DetailInfo(row);
-                        $("#detailInfo").html(html).show();
-                    }).on("mouseout", () =>
-                    {
-                        if (Main.KeepOpenDetails)
-                            return;
-                        $("#detailInfo").hide();
-                    }).on("click", (evt) =>
-                    {
-                        var row = <LogEntry>(<object>$("#logsContent").data("kendoGrid").dataItem($(evt.target).parent()));
-                        var html = Main.DetailInfo(row);
-
-                        /*var rowId = parseInt(evt.target.parentElement.attributes["rowId"].value);
-                        if (rowId == -1)
+                        columns.forEach((j) =>
                         {
-                            Main.Offset = Main.Logs[Main.Logs.length - 1].Position;
-                            Main.OffsetFile = Main.Logs[Main.Logs.length - 1].CurrentFile;
-                            Main.LoadTimeInfo();
-                            return;
-                        }*/
-                        if (Main.KeepOpenDetails)
-                        {
-                            Main.KeepOpenDetails = false;
-                            $("#detailInfo").html(html);
-                            return;
-                        }
-                        Main.KeepOpenDetails = true;
-                        html += "<div class='closeDetails' onclick='Main.CloseDetails()'></div>";
-                        $("#detailInfo").html(html).show();
+                            if(j.format)
+                                r[j.field] = new Date(r[j.field] + tz);
+                        });
                     });
+
+                    var options = {
+                        columns: columns,
+                        dataSource:
+                        {
+                            data: data
+                        }
+                    };
+
+                    $("#logsContent").html("").kendoGrid(options);
+                }
+                else
+                {
+                    var logs: LogEntry[] = data;
+                    Main.Logs = logs;
+                    Main.Logs.forEach((r) =>
+                    {
+                        r.Date = new Date(<number>r.Date + tz);
+                    });
+                    $("#logsContent").html("").kendoGrid({
+                        columns: [
+                            { title: "Date", field: "Date", format: "{0:MM/dd HH:mm:ss.fff}", width: "160px" },
+                            { title: "Type", field: "Type", width: "80px", attributes: { style: "text-align:right;" } },
+                            { title: "Level", field: "Level", width: "80px", attributes: { style: "text-align:right;" } },
+                            { title: "Message", field: "Message" }],
+                        dataSource:
+                        {
+                            data: Main.Logs
+                        }
+                    });
+
+                    $("#logsContent").data("kendoGrid").table.on("mouseover",
+                        (evt) =>
+                        {
+                            if (Main.KeepOpenDetails)
+                                return;
+                            var row = <LogEntry>(<object>$("#logsContent").data("kendoGrid").dataItem($(evt.target).parent()));
+                            var html = Main.DetailInfo(row);
+                            $("#detailInfo").html(html).show();
+                        }).on("mouseout", () =>
+                        {
+                            if (Main.KeepOpenDetails)
+                                return;
+                            $("#detailInfo").hide();
+                        }).on("click", (evt) =>
+                        {
+                            var row = <LogEntry>(<object>$("#logsContent").data("kendoGrid").dataItem($(evt.target).parent()));
+                            var html = Main.DetailInfo(row);
+
+                            /*var rowId = parseInt(evt.target.parentElement.attributes["rowId"].value);
+                            if (rowId == -1)
+                            {
+                                Main.Offset = Main.Logs[Main.Logs.length - 1].Position;
+                                Main.OffsetFile = Main.Logs[Main.Logs.length - 1].CurrentFile;
+                                Main.LoadTimeInfo();
+                                return;
+                            }*/
+                            if (Main.KeepOpenDetails)
+                            {
+                                Main.KeepOpenDetails = false;
+                                $("#detailInfo").html(html);
+                                return;
+                            }
+                            Main.KeepOpenDetails = true;
+                            html += "<div class='closeDetails' onclick='Main.CloseDetails()'></div>";
+                            $("#detailInfo").html(html).show();
+                        });
+                }
 
                 // Scroll to bottom
                 //if (Main.IsLast)

@@ -24,6 +24,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{9BD6BCA4-62D5-4E1A-8704-A4DD7BBCD926}"
 	ProjectSection(SolutionItems) = preProject
 		Documentation\EPICS Gateway configuration.docx = Documentation\EPICS Gateway configuration.docx
+		Documentation\Gateway 3.vpp = Documentation\Gateway 3.vpp
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GWLogger", "GWLogger\GWLogger.csproj", "{B8FD6239-E447-4DC5-A97A-9E65A29C459E}"

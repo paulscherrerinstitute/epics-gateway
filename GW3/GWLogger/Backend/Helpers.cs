@@ -19,6 +19,35 @@ namespace GWLogger.Backend
             return System.Convert.ToInt64((from - _jan1st1970).TotalMilliseconds);
         }
 
+        public static string ToJs(this object src)
+        {
+            switch (src)
+            {
+                case int n:
+                    return n.ToString();
+                case long n:
+                    return n.ToString();
+                case short n:
+                    return n.ToString();
+                case uint n:
+                    return n.ToString();
+                case ushort n:
+                    return n.ToString();
+                case ulong n:
+                    return n.ToString();
+                case float n:
+                    return n.ToString();
+                case double n:
+                    return n.ToString();
+                case string s:
+                    return "\"" + s.JsEscape() + "\"";
+                case DateTime d:
+                    return d.ToJsDate().ToString();
+                default:
+                    return "\"" + src.ToString().JsEscape() + "\"";
+            }
+        }
+
         /// <summary>
         /// Converts a (JavaScript parsable) Int64 into a DateTime.
         /// </summary>
@@ -52,7 +81,7 @@ namespace GWLogger.Backend
 
         public static string JsEscape(this string source)
         {
-            return source.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n","\\n").Replace("\r","\\r");
+            return source.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "\\r");
         }
 
         public static string Hostname(this string ip)
@@ -81,7 +110,7 @@ namespace GWLogger.Backend
             public DateTime LastChecked { get; } = DateTime.UtcNow;
         }
 
-        public static IEnumerable<TType> Last<TType>(this IEnumerable<TType> src,int nbElements)
+        public static IEnumerable<TType> Last<TType>(this IEnumerable<TType> src, int nbElements)
         {
             return src.Skip(Math.Max(0, src.Count() - nbElements));
         }

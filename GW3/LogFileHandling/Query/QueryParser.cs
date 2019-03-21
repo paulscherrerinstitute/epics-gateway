@@ -73,6 +73,8 @@ namespace GWLogger.Backend.DataContext.Query
 
         internal bool HasChar()
         {
+            if (Source == null)
+                return false;
             return Position < Source.Length;
         }
 

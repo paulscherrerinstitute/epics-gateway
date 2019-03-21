@@ -371,14 +371,19 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        public List<LogEntry> ReadLog(string gatewayName, DateTime start, DateTime end, string query, int nbMaxEntries = -1, List<int> messageTypes = null, string startFile = null, long offset = 0, CancellationToken cancellationToken = default(CancellationToken))
+        public List<TType> ReadLog<TType>(string gatewayName, DateTime start, DateTime end, string query, int nbMaxEntries = -1, List<int> messageTypes = null, string startFile = null, long offset = 0, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return ReadLog(gatewayName, start, end, query, nbMaxEntries, messageTypes, startFile, offset, cancellationToken).Cast<TType>().ToList();
+        }
+
+        public List<object> ReadLog(string gatewayName, DateTime start, DateTime end, string query, int nbMaxEntries = -1, List<int> messageTypes = null, string startFile = null, long offset = 0, CancellationToken cancellationToken = default(CancellationToken))
         {
             lock (lockObject)
             {
                 if (!files.Exists(gatewayName))
                     return null;
                 if (start >= DateTime.UtcNow)
-                    return new List<LogEntry>();
+                    return new List<object>();
                 Query.Statement.QueryNode node = null;
                 try
                 {
@@ -389,12 +394,20 @@ namespace GWLogger.Backend.DataContext
                 {
                 }
 
-                var result = new List<LogEntry>();
-                foreach(var entry in files[gatewayName].ReadLog(start, end, node, messageTypes, false, startFile, offset))
+                var result = new List<object>();
+                var where = node;
+                var select = node as Query.Statement.SelectNode;
+                if (select != null)
+                    where = select.Where;
+
+                foreach (var entry in files[gatewayName].ReadLog(start, end, where, messageTypes, false, startFile, offset))
                 {
                     if (result.Count >= nbMaxEntries || cancellationToken.IsCancellationRequested)
                         break;
-                    result.Add(entry);
+                    if (node == where)
+                        result.Add(entry);
+                    else
+                        result.Add(select.Values(this, entry));
                 }
                 return result;
             }
@@ -423,7 +436,7 @@ namespace GWLogger.Backend.DataContext
         {
             lock (lockObject)
             {
-                return files.Select(row =>row.GetLogsStats()).OrderBy(row => row.Name).ToList();
+                return files.Select(row => row.GetLogsStats()).OrderBy(row => row.Name).ToList();
             }
         }
 

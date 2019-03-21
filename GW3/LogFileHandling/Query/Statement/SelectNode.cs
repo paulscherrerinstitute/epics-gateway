@@ -10,6 +10,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
     public class SelectNode : QueryNode
     {
         public List<QueryColumn> Columns { get; } = new List<QueryColumn>();
+        public FunctionNode Group { get; } = null;
         public QueryNode Where { get; set; } = null;
         private static DateTime _jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private Dictionary<int, int> logLevels = null;
@@ -26,15 +27,27 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                 if (!(next is TokenName))
                     throw new SyntaxException("Was expecting a TokenName and found a " + next.GetType().Name + " instead");
 
-                Columns.Add(next.Value.ToLower());
+                var c = new QueryColumn { Field = next.Value.ToLower(), DisplayTitle = next.Value };
+                Columns.Add(c);
 
                 if (!parser.Tokens.HasToken())
                     break;
                 next = parser.Tokens.Peek();
-                if (next is TokenWhere)
+                if (next is TokenString || next is TokenName)
+                    c.DisplayTitle = next.Value;
+                else if (next is TokenWhere)
                 {
                     parser.Tokens.Next(); // Skip next
                     Where = QueryNode.Get(parser);
+
+                    next = parser.Tokens.Peek();
+                    if (next != null && next is TokenGroup)
+                        Group = new FunctionNode(parser);
+                    break;
+                }
+                else if(next is TokenGroup)
+                {
+                    Group = new FunctionNode(parser);
                     break;
                 }
                 else if (!(next is TokenComa))
@@ -47,16 +60,6 @@ namespace GWLogger.Backend.DataContext.Query.Statement
         {
             Columns = new List<QueryColumn> { "date", "remote", "type", "level", "message", "position", "currentfile" };
             Where = whereNode;
-        }
-
-        /// <summary>
-        /// Converts a DateTime into a (JavaScript parsable) Int64.
-        /// </summary>
-        /// <param name="from">The DateTime to convert from</param>
-        /// <returns>An integer value representing the number of milliseconds since 1 January 1970 00:00:00 UTC.</returns>
-        private static long ToJsDate(DateTime from)
-        {
-            return System.Convert.ToInt64((from - _jan1st1970).TotalMilliseconds);
         }
 
         private string Convert(string remoteIpPoint, int messageType, IEnumerable<Backend.DataContext.LogEntryDetail> details)
@@ -90,25 +93,25 @@ namespace GWLogger.Backend.DataContext.Query.Statement
             }
         }
 
-        private string ColumnValue(Context context, QueryColumn column, LogEntry entry)
+        private object ColumnValue(Context context, QueryColumn column, LogEntry entry)
         {
             switch (column.Field)
             {
                 case "entrydate":
                 case "date":
-                    return ToJsDate(entry.EntryDate.ToUniversalTime()).ToString();
+                    return entry.EntryDate.ToUniversalTime();
                 case "remoteippoint":
                 case "remote":
-                    return entry.RemoteIpPoint.ToString();
+                    return entry.RemoteIpPoint;
                 case "messagetypeid":
                 case "type":
-                    return entry.MessageTypeId.ToString();
+                    return entry.MessageTypeId;
                 case "level":
-                    return (logLevels.ContainsKey(entry.MessageTypeId) ? logLevels[entry.MessageTypeId] : 0).ToString();
+                    return (logLevels.ContainsKey(entry.MessageTypeId) ? logLevels[entry.MessageTypeId] : 0);
                 case "message":
                     return Convert(entry.RemoteIpPoint, entry.MessageTypeId, entry.LogEntryDetails);
                 case "position":
-                    return entry.Position.ToString();
+                    return entry.Position;
                 case "currentfile":
                     return entry.CurrentFile;
                 default:
@@ -116,7 +119,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
             }
         }
 
-        public List<string> Values(Context context, LogEntry entry)
+        public object[] Values(Context context, LogEntry entry)
         {
             if (logLevels == null && context != null)
             {
@@ -125,7 +128,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                 detailTypes = context.MessageDetailTypes.ToDictionary(key => key.Id, val => val.Value);
             }
 
-            return Columns.Select(c => ColumnValue(context, c, entry)).ToList();
+            return Columns.Select(c => ColumnValue(context, c, entry)).ToArray();
         }
 
         public override bool CheckCondition(Context context, LogEntry entry)

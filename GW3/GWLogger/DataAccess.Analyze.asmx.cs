@@ -52,7 +52,7 @@ namespace GWLogger
         [WebMethod]
         public List<KeyValuePair<string, int>> SearchesPerformed(string gatewayName, DateTime datePoint)
         {
-            var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), "type = \"SearchRequest\"", 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
+            var searches = Global.DataContext.ReadLog<Backend.DataContext.LogEntry>(gatewayName, datePoint, datePoint.AddMinutes(5), "type = \"SearchRequest\"", 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
             if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
                 return null;
             var channelName = Global.DataContext.MessageDetailTypes.First(row => row.Value == "ChannelName").Id;
@@ -63,7 +63,7 @@ namespace GWLogger
         [WebMethod]
         public List<KeyValuePair<string, int>> SearchesOnChannelsPerformed(string gatewayName, DateTime datePoint)
         {
-            var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), "type = \"SearchRequest\"", 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
+            var searches = Global.DataContext.ReadLog<Backend.DataContext.LogEntry>(gatewayName, datePoint, datePoint.AddMinutes(5), "type = \"SearchRequest\"", 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
             if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
                 return null;
             var channelName = Global.DataContext.MessageDetailTypes.First(row => row.Value == "ChannelName").Id;
@@ -75,7 +75,7 @@ namespace GWLogger
         public List<KeyValuePair<string, int>> MostActiveClasses(string gatewayName, DateTime datePoint)
         {
             // Retrieves up to 20K lines of logs
-            var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), null, 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
+            var searches = Global.DataContext.ReadLog<Backend.DataContext.LogEntry>(gatewayName, datePoint, datePoint.AddMinutes(5), null, 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
             if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
                 return null;
 
@@ -107,7 +107,7 @@ namespace GWLogger
         public List<KeyValuePair<string, int>> ActiveClients(string gatewayName, DateTime datePoint)
         {
             // Retrieves up to 20K lines of logs
-            var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), null, 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
+            var searches = Global.DataContext.ReadLog<Backend.DataContext.LogEntry>(gatewayName, datePoint, datePoint.AddMinutes(5), null, 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
             if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
                 return null;
 
@@ -140,7 +140,7 @@ namespace GWLogger
         public List<KeyValuePair<string, int>> ActiveServers(string gatewayName, DateTime datePoint)
         {
             // Retrieves up to 20K lines of logs
-            var searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), null, 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
+            var searches = Global.DataContext.ReadLog<Backend.DataContext.LogEntry>(gatewayName, datePoint, datePoint.AddMinutes(5), null, 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
             if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
                 return null;
 
@@ -213,7 +213,7 @@ namespace GWLogger
                 List<Backend.DataContext.LogEntry> searches = null;
                 try
                 {
-                    searches = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), "type = \"SearchRequestTooNew\"", 10000, null, null, 0, Context.Response.ClientDisconnectedToken);
+                    searches = Global.DataContext.ReadLog<Backend.DataContext.LogEntry>(gatewayName, datePoint, datePoint.AddMinutes(5), "type = \"SearchRequestTooNew\"", 10000, null, null, 0, Context.Response.ClientDisconnectedToken);
                 }
                 catch
                 {
@@ -264,7 +264,7 @@ namespace GWLogger
         public List<KeyValuePair<string, int>> MostConsumingChannel(string gatewayName, DateTime datePoint)
         {
             // Retrieves up to 20K lines of logs
-            var logs = Global.DataContext.ReadLog(gatewayName, datePoint, datePoint.AddMinutes(5), null, 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
+            var logs = Global.DataContext.ReadLog<Backend.DataContext.LogEntry>(gatewayName, datePoint, datePoint.AddMinutes(5), null, 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
             if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
                 return null;
 

@@ -27,7 +27,17 @@ namespace ParserUnitTests
         {
 
             var node = (GWLogger.Backend.DataContext.Query.Statement.SelectNode)GWLogger.Backend.DataContext.Query.QueryParser.Parse("select position");
-            Assert.AreEqual("5432", node.Values(null, new GWLogger.Backend.DataContext.LogEntry { Position = 5432 })[0]);
+            Assert.AreEqual(5432L, node.Values(null, new GWLogger.Backend.DataContext.LogEntry { Position = 5432 })[0]);
+        }
+
+
+        [TestMethod]
+        public void CheckGroupColumns()
+        {
+            var node = (GWLogger.Backend.DataContext.Query.Statement.SelectNode)GWLogger.Backend.DataContext.Query.QueryParser.Parse("select date,position group by date");
+
+            Assert.AreEqual(1, node.Group.Fields.Count);
+            Assert.AreEqual("date", node.Group.Fields[0]);
         }
     }
 }

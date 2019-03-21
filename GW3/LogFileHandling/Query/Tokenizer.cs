@@ -42,6 +42,8 @@ namespace GWLogger.Backend.DataContext.Query
 
         public Token Peek(int offset = 0)
         {
+            if (Position + offset >= Tokens.Count)
+                return null;
             return Tokens[Position + offset];
         }
 
