@@ -10,7 +10,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
     public class SelectNode : QueryNode
     {
         public List<QueryColumn> Columns { get; } = new List<QueryColumn>();
-        public FunctionNode Group { get; } = null;
+        public GroupNode Group { get; } = null;
         public QueryNode Where { get; set; } = null;
         private static DateTime _jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private Dictionary<int, int> logLevels = null;
@@ -42,12 +42,12 @@ namespace GWLogger.Backend.DataContext.Query.Statement
 
                     next = parser.Tokens.Peek();
                     if (next != null && next is TokenGroup)
-                        Group = new FunctionNode(parser);
+                        Group = new GroupNode(parser);
                     break;
                 }
                 else if(next is TokenGroup)
                 {
-                    Group = new FunctionNode(parser);
+                    Group = new GroupNode(parser);
                     break;
                 }
                 else if (!(next is TokenComa))

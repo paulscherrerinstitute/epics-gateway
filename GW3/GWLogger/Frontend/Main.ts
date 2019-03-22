@@ -913,7 +913,7 @@ class Main
                         }*/
                         break;
                     case "Operator Help":
-                        window.open("/sop.html", "help", "menubar=no,location=no,status=no,toolbar=no,width=800,height=600,scrollbars=yes");
+                        window.open("/sop_d.html", "help", "menubar=no,location=no,status=no,toolbar=no,width=800,height=600,scrollbars=yes");
                         /*$(".inset").removeClass("inset");
                         if ($("#helpView").is(":visible"))
                             $("#helpView").hide();

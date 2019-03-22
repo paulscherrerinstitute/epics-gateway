@@ -399,6 +399,7 @@
     <Content Include="Scripts\kendo.all.min.js" />
     <Content Include="Scripts\kendo.angular.min.js" />
     <Content Include="sop.html" />
+    <Content Include="sop_d.html" />
     <Content Include="styles\Bootstrap\editor.png" />
     <Content Include="styles\Bootstrap\imagebrowser.png" />
     <Content Include="styles\Bootstrap\indeterminate.gif" />
