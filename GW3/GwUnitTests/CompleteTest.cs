@@ -488,7 +488,7 @@ namespace GwUnitTests
             }
         }
 
-        [TestMethod]
+        /*[TestMethod]
         [Timeout(8000)]
         public void DoubleMonitorContinue()
         {
@@ -557,7 +557,7 @@ namespace GwUnitTests
                     }
                 }
             }
-        }
+        }*/
 
         [TestMethod]
         [Timeout(5000)]
