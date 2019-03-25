@@ -19,6 +19,7 @@ namespace GWLogger.Backend.DataContext.Query.Tokens
         {
             parser.SkipSpaces();
             parser.NextString();
+            parser.SkipSpaces();
             return new TokenAscending();
         }
     }

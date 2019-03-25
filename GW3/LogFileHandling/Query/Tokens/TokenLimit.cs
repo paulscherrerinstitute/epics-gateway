@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace GWLogger.Backend.DataContext.Query.Tokens
 {
-    internal class TokenDescending : Token
+    internal class TokenLimit : Token
     {
         public override bool CanBeUsed(QueryParser parser)
         {
             parser.SkipSpaces();
 
-            return parser.PeekString().ToLower() == "desc";
+            return parser.PeekString().ToLower() == "limit";
         }
 
         public override Token Extract(QueryParser parser)
@@ -20,7 +20,7 @@ namespace GWLogger.Backend.DataContext.Query.Tokens
             parser.SkipSpaces();
             parser.NextString();
             parser.SkipSpaces();
-            return new TokenDescending();
+            return new TokenLimit();
         }
     }
 }

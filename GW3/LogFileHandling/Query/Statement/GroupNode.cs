@@ -11,9 +11,6 @@ namespace GWLogger.Backend.DataContext.Query.Statement
         internal GroupNode(QueryParser parser)
         {
             parser.Tokens.Next(); // Skip the group
-            // Skip a possible "by" keyword
-            if (parser.Tokens.Peek() is TokenName && parser.Tokens.Peek().Value.ToLower() == "by")
-                parser.Tokens.Next();
 
             while (parser.Tokens.HasToken())
             {
@@ -27,6 +24,8 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                     break;
                 next = parser.Tokens.Peek();
                 if (next is TokenOrder)
+                    break;
+                else if (next is TokenLimit)
                     break;
                 else if (!(next is TokenComa))
                     throw new SyntaxException("Was expecting a TokenComa and found a " + next.GetType().Name + " instead");

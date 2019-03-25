@@ -10,7 +10,7 @@ namespace TestQueries
         {
             using (var ctx = new Context(@"C:\temp\t2"))
             {
-                var data = ctx.ReadLog("cryo-cagw02", new DateTime(2019, 03, 14, 12, 0, 0), new DateTime(2019, 03, 14, 12, 10, 0), "select count(*) nb,sum(packetsize) tot,channel group by channel order by tot desc", 20000);
+                var data = ctx.ReadLog("cryo-cagw02", new DateTime(2019, 03, 14, 12, 0, 0), new DateTime(2019, 03, 14, 12, 10, 0), "select count(*) nb,sum(packetsize) tot,channel group by channel order by tot desc limit 10", 20000);
                 foreach (var r in data.Cast<object[]>())
                 {
                     Console.WriteLine(string.Join(" ", r.Select(r2 => r2?.ToString()).ToArray()));

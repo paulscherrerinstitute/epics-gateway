@@ -435,6 +435,9 @@ namespace GWLogger.Backend.DataContext
                     result = q.Cast<object>().ToList();
                 }
 
+                if (select != null && select.Limit.HasValue)
+                    result = result.Take(select.Limit.Value).ToList();
+
                 return result;
             }
         }

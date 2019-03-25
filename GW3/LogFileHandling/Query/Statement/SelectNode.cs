@@ -12,6 +12,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
         public List<QueryColumn> Columns { get; } = new List<QueryColumn>();
         public OrderNode Orders { get; } = null;
         public GroupNode Group { get; } = null;
+        public int? Limit { get; } = null;
         public QueryNode Where { get; set; } = null;
         private static DateTime _jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private Dictionary<int, int> logLevels = null;
@@ -25,6 +26,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
         internal SelectNode(QueryParser parser)
         {
             parser.Tokens.Next(); // Skip the select
+            Token next;
 
             while (parser.Tokens.HasToken())
             {
@@ -40,7 +42,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
 
                 if (!parser.Tokens.HasToken())
                     break;
-                var next = parser.Tokens.Peek();
+                next = parser.Tokens.Peek();
                 if (next is TokenString || next is TokenName)
                     c.DisplayTitle = parser.Tokens.Next().Value;
                 else if (next is TokenWhere)
@@ -60,6 +62,8 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                 }
                 else if (next is TokenOrder)
                     break;
+                else if (next is TokenLimit)
+                    break;
                 else if (!(next is TokenComa))
                     throw new SyntaxException("Was expecting a TokenComa and found a " + next.GetType().Name + " instead");
                 parser.Tokens.Next();
@@ -68,8 +72,16 @@ namespace GWLogger.Backend.DataContext.Query.Statement
             // Add order by
             if (parser.Tokens.HasToken() && parser.Tokens.Peek() is TokenOrder)
             {
-                parser.Tokens.Next();
                 Orders = new OrderNode(parser);
+            }
+
+            if (parser.Tokens.HasToken() && parser.Tokens.Peek() is TokenLimit)
+            {
+                parser.Tokens.Next();
+                next = parser.Tokens.Next();
+                if(!(next is TokenNumber))
+                    throw new SyntaxException("Was expecting a TokenNumber and found a " + next.GetType().Name + " instead");
+                Limit = int.Parse(next.Value);
             }
         }
 
