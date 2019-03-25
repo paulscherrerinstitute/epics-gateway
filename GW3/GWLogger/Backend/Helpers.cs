@@ -21,6 +21,8 @@ namespace GWLogger.Backend
 
         public static string ToJs(this object src)
         {
+            if (src == null)
+                return "null";
             switch (src)
             {
                 case int n:

@@ -15,8 +15,8 @@ namespace GWLogger.Backend.DataContext.Query.Statement
             while (parser.Tokens.HasToken())
             {
                 var next = parser.Tokens.Next();
-                if (!(next is TokenName))
-                    throw new SyntaxException("Was expecting a TokenName and found a " + next.GetType().Name + " instead");
+                if (!(next is TokenName || next is TokenString))
+                    throw new SyntaxException("Was expecting a TokenName or a TokenString and found a " + next.GetType().Name + " instead");
 
                 var order = Direction.Ascending;
                 if (parser.Tokens.Peek() is TokenAscending)

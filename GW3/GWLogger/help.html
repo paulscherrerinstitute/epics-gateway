@@ -79,6 +79,18 @@
         will be used while crossing multiple networks.
         <h2>Queries:</h2>
         <div id="queriesHelp"></div>
+        <h2>Advanced queries:</h2>
+        CAESAR allows more complex queries via the following syntax:<br />
+        SELECT [fields] GROUP BY [fields] ORDER BY [fields] [ASC/DESC] LIMIT [number or rows]<br />
+        The selection of the fields can contains the following grouping functions:
+        <ul>
+            <li>Min([field])</li>
+            <li>Max([field])</li>
+            <li>Count(*)</li>
+            <li>Avg([field])</li>
+        </ul>
+        Example:<br />
+        select channel,count(*) nb,sum(packetsize) group by channel order by nb desc limit 5
         <h2>EPICS Debug tool:</h2>
         By clicking on the hamburger menu (on the top left) and then on the entry "EPICS Debug" it is possible to try to debug if
         there is an error with a gateway or if the gateway seems to react in an abnormal way.<br />
@@ -134,6 +146,7 @@
             Live.DisplayPaint("#canvas_high_search", { CPU: 10, Searches: 291, State: 0 });
             Live.DisplayPaint("#canvas_high_cpu", { CPU: 90, Searches: 20, State: 0 });
             Live.DisplayPaint("#canvas_error", { CPU: 90, Searches: 20, State: 3 });
+            Main.QueriesHelp();
         });
     </script>
 </body>

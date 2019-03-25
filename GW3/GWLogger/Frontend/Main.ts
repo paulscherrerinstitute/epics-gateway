@@ -439,7 +439,7 @@ class Main
                     var columns = [];
                     for (var j in data[0])
                     {
-                        var c = { field: j };
+                        var c = { field: j, title: j.replace(/_/g," ") };
                         if (typeof data[0][j] == "number" && Math.abs((new Date()).getTime() - new Date(data[0][j]).getTime()) < 4320000000)
                             c['format'] = "{0:MM/dd HH:mm:ss.fff}";
                         columns.push(c);

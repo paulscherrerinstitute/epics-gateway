@@ -385,14 +385,14 @@ namespace GWLogger.Backend.DataContext
                 if (start >= DateTime.UtcNow)
                     return new List<object>();
                 Query.Statement.QueryNode node = null;
-                //try
-                //{
-                if (!string.IsNullOrWhiteSpace(query))
-                    node = Query.QueryParser.Parse(query.Trim());
-                //}
-                //catch (Exception ex)
-                //{
-                //}
+                try
+                {
+                    if (!string.IsNullOrWhiteSpace(query))
+                        node = Query.QueryParser.Parse(query.Trim());
+                }
+                catch (Exception ex)
+                {
+                }
 
                 var result = new List<object>();
                 var where = node;
@@ -427,10 +427,13 @@ namespace GWLogger.Backend.DataContext
                     {
                         var o = orders.Columns[i];
                         var idx = select.Columns.FindIndex(c => c.DisplayTitle.ToLower() == o.Name);
-                        if (o.Direction == Query.Direction.Descending)
-                            q = q.OrderByDescending(row => row[idx]);
-                        else
-                            q = q.OrderBy(row => row[idx]);
+                        if (idx != -1)
+                        {
+                            if (o.Direction == Query.Direction.Descending)
+                                q = q.OrderByDescending(row => row[idx]);
+                            else
+                                q = q.OrderBy(row => row[idx]);
+                        }
                     }
                     result = q.Cast<object>().ToList();
                 }

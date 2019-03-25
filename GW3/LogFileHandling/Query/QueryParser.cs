@@ -51,7 +51,7 @@ namespace GWLogger.Backend.DataContext.Query
 
         internal void SkipSpaces()
         {
-            while (PeekChar() == ' ' || PeekChar() == '\t' || PeekChar() == '\n' || PeekChar() == '\r')
+            while (HasChar() && (PeekChar() == ' ' || PeekChar() == '\t' || PeekChar() == '\n' || PeekChar() == '\r'))
                 NextChar();
         }
 

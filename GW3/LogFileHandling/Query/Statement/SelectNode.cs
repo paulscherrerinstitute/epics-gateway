@@ -44,8 +44,12 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                     break;
                 next = parser.Tokens.Peek();
                 if (next is TokenString || next is TokenName)
+                {
                     c.DisplayTitle = parser.Tokens.Next().Value;
-                else if (next is TokenWhere)
+                    next = parser.Tokens.Peek();
+                }
+
+                if (next is TokenWhere)
                 {
                     parser.Tokens.Next(); // Skip next
                     Where = QueryNode.Get(parser, true);

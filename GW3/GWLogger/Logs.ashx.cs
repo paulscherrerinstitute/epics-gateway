@@ -74,6 +74,14 @@ namespace GWLogger
                 string query = null;
                 if (!string.IsNullOrWhiteSpace(context.Request["query"]))
                     query = context.Request["query"];
+                Backend.DataContext.Query.Statement.SelectNode queryNode = null;
+                try
+                {
+                    queryNode = (Backend.DataContext.Query.Statement.SelectNode)Backend.DataContext.Query.QueryParser.Parse(query);
+                }
+                catch
+                {
+                }
 
                 long offset = 0;
                 string startFile = null;
@@ -96,19 +104,22 @@ namespace GWLogger
                     var start = long.Parse(path[1]).ToNetDate();
                     var startTrim = start.Trim();
 
+                    var limit = (queryNode != null && queryNode.Group != null) ? 20000 : 100;
+
+
                     if (path.Length > 2)
                     {
                         var end = long.Parse(path[2]).ToNetDate().Trim();
                         if (context.Request["levels"] == "3,4") // Show errors
                             logs = Global.DataContext.GetLogs(gateway, start, end, query, null, true).Take(100).Cast<object>().ToList();
                         else
-                            logs = Global.DataContext.ReadLog(gateway, start, end, query, 100, msgTypes, startFile, offset, cancel);
+                            logs = Global.DataContext.ReadLog(gateway, start, end, query, limit, msgTypes, startFile, offset, cancel).Take(100).Cast<object>().ToList();
                     }
                     else
                         if (context.Request["levels"] == "3,4") // Show errors
                         logs = Global.DataContext.GetLogs(gateway, start, start.AddMinutes(20), query, null, true).Take(100).Cast<object>().ToList();
                     else
-                        logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, 100, msgTypes, startFile, offset, cancel);
+                        logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, limit, msgTypes, startFile, offset, cancel).Cast<object>().ToList();
                 }
 
                 var elementType = (logs.Count == 0 ? null : logs.First().GetType());
@@ -177,7 +188,6 @@ namespace GWLogger
                 else
                 {
                     var isFirst = true;
-                    var queryNode = (Backend.DataContext.Query.Statement.SelectNode)Backend.DataContext.Query.QueryParser.Parse(query);
 
                     foreach (var i in logs.Cast<object[]>())
                     {
@@ -189,7 +199,7 @@ namespace GWLogger
                         {
                             if (j != 0)
                                 context.Response.Write(",");
-                            context.Response.Write("\"" + (queryNode.Columns[j].DisplayTitle ?? queryNode.Columns[j].Field) + "\"");
+                            context.Response.Write("\"" + (queryNode.Columns[j].DisplayTitle.Replace(" ", "_") ?? queryNode.Columns[j].Field.Name) + "\"");
                             context.Response.Write(":");
                             context.Response.Write(i[j].ToJs());
                         }
