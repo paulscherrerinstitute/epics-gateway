@@ -4,11 +4,11 @@ using System.Collections.Generic;
 
 namespace GWLogger.Backend.DataContext.Query.Statement
 {
-    public class GroupNode : QueryNode
+    public class OrderNode : QueryNode
     {
-        public List<string> Fields { get; } = new List<string>();
+        public List<OrderColumn> Columns { get; } = new List<OrderColumn>();
 
-        internal GroupNode(QueryParser parser)
+        internal OrderNode(QueryParser parser)
         {
             parser.Tokens.Next(); // Skip the group
             // Skip a possible "by" keyword
@@ -21,14 +21,21 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                 if (!(next is TokenName))
                     throw new SyntaxException("Was expecting a TokenName and found a " + next.GetType().Name + " instead");
 
-                Fields.Add(next.Value == "channel" ? "channelname" : next.Value);
+                var order = Direction.Ascending;
+                if (parser.Tokens.Peek() is TokenAscending)
+                    parser.Tokens.Next();
+                else if (parser.Tokens.Peek() is TokenDescending)
+                {
+                    order = Direction.Descending;
+                    parser.Tokens.Next();
+                }
+
+                Columns.Add(new OrderColumn { Name = next.Value.ToLower(), Direction = order });
 
                 if (!parser.Tokens.HasToken())
                     break;
                 next = parser.Tokens.Peek();
-                if (next is TokenOrder)
-                    break;
-                else if (!(next is TokenComa))
+                if (!(next is TokenComa))
                     throw new SyntaxException("Was expecting a TokenComa and found a " + next.GetType().Name + " instead");
                 parser.Tokens.Next();
             }

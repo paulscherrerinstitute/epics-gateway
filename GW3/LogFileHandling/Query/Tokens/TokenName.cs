@@ -6,7 +6,7 @@ namespace GWLogger.Backend.DataContext.Query.Tokens
     {
         private const string allowedChar = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
         private const string secondChar = "0123456789";
-        private static readonly string[] keywords = new string[] { "and", "or", "contains", "starts", "ends", "select", "where", "group" };
+        private static readonly string[] keywords = new string[] { "and", "or", "contains", "starts", "ends", "select", "where", "group", "order", "asc", "desc" };
 
         public override bool CanBeUsed(QueryParser parser)
         {

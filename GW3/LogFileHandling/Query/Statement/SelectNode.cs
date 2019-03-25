@@ -10,6 +10,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
     public class SelectNode : QueryNode
     {
         public List<QueryColumn> Columns { get; } = new List<QueryColumn>();
+        public OrderNode Orders { get; } = null;
         public GroupNode Group { get; } = null;
         public QueryNode Where { get; set; } = null;
         private static DateTime _jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -41,7 +42,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                     break;
                 var next = parser.Tokens.Peek();
                 if (next is TokenString || next is TokenName)
-                    c.DisplayTitle = next.Value;
+                    c.DisplayTitle = parser.Tokens.Next().Value;
                 else if (next is TokenWhere)
                 {
                     parser.Tokens.Next(); // Skip next
@@ -57,9 +58,18 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                     Group = new GroupNode(parser);
                     break;
                 }
+                else if (next is TokenOrder)
+                    break;
                 else if (!(next is TokenComa))
                     throw new SyntaxException("Was expecting a TokenComa and found a " + next.GetType().Name + " instead");
                 parser.Tokens.Next();
+            }
+
+            // Add order by
+            if (parser.Tokens.HasToken() && parser.Tokens.Peek() is TokenOrder)
+            {
+                parser.Tokens.Next();
+                Orders = new OrderNode(parser);
             }
         }
 

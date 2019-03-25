@@ -385,15 +385,14 @@ namespace GWLogger.Backend.DataContext
                 if (start >= DateTime.UtcNow)
                     return new List<object>();
                 Query.Statement.QueryNode node = null;
-                try
-                {
-                    if (!string.IsNullOrWhiteSpace(query))
-                        node = Query.QueryParser.Parse(query.Trim());
-                }
-                catch (Exception ex)
-                {
-                    //Console.WriteLine(ex);
-                }
+                //try
+                //{
+                if (!string.IsNullOrWhiteSpace(query))
+                    node = Query.QueryParser.Parse(query.Trim());
+                //}
+                //catch (Exception ex)
+                //{
+                //}
 
                 var result = new List<object>();
                 var where = node;
@@ -401,6 +400,7 @@ namespace GWLogger.Backend.DataContext
                 if (select != null)
                     where = select.Where;
                 var group = select?.Group;
+                var orders = select?.Orders;
 
                 foreach (var entry in files[gatewayName].ReadLog(start, end, where, messageTypes, false, startFile, offset))
                 {
@@ -417,7 +417,22 @@ namespace GWLogger.Backend.DataContext
                     var sn = new Query.Statement.SelectNode();
                     var grouped = result.Cast<LogEntry>().GroupBy(row => sn.Value(this, row, group.Fields[0])?.ToString());
 
-                    return select.GroupedValues(this, grouped);
+                    result = select.GroupedValues(this, grouped);
+                }
+
+                if (orders != null) // Let's sort the data
+                {
+                    var q = result.Cast<object[]>();
+                    for (var i = 0; i < orders.Columns.Count; i++)
+                    {
+                        var o = orders.Columns[i];
+                        var idx = select.Columns.FindIndex(c => c.DisplayTitle.ToLower() == o.Name);
+                        if (o.Direction == Query.Direction.Descending)
+                            q = q.OrderByDescending(row => row[idx]);
+                        else
+                            q = q.OrderBy(row => row[idx]);
+                    }
+                    result = q.Cast<object>().ToList();
                 }
 
                 return result;
