@@ -18,8 +18,8 @@ namespace ParserUnitTests
             var node = (GWLogger.Backend.DataContext.Query.Statement.SelectNode)GWLogger.Backend.DataContext.Query.QueryParser.Parse("select date,position");
 
             Assert.AreEqual(2, node.Columns.Count);
-            Assert.AreEqual("date", node.Columns[0].Field);
-            Assert.AreEqual("position", node.Columns[1].Field);
+            Assert.AreEqual("date", node.Columns[0].Field.Name);
+            Assert.AreEqual("position", node.Columns[1].Field.Name);
         }
 
         [TestMethod]

@@ -390,8 +390,9 @@ namespace GWLogger.Backend.DataContext
                     if (!string.IsNullOrWhiteSpace(query))
                         node = Query.QueryParser.Parse(query.Trim());
                 }
-                catch
+                catch (Exception ex)
                 {
+                    //Console.WriteLine(ex);
                 }
 
                 var result = new List<object>();
@@ -399,16 +400,26 @@ namespace GWLogger.Backend.DataContext
                 var select = node as Query.Statement.SelectNode;
                 if (select != null)
                     where = select.Where;
+                var group = select?.Group;
 
                 foreach (var entry in files[gatewayName].ReadLog(start, end, where, messageTypes, false, startFile, offset))
                 {
                     if (result.Count >= nbMaxEntries || cancellationToken.IsCancellationRequested)
                         break;
-                    if (node == where)
+                    if (node == where || group != null)
                         result.Add(entry);
                     else
                         result.Add(select.Values(this, entry));
                 }
+
+                if (group != null) // Let's group the data
+                {
+                    var sn = new Query.Statement.SelectNode();
+                    var grouped = result.Cast<LogEntry>().GroupBy(row => sn.Value(this, row, group.Fields[0])?.ToString());
+
+                    return select.GroupedValues(this, grouped);
+                }
+
                 return result;
             }
         }

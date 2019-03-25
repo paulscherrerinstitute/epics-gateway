@@ -17,35 +17,42 @@ namespace GWLogger.Backend.DataContext.Query.Statement
         private Dictionary<int, string> convertion = null;
         private Dictionary<int, string> detailTypes = null;
 
+        internal SelectNode()
+        {
+        }
+
         internal SelectNode(QueryParser parser)
         {
             parser.Tokens.Next(); // Skip the select
 
             while (parser.Tokens.HasToken())
             {
-                var next = parser.Tokens.Next();
-                if (!(next is TokenName))
-                    throw new SyntaxException("Was expecting a TokenName and found a " + next.GetType().Name + " instead");
+                var node = SelectNode.Get(parser, true);
+                //var next = parser.Tokens.Next();
+                if (!(node is FunctionNode) && !(node is VariableNode))
+                    throw new SyntaxException("Was expecting a function or a variable and found a " + node.GetType().Name + " instead");
 
-                var c = new QueryColumn { Field = next.Value.ToLower(), DisplayTitle = next.Value };
+                var c = new QueryColumn { Field = (INamedNode)node, DisplayTitle = ((INamedNode)node).Name };
+                if (c.Field.Name == "channel")
+                    c.Field = new VariableNode("channelname");
                 Columns.Add(c);
 
                 if (!parser.Tokens.HasToken())
                     break;
-                next = parser.Tokens.Peek();
+                var next = parser.Tokens.Peek();
                 if (next is TokenString || next is TokenName)
                     c.DisplayTitle = next.Value;
                 else if (next is TokenWhere)
                 {
                     parser.Tokens.Next(); // Skip next
-                    Where = QueryNode.Get(parser);
+                    Where = QueryNode.Get(parser, true);
 
                     next = parser.Tokens.Peek();
                     if (next != null && next is TokenGroup)
                         Group = new GroupNode(parser);
                     break;
                 }
-                else if(next is TokenGroup)
+                else if (next is TokenGroup)
                 {
                     Group = new GroupNode(parser);
                     break;
@@ -95,7 +102,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
 
         private object ColumnValue(Context context, QueryColumn column, LogEntry entry)
         {
-            switch (column.Field)
+            switch (column.Field.Name)
             {
                 case "entrydate":
                 case "date":
@@ -115,8 +122,20 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                 case "currentfile":
                     return entry.CurrentFile;
                 default:
-                    return entry.LogEntryDetails.FirstOrDefault(d => detailTypes.ContainsKey(d.DetailTypeId) && detailTypes[d.DetailTypeId].ToLower() == column.Field).Value;
+                    return entry.LogEntryDetails.FirstOrDefault(d => detailTypes.ContainsKey(d.DetailTypeId) && detailTypes[d.DetailTypeId].ToLower() == column.Field.Name)?.Value;
             }
+        }
+
+        public object Value(Context context, LogEntry entry, string column)
+        {
+            if (logLevels == null && context != null)
+            {
+                logLevels = context.MessageTypes.ToDictionary(key => key.Id, val => val.LogLevel);
+                convertion = context.MessageTypes.ToDictionary(key => key.Id, val => val.DisplayMask);
+                detailTypes = context.MessageDetailTypes.ToDictionary(key => key.Id, val => val.Value);
+            }
+
+            return ColumnValue(context, column, entry);
         }
 
         public object[] Values(Context context, LogEntry entry)
@@ -137,5 +156,23 @@ namespace GWLogger.Backend.DataContext.Query.Statement
         }
 
         public override string Value(Context context, LogEntry entry) => throw new System.NotImplementedException();
+        internal List<object> GroupedValues(Context context, IEnumerable<IGrouping<string, LogEntry>> grouped)
+        {
+            var result = new List<object>();
+            foreach (var row in grouped)
+            {
+                var rowOut = new object[this.Columns.Count];
+                for (var i = 0; i < this.Columns.Count; i++)
+                {
+                    var c = this.Columns[i];
+                    if (c.Field is FunctionNode)
+                        rowOut[i] = ((FunctionNode)c.Field).ExecuteGrouping(context, row.AsEnumerable());
+                    else
+                        rowOut[i] = row.Key;
+                }
+                result.Add(rowOut);
+            }
+            return result;
+        }
     }
 }

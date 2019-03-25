@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace GWLogger.Backend.DataContext.Query.Statement
 {
-    internal class VariableNode : QueryNode
+    internal class VariableNode : QueryNode, INamedNode
     {
         public string Name { get; }
 
@@ -13,6 +13,11 @@ namespace GWLogger.Backend.DataContext.Query.Statement
         internal VariableNode(Tokens.Token token)
         {
             Name = token.Value.ToLower();
+        }
+
+        internal VariableNode(string name)
+        {
+            Name = name.ToLower();
         }
 
         public override bool CheckCondition(Context context, LogEntry entry)

@@ -21,7 +21,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                 if (!(next is TokenName))
                     throw new SyntaxException("Was expecting a TokenName and found a " + next.GetType().Name + " instead");
 
-                Fields.Add(next.Value);
+                Fields.Add(next.Value == "channel" ? "channelname" : next.Value);
 
                 if (!parser.Tokens.HasToken())
                     break;

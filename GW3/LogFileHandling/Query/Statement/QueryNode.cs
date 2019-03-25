@@ -5,14 +5,14 @@ namespace GWLogger.Backend.DataContext.Query.Statement
 {
     public abstract class QueryNode
     {
-        internal static QueryNode Get(QueryParser parser)
+        internal static QueryNode Get(QueryParser parser, bool allowFurtherTokens = false)
         {
             var next = parser.Tokens.Peek();
             if (next is TokenSelect)
                 return new SelectNode(parser);
 
             var root = Or(parser);
-            if (parser.Tokens.HasToken())
+            if (!allowFurtherTokens && parser.Tokens.HasToken())
                 throw new SpareTokenException();
             return root;
         }
@@ -94,6 +94,8 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                         var after = parser.Tokens.Peek(1);
                         if (after != null && after is TokenOpenParenthesis)
                             return new FunctionNode(parser);
+                        return new VariableNode(parser.Tokens.Next());
+                    case TokenStar tokenStar:
                         return new VariableNode(parser.Tokens.Next());
                     default:
                         throw new InvalidTokenException("Wasn't expecting a " + parser.Tokens.Peek().GetType().Name + " here.");
