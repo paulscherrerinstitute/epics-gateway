@@ -10,6 +10,9 @@
         canvas.width = width;
         canvas.height = height;
 
+        var labelsWidth = 50;
+        width -= labelsWidth;
+
         ctx.fillStyle = "rgba(255,255,255,0)";
         ctx.fillRect(0, 0, width, height);
 
@@ -26,54 +29,122 @@
         var maxValue = 1;
         for (var i = 0; i < Main.Stats.Logs.length; i++)
             maxValue = Math.max(maxValue, Main.Stats.Logs[i].Value);
-        var maxEValue = 1;
+        var maxErrorValue = 1;
         for (var i = 0; i < Main.Stats.Errors.length; i++)
-            maxEValue = Math.max(maxEValue, Main.Stats.Errors[i].Value); var maxNValue = 1;
+            maxErrorValue = Math.max(maxErrorValue, Main.Stats.Errors[i].Value);
+        var maxSearchValue = 1;
         for (var i = 0; i < Main.Stats.Searches.length; i++)
-            maxNValue = Math.max(maxNValue, Main.Stats.Searches[i].Value);
+            maxSearchValue = Math.max(maxSearchValue, Main.Stats.Searches[i].Value);
 
         var prevErrorValY: number = null;
+        var prevCpuValY: number = null;
+
+        var unit = "";
+        var maxDisplay = maxValue;
+        if (maxValue > 1000 * 1000 * 1000)
+        {
+            maxDisplay = Math.round(maxValue / (1000 * 1000 * 1000));
+            unit = "G";
+        }
+        else if (maxValue > 1000 * 1000)
+        {
+            maxDisplay = Math.round(maxValue / (1000 * 1000));
+            unit = "M";
+        }
+        else if (maxValue > 1000)
+        {
+            maxDisplay = Math.round(maxValue / 1000);
+            unit = "K";
+        }
+
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.fillStyle = "#000000";
+        ctx.font = "12px sans-serif";
+
+        var tw = ctx.measureText("" + maxDisplay + unit).width;
+        ctx.fillText("" + maxDisplay + unit, labelsWidth - 5 - tw, 15);
+
+        tw = ctx.measureText("0").width;
+        ctx.fillText("0", labelsWidth - 5 - tw, b + 5);
+
+        var unit = "";
+        var maxDisplay = maxSearchValue;
+        if (maxSearchValue > 1000 * 1000 * 1000)
+        {
+            maxDisplay = Math.round(maxSearchValue / (1000 * 1000 * 1000));
+            unit = "G";
+        }
+        else if (maxSearchValue > 1000 * 1000)
+        {
+            maxDisplay = Math.round(maxSearchValue / (1000 * 1000));
+            unit = "M";
+        }
+        else if (maxSearchValue > 1000)
+        {
+            maxDisplay = Math.round(maxSearchValue / 1000);
+            unit = "K";
+        }
+
+        tw = ctx.measureText(maxDisplay + unit).width;
+        ctx.fillText("" + maxDisplay + unit, labelsWidth - 5 - tw, height);
 
         //for (var i = 0; i < 145; i++)
         for (var i = 0; i < Main.Stats.Logs.length; i++)
         {
             var dt = new Date(end.getTime() - i * 10 * 60 * 1000);
 
+            // NB Logs bar
             var val = StatsBarGraph.GetStat('Logs', dt);
             ctx.fillStyle = "#80d680";
             ctx.strokeStyle = "#528c52";
             var bv = b * val / maxValue;
-            ctx.fillRect(Math.round(width - (i + 1) * w), Math.round(b - bv), Math.ceil(w), Math.round(bv));
+            ctx.fillRect(Math.round(width - (i + 1) * w) + labelsWidth, Math.round(b - bv), Math.ceil(w), Math.round(bv));
             ctx.beginPath();
-            ctx.moveTo(Math.round(width - (i + 1) * w) + 1.5, Math.round(b - bv) + 0.5);
-            ctx.lineTo(Math.round(width - i * w) + 0.5, Math.round(b - bv) + 0.5);
-            ctx.lineTo(Math.round(width - i * w) + 0.5, Math.round(b) + 0.5);
+            ctx.moveTo(Math.round(width - (i + 1) * w) + 1.5 + labelsWidth, Math.round(b - bv) + 0.5);
+            ctx.lineTo(Math.round(width - i * w) + 0.5 + labelsWidth, Math.round(b - bv) + 0.5);
+            ctx.lineTo(Math.round(width - i * w) + 0.5 + labelsWidth, Math.round(b) + 0.5);
             ctx.stroke();
 
+            // Error line
             var val = StatsBarGraph.GetStat('Errors', dt);
-            var bv = b * val / maxEValue;
+            var bv = b * val / maxErrorValue;
             if (prevErrorValY != null)
             {
                 ctx.strokeStyle = "#cc8282";
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.moveTo(Math.round(width - (i - 0.5) * w) + 0.5, Math.round(b - prevErrorValY) + 0.5);
-                ctx.lineTo(Math.round(width - (i + 0.5) * w) + 0.5, Math.round(b - bv) + 0.5);
+                ctx.moveTo(Math.round(width - (i - 0.5) * w) + 0.5 + labelsWidth, Math.round(b - prevErrorValY) + 0.5);
+                ctx.lineTo(Math.round(width - (i + 0.5) * w) + 0.5 + labelsWidth, Math.round(b - bv) + 0.5);
                 ctx.stroke();
                 ctx.lineWidth = 1;
             }
             prevErrorValY = bv;
 
+            // CPU line
+            var val = StatsBarGraph.GetStat('CPU', dt);
+            var bv = b * val / 100;
+            if (prevCpuValY != null)
+            {
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(Math.round(width - (i - 0.5) * w) + 0.5 + labelsWidth, Math.round(b - prevCpuValY) + 0.5);
+                ctx.lineTo(Math.round(width - (i + 0.5) * w) + 0.5 + labelsWidth, Math.round(b - bv) + 0.5);
+                ctx.stroke();
+                ctx.lineWidth = 1;
+            }
+            prevCpuValY = bv;
 
+            // Search bar
             val = StatsBarGraph.GetStat('Searches', dt);
             ctx.fillStyle = "#68a568";
-            var bv = bn * val / maxNValue;
-            ctx.fillRect(Math.round(width - (i + 1) * w), Math.round(b), Math.ceil(w), Math.round(bv));
+            var bv = bn * val / maxSearchValue;
+            ctx.fillRect(Math.round(width - (i + 1) * w) + labelsWidth, Math.round(b), Math.ceil(w), Math.round(bv));
             ctx.beginPath();
             ctx.strokeStyle = "#395639";
-            ctx.moveTo(Math.round(width - (i + 1) * w) + 1.5, Math.floor(b + bv) + 0.5);
-            ctx.lineTo(Math.round(width - i * w) + 0.5, Math.floor(b + bv) + 0.5);
-            ctx.lineTo(Math.round(width - i * w) + 0.5, Math.floor(b) + 0.5);
+            ctx.moveTo(Math.round(width - (i + 1) * w) + 1.5 + labelsWidth, Math.floor(b + bv) + 0.5);
+            ctx.lineTo(Math.round(width - i * w) + 0.5 + labelsWidth, Math.floor(b + bv) + 0.5);
+            ctx.lineTo(Math.round(width - i * w) + 0.5 + labelsWidth, Math.floor(b) + 0.5);
             ctx.stroke();
         }
 
@@ -83,26 +154,26 @@
         var dts = Utils.ShortGWDateFormat(new Date(end.getTime() - end.getTimezoneOffset() * 60000));
         var tw = ctx.measureText(dts).width;
         ctx.fillStyle = "rgba(255,255,255,0.7)";
-        ctx.fillRect(width - (tw + 5), b + 2, tw + 2, 16);
+        ctx.fillRect(labelsWidth + width - (tw + 5), b + 2, tw + 2, 16);
         ctx.fillStyle = "#000000";
-        ctx.fillText(dts, width - (tw + 5), b + 14);
+        ctx.fillText(dts, labelsWidth + width - (tw + 5), b + 14);
 
         var dts = Utils.ShortGWDateFormat(new Date(end.getTime() - end.getTimezoneOffset() * 60000 - Main.Stats.Logs.length / 2 * 10 * 60 * 1000));
         var tw = ctx.measureText(dts).width;
         ctx.fillStyle = "rgba(255,255,255,0.7)";
-        ctx.fillRect(width / 2 - tw / 2, b + 2, tw + 2, 16);
+        ctx.fillRect(labelsWidth + width / 2 - tw / 2, b + 2, tw + 2, 16);
         ctx.fillStyle = "#000000";
-        ctx.fillText(dts, width / 2 - tw / 2, b + 14);
+        ctx.fillText(dts, labelsWidth + width / 2 - tw / 2, b + 14);
 
         var dts = Utils.ShortGWDateFormat(new Date(end.getTime() - end.getTimezoneOffset() * 60000 - Main.Stats.Logs.length * 10 * 60 * 1000));
         var tw = ctx.measureText(dts).width;
         ctx.fillStyle = "rgba(255,255,255,0.7)";
-        ctx.fillRect(5, b + 2, tw + 2, 16);
+        ctx.fillRect(labelsWidth + 5, b + 2, tw + 2, 16);
         ctx.fillStyle = "#000000";
-        ctx.fillText(dts, 5, b + 14);
+        ctx.fillText(dts, labelsWidth + 5, b + 14);
 
         ctx.fillStyle = "#E0E0E0";
-        ctx.fillRect(0, Math.round(b), width, 1);
+        ctx.fillRect(labelsWidth, Math.round(b), width, 1);
 
         if (Main.CurrentTime)
         {
@@ -116,8 +187,8 @@
             ctx.lineWidth = 1;
             ctx.strokeStyle = "rgba(0,0,255,0.7)";
             ctx.beginPath();
-            ctx.moveTo(x + 0.5, 0);
-            ctx.lineTo(x + 0.5, height);
+            ctx.moveTo(x + 0.5 + labelsWidth, 0);
+            ctx.lineTo(x + 0.5 + labelsWidth, height);
             ctx.stroke();
         }
 
@@ -152,10 +223,10 @@
         if (!Main.Stats || !Main.Stats.Logs || Main.Stats.Logs.length == 0)
             return;
 
-        var width = $("#timeRangeCanvas").width();
+        var width = $("#timeRangeCanvas").width() - 50;
         var w = width / Main.Stats.Logs.length;
         //var x = evt.pageX - ($("#timeRange").position().left + $("#timeRange div").width());
-        var x = evt.pageX - $("#timeRange").position().left - 10;
+        var x = evt.pageX - $("#timeRange").position().left - 50 - 10;
 
         var tx = Math.ceil((width - x) / w);
         if (tx < 0)

@@ -18,6 +18,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
         private Dictionary<int, int> logLevels = null;
         private Dictionary<int, string> convertion = null;
         private Dictionary<int, string> detailTypes = null;
+        private Dictionary<int, string> messageTypes = null;
 
         internal SelectNode()
         {
@@ -83,7 +84,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
             {
                 parser.Tokens.Next();
                 next = parser.Tokens.Next();
-                if(!(next is TokenNumber))
+                if (!(next is TokenNumber))
                     throw new SyntaxException("Was expecting a TokenNumber and found a " + next.GetType().Name + " instead");
                 Limit = int.Parse(next.Value);
             }
@@ -137,8 +138,9 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                 case "remote":
                     return entry.RemoteIpPoint;
                 case "messagetypeid":
-                case "type":
                     return entry.MessageTypeId;
+                case "type":
+                    return (messageTypes.ContainsKey(entry.MessageTypeId) ? messageTypes[entry.MessageTypeId] : entry.MessageTypeId.ToString());
                 case "level":
                     return (logLevels.ContainsKey(entry.MessageTypeId) ? logLevels[entry.MessageTypeId] : 0);
                 case "message":
@@ -158,6 +160,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
             {
                 logLevels = context.MessageTypes.ToDictionary(key => key.Id, val => val.LogLevel);
                 convertion = context.MessageTypes.ToDictionary(key => key.Id, val => val.DisplayMask);
+                messageTypes= context.MessageTypes.ToDictionary(key => key.Id, val => val.Name);
                 detailTypes = context.MessageDetailTypes.ToDictionary(key => key.Id, val => val.Value);
             }
 
@@ -170,6 +173,7 @@ namespace GWLogger.Backend.DataContext.Query.Statement
             {
                 logLevels = context.MessageTypes.ToDictionary(key => key.Id, val => val.LogLevel);
                 convertion = context.MessageTypes.ToDictionary(key => key.Id, val => val.DisplayMask);
+                messageTypes = context.MessageTypes.ToDictionary(key => key.Id, val => val.Name);
                 detailTypes = context.MessageDetailTypes.ToDictionary(key => key.Id, val => val.Value);
             }
 

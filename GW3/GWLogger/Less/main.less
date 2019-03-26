@@ -10,6 +10,7 @@
 @errorPanel: 150px;
 @menuHoverBgColor: #707ece;
 @middleSidebar: (@leftSidebar+5)/2;
+@suggestionBackground: rgb(255, 253, 242);
 
 body
 {
@@ -315,8 +316,37 @@ body
     position: absolute;
     top: (@timeRangeHeight + @borderSpacing * 2 + 25);
     left: (@leftSidebar + @borderSpacing);
-    right: calc(@borderSpacing * 2 + @errorPanel);
-    width: ~"calc(100vw - @{errorPanel} - 315px)";
+    right: calc(@borderSpacing * 2 + @errorPanel - 25px);
+    width: ~"calc(100vw - @{errorPanel} - 345px)";
+}
+
+#btnPremadeQueries
+{
+    .button;
+    position: absolute;
+    top: (@timeRangeHeight + @borderSpacing * 2 + 25);
+    right: @borderSpacing;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    font-weight: bolder;
+}
+
+#premadeQueries
+{
+    position: absolute;
+    background-color: @suggestionBackground;
+    right: @borderSpacing;
+    top: (@timeRangeHeight + @borderSpacing * 2 + 60);
+    padding: 5px;
+    display: none;
+
+    div
+    {
+        cursor: pointer;
+        color: blue;
+        text-decoration: underline;
+    }
 }
 
 #clients
@@ -522,7 +552,7 @@ select
     padding: 0;
     display: none;
     z-index: 1;
-    background: rgb(255, 253, 242);
+    background: @suggestionBackground;
     font-family: sans-serif;
     font-size: 14px;
 

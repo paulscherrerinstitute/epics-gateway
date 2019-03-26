@@ -104,7 +104,7 @@ namespace GWLogger
                     var start = long.Parse(path[1]).ToNetDate();
                     var startTrim = start.Trim();
 
-                    var limit = (queryNode != null && queryNode.Group != null) ? 20000 : 100;
+                    var limit = (queryNode != null && queryNode.Group != null) ? 100000 : 100;
 
 
                     if (path.Length > 2)
@@ -201,7 +201,10 @@ namespace GWLogger
                                 context.Response.Write(",");
                             context.Response.Write("\"" + (queryNode.Columns[j].DisplayTitle.Replace(" ", "_") ?? queryNode.Columns[j].Field.Name) + "\"");
                             context.Response.Write(":");
-                            context.Response.Write(i[j].ToJs());
+                            if (queryNode.Columns[j].Field.Name == "remote" && i[j] != null)
+                                context.Response.Write((Hostname((string)i[j]) + " (" + i[j] + ")").ToJs());
+                            else
+                                context.Response.Write(i[j].ToJs());
                         }
                         context.Response.Write("}");
                     }

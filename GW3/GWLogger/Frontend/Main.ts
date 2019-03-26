@@ -124,24 +124,12 @@ class Main
 
                 if (Main.EndDate === null)
                 {
-                    /*if (Main.Stats.Logs && Main.Stats.Logs.length > 0)
-                        Main.EndDate = Main.Stats.Logs[Main.Stats.Logs.length - 1].Date;
-                    else
-                        Main.EndDate = new Date();*/
                     $("#startDate").val(Utils.FullUtcDateFormat(start));
                     $("#endDate").val(Utils.FullUtcDateFormat(end));
                 }
 
-                /*if (resetEndDate)
-                {
-                    if (Main.Stats.Logs && Main.Stats.Logs.length > 0)
-                        Main.EndDate = Main.CurrentTime = Main.Stats.Logs[Main.Stats.Logs.length - 1].Date;
-                    else
-                        Main.EndDate = Main.CurrentTime = new Date();
-                }*/
                 StatsBarGraph.DrawStats();
 
-                //if (refresh && Main.IsLast)
                 if (refresh && (!params["c"] && !params["s"]))
                     Main.LoadTimeInfo(refresh);
                 else if (!refresh)
@@ -1037,6 +1025,29 @@ class Main
             {
                 $("#querySuggestions").hide();
             }
+        });
+        
+        $("#btnPremadeQueries").on("click", () =>
+        {
+            if ($("#premadeQueries").is(":visible"))
+            {
+                $("#premadeQueries").hide();
+            }
+            else
+            {
+                $("#premadeQueries").show();
+                setTimeout(() =>
+                {
+                    $("#premadeQueries").hide();
+                }, 3000);
+            }
+        });
+
+        $("#premadeQueries div").on("click", (evt: JQueryEventObject) =>
+        {
+            $("#premadeQueries").hide();
+            $("#queryField").val(evt.target.getAttribute("query"));
+            $("#queryField").keyup();
         });
 
         $("#queryField").on("click", (evt: JQueryEventObject) =>

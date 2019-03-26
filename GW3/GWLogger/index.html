@@ -110,6 +110,7 @@
             <input type="text" id="endDate" class="dateInputs" />
         </div>
         <input type="text" id="queryField" placeholder="Type your query here..." class="k-textbox" />
+        <div id="btnPremadeQueries">...</div>
         <div id="clients"><div id="clientsContent" class="listContent"></div></div>
         <div id="servers"><div id="serversContent" class="listContent"></div></div>
         <div id="logs">
@@ -128,10 +129,18 @@
             <div id="suggestions"></div>
             <div id="suggestionsFooter">Press <u>ESC</u> to close</div>
         </div>
-        <div id="detailInfo"></div>
-        <div id="showLastBtn">Last entries</div>
-        <div id="mouseCapture"></div>
-    </div>
+        <div id="premadeQueries">
+            <div query=''>Reset</div>
+            <div query='select count(*) nb, remote group by remote order by nb desc limit 100'>NB logs pro remote</div>
+            <div query='select count(*) nb, sourcefilepath group by sourcefilepath order by nb desc limit 100'>NB Logs per source path</div>
+            <div query='select sum(packetsize) tot, remote group by remote order by tot desc limit 100'>Tot communication pro remote</div>
+            <div query='select count(*) nb, type group by type order by nb desc limit 100'>NB logs pro type</div>
+            <div query='select count(*) nb, remote where type="ReadNotifyRequest" or type="ReadNotifyResponse" group by remote order by nb desc limit 100'>NB logs pro remote for given type</div>
+        </div>
+            <div id="detailInfo"></div>
+            <div id="showLastBtn">Last entries</div>
+            <div id="mouseCapture"></div>
+        </div>
     <div id="mapView">
         <svg id="svgMap" xml:space="preserve" viewBox="0 0 1250 950" style="width:100%;height:100%;" preserveAspectRatio="xMidYMid meet"></svg>
     </div>
