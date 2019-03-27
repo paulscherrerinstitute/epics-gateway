@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Web;
 
 namespace GWLogger
@@ -61,7 +62,10 @@ namespace GWLogger
             {
                 RefreshLookup();
 
-                var cancel = context.Response.ClientDisconnectedToken;
+                var timeoutCancellation = new CancellationTokenSource();
+                timeoutCancellation.CancelAfter(3000);
+                var cancel = CancellationTokenSource.CreateLinkedTokenSource(context.Response.ClientDisconnectedToken, timeoutCancellation.Token);
+
                 var logLevels = Global.DataContext.MessageTypes.ToDictionary(key => key.Id, val => val.LogLevel);
 
                 List<int> msgTypes = null;
@@ -113,13 +117,13 @@ namespace GWLogger
                         if (context.Request["levels"] == "3,4") // Show errors
                             logs = Global.DataContext.GetLogs(gateway, start, end, query, null, true).Take(100).Cast<object>().ToList();
                         else
-                            logs = Global.DataContext.ReadLog(gateway, start, end, query, limit, msgTypes, startFile, offset, cancel).Take(100).Cast<object>().ToList();
+                            logs = Global.DataContext.ReadLog(gateway, start, end, query, limit, msgTypes, startFile, offset, cancel.Token).Take(100).Cast<object>().ToList();
                     }
                     else
                         if (context.Request["levels"] == "3,4") // Show errors
                         logs = Global.DataContext.GetLogs(gateway, start, start.AddMinutes(20), query, null, true).Take(100).Cast<object>().ToList();
                     else
-                        logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, limit, msgTypes, startFile, offset, cancel).Cast<object>().ToList();
+                        logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, limit, msgTypes, startFile, offset, cancel.Token).Cast<object>().ToList();
                 }
 
                 var elementType = (logs.Count == 0 ? null : logs.First().GetType());
