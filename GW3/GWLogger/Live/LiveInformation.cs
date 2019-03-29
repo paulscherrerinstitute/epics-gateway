@@ -1,11 +1,11 @@
-﻿using GWLogger.Backend;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GWLogger.Backend;
 
 namespace GWLogger.Live
 {
@@ -17,6 +17,7 @@ namespace GWLogger.Live
         private Thread backgroundUpdater;
 
         private Dictionary<string, GatewayHistory> historicData = null;
+
 
         public LiveInformation()
         {
@@ -98,20 +99,24 @@ namespace GWLogger.Live
             {
                 Thread.Sleep(5000);
                 List<string> newOnErrors;
-                Dictionary<string, GatewayHistory> historyDump;
+                List<Gateway> snapshot;
                 lock (Gateways)
-                {
-                    Gateways.ForEach(row => row.UpdateGateway());
-                    newOnErrors = Gateways.Where(row => row.State >= 3).OrderBy(row => row.Name).Select(row => row.Name).ToList();
-                    historyDump = Gateways.ToDictionary(key => key.Name, val => val.GetHistory());
-                }
+                    snapshot = Gateways.ToList();
 
+                snapshot.ForEach(row => row.UpdateGateway());
+                newOnErrors = snapshot
+                    .Where(row => row.State >= 3)
+                    .OrderBy(row => row.Name)
+                    .Select(row => row.Name)
+                    .ToList();
 
+                // Run this part only every 7 * 5 = 35 seconds
                 if (sleepCounter > 6)
                 {
+                    // Store history dump
                     try
                     {
-                        // Store historyDump
+                        var historyDump = snapshot.ToDictionary(key => key.Name, val => val.GetHistory());
                         using (var stream = new StreamWriter(new GZipStream(File.Create(Global.HistoryStorage + "\\history.dump.new"), CompressionLevel.Fastest)))
                         {
                             var serializer = Newtonsoft.Json.JsonSerializer.Create();
@@ -122,10 +127,16 @@ namespace GWLogger.Live
                     catch
                     {
                     }
+
+                    // Analyze graph data
+                    //snapshot.ForEach(row => row.AnalyzeGraphs());
+
                     sleepCounter = 0;
                 }
                 else
                     sleepCounter++;
+
+                snapshot.ForEach(row => row.AnalyzeGraphs());
 
                 // Check if we have some gateways on errors
                 var emails = new Dictionary<string, string>();

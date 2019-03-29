@@ -120,10 +120,12 @@ namespace GWLogger
                             logs = Global.DataContext.ReadLog(gateway, start, end, query, limit, msgTypes, startFile, offset, cancel.Token).Take(100).Cast<object>().ToList();
                     }
                     else
+                    {
                         if (context.Request["levels"] == "3,4") // Show errors
-                        logs = Global.DataContext.GetLogs(gateway, start, start.AddMinutes(20), query, null, true).Take(100).Cast<object>().ToList();
-                    else
-                        logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, limit, msgTypes, startFile, offset, cancel.Token).Cast<object>().ToList();
+                            logs = Global.DataContext.GetLogs(gateway, start, start.AddMinutes(20), query, null, true).Take(100).Cast<object>().ToList();
+                        else
+                            logs = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, limit, msgTypes, startFile, offset, cancel.Token).Cast<object>().ToList();
+                    }
                 }
 
                 var elementType = (logs.Count == 0 ? null : logs.First().GetType());

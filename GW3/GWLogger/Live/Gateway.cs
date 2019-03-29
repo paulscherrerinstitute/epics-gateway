@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace GWLogger.Live
@@ -223,6 +224,115 @@ namespace GWLogger.Live
         }
 
         public int State => Math.Max(CpuState, SearchState);
+
+        internal void AnalyzeGraphs()
+        {
+            List<(DateTime Created, double Value)> cpuAvg, networkAvg;
+
+            lock (cpuHistory)
+                cpuAvg = PlateauAverage(cpuHistory);
+
+            lock (networkHistory)
+                networkAvg = PlateauAverage(networkHistory);
+
+            var cpuRiseDrops = FindRiseAndDrops(cpuAvg, threshold: 5);
+            var networkRiseDrops = FindRiseAndDrops(networkAvg, threshold: 5);
+
+            if (cpuRiseDrops.Count == 0)
+                return;
+
+            foreach (var cpuRiseOrDrop in cpuRiseDrops)
+            {
+                // TODO: Check if the event was already written
+
+                // Collect data
+                var logs = Global.DataContext.ReadLog(Name.ToLowerInvariant(), cpuRiseOrDrop.From.AddMinutes(-10), cpuRiseOrDrop.To.AddMinutes(10), null);
+
+            }
+            
+            
+
+            Debug.WriteLine(Name + " ---------------------------------");
+            Debug.WriteLine("CPU:");
+            Debug.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(cpuRiseDrops, Newtonsoft.Json.Formatting.Indented));
+
+            // TODO: Find rise and drops
+        }
+
+        private List<(DateTime Created, double Value)> PlateauAverage(List<HistoricData> rawData, int groupSize = 10)
+        {
+            var averaged = new List<(DateTime Created, double Value)>();
+            for (int i = 0; i < rawData.Count; i += groupSize)
+            {
+                double sum = 0;
+                var count = 0;
+                var lastIndex = 0;
+                for (int j = 0; j < groupSize && i + j < rawData.Count; j++)
+                {
+                    lastIndex = i + j;
+                    sum += rawData[i + j].Value ?? -1;
+                    count++;
+                }
+                var avgValue = Math.Round(sum / count, 1, MidpointRounding.AwayFromZero);
+                var firstDate = rawData[i].Date.Ticks;
+                var lastDate = rawData[lastIndex].Date.Ticks;
+                var avgDate = new DateTime((lastDate + firstDate) / 2);
+                averaged.Add((avgDate, avgValue));
+            }
+            return averaged;
+        }
+
+        private List<(DateTime From, DateTime To)> FindRiseAndDrops(List<(DateTime Created, double Value)> entries, double threshold)
+        {
+            var allRiseOrDrops = new List<(DateTime From, DateTime To)>();
+            var totalDiff = 0.0;
+            var lastUp = true;
+            int? lastEnd = null;
+            DateTime? start = entries[0].Created;
+            for (int i = 0; i < entries.Count - 1; i++)
+            {
+                var diff = entries[i + 1].Value - entries[i].Value;
+
+                if (Math.Abs(diff) >= threshold)
+                {
+                    allRiseOrDrops.Add((entries[i].Created, entries[i + 1].Created));
+                    lastEnd = i + 1;
+                    totalDiff = 0;
+                }
+
+                var up = diff >= 0;
+                if (up != lastUp)
+                {
+                    lastUp = up;
+
+                    if (start.HasValue && Math.Abs(totalDiff) >= threshold)
+                    {
+                        allRiseOrDrops.Add((start.Value, entries[i].Created));
+                        lastEnd = i;
+                    }
+
+                    start = entries[i].Created;
+                    totalDiff = 0;
+                }
+
+                totalDiff += diff;
+            }
+
+            return CombineOverlappingRanges(allRiseOrDrops);
+        }
+
+        private List<(DateTime, DateTime)> CombineOverlappingRanges(List<(DateTime From, DateTime To)> ranges)
+        {
+            var combined = new List<(DateTime, DateTime)>();
+            for (int i = 0; i < ranges.Count - 1; i++)
+            {
+                var startOfRange = ranges[i].From;
+                while (i < ranges.Count - 1 && ranges[i + 1].From <= ranges[i].To)
+                    i++;
+                combined.Add((startOfRange, ranges[i].To));
+            }
+            return combined;
+        }
 
         /// <summary>
         /// Average PVs in the last 10 minutes
