@@ -104,6 +104,14 @@ namespace GWLogger.Backend.DataContext.Query.Statement
                     return context.MessageTypes.First(row => row.Id == entry.MessageTypeId).Name;
                 case "date":
                     return entry.EntryDate.ToString(@"yyyy\/MM\/dd HH:mm:ss.fff");
+                case "reason":
+                    if (detailId == -1)
+                        detailId = context.MessageDetailTypes.First(row => row.Value == "Reason").Id;
+                    return entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == detailId)?.Value ?? "";
+                case "message":
+                    if (detailId == -1)
+                        detailId = context.MessageDetailTypes.First(row => row.Value == "Message").Id;
+                    return entry.LogEntryDetails.FirstOrDefault(row => row.DetailTypeId == detailId)?.Value ?? "";
                 default:
                     return Name;
             }

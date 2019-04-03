@@ -211,7 +211,7 @@ namespace GatewayLogic.Services
                             foreach (var detail in message.Details)
                             {
                                 writer.Write((ushort)detail.TypeId);
-                                writer.Write(detail.Value);
+                                writer.Write((detail?.Value) ?? "");
                             }
                         }
                         try
