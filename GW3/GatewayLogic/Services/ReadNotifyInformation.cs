@@ -2,16 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GatewayLogic.Services
 {
-    class ReadNotifyInformation : IDisposable
+    internal class ReadNotifyInformation : IDisposable
     {
-        readonly SafeLock dictionaryLock = new SafeLock();
-        readonly List<ReadNotifyInformationDetail> reads = new List<ReadNotifyInformationDetail>();
+        private readonly List<ReadNotifyInformationDetail> reads = new List<ReadNotifyInformationDetail>();
 
         private uint nextId = 1;
 
@@ -37,35 +33,30 @@ namespace GatewayLogic.Services
 
         public ReadNotifyInformationDetail Get(ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
         {
-            using (dictionaryLock.Aquire())
+            var result = new ReadNotifyInformationDetail(nextId++, channelInformation, clientId, client);
+            lock (reads)
             {
-                var result = new ReadNotifyInformationDetail(nextId++, channelInformation, clientId, client);
                 reads.Add(result);
-                return result;
             }
+            return result;
         }
 
         public ReadNotifyInformationDetail GetByGatewayId(uint id)
         {
-            using (dictionaryLock.Aquire())
+            ReadNotifyInformationDetail result;
+
+            lock (reads)
             {
-                var result = reads.FirstOrDefault(row => row.GatewayId == id);
+                result = reads.FirstOrDefault(row => row.GatewayId == id);
                 reads.Remove(result);
-
                 reads.RemoveAll(row => (DateTime.UtcNow - row.When).TotalSeconds > 3600);
-
-                return result;
             }
-        }
-
-        ~ReadNotifyInformation()
-        {
-            dictionaryLock.Dispose();
+            return result;
         }
 
         public void Dispose()
         {
-            using (dictionaryLock.Aquire())
+            lock (reads)
             {
                 reads.Clear();
             }
@@ -73,7 +64,7 @@ namespace GatewayLogic.Services
 
         internal void Remove(ReadNotifyInformationDetail read)
         {
-            using (dictionaryLock.Aquire())
+            lock (reads)
             {
                 reads.Remove(read);
             }

@@ -158,7 +158,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(5000)]
+        [Timeout(15000)]
         public void CheckMultiGet()
         {
             using (var gateway = new Gateway())
@@ -179,6 +179,7 @@ namespace GwUnitTests
                         serverChannels[i].Value = "Works fine! - " + i;
                     }
                     server.Start();
+                    Thread.Sleep(1000);
 
                     // Client
 

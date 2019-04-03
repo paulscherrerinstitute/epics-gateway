@@ -109,6 +109,7 @@
     <Compile Include="DiagnosticServer.cs" />
     <Compile Include="Gateway.cs" />
     <Compile Include="Connections\GatewayConnection.cs" />
+    <Compile Include="Helpers.cs" />
     <Compile Include="SafeLock.cs" />
     <Compile Include="Services\ChannelInformation.cs" />
     <Compile Include="Connections\ClientConnection.cs" />
