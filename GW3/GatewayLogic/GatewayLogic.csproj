@@ -100,7 +100,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
-    <Compile Include="Connections\DebugPortConnection.cs" />
     <Compile Include="Connections\GatewayConnectionCollection.cs" />
     <Compile Include="Connections\GatewayTcpConnection.cs" />
     <Compile Include="DataPacket.cs" />

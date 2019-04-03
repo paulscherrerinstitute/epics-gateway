@@ -12,7 +12,7 @@ namespace GatewayLogic.Commands
             if (channel == null)
             {
                 connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.ReadNotifyRequestWrongChannel, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.GWID, Value = packet.Parameter1.ToString() } });
-                connection.Dispose();
+                connection.Dispose(Services.LogMessageType.ReadNotifyRequestWrongChannel);
                 return;
             }
             var read = connection.Gateway.ReadNotifyInformation.Get(channel, packet.Parameter2, (TcpClientConnection)connection);

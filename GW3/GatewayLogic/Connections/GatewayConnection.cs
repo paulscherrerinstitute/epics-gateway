@@ -1,13 +1,10 @@
-﻿using System;
+﻿using GatewayLogic.Services;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GatewayLogic.Connections
 {
-    abstract class GatewayConnection : IDisposable
+    internal abstract class GatewayConnection
     {
         public IList<IPEndPoint> Destinations { get; set; }
         public Gateway Gateway { get; }
@@ -18,6 +15,8 @@ namespace GatewayLogic.Connections
 
         abstract public void Send(DataPacket packet);
 
-        public abstract void Dispose();
+        protected void Dispose() => Dispose(LogMessageType.UnknownReason);
+
+        public abstract void Dispose(LogMessageType commandReason, string message = null);
     }
 }

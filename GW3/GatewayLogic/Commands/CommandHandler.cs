@@ -58,7 +58,7 @@ namespace GatewayLogic.Commands
                 //connection.Gateway.Log.Write(Services.LogLevel.Error, "Command not supported " + command);
                 // Wrong packet handling!
                 if (command > 27)
-                    connection.Dispose();
+                    connection.Dispose(Services.LogMessageType.CommandNotSupported);
             }
         }
 
@@ -81,7 +81,7 @@ namespace GatewayLogic.Commands
                 //connection.Gateway.Log.Write(Services.LogLevel.Error, "Command not supported " + command);
                 // Wrong packet handling!
                 if (command > 27)
-                    connection.Dispose();
+                    connection.Dispose(Services.LogMessageType.CommandNotSupported);
             }
         }
 

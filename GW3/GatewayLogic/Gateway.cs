@@ -264,8 +264,8 @@ namespace GatewayLogic
             tcpSideA?.Dispose();
             tcpSideB?.Dispose();
 
-            udpSideA?.Dispose();
-            udpSideB?.Dispose();
+            udpSideA?.Dispose(LogMessageType.Dispose);
+            udpSideB?.Dispose(LogMessageType.Dispose);
 
             ChannelInformation?.Dispose();
             MonitorInformation?.Dispose();
@@ -273,8 +273,8 @@ namespace GatewayLogic
             SearchInformation?.Dispose();
             searchLock?.Dispose();
 
-            ClientConnection?.Dispose();
-            ServerConnection?.Dispose();
+            ClientConnection?.Dispose(LogMessageType.Dispose);
+            ServerConnection?.Dispose(LogMessageType.Dispose);
 
             DiagnosticServer?.Dispose();
 

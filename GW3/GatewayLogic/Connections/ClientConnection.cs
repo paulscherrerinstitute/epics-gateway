@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic.Connections
 {
-    class ClientConnection : GatewayConnectionCollection<GatewayTcpConnection>, IDisposable
+    class ClientConnection : GatewayConnectionCollection<GatewayTcpConnection>
     {
         internal ClientConnection(Gateway gateway) : base(gateway)
         {

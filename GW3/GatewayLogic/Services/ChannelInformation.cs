@@ -149,7 +149,7 @@ namespace GatewayLogic.Services
                     // Drop server connection
                     try
                     {
-                        TcpConnection?.Dispose();
+                        TcpConnection?.Dispose(LogMessageType.DropChannel);
                         TcpConnection = null;
                     }
                     catch

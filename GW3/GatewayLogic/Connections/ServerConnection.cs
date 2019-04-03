@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic.Connections
 {
-    class ServerConnection : GatewayConnectionCollection<TcpServerConnection>, IDisposable
+    class ServerConnection : GatewayConnectionCollection<TcpServerConnection>
     {
         public delegate void TcpConnectionReady(TcpServerConnection connection);
 

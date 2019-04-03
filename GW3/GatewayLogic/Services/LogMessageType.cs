@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GatewayLogic.Services
+﻿namespace GatewayLogic.Services
 {
-    enum LogMessageType : int
+    internal enum LogMessageType : int
     {
         [MessageDisplay("Loading configuration from {Url}", LogLevel.Detail)]
         LoadingConfiguration,
@@ -22,7 +16,7 @@ namespace GatewayLogic.Services
         Exception,
         [MessageDisplay("Client {Endpoint} disconnect", LogLevel.Connection)]
         ClientDisconnect,
-        [MessageDisplay("Channel disconnect on {ChannelName}", LogLevel.Detail)]
+        [MessageDisplay("Channel disconnect on {ChannelName}, reason: {Reason} {Message}", LogLevel.Detail)]
         ChannelDisconnect,
         [MessageDisplay("Clear channel {ChannelName}", LogLevel.Detail)]
         ClearChannel,
@@ -90,7 +84,7 @@ namespace GatewayLogic.Services
         SearchRequest,
         [MessageDisplay("Search cached for: {ChannelName}, from client {Endpoint}.", LogLevel.Detail)]
         SearchRequestAnswerFromCache,
-        [MessageDisplay("Search is too new, we drop it for: {ChannelName}, from client {Endpoint}.", LogLevel.Detail)]        
+        [MessageDisplay("Search is too new, we drop it for: {ChannelName}, from client {Endpoint}.", LogLevel.Detail)]
         SearchRequestTooNew,
         [MessageDisplay("Search answer for: {ChannelName}, from server {Endpoint}.", LogLevel.Detail)]
         SearchAnswer,
@@ -100,7 +94,7 @@ namespace GatewayLogic.Services
         VersionRequest,
         [MessageDisplay("Version answer from {Endpoint} => {Version}.", LogLevel.Detail)]
         VersionAnswer,
-        [MessageDisplay("Write on wrong channel.",LogLevel.Error)]
+        [MessageDisplay("Write on wrong channel.", LogLevel.Error)]
         WriteWrongChannel,
         [MessageDisplay("Write on {ChannelName}, from {Endpoint}.", LogLevel.Detail)]
         Write,
@@ -137,6 +131,28 @@ namespace GatewayLogic.Services
         [MessageDisplay("Blocked Write to {ChannelName}.", LogLevel.Detail)]
         WriteRequestNoAccess,
         [MessageDisplay("WriteNotify wrong answer {ClientIoId}.", LogLevel.Error)]
-        WriteNotifyAnswerWrong
+        WriteNotifyAnswerWrong,
+        [MessageDisplay("-- No display --", LogLevel.Error)]
+        UnknownReason,
+        [MessageDisplay("-- No display --", LogLevel.Error)]
+        EchoNeverAnswered,
+        [MessageDisplay("-- No display --", LogLevel.Error)]
+        Dispose,
+        [MessageDisplay("-- No display --", LogLevel.Error)]
+        DropChannel,
+        [MessageDisplay("-- No display --", LogLevel.Error)]
+        NotConnected,
+        [MessageDisplay("-- No display --", LogLevel.Error)]
+        SocketClosed,
+        [MessageDisplay("-- No display --", LogLevel.Error)]
+        SocketDisposed,
+        [MessageDisplay("-- No display --", LogLevel.Error)]
+        SocketErrorReceiving,
+        [MessageDisplay("-- No display --", LogLevel.Error)]
+        SocketErrorSending,
+        [MessageDisplay("-- No display --", LogLevel.Error)]
+        SocketConnectionTimeout,
+        [MessageDisplay("-- No display --", LogLevel.Error)]
+        SocketCreationError
     }
 }

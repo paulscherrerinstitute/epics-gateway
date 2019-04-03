@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GatewayLogic.Services;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -54,7 +55,7 @@ namespace GatewayLogic.Connections
             flusher.Start();
         }
 
-        public override void Dispose()
+        public override void Dispose(LogMessageType commandReason, string message = null)
         {
             disposed = true;
             receiver.Dispose();

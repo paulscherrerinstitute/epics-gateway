@@ -4,28 +4,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace GatewayLogic.Connections
 {
-    class TcpServerConnection : GatewayTcpConnection
+    internal class TcpServerConnection : GatewayTcpConnection
     {
         //public Gateway Gateway { get; private set; }
 
-        Socket socket;
-        SafeLock lockObject = new SafeLock();
-        //SafeLock socketLock = new SafeLock();
-        SemaphoreSlim socketLock = new SemaphoreSlim(1);
-        bool isConnected = false;
-        List<Action> toCallWhenReady = new List<Action>();
-        readonly byte[] buffer = new byte[Gateway.BUFFER_SIZE];
-        Splitter splitter = new Splitter();
-        bool disposed = false;
+        private Socket socket;
+        private SafeLock lockObject = new SafeLock();
 
-        SafeLock channelsLock = new SafeLock();
-        readonly List<ChannelInformation.ChannelInformationDetails> channels = new List<ChannelInformation.ChannelInformationDetails>();
+        //SafeLock socketLock = new SafeLock();
+        private SemaphoreSlim socketLock = new SemaphoreSlim(1);
+        private bool isConnected = false;
+        private List<Action> toCallWhenReady = new List<Action>();
+        private readonly byte[] buffer = new byte[Gateway.BUFFER_SIZE];
+        private Splitter splitter = new Splitter();
+        private bool disposed = false;
+        private SafeLock channelsLock = new SafeLock();
+        private readonly List<ChannelInformation.ChannelInformationDetails> channels = new List<ChannelInformation.ChannelInformationDetails>();
 
         public TcpServerConnection(Gateway gateway, IPEndPoint destination) : base(gateway)
         {
@@ -62,10 +60,10 @@ namespace GatewayLogic.Connections
                         {
                             socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
                         }
-                        catch
+                        catch(Exception ex)
                         {
                             //Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
-                            Dispose();
+                            Dispose(LogMessageType.SocketCreationError,ex.ToString());
                         }
                     }
                 }, null);
@@ -75,7 +73,7 @@ namespace GatewayLogic.Connections
                 {
                     gateway.MessageLogger.Write(destination.ToString(), Services.LogMessageType.StartTcpServerConnectionFailed);
                     //Gateway.Log.Write(LogLevel.Error, "Cannot connect to " + destination.ToString());
-                    this.Dispose();
+                    this.Dispose(LogMessageType.SocketConnectionTimeout);
                 }
                 evt.Dispose();
             });
@@ -97,10 +95,10 @@ namespace GatewayLogic.Connections
                 {
                     socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
                 }
-                catch
+                catch (Exception ex)
                 {
                     //Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
-                    Dispose();
+                    Dispose(LogMessageType.SocketErrorReceiving, ex.ToString());
                 }
             }
         }
@@ -128,16 +126,16 @@ namespace GatewayLogic.Connections
             {
                 size = socket.EndReceive(ar);
             }
-            catch
+            catch (Exception ex)
             {
-                this.Dispose();
+                this.Dispose(LogMessageType.SocketErrorReceiving, ex.ToString());
                 // Stop receiving
                 return;
             }
             //  End of the stream
             if (size == 0)
             {
-                this.Dispose();
+                this.Dispose(LogMessageType.SocketClosed);
                 return;
             }
 
@@ -159,17 +157,17 @@ namespace GatewayLogic.Connections
             }
             catch (SocketException)
             {
-                this.Dispose();
+                this.Dispose(LogMessageType.SocketClosed);
             }
             catch (ObjectDisposedException)
             {
-                this.Dispose();
+                this.Dispose(LogMessageType.SocketDisposed);
             }
             catch (Exception ex)
             {
                 //Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
                 Gateway.MessageLogger.Write(RemoteEndPoint.ToString(), LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex.ToString() } });
-                this.Dispose();
+                this.Dispose(LogMessageType.SocketErrorReceiving, ex.ToString());
             }
         }
 
@@ -211,12 +209,12 @@ namespace GatewayLogic.Connections
                 socketLock.Wait();
                 //using (socketLock.Aquire())
                 //{
-                    socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
+                socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
                 //}
             }
-            catch
+            catch (Exception ex)
             {
-                ThreadPool.QueueUserWorkItem((obj) => { this.Dispose(); });
+                ThreadPool.QueueUserWorkItem((obj) => { this.Dispose(LogMessageType.SocketErrorSending, ex.ToString()); });
             }
             finally
             {
@@ -231,7 +229,7 @@ namespace GatewayLogic.Connections
             channelsLock.Dispose();
         }
 
-        public override void Dispose()
+        public override void Dispose(LogMessageType commandReason, string message = null)
         {
             if (disposed)
                 return;
@@ -245,7 +243,11 @@ namespace GatewayLogic.Connections
                 channelsLock.Dispose();
                 return;
             }
-            Gateway.MessageLogger.Write(this.RemoteEndPoint.ToString(), Services.LogMessageType.DiposeTcpServerConnection);
+            Gateway.MessageLogger.Write(this.RemoteEndPoint.ToString(), Services.LogMessageType.DiposeTcpServerConnection, new LogMessageDetail[]
+            {
+                new LogMessageDetail{ TypeId=MessageDetail.Reason, Value=commandReason.ToString()},
+                new LogMessageDetail{ TypeId=MessageDetail.Message, Value=message}
+            });
             //Gateway.Log.Write(LogLevel.Connection, "Server " + this.Name + " disconnect");
 
             Gateway.ServerConnection.Remove(this);

@@ -31,7 +31,7 @@ namespace GatewayLogic.Connections
             toDelete = dictionary.Values.Where(row => (DateTime.UtcNow - row.LastMessage).TotalSeconds > 90).ToList();
             toCheck = dictionary.Values.Where(row => (DateTime.UtcNow - row.LastMessage).TotalSeconds > 35 && !toDelete.Contains(row)).ToList();
 
-            toDelete.ForEach(row => row.Dispose());
+            toDelete.ForEach(row => row.Dispose(Services.LogMessageType.EchoNeverAnswered));
 
             var echoPacket = DataPacket.Create(0);
             echoPacket.Command = 23;
@@ -55,13 +55,13 @@ namespace GatewayLogic.Connections
             dictionary.TryAdd(endPoint, value);
         }
 
-        public void Dispose()
+        public void Dispose(Services.LogMessageType reason)
         {
             var toClean = dictionary.Values.ToList();
             dictionary.Clear();
 
             foreach (var i in toClean)
-                i.Dispose();
+                i.Dispose(reason);
         }
 
         internal void Remove(TType tcpClientConnection)

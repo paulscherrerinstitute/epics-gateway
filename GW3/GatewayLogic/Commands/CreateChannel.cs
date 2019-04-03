@@ -32,7 +32,7 @@ namespace GatewayLogic.Commands
             if (!connection.Gateway.ChannelInformation.HasChannelInformation(channelName) && !connection.Gateway.SearchInformation.HasChannelServerInformation(channelName))
             {
                 connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.ChannelUnknown, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
-                connection.Dispose();
+                connection.Dispose(Services.LogMessageType.ChannelUnknown);
                 return;
             }
             connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannel, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName }, new LogMessageDetail { TypeId = MessageDetail.CID, Value = packet.Parameter1.ToString() } });
@@ -141,7 +141,7 @@ namespace GatewayLogic.Commands
                 {
                     locked = false;
                     locker.Release();
-                    connection.Dispose();
+                    connection.Dispose(Services.LogMessageType.CreateChannelAnswerForUnknown);
                     connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannelAnswerForUnknown);
                     return;
                 }
