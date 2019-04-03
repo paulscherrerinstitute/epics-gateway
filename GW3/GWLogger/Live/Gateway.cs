@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Xml.Serialization;
 
 namespace GWLogger.Live
 {
@@ -225,38 +229,104 @@ namespace GWLogger.Live
 
         public int State => Math.Max(CpuState, SearchState);
 
+        private readonly object PreviousAnomaliesLock = new object();
+        private List<GraphAnomaly> PreviousAnomalies = null;
+
         internal void AnalyzeGraphs()
         {
-            List<(DateTime Created, double Value)> cpuAvg, networkAvg;
+            var anomalyDateFormat = "yyyy-MM-dd-hh-mm-ss";
+            var anomalyStorage = Global.AnomalyStorage;
+            var anomalySerializer = new XmlSerializer(typeof(GraphAnomaly));
 
+            lock (PreviousAnomaliesLock)
+            {
+                if(PreviousAnomalies == null)
+                {
+                    var dateMatcher = Regex.Replace(anomalyDateFormat, @"([^-\s])", "?");
+                    PreviousAnomalies = Directory.EnumerateFiles(anomalyStorage, $"{Name}_{dateMatcher}.xml", SearchOption.TopDirectoryOnly)
+                        .Where(path => {
+                            var parts = Path.GetFileNameWithoutExtension(path).Split('_');
+                            if (parts.Length != 2)
+                                return false;
+
+                            if (!DateTime.TryParseExact(parts[1], anomalyDateFormat, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTime parsedDateTime))
+                                return false;
+
+                            if (parsedDateTime <= Global.ApplicationStartUtc)
+                                return false;
+                            return true;
+                        })
+                        .Select(path => {
+                            GraphAnomaly anomaly = null;
+                            try
+                            {
+                                using (var file = File.OpenRead(path))
+                                {
+                                    anomaly = (GraphAnomaly)anomalySerializer.Deserialize(file);
+                                    anomaly.IsDirty = false;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine("Exception while reading anomaly xml file: " + path);
+                                Debug.WriteLine(ex.GetType().Name + ": " + ex.Message);
+                            }
+                            return anomaly;
+                        })
+                        .Where(anomaly => anomaly != null)
+                        .OrderByDescending(anomaly => anomaly.From)
+                        .ToList();
+                }
+            }
+
+            List<(DateTime Created, double Value)> cpuAvg;
             lock (cpuHistory)
                 cpuAvg = PlateauAverage(cpuHistory);
 
-            lock (networkHistory)
-                networkAvg = PlateauAverage(networkHistory);
+            var cpuAnomalies = FindAnomalies(cpuAvg, threshold: 5)
+                .Where(c => c.From > Global.ApplicationStartUtc) // Only handle events that happened after application start
+                .ToList();
 
-            var cpuRiseDrops = FindRiseAndDrops(cpuAvg, threshold: 5);
-            var networkRiseDrops = FindRiseAndDrops(networkAvg, threshold: 5);
-
-            if (cpuRiseDrops.Count == 0)
+            if (cpuAnomalies.Count == 0)
                 return;
 
-            foreach (var cpuRiseOrDrop in cpuRiseDrops)
+            lock (PreviousAnomaliesLock)
             {
-                // TODO: Check if the event was already written
+                foreach (var (From, To) in cpuAnomalies)
+                {
+                    var cpuAnomaly = PreviousAnomalies.FirstOrDefault(a => a.To <= From);
 
-                // Collect data
-                var logs = Global.DataContext.ReadLog(Name.ToLowerInvariant(), cpuRiseOrDrop.From.AddMinutes(-10), cpuRiseOrDrop.To.AddMinutes(10), null);
+                    if(cpuAnomaly != null)
+                    {
+                        // Combine the two
+                        cpuAnomaly.To = To;
+                    }
+                    else
+                    {
+                        // Add new anomaly
+                        cpuAnomaly = new GraphAnomaly { From = From, To = To, IsDirty = true };
+                    }
 
+                    // Only requery and store data if the range was changed
+                    if (cpuAnomaly.IsDirty)
+                    {
+                        // Collect data
+                        // var logs = Global.DataContext.ReadLog(Name, cpuRiseOrDrop.From.AddMinutes(-10), cpuRiseOrDrop.To.AddMinutes(10), null);
+                        // TODO: Query data for meaningful information 
+
+                        var filePath = Path.Combine(anomalyStorage, $"{Name}_{cpuAnomaly.From.ToString(anomalyDateFormat, CultureInfo.InvariantCulture)}.xml");
+                        using (var file = File.OpenWrite(filePath))
+                        {
+                            anomalySerializer.Serialize(file, cpuAnomaly);
+                        }
+                    }
+                }
+
+                // Remove anomalies that are too old
+                var lastDataPoint = cpuHistory.OrderBy(c => c.Date).FirstOrDefault();
+                if(lastDataPoint != null)
+                    PreviousAnomalies.RemoveAll(a => a.To < lastDataPoint.Date);
             }
-            
-            
-
-            Debug.WriteLine(Name + " ---------------------------------");
-            Debug.WriteLine("CPU:");
-            Debug.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(cpuRiseDrops, Newtonsoft.Json.Formatting.Indented));
-
-            // TODO: Find rise and drops
         }
 
         private List<(DateTime Created, double Value)> PlateauAverage(List<HistoricData> rawData, int groupSize = 10)
@@ -282,7 +352,7 @@ namespace GWLogger.Live
             return averaged;
         }
 
-        private List<(DateTime From, DateTime To)> FindRiseAndDrops(List<(DateTime Created, double Value)> entries, double threshold)
+        private List<(DateTime From, DateTime To)> FindAnomalies(List<(DateTime Created, double Value)> entries, double threshold)
         {
             var allRiseOrDrops = new List<(DateTime From, DateTime To)>();
             var totalDiff = 0.0;

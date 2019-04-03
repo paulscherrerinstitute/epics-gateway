@@ -564,6 +564,7 @@
     <Compile Include="Introspection.ashx.cs">
       <DependentUpon>Introspection.ashx</DependentUpon>
     </Compile>
+    <Compile Include="Live\GraphAnomaly.cs" />
     <Compile Include="Live\Gateway.cs" />
     <Compile Include="Live\GatewayInformation.cs" />
     <Compile Include="Live\GatewayShortInformation.cs" />
