@@ -886,6 +886,13 @@ class Main
                         State.Pop(null);
                         $(".inset").removeClass("inset");
                         break;
+                    case "Events":
+                        alert("Todo");
+                        Main.Path = "Events";
+                        State.Set(true);
+                        State.Pop(null);
+                        $(".inset").removeClass("inset");
+                        break;
                     case "Help":
                         window.open("/help.html", "help", "menubar=no,location=no,status=no,toolbar=no,width=800,height=600,scrollbars=yes");
                         /*$(".inset").removeClass("inset");

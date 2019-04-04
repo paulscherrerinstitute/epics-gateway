@@ -294,31 +294,100 @@ namespace GWLogger.Live
             {
                 foreach (var (From, To) in cpuAnomalies)
                 {
-                    var cpuAnomaly = PreviousAnomalies.FirstOrDefault(a => a.To <= From);
+                    var anomaly = PreviousAnomalies.FirstOrDefault(a => From <= a.To);
 
-                    if(cpuAnomaly != null)
+                    if(anomaly != null)
                     {
                         // Combine the two
-                        cpuAnomaly.To = To;
+                        anomaly.To = To;
                     }
                     else
                     {
                         // Add new anomaly
-                        cpuAnomaly = new GraphAnomaly { From = From, To = To, IsDirty = true };
+                        anomaly = new GraphAnomaly { From = From, To = To, IsDirty = true };
                     }
 
                     // Only requery and store data if the range was changed
-                    if (cpuAnomaly.IsDirty)
+                    if (anomaly.IsDirty)
                     {
                         // Collect data
-                        // var logs = Global.DataContext.ReadLog(Name, cpuRiseOrDrop.From.AddMinutes(-10), cpuRiseOrDrop.To.AddMinutes(10), null);
-                        // TODO: Query data for meaningful information 
+                        var before = From.Add(-(To - From));
 
-                        var filePath = Path.Combine(anomalyStorage, $"{Name}_{cpuAnomaly.From.ToString(anomalyDateFormat, CultureInfo.InvariantCulture)}.xml");
-                        using (var file = File.OpenWrite(filePath))
+                        var typeQuery = "select count(*) nb, type group by type order by nb desc";
+                        var beforeEventTypes = Global.DataContext.ReadLog(Name, before, From, typeQuery)?.Select(o => new QueryResultValue(o)).ToList();
+                        var duringEventTypes = Global.DataContext.ReadLog(Name, From, To, typeQuery)?.Select(o => new QueryResultValue(o)).ToList();
+
+                        // Skip graph events when there was no log data around to analyze
+                        if (beforeEventTypes == null || duringEventTypes == null)
+                            continue;
+
+                        var typeDifferences = beforeEventTypes
+                            .Concat(duringEventTypes)
+                            .GroupBy(g => g.Text)
+                            .Select(g => new QueryResultValue {
+                                Text = g.Key,
+                                Value = g.Max(q => q.Value) - g.Min(q => q.Value)
+                            });
+
+                        var interestingEventTypes = typeDifferences
+                            .OrderByDescending(v => v.Value)
+                            .Take(5)
+                            .ToList();
+
+                        var interestingEventTypeRemotes = new List<InterestingEventType>();
+
+                        foreach (var interestingEventType in interestingEventTypes)
                         {
-                            anomalySerializer.Serialize(file, cpuAnomaly);
+                            var interestingTypeQuery = $"select count(*) nb, remote where type=\"{interestingEventType.Text}\" group by remote order by nb desc";
+                            var groupedRemotes = new Dictionary<string, int>();
+
+                            foreach (var remote in Global.DataContext.ReadLog(Name, From, To, interestingTypeQuery).Select(o => new QueryResultValue(o)))
+                            {
+                                var host = remote.Text.Split(':').First();
+                                if (groupedRemotes.TryGetValue(host, out int prev))
+                                    groupedRemotes[host] = prev + (int)remote.Value;
+                                else
+                                    groupedRemotes.Add(host, (int)remote.Value);
+                            }
+
+                            interestingEventTypeRemotes.Add(new InterestingEventType {
+                                EventType = interestingEventType,
+                                TopRemotes = groupedRemotes
+                                    .OrderByDescending(g => g.Value)
+                                    .Take(3)
+                                    .Select(r => new QueryResultValue { Text = r.Key, Value = r.Value })
+                                    .ToList()
+                            });
                         }
+
+                        var remoteQuery = "select count(*) nb, remote group by remote order by nb desc";
+                        var beforeRemoteCounts = Global.DataContext.ReadLog(Name, before, From, remoteQuery).Select(o => new QueryResultValue(o)).ToList();
+                        var duringRemoteCounts = Global.DataContext.ReadLog(Name, From, To, remoteQuery).Select(o => new QueryResultValue(o)).ToList();
+
+                        anomaly.History = GetHistory();
+                        anomaly.InterestingEventTypeRemotes = interestingEventTypeRemotes;
+                        anomaly.BeforeEventTypes = beforeEventTypes.Take(5).ToList();
+                        anomaly.DuringEventTypes = duringEventTypes.Take(5).ToList();
+                        anomaly.BeforeRemoteCounts = beforeRemoteCounts.Take(5).ToList();
+                        anomaly.DuringRemoteCounts = duringRemoteCounts.Take(5).ToList();
+
+                        var writingFailed = true;
+                        try
+                        {
+                            var filePath = Path.Combine(anomalyStorage, $"{Name}_{anomaly.From.ToString(anomalyDateFormat, CultureInfo.InvariantCulture)}.xml");
+                            using (var file = File.OpenWrite(filePath))
+
+                            {
+                                anomalySerializer.Serialize(file, anomaly);
+                            }
+                            writingFailed = false;
+                        }
+                        catch
+                        {
+                        }
+
+                        anomaly.IsDirty = writingFailed;
+                        PreviousAnomalies.Add(anomaly);
                     }
                 }
 
