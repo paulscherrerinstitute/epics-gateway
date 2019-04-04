@@ -26,6 +26,11 @@ namespace GatewayLogic
         private readonly CAIntRecord channelNbCreatedPacketPerSec;
         private readonly CAIntRecord channelNbPooledPacket;
         private readonly CAIntRecord channelNbTcpCreated;
+        private readonly CAIntRecord channelNbCAGET;
+        private readonly CAIntRecord channelNbCAPUT;
+        private readonly CAIntRecord channelNbNewCAMON;
+        private readonly CAIntRecord channelNbCAMONAnswers;
+        private readonly CAIntRecord channelNbCreateChannel;
         private readonly CAIntRecord channelRestartGateway;
         private readonly CAIntRecord channelMaxCid;
         private readonly CAIntRecord channelFreeCid;
@@ -40,6 +45,11 @@ namespace GatewayLogic
         public int NbNewData = 0;
         public int NbPooledPacket = 0;
         public int NbTcpCreated = 0;
+        public int NbCAGET = 0;
+        public int NbCAPUT = 0;
+        public int NbNewCAMON = 0;
+        public int NbCAMONAnswers = 0;
+        public int NbCreateChannel = 0;
         private bool disposed = false;
         private readonly CAServer diagServer;
         private readonly Gateway gateway;
@@ -205,6 +215,37 @@ namespace GatewayLogic
             channelHeartBeat.Value = 0;
             channelHeartBeat.PrepareRecord += channelHeartBeat_PrepareRecord;
             channelHeartBeat.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
+
+            // Nb CAGET
+            channelNbCAGET = diagServer.CreateRecord<CAIntRecord>(gateway.Configuration.GatewayName + ":NBCAGET");
+            channelNbCAGET.CanBeRemotlySet = false;
+            channelNbCAGET.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC5;
+            channelNbCAGET.PrepareRecord += (sender, e) => { channelNbCAGET.Value = NbCAGET / 5; NbCAGET = 0; };
+
+            // Nb CAPUT
+            channelNbCAPUT = diagServer.CreateRecord<CAIntRecord>(gateway.Configuration.GatewayName + ":NBCAPUT");
+            channelNbCAPUT.CanBeRemotlySet = false;
+            channelNbCAPUT.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC5;
+            channelNbCAPUT.PrepareRecord += (sender, e) => { channelNbCAPUT.Value = NbCAPUT / 5; NbCAPUT = 0; };
+
+            // Nb NewCAMON
+            channelNbNewCAMON = diagServer.CreateRecord<CAIntRecord>(gateway.Configuration.GatewayName + ":NBNEWCAMON");
+            channelNbNewCAMON.CanBeRemotlySet = false;
+            channelNbNewCAMON.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC5;
+            channelNbNewCAMON.PrepareRecord += (sender, e) => { channelNbNewCAMON.Value = NbNewCAMON / 5; NbNewCAMON = 0; };
+
+            // Nb NewCAMON
+            channelNbCAMONAnswers = diagServer.CreateRecord<CAIntRecord>(gateway.Configuration.GatewayName + ":NBCAMONANSWER");
+            channelNbCAMONAnswers.CanBeRemotlySet = false;
+            channelNbCAMONAnswers.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC5;
+            channelNbCAMONAnswers.PrepareRecord += (sender, e) => { channelNbCAMONAnswers.Value = NbCAMONAnswers / 5; NbCAMONAnswers = 0; };
+
+            // Nb CreateChannel
+            channelNbCreateChannel = diagServer.CreateRecord<CAIntRecord>(gateway.Configuration.GatewayName + ":NBCREATECHANNEL");
+            channelNbCreateChannel.CanBeRemotlySet = false;
+            channelNbCreateChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC5;
+            channelNbCreateChannel.PrepareRecord += (sender, e) => { channelNbCreateChannel.Value = NbCreateChannel / 5; NbCreateChannel = 0; };
+
             diagServer.Start();
         }
 

@@ -32,6 +32,7 @@ namespace GatewayLogic.Commands
             packet.Parameter2 = write.GatewayId;
             packet.Destination = channel.TcpConnection.RemoteEndPoint;
             channel.TcpConnection.Send(packet);
+            System.Threading.Interlocked.Increment(ref connection.Gateway.DiagnosticServer.NbCAPUT);
         }
 
         public override void DoResponse(GatewayConnection connection, DataPacket packet)

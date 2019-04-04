@@ -14,5 +14,10 @@
         public int? NbClients { get; set; }
         public int? NbServers { get; set; }
         public double? Network { get; set; }
+        public int? NbGets { get; set; }
+        public int? NbPuts { get; set; }
+        public int? NbNewMons { get; set; }
+        public int? NbMons { get; set; }
+        public int? NbCreates { get; set; }
     }
 }

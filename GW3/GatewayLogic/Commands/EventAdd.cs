@@ -35,6 +35,8 @@ namespace GatewayLogic.Commands
             var monitorMask = packet.GetUInt16(12 + (int)packet.HeaderSize);
             var monitor = connection.Gateway.MonitorInformation.Get(channel, packet.DataType, dataCount, monitorMask);
 
+            System.Threading.Interlocked.Increment(ref connection.Gateway.DiagnosticServer.NbNewCAMON);
+
             /*using (lockObject.Aquire())
             {*/
             // A fresh new monitor
@@ -124,6 +126,8 @@ namespace GatewayLogic.Commands
                 // Events have been disabled
                 if (connection.Gateway.EventsOnHold.Contains(client.Client))
                     continue;
+
+                System.Threading.Interlocked.Increment(ref connection.Gateway.DiagnosticServer.NbCAMONAnswers);
 
                 /*var newPacket = (DataPacket)packet.Clone();
                 newPacket.Destination = conn.RemoteEndPoint;

@@ -20,6 +20,7 @@ namespace GatewayLogic.Commands
             packet.Parameter1 = channel.ServerId.Value;
             packet.Parameter2 = read.GatewayId;
             packet.Destination = channel.TcpConnection.RemoteEndPoint;
+            System.Threading.Interlocked.Increment(ref connection.Gateway.DiagnosticServer.NbCAGET);
             channel.TcpConnection.Send(packet);
         }
 

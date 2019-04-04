@@ -226,7 +226,12 @@ namespace GWLogger.Live
                     RunningTime = row.RunningTime,
                     NbClients = row.NbClients,
                     NbServers = row.NbServers,
-                    Network = row.Network.HasValue ? Math.Round((double)row.Network / (1024 * 1024) * 100.0) / 100.0 : (double?)null
+                    Network = row.Network.HasValue ? Math.Round((double)row.Network / (1024 * 1024) * 100.0) / 100.0 : (double?)null,
+                    NbCreates = row.NbCreates,
+                    NbGets = row.NbGets,
+                    NbPuts = row.NbPuts,
+                    NbMons = row.NbMons,
+                    NbNewMons = row.NbNewMons,
                 }).FirstOrDefault(row => row.Name.ToLower() == gatewayName.ToLower());
             }
         }

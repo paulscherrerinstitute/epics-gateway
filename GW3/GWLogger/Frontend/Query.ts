@@ -15,7 +15,9 @@
     "clientioid": "Client I/O ID",
     "version": "Channel Access protocol's version",
     "origin": "Origin",
-    "type": "Log message type"
+    "type": "Log message type",
+    "reason": "Reason of disconnection",
+    "message": "Additional message attached to an event"
 };
 
 var availableConditions = {

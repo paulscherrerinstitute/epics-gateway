@@ -35,6 +35,11 @@ namespace GWLogger.Live
         private GatewayNullableValue<int> nbMessages;
         private GatewayNullableValue<int> nbClients;
         private GatewayNullableValue<int> nbServers;
+        private GatewayNullableValue<int> nbGets;
+        private GatewayNullableValue<int> nbPuts;
+        private GatewayNullableValue<int> nbNewMons;
+        private GatewayNullableValue<int> nbMons;
+        private GatewayNullableValue<int> nbCreates;
         private GatewayNullableValue<int> netIn;
         private GatewayNullableValue<int> netOut;
         private GatewayValue<string> runningTime;
@@ -62,6 +67,11 @@ namespace GWLogger.Live
             version = new GatewayValue<string>(this.liveInformation.Client, gatewayName + ":VERSION");
             nbClients = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NBCLIENTS");
             nbServers = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NBSERVERS");
+            nbGets = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NBCAGET");
+            nbPuts = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NBCAPUT");
+            nbNewMons = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NBNEWCAMON");
+            nbMons = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NBCAMONANSWER");
+            nbCreates = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NBCREATECHANNEL");
             netIn = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NET-IN");
             netOut = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NET-OUT");
         }
@@ -480,5 +490,15 @@ namespace GWLogger.Live
         public int? NbServers => nbServers.Value;
 
         public int? Network => netIn.Value + netOut.Value;
+
+        public int? NbGets => nbGets.Value;
+
+        public int? NbPuts => nbPuts.Value;
+
+        public int? NbNewMons => nbNewMons.Value;
+
+        public int? NbMons => nbMons.Value;
+
+        public int? NbCreates => nbCreates.Value;
     }
 }

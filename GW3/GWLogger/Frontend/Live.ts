@@ -20,10 +20,16 @@ interface HistoricData
 }
 
 var DebugChannels = {
-    'CPU': '{0}:CPU', 'Mem': '{0}:MEM-FREE', 'Searches': '{0}:SEARCH-SEC', 'Build': '{0}:BUILD', 'Version': '{0}:VERSION', 'Messages': '{0}:MESSAGES-SEC', 'PVs': '{0}:PVTOTAL', 'RunningTime': '{0}:RUNNING-TIME', 'NbClients': '{0}:NBCLIENTS', 'NbServers': '{0}:NBSERVERS', 'Network': '({0}:NET-IN + {0}:NET-OUT) / (1024 * 1024)'
+    'CPU': '{0}:CPU', 'Mem': '{0}:MEM-FREE', 'Searches': '{0}:SEARCH-SEC',
+    'Build': '{0}:BUILD', 'Version': '{0}:VERSION', 'Messages': '{0}:MESSAGES-SEC',
+    'PVs': '{0}:PVTOTAL', 'RunningTime': '{0}:RUNNING-TIME', 'NbClients': '{0}:NBCLIENTS',
+    'NbServers': '{0}:NBSERVERS', 'Network': '({0}:NET-IN + {0}:NET-OUT) / (1024 * 1024)',
+    'NbGets': '{0}:NBCAGET', 'NbPuts': '{0}:NBCAPUT', 'NbNewMons': '{0}:NBNEWCAMON',
+    'NbMons': '{0}:NBCAMON', 'NbCreates': '{0}:NBCREATECHANNEL'
 };
 var ChannelsUnits = {
-    'CPU': '%', 'Mem': 'Mb', 'Searches': '/ Sec', 'Messages': '/ Sec', 'Network': 'MB/Sec'
+    'CPU': '%', 'Mem': 'Mb', 'Searches': '/ Sec', 'Messages': '/ Sec', 'Network': 'MB/Sec', 'NbGets': '/ Sec',
+    'NbPuts': '/ Sec', 'NbNewMons': '/ Sec', 'NbMons': '/ Sec', 'NbCreates': '/ Sec'
 };
 var GatewayStates = { 0: 'All Ok', 1: 'Minor', 2: 'Warning', 3: 'Error' };
 
@@ -219,7 +225,7 @@ class Live
                         }
                         $("#gwInfos").html(html);
 
-                        $("#gwInfos tr").on("mouseenter",null, (e) =>
+                        $("#gwInfos tr").on("mouseenter", null, (e) =>
                         {
                             var target = e.target;
                             if (target.nodeName == "TD")

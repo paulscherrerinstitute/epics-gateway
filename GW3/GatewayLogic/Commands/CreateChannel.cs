@@ -37,6 +37,8 @@ namespace GatewayLogic.Commands
             }
             connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannel, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName }, new LogMessageDetail { TypeId = MessageDetail.CID, Value = packet.Parameter1.ToString() } });
             var locked = true;
+
+            System.Threading.Interlocked.Increment(ref connection.Gateway.DiagnosticServer.NbCreateChannel);
             try
             {
                 locker.Wait();
