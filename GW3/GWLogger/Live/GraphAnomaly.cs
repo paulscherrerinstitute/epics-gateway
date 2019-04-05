@@ -9,6 +9,9 @@ namespace GWLogger.Live
         [XmlIgnore]
         public bool IsDirty { get; set; } = false;
 
+        [XmlIgnore]
+        public string Filename { get; set; }
+
         private DateTime _From = DateTime.MinValue;
         public DateTime From {
 

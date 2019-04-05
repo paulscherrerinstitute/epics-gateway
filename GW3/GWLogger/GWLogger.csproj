@@ -546,6 +546,10 @@
       <DependentUpon>DataAccess.asmx</DependentUpon>
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="DataAccess.Anomaly.asmx.cs">
+      <SubType>Component</SubType>
+      <DependentUpon>DataAccess.asmx</DependentUpon>
+    </Compile>
     <Compile Include="DataAccess.asmx.cs">
       <DependentUpon>DataAccess.asmx</DependentUpon>
       <SubType>Component</SubType>
@@ -578,6 +582,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Frontend\Anomalies.ts" />
     <TypeScriptCompile Include="Frontend\Commands.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\Connections.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\DataFileStats.ts" />
@@ -585,6 +590,7 @@
     <TypeScriptCompile Include="Frontend\DTOs\GatewayInformation.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewaySession.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewayStats.ts" />
+    <TypeScriptCompile Include="Frontend\DTOs\GraphAnomaly.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\KeyValuePair.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\LogEntry.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\SearchRequest.ts" />

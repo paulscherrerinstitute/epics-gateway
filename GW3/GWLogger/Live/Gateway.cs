@@ -264,6 +264,7 @@ namespace GWLogger.Live
                                 {
                                     anomaly = (GraphAnomaly)anomalySerializer.Deserialize(file);
                                     anomaly.IsDirty = false;
+                                    anomaly.Filename = Path.GetFileNameWithoutExtension(path);
                                 }
                             }
                             catch (Exception ex)
@@ -317,59 +318,62 @@ namespace GWLogger.Live
                         var beforeEventTypes = Global.DataContext.ReadLog(Name, before, From, typeQuery)?.Select(o => new QueryResultValue(o)).ToList();
                         var duringEventTypes = Global.DataContext.ReadLog(Name, From, To, typeQuery)?.Select(o => new QueryResultValue(o)).ToList();
 
-                        // Skip graph events when there was no log data around to analyze
-                        if (beforeEventTypes == null || duringEventTypes == null)
-                            continue;
-
-                        var typeDifferences = beforeEventTypes
+                        // Don't try to analyze if there is no log data available
+                        if (beforeEventTypes != null && duringEventTypes != null)
+                        {
+                            var typeDifferences = beforeEventTypes
                             .Concat(duringEventTypes)
                             .GroupBy(g => g.Text)
-                            .Select(g => new QueryResultValue {
+                            .Select(g => new QueryResultValue
+                            {
                                 Text = g.Key,
                                 Value = g.Max(q => q.Value) - g.Min(q => q.Value)
                             });
 
-                        var interestingEventTypes = typeDifferences
-                            .OrderByDescending(v => v.Value)
-                            .Take(5)
-                            .ToList();
+                            var interestingEventTypes = typeDifferences
+                                .OrderByDescending(v => v.Value)
+                                .Take(5)
+                                .ToList();
 
-                        var interestingEventTypeRemotes = new List<InterestingEventType>();
+                            var interestingEventTypeRemotes = new List<InterestingEventType>();
 
-                        foreach (var interestingEventType in interestingEventTypes)
-                        {
-                            var interestingTypeQuery = $"select count(*) nb, remote where type=\"{interestingEventType.Text}\" group by remote order by nb desc";
-                            var groupedRemotes = new Dictionary<string, int>();
-
-                            foreach (var remote in Global.DataContext.ReadLog(Name, From, To, interestingTypeQuery).Select(o => new QueryResultValue(o)))
+                            foreach (var interestingEventType in interestingEventTypes)
                             {
-                                var host = remote.Text.Split(':').First();
-                                if (groupedRemotes.TryGetValue(host, out int prev))
-                                    groupedRemotes[host] = prev + (int)remote.Value;
-                                else
-                                    groupedRemotes.Add(host, (int)remote.Value);
+                                var interestingTypeQuery = $"select count(*) nb, remote where type=\"{interestingEventType.Text.Replace("\"","")}\" group by remote order by nb desc";
+                                var groupedRemotes = new Dictionary<string, int>();
+
+                                foreach (var remote in Global.DataContext.ReadLog(Name, From, To, interestingTypeQuery).Select(o => new QueryResultValue(o)))
+                                {
+                                    var host = remote.Text.Split(':').First();
+                                    if (groupedRemotes.TryGetValue(host, out int prev))
+                                        groupedRemotes[host] = prev + (int)remote.Value;
+                                    else
+                                        groupedRemotes.Add(host, (int)remote.Value);
+                                }
+
+                                interestingEventTypeRemotes.Add(new InterestingEventType
+                                {
+                                    EventType = interestingEventType,
+                                    TopRemotes = groupedRemotes
+                                        .OrderByDescending(g => g.Value)
+                                        .Take(3)
+                                        .Select(r => new QueryResultValue { Text = r.Key, Value = r.Value })
+                                        .ToList()
+                                });
                             }
 
-                            interestingEventTypeRemotes.Add(new InterestingEventType {
-                                EventType = interestingEventType,
-                                TopRemotes = groupedRemotes
-                                    .OrderByDescending(g => g.Value)
-                                    .Take(3)
-                                    .Select(r => new QueryResultValue { Text = r.Key, Value = r.Value })
-                                    .ToList()
-                            });
+                            var remoteQuery = "select count(*) nb, remote group by remote order by nb desc";
+                            var beforeRemoteCounts = Global.DataContext.ReadLog(Name, before, From, remoteQuery).Select(o => new QueryResultValue(o)).ToList();
+                            var duringRemoteCounts = Global.DataContext.ReadLog(Name, From, To, remoteQuery).Select(o => new QueryResultValue(o)).ToList();
+
+                            anomaly.InterestingEventTypeRemotes = interestingEventTypeRemotes;
+                            anomaly.BeforeEventTypes = beforeEventTypes.Take(5).ToList();
+                            anomaly.DuringEventTypes = duringEventTypes.Take(5).ToList();
+                            anomaly.BeforeRemoteCounts = beforeRemoteCounts.Take(5).ToList();
+                            anomaly.DuringRemoteCounts = duringRemoteCounts.Take(5).ToList();
                         }
 
-                        var remoteQuery = "select count(*) nb, remote group by remote order by nb desc";
-                        var beforeRemoteCounts = Global.DataContext.ReadLog(Name, before, From, remoteQuery).Select(o => new QueryResultValue(o)).ToList();
-                        var duringRemoteCounts = Global.DataContext.ReadLog(Name, From, To, remoteQuery).Select(o => new QueryResultValue(o)).ToList();
-
                         anomaly.History = GetHistory();
-                        anomaly.InterestingEventTypeRemotes = interestingEventTypeRemotes;
-                        anomaly.BeforeEventTypes = beforeEventTypes.Take(5).ToList();
-                        anomaly.DuringEventTypes = duringEventTypes.Take(5).ToList();
-                        anomaly.BeforeRemoteCounts = beforeRemoteCounts.Take(5).ToList();
-                        anomaly.DuringRemoteCounts = duringRemoteCounts.Take(5).ToList();
 
                         var writingFailed = true;
                         try
@@ -391,7 +395,7 @@ namespace GWLogger.Live
                     }
                 }
 
-                // Remove anomalies that are too old
+                // Remove anomalies that are too old from memory
                 var lastDataPoint = cpuHistory.OrderBy(c => c.Date).FirstOrDefault();
                 if(lastDataPoint != null)
                     PreviousAnomalies.RemoveAll(a => a.To < lastDataPoint.Date);
@@ -473,6 +477,27 @@ namespace GWLogger.Live
             return combined;
         }
 
+        public List<GraphAnomaly> GetGatewayAnomalies()
+        {
+            var anomalyDateFormat = "yyyy-MM-dd-hh-mm-ss";
+            var anomalyStorage = Global.AnomalyStorage;
+            var anomalySerializer = new XmlSerializer(typeof(GraphAnomaly));
+
+            lock (PreviousAnomaliesLock)
+            {
+                var dateMatcher = Regex.Replace(anomalyDateFormat, @"([^-\s])", "?");
+                var files = Directory.EnumerateFiles(anomalyStorage, $"{Name}_{dateMatcher}.xml", SearchOption.TopDirectoryOnly);
+                return files.Select(path => {
+                    using (var file = File.OpenRead(path))
+                    {
+                        var anomaly = (GraphAnomaly)anomalySerializer.Deserialize(file);
+                        anomaly.IsDirty = false;
+                        anomaly.Filename = Path.GetFileNameWithoutExtension(path);
+                        return anomaly;
+                    }
+                }).ToList();
+            }
+        }
         /// <summary>
         /// Average PVs in the last 10 minutes
         /// </summary>

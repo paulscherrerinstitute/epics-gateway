@@ -886,9 +886,8 @@ class Main
                         State.Pop(null);
                         $(".inset").removeClass("inset");
                         break;
-                    case "Events":
-                        alert("Todo");
-                        Main.Path = "Events";
+                    case "Anomalies":
+                        Main.Path = "Anomalies";
                         State.Set(true);
                         State.Pop(null);
                         $(".inset").removeClass("inset");

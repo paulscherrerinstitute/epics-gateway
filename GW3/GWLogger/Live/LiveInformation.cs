@@ -166,6 +166,16 @@ namespace GWLogger.Live
             }
         }
 
+        public List<GraphAnomaly> GetGraphAnomalies()
+        {
+            List<Gateway> snapshot;
+            lock (Gateways)
+                snapshot = Gateways.ToList();
+            return snapshot
+                .SelectMany(gateway => gateway.GetGatewayAnomalies())
+                .ToList();
+        }
+
         internal static void SendEmail(string destination, string subject, string content)
         {
             using (var mail = new System.Net.Mail.MailMessage(System.Configuration.ConfigurationManager.AppSettings["smtpSenderAddress"], destination))

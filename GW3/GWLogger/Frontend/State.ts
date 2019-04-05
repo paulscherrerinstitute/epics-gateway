@@ -41,6 +41,7 @@
                     $("#mapView").hide();
                     $("#gatewayView").hide();
                     $("#gatewayDetails").hide();
+                    $("#anomalyView").hide();
                     $("#logView").show();
                     break;
                 case "Map":
@@ -49,7 +50,18 @@
                     $("#mapView").show();
                     $("#gatewayView").hide();
                     $("#gatewayDetails").hide();
+                    $("#anomalyView").hide();
                     $("#logView").hide();
+                    break;
+                case "Anomalies":
+                    Main.Path = "Anomalies";
+                    $($("#mainTabs li")[4]).addClass("activeTab");
+                    $("#mapView").hide();
+                    $("#gatewayView").hide();
+                    $("#gatewayDetails").hide();
+                    $("#anomalyView").show();
+                    $("#logView").hide();
+                    Anomalies.Show();
                     break;
                 default:
                     Main.Path = "Status";
@@ -58,6 +70,7 @@
                     $("#gatewayView").show();
                     $("#gatewayDetails").hide();
                     $("#logView").hide();
+                    $("#anomalyView").hide();
             }
         }
 
