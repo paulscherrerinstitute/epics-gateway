@@ -627,6 +627,11 @@ class Main
             }
         }
 
+        if (Main.Path == "Anomalies")
+        {
+            Anomalies.Refresh();
+        }
+
         Live.RefreshShort();
     }
 

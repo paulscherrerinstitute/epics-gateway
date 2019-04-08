@@ -587,6 +587,7 @@
     <TypeScriptCompile Include="Frontend\DTOs\Connections.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\DataFileStats.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\FreeSpace.ts" />
+    <TypeScriptCompile Include="Frontend\DTOs\GatewayHistory.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewayInformation.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewaySession.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewayStats.ts" />

@@ -1,5 +1,6 @@
 ﻿class GraphAnomaly {
     Filename: string;
+    Name: string;
     From: Date;
     To: Date;
     InterestingEventTypeRemotes: InterestingEventType[];
@@ -7,10 +8,11 @@
     DuringRemoteCounts: QueryResultValue[];
     BeforeEventTypes: QueryResultValue[];
     DuringEventTypes: QueryResultValue[];
-    History: GatewayStats;
+    History: GatewayHistory;
 
     constructor(
         filename: string,
+        name: string,
         from: string,
         to: string,
         interestingEventTypeRemotes: InterestingEventType[],
@@ -18,9 +20,10 @@
         duringRemoteCounts: QueryResultValue[],
         beforeEventTypes: QueryResultValue[],
         duringEventTypes: QueryResultValue[],
-        history: GatewayStats,
+        history: GatewayHistory
     ) {
         this.Filename = filename;
+        this.Name = name;
         this.From = (from ? new Date(parseInt(from.substr(6, from.length - 8))) : null);
         this.To = (to ? new Date(parseInt(to.substr(6, to.length - 8))) : null);
         this.BeforeRemoteCounts = beforeRemoteCounts;
@@ -35,6 +38,7 @@
             return null;
         return new GraphAnomaly(
             obj.Filename,
+            obj.Name,
             obj.From,
             obj.To,
             obj.InterestingEventTypeRemotes,
@@ -42,7 +46,7 @@
             obj.DuringRemoteCounts,
             obj.BeforeEventTypes,
             obj.DuringEventTypes,
-            GatewayStats.CreateFromObject(obj.History),
+            GatewayHistory.CreateFromObject(obj.History),
         );
     }
 }

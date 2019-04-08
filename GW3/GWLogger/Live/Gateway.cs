@@ -265,6 +265,7 @@ namespace GWLogger.Live
                                     anomaly = (GraphAnomaly)anomalySerializer.Deserialize(file);
                                     anomaly.IsDirty = false;
                                     anomaly.Filename = Path.GetFileNameWithoutExtension(path);
+                                    anomaly.Name = Name;
                                 }
                             }
                             catch (Exception ex)
@@ -493,6 +494,7 @@ namespace GWLogger.Live
                         var anomaly = (GraphAnomaly)anomalySerializer.Deserialize(file);
                         anomaly.IsDirty = false;
                         anomaly.Filename = Path.GetFileNameWithoutExtension(path);
+                        anomaly.Name = Name;
                         return anomaly;
                     }
                 }).ToList();

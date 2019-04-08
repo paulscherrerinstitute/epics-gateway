@@ -173,6 +173,7 @@ namespace GWLogger.Live
                 snapshot = Gateways.ToList();
             return snapshot
                 .SelectMany(gateway => gateway.GetGatewayAnomalies())
+                .OrderByDescending(anomaly => anomaly.From)
                 .ToList();
         }
 

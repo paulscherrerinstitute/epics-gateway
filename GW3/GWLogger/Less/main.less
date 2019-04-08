@@ -1230,7 +1230,7 @@ select
         position: fixed;
         top: 35px;
         left: 5px;
-        right: @errorPanel + 24;
+        right: @errorPanel + 8;
         width: auto;
     }
 }
@@ -1258,5 +1258,36 @@ select
     {
         height: 16px;
         line-height: 16px;
+    }
+}
+
+#anomalyView {
+    .container;
+    position: absolute;
+    top: 35px;
+    right: calc(@errorPanel + 8);
+    left: 5px;
+    bottom: 5px;
+    padding-top: 10px;
+    overflow-y: scroll;
+
+    &:before {
+        .containterLabel;
+        content: "Anomalies";
+        position: fixed;
+        top: 35px;
+        left: 5px;
+        right: @errorPanel + 8;
+        width: auto;
+    }
+}
+
+.anomaly-card {
+    background-color: white;
+    padding: 5px;
+    cursor: pointer;
+
+    &:hover{
+        background-color: darken(white, 5%);
     }
 }

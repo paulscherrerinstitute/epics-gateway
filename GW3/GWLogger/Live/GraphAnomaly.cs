@@ -40,6 +40,9 @@ namespace GWLogger.Live
                 IsDirty = true;
             }
         }
+
+        public string Name { get; set; }
+
         public List<InterestingEventType> InterestingEventTypeRemotes { get; set; }
 
         public List<QueryResultValue> BeforeRemoteCounts { get; set; }
