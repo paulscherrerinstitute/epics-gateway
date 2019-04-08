@@ -221,6 +221,9 @@ class Main
             return;
         }
 
+        if (Main.CurrentGateway == null)
+            return;
+
         var startDate = Main.Stats.Logs[Main.Stats.Logs.length - 1].Date;
         //var startDate = new Date((new Date()).getTime() - 10 * 60 * 1000);
         if (Main.CurrentTime)
@@ -408,6 +411,9 @@ class Main
             //(Main.Levels ? "?levels=" + Main.Levels + "&query=" + $("#queryField").val() : "?query=" + $("#queryField").val()
             url = '/Logs/' + Main.CurrentGateway + '/' + startDate.getTime() + '/' + endDate.getTime() + queryString;
         }
+
+        if (Main.CurrentGateway == null)
+            return;
 
         Main.loadingLogs = $.ajax({
             type: 'GET',

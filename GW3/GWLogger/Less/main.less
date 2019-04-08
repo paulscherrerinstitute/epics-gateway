@@ -1282,12 +1282,28 @@ select
     }
 }
 
-.anomaly-card {
+.anomaly-card
+{
     background-color: white;
     padding: 5px;
     cursor: pointer;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
 
-    &:hover{
+    &:hover
+    {
         background-color: darken(white, 5%);
     }
+
+    &:first-child
+    {
+        margin-top: 5px;
+    }
+}
+
+.no-anomalies
+{
+    padding-top: 20px;
+    text-align: center;
 }
