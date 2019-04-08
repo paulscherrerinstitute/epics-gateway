@@ -234,7 +234,7 @@ namespace GWLogger.Live
 
         internal void AnalyzeGraphs()
         {
-            var anomalyDateFormat = "yyyy-MM-dd-hh-mm-ss";
+            var anomalyDateFormat = "yyyy-MM-dd-HH-mm-ss";
             var anomalyStorage = Global.AnomalyStorage;
             var anomalySerializer = new XmlSerializer(typeof(GraphAnomaly));
 
@@ -418,10 +418,7 @@ namespace GWLogger.Live
                     count++;
                 }
                 var avgValue = Math.Round(sum / count, 1, MidpointRounding.AwayFromZero);
-                var firstDate = rawData[i].Date.Ticks;
-                var lastDate = rawData[lastIndex].Date.Ticks;
-                var avgDate = new DateTime((lastDate + firstDate) / 2);
-                averaged.Add((avgDate, avgValue));
+                averaged.Add((rawData[i].Date, avgValue));
             }
             return averaged;
         }
@@ -480,7 +477,7 @@ namespace GWLogger.Live
 
         public List<GraphAnomaly> GetGatewayAnomalies()
         {
-            var anomalyDateFormat = "yyyy-MM-dd-hh-mm-ss";
+            var anomalyDateFormat = "yyyy-MM-dd-HH-mm-ss";
             var anomalyStorage = Global.AnomalyStorage;
             var anomalySerializer = new XmlSerializer(typeof(GraphAnomaly));
 

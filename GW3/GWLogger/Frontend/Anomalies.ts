@@ -2,6 +2,8 @@
 {
 
     public static Show(): void {
+        Main.CurrentGateway = null;
+        State.Set(true);
         this.GetGraphAnomalies((anomalies) => {
             var html = "";
             for (var anomaly of anomalies) {
@@ -19,8 +21,13 @@
                     MinY: 0,
                     MaxY: 100,
                     FontSize: 10,
-                    PlotColor: '#000080',
+                    PlotColor: "#000080",
                     LabelFormat: Utils.ShortGWDateFormat,
+                    HighlightSection: {
+                        StartLabel: anomaly.From,
+                        EndLabel: anomaly.To,
+                        HighlightColor: "#800000",
+                    }
                 });
             }
         });
@@ -31,7 +38,6 @@
     }
 
     public static Detail(filename: string) {
-
     }
 
     private static GetGraphAnomalies(callback: (a: GraphAnomaly[]) => void): void {

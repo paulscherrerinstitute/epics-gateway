@@ -20,6 +20,13 @@ interface GraphOptions
     LabelFormat?: (value: any) => string;
     TooltipLabelFormat?: (value: any) => string;
     OnClick?: (label: any, value: number) => void;
+    HighlightSection?: HighlightSection;
+}
+
+interface HighlightSection {
+    StartLabel: any;
+    EndLabel: any;
+    HighlightColor: string;
 }
 
 interface Math
@@ -301,10 +308,43 @@ class LineGraph
         ctx.setLineDash([]);
         ctx.strokeStyle = this.plotColor;
         ctx.lineWidth = this.plotLineWidth;
+
+        var highlightSection = this.graphOptions.HighlightSection;
+        var isHighlighted = false;
         for (var i = 0; i < this.dataSource.Values.length; i++)
         {
-            var y = this.TransformY(this.dataSource.Values[i].Value);
+            var point = this.dataSource.Values[i];
+
+            var y = this.TransformY(point.Value);
             var x = this.TransformX(i, this.xLabelWidth + 2);
+
+            if (highlightSection) {
+
+                var comparer = point.Label instanceof Date ? (a,b) => this.AreDatesEqual(a,b) : (a, b) => a == b;
+
+                if (comparer(point.Label, highlightSection.StartLabel))
+                    isHighlighted = true;
+                if (comparer(point.Label, highlightSection.EndLabel))
+                    isHighlighted = false;
+
+                var newStrokeStyle = isHighlighted ? highlightSection.HighlightColor : this.plotColor;
+                if (ctx.strokeStyle != newStrokeStyle)
+                {
+                    if (i == 0)
+                        ctx.moveTo(x, y);
+                    else
+                        ctx.lineTo(x, y);
+
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = newStrokeStyle;
+                    ctx.setLineDash([]);
+                    ctx.lineWidth = this.plotLineWidth;
+                }
+            }
+            
+
             if (i == 0)
                 ctx.moveTo(x, y);
             else
@@ -312,6 +352,15 @@ class LineGraph
         }
         ctx.stroke();
     }
+
+    private AreDatesEqual(a: Date, b: Date): boolean {
+        return a.getUTCFullYear() == b.getUTCFullYear() &&
+            a.getUTCMonth() == b.getUTCMonth() &&
+            a.getUTCDate() == b.getUTCDate() &&
+            a.getUTCHours() == b.getUTCHours() &&
+            a.getUTCMinutes() == b.getUTCMinutes() &&
+            a.getUTCSeconds() == b.getUTCSeconds();
+    } 
 
     // Transforms the X value in the screen coordinate
     private TransformX(x: number, xLabelWidth: number)
