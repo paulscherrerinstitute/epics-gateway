@@ -220,7 +220,7 @@ class Main
         });
     }
 
-    static ShowStats()
+    static ShowStats(refresh: boolean)
     {
         if (!Main.Stats || !Main.Stats.Logs || Main.Stats.Logs.length == 0)
         {
@@ -245,6 +245,36 @@ class Main
             dataType: 'json',
             success: function (msg)
             {
+                $.ajax({
+                    type: 'POST',
+                    url: 'DataAccess.asmx/ActiveServers',
+                    data: JSON.stringify({
+                        "gatewayName": Main.CurrentGateway,
+                        "datePoint": Utils.FullDateFormat(startDate)
+                    }),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    success: function (msg)
+                    {
+                        if ($("#serversContent").data("kendoGrid"))
+                            $("#serversContent").data("kendoGrid").destroy();
+                        $("#serversContent").html("").kendoGrid({
+                            columns: [
+                                { title: "Server", field: "Key" },
+                                { title: "Nb Actions", field: "Value" }],
+                            dataSource:
+                            {
+                                data: msg.d
+                            }
+                        });
+                    },
+                    error: function (msg, textStatus)
+                    {
+                        $("#serversContent").html("");
+                        console.log(msg.responseText);
+                    }
+                });
+
                 if ($("#clientsContent").data("kendoGrid"))
                     $("#clientsContent").data("kendoGrid").destroy();
                 $("#clientsContent").html("").kendoGrid({
@@ -260,36 +290,6 @@ class Main
             error: function (msg, textStatus)
             {
                 $("#clientsContent").html("");
-                console.log(msg.responseText);
-            }
-        });
-
-        $.ajax({
-            type: 'POST',
-            url: 'DataAccess.asmx/ActiveServers',
-            data: JSON.stringify({
-                "gatewayName": Main.CurrentGateway,
-                "datePoint": Utils.FullDateFormat(startDate)
-            }),
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
-            success: function (msg)
-            {
-                if ($("#serversContent").data("kendoGrid"))
-                    $("#serversContent").data("kendoGrid").destroy();
-                $("#serversContent").html("").kendoGrid({
-                    columns: [
-                        { title: "Server", field: "Key" },
-                        { title: "Nb Actions", field: "Value" }],
-                    dataSource:
-                    {
-                        data: msg.d
-                    }
-                });
-            },
-            error: function (msg, textStatus)
-            {
-                $("#serversContent").html("");
                 console.log(msg.responseText);
             }
         });
@@ -343,7 +343,7 @@ class Main
                 dataType: 'json',
                 success: function (msg)
                 {
-                    Main.ShowStats();
+                    Main.ShowStats(refresh);
 
                     Main.loadingLogs = null;
                     var data = <KeyValuePair[]>msg.d;
@@ -422,7 +422,7 @@ class Main
             url: url,
             success: function (data)
             {
-                Main.ShowStats();
+                Main.ShowStats(refresh);
 
                 Main.loadingLogs = null;
                 var tz = (new Date()).getTimezoneOffset() * 60000;
@@ -626,21 +626,21 @@ class Main
                         {
                             $("#bufferSpace").html("" + msg.d + "%");
 
-                                Main.LoadGateways(() =>
+                            /*Main.LoadGateways(() =>
+                            {*/
+                                Live.RefreshShort(() =>
                                 {
-                                    Live.RefreshShort(() =>
-                                    {
-                                        if (Main.Path == "GW" && Main.CurrentGateway)
-                                            Main.LoadSessions(() =>
-                                            {
-                                                Main.statsAreLoading = false;
-
-                                                Main.LoadLogStats(true);
-                                            });
-                                        else
+                                    if (Main.Path == "GW" && Main.CurrentGateway)
+                                        Main.LoadSessions(() =>
+                                        {
                                             Main.statsAreLoading = false;
-                                    });
+
+                                            Main.LoadLogStats(true);
+                                        });
+                                    else
+                                        Main.statsAreLoading = false;
                                 });
+                            //});
                         },
                         error: () =>
                         {
@@ -809,6 +809,8 @@ class Main
 
         if (("" + document.location).startsWith("http://localhost"))
             $("#gatewayBeamlines").append(`<div class="GWDisplay" id="PBGW"></div>`);
+
+        Main.LoadGateways(() => { });
 
         $(".helpMiddleContainer a").on("click", (elem) =>
         {
