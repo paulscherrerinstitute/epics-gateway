@@ -24,7 +24,7 @@ class Main
     static loadingLogs: JQueryXHR;
 
 
-    static LoadGateways(): void
+    static LoadGateways(callback: () => void): void
     {
         $.ajax({
             type: 'POST',
@@ -34,6 +34,8 @@ class Main
             dataType: 'json',
             success: function (msg)
             {
+                callback();
+
                 var gateways: string[] = msg.d;
                 var data = gateways.map((c) => { return { text: c, value: c }; });
 
@@ -59,6 +61,7 @@ class Main
             },
             error: function (msg, textStatus)
             {
+                Main.statsAreLoading = false;
                 console.log(msg.responseText);
             }
         });
@@ -84,8 +87,10 @@ class Main
 
     static GatewaySelected(): void
     {
-        Main.LoadSessions();
-        Main.LoadLogStats();
+        Main.LoadSessions(() =>
+        {
+            Main.LoadLogStats();
+        });
     }
 
     static LoadLogStats(refresh: boolean = false): void
@@ -142,7 +147,7 @@ class Main
         });
     }
 
-    static LoadSessions(): void
+    static LoadSessions(callback: () => void): void
     {
         $.ajax({
             type: 'POST',
@@ -152,6 +157,8 @@ class Main
             dataType: 'json',
             success: function (msg)
             {
+                callback();
+
                 var restartTypes = [];
                 for (var o in RestartType)
                     restartTypes.push({
@@ -207,6 +214,7 @@ class Main
             },
             error: function (msg, textStatus)
             {
+                Main.statsAreLoading = false;
                 console.log(msg.responseText);
             }
         });
@@ -427,7 +435,7 @@ class Main
                     var columns = [];
                     for (var j in data[0])
                     {
-                        var c = { field: j, title: j.replace(/_/g," ") };
+                        var c = { field: j, title: j.replace(/_/g, " ") };
                         if (typeof data[0][j] == "number" && Math.abs((new Date()).getTime() - new Date(data[0][j]).getTime()) < 4320000000)
                             c['format'] = "{0:MM/dd HH:mm:ss.fff}";
                         columns.push(c);
@@ -437,7 +445,7 @@ class Main
                     {
                         columns.forEach((j) =>
                         {
-                            if(j.format)
+                            if (j.format)
                                 r[j.field] = new Date(r[j.field] + tz);
                         });
                     });
@@ -582,6 +590,7 @@ class Main
     }
 
     static lastRefresh: number = 0;
+    static statsAreLoading = false;
     static Refresh()
     {
         var now = new Date();
@@ -593,41 +602,58 @@ class Main
         }
         Main.lastRefresh++;
 
-        $.ajax({
-            type: 'POST',
-            url: 'DataAccess.asmx/GetFreeSpace',
-            data: JSON.stringify({}),
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
-            success: function (msg)
-            {
-                var free = <FreeSpace>msg.d;
-                $("#freeSpace").html("" + (Math.round(free.FreeMB * 1000 / free.TotMB) / 10) + "%");
-            }
-        });
-
-        $.ajax({
-            type: 'POST',
-            url: 'DataAccess.asmx/GetBufferUsage',
-            data: JSON.stringify({}),
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
-            success: function (msg)
-            {
-                $("#bufferSpace").html("" + msg.d + "%");
-            }
-        });
-
-        if (Main.Path == "GW")
+        if (!this.statsAreLoading)
         {
-            if (Main.CurrentGateway)
-            {
-                Main.LoadSessions();
-                Main.LoadLogStats(true);
-            }
-        }
+            Main.statsAreLoading = true;
+            $.ajax({
+                type: 'POST',
+                url: 'DataAccess.asmx/GetFreeSpace',
+                data: JSON.stringify({}),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (msg)
+                {
+                    var free = <FreeSpace>msg.d;
+                    $("#freeSpace").html("" + (Math.round(free.FreeMB * 1000 / free.TotMB) / 10) + "%");
 
-        Live.RefreshShort();
+                    $.ajax({
+                        type: 'POST',
+                        url: 'DataAccess.asmx/GetBufferUsage',
+                        data: JSON.stringify({}),
+                        contentType: 'application/json; charset=utf-8',
+                        dataType: 'json',
+                        success: (msg) =>
+                        {
+                            $("#bufferSpace").html("" + msg.d + "%");
+
+                                Main.LoadGateways(() =>
+                                {
+                                    Live.RefreshShort(() =>
+                                    {
+                                        if (Main.Path == "GW" && Main.CurrentGateway)
+                                            Main.LoadSessions(() =>
+                                            {
+                                                Main.statsAreLoading = false;
+
+                                                Main.LoadLogStats(true);
+                                            });
+                                        else
+                                            Main.statsAreLoading = false;
+                                    });
+                                });
+                        },
+                        error: () =>
+                        {
+                            Main.statsAreLoading = false;
+                        }
+                    });
+                },
+                error: () =>
+                {
+                    Main.statsAreLoading = false;
+                }
+            });
+        }
     }
 
     static CheckTouch(): boolean
@@ -1026,7 +1052,7 @@ class Main
                 $("#querySuggestions").hide();
             }
         });
-        
+
         $("#btnPremadeQueries").on("click", () =>
         {
             if ($("#premadeQueries").is(":visible"))

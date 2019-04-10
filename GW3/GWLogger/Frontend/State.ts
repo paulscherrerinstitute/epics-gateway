@@ -135,7 +135,6 @@
         }
 
         Main.Refresh();
-        Main.LoadGateways();
         //Main.DelayedSearch(Main.LoadLogStats, true);
     }
 

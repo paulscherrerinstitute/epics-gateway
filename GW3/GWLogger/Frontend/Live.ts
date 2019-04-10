@@ -154,11 +154,11 @@ class Live
     {
         Main.CurrentGateway = gwName.toLowerCase();
         State.Set();
-        Live.RefreshShort();
+        //Live.RefreshShort();
         $("#gatewayView").hide();
         $("#gatewayDetails").show();
         Live.mustUpdate = 0;
-        Live.RefreshShort();
+        Live.RefreshShort(null);
 
         $("#currentGW").html("Loading...");
         $("#gwInfos").html("");
@@ -193,116 +193,9 @@ class Live
         return null;
     }
 
-    static RefreshShort()
+    static RefreshShort(callback: () => void)
     {
-        if (Main.CurrentGateway)
-        {
-            $("#inventoryLink").attr("href", "https://inventory.psi.ch/#action=Part&system=" + encodeURIComponent(Main.CurrentGateway.toUpperCase()));
-            $("#logLink").attr("href", "/GW/" + Main.CurrentGateway);
 
-            $.ajax({
-                type: 'POST',
-                url: 'DataAccess.asmx/GetGatewayInformation',
-                data: JSON.stringify({ gatewayName: Main.CurrentGateway.toUpperCase() }),
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'json',
-                success: function (msg)
-                {
-                    var data: GatewayInformation = msg.d;
-                    try
-                    {
-                        data.CPU = Math.round(data.CPU * 100) / 100;
-                        data.RunningTime = data.RunningTime ? data.RunningTime.substr(0, data.RunningTime.lastIndexOf('.')).replace(".", " day(s) ") : "";
-
-                        var html = "";
-                        for (var i in data)
-                        {
-                            if (i == "__type" || i == "Name")
-                                continue;
-                            html += "<tr><td>" + i + "</td><td" + (ChannelsUnits[i] ? "" : " colspan='2'") + ">" + data[i] + "</td>";
-                            html += ChannelsUnits[i] ? "<td>" + ChannelsUnits[i] + "</td>" : "";
-                            html += "</tr>";
-                        }
-                        $("#gwInfos").html(html);
-
-                        $("#gwInfos tr").on("mouseenter", null, (e) =>
-                        {
-                            var target = e.target;
-                            if (target.nodeName == "TD")
-                                target = target.parentElement;
-                            ToolTip.Show(target, "bottom", "EPICS Channel Name:<br>" + DebugChannels[target.children[0].innerHTML].replace(/\{0\}/g, Main.CurrentGateway.toUpperCase()));
-                        });
-                    }
-                    catch (ex)
-                    {
-                    }
-                }
-            });
-
-            $.ajax({
-                type: 'POST',
-                url: 'DataAccess.asmx/GetHistoricData',
-                data: JSON.stringify({ gatewayName: Main.CurrentGateway.toUpperCase() }),
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'json',
-                success: function (msg)
-                {
-                    $("#currentGW").html(Main.CurrentGateway.toUpperCase());
-
-                    var data: HistoricData[] = null;
-                    try
-                    {
-                        for (var i = 0; i < msg.d.length; i++)
-                        {
-                            switch (msg.d[i].Key)
-                            {
-                                case "CPU":
-                                    data = msg.d[i].Value;
-                                    Live.cpuChart.SetDataSource({
-                                        Values: data.map((c) =>
-                                        {
-                                            return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
-                                        })
-                                    });
-                                    break;
-                                case "Searches":
-                                    data = msg.d[i].Value;
-                                    Live.searchesChart.SetDataSource({
-                                        Values: data.map((c) =>
-                                        {
-                                            return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
-                                        })
-                                    });
-                                    break;
-                                case "PVs":
-                                    data = msg.d[i].Value;
-                                    Live.pvsChart.SetDataSource({
-                                        Values: data.map((c) =>
-                                        {
-                                            return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
-                                        })
-                                    });
-                                    break;
-                                case "Network":
-                                    data = msg.d[i].Value;
-                                    Live.networkChart.SetDataSource({
-                                        Values: data.map((c) =>
-                                        {
-                                            return { Label: Utils.DateFromNet(c.Date), Value: c.Value / (1024 * 1024) };
-                                        })
-                                    });
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                    }
-                    catch (ex)
-                    {
-                    }
-                }
-            });
-        }
 
         $.ajax({
             type: 'POST',
@@ -348,9 +241,132 @@ class Live
 
                 if (!Main.CurrentGateway && Main.Path != "GW")
                     Live.DisplayShort();
+
+                if (!Main.CurrentGateway)
+                {
+                    callback();
+                    return;
+                }
+
+                $("#inventoryLink").attr("href", "https://inventory.psi.ch/#action=Part&system=" + encodeURIComponent(Main.CurrentGateway.toUpperCase()));
+                $("#logLink").attr("href", "/GW/" + Main.CurrentGateway);
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'DataAccess.asmx/GetGatewayInformation',
+                    data: JSON.stringify({ gatewayName: Main.CurrentGateway.toUpperCase() }),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    success: function (msg)
+                    {
+                        $.ajax({
+                            type: 'POST',
+                            url: 'DataAccess.asmx/GetHistoricData',
+                            data: JSON.stringify({ gatewayName: Main.CurrentGateway.toUpperCase() }),
+                            contentType: 'application/json; charset=utf-8',
+                            dataType: 'json',
+                            success: function (msg)
+                            {
+                                if (callback)
+                                    callback();
+
+                                $("#currentGW").html(Main.CurrentGateway.toUpperCase());
+
+                                var data: HistoricData[] = null;
+                                try
+                                {
+                                    for (var i = 0; i < msg.d.length; i++)
+                                    {
+                                        switch (msg.d[i].Key)
+                                        {
+                                            case "CPU":
+                                                data = msg.d[i].Value;
+                                                Live.cpuChart.SetDataSource({
+                                                    Values: data.map((c) =>
+                                                    {
+                                                        return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
+                                                    })
+                                                });
+                                                break;
+                                            case "Searches":
+                                                data = msg.d[i].Value;
+                                                Live.searchesChart.SetDataSource({
+                                                    Values: data.map((c) =>
+                                                    {
+                                                        return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
+                                                    })
+                                                });
+                                                break;
+                                            case "PVs":
+                                                data = msg.d[i].Value;
+                                                Live.pvsChart.SetDataSource({
+                                                    Values: data.map((c) =>
+                                                    {
+                                                        return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
+                                                    })
+                                                });
+                                                break;
+                                            case "Network":
+                                                data = msg.d[i].Value;
+                                                Live.networkChart.SetDataSource({
+                                                    Values: data.map((c) =>
+                                                    {
+                                                        return { Label: Utils.DateFromNet(c.Date), Value: c.Value / (1024 * 1024) };
+                                                    })
+                                                });
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                    }
+                                }
+                                catch (ex)
+                                {
+                                }
+                            },
+                            error: () =>
+                            {
+                                Main.statsAreLoading = false;
+                            }
+                        });
+                        var data: GatewayInformation = msg.d;
+                        try
+                        {
+                            data.CPU = Math.round(data.CPU * 100) / 100;
+                            data.RunningTime = data.RunningTime ? data.RunningTime.substr(0, data.RunningTime.lastIndexOf('.')).replace(".", " day(s) ") : "";
+
+                            var html = "";
+                            for (var i in data)
+                            {
+                                if (i == "__type" || i == "Name")
+                                    continue;
+                                html += "<tr><td>" + i + "</td><td" + (ChannelsUnits[i] ? "" : " colspan='2'") + ">" + data[i] + "</td>";
+                                html += ChannelsUnits[i] ? "<td>" + ChannelsUnits[i] + "</td>" : "";
+                                html += "</tr>";
+                            }
+                            $("#gwInfos").html(html);
+
+                            $("#gwInfos tr").on("mouseenter", null, (e) =>
+                            {
+                                var target = e.target;
+                                if (target.nodeName == "TD")
+                                    target = target.parentElement;
+                                ToolTip.Show(target, "bottom", "EPICS Channel Name:<br>" + DebugChannels[target.children[0].innerHTML].replace(/\{0\}/g, Main.CurrentGateway.toUpperCase()));
+                            });
+                        }
+                        catch (ex)
+                        {
+                        }
+                    },
+                    error: () =>
+                    {
+                        Main.statsAreLoading = false;
+                    }
+                });
             },
             error: function (msg, textStatus)
             {
+                Main.statsAreLoading = false;
                 console.log(msg.responseText);
             }
         });

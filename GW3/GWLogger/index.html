@@ -136,6 +136,8 @@
             <div query='select sum(packetsize) tot, remote group by remote order by tot desc limit 100'>Tot communication pro remote</div>
             <div query='select count(*) nb, type group by type order by nb desc limit 100'>NB logs pro type</div>
             <div query='select count(*) nb, remote where type="ReadNotifyRequest" or type="ReadNotifyResponse" group by remote order by nb desc limit 100'>NB logs pro remote for given type</div>
+            <div query='select date, reason, message, hostname  where type starts "client"'>Client disconnection reason</div>
+            <div query='select count(*) nb, reason where type starts "client" group by reason order by nb desc limit 100'>NB Disconnect per reason</div>
         </div>
             <div id="detailInfo"></div>
             <div id="showLastBtn">Last entries</div>
