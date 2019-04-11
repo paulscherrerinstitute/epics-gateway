@@ -12,8 +12,7 @@
 @middleSidebar: (@leftSidebar+5)/2;
 @suggestionBackground: rgb(255, 253, 242);
 
-body
-{
+body {
     background-color: @backgroundColor;
     //color: black;
     color: #606060;
@@ -23,28 +22,23 @@ body
     user-select: none;
 }
 
-.scrollbarStyle
-{
-    &::-webkit-scrollbar
-    {
+.scrollbarStyle {
+    &::-webkit-scrollbar {
         width: 10px;
     }
 
-    &::-webkit-scrollbar-track
-    {
+    &::-webkit-scrollbar-track {
         -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
     }
 
 
-    &::-webkit-scrollbar-thumb
-    {
+    &::-webkit-scrollbar-thumb {
         background-color: darkgrey;
         outline: 1px solid slategrey;
     }
 }
 
-.container
-{
+.container {
     position: absolute;
     background-color: @containerBackground;
     box-shadow: @boxShadow;
@@ -53,26 +47,22 @@ body
     box-sizing: border-box;
 }
 
-.dataTable
-{
+.dataTable {
     width: 100%;
     border-collapse: collapse;
 
-    & tr > td
-    {
+    & tr > td {
         border-bottom: 1px solid #d3cfbc;
         padding: 10px 3px 10px 3px;
     }
 
-    & thead td
-    {
+    & thead td {
         font-weight: bold;
         color: #6b6750;
     }
 }
 
-.button
-{
+.button {
     cursor: pointer;
     background-color: @labelBackgroundColor;
     padding: 3px;
@@ -83,14 +73,12 @@ body
     border-radius: 3px;
     text-decoration: none;
 
-    &:hover
-    {
+    &:hover {
         background-color: #707ece;
     }
 }
 
-.containterLabel
-{
+.containterLabel {
     position: absolute;
     display: block;
     width: ~"calc(100% - 4px)";
@@ -107,8 +95,7 @@ body
     color: @labelColor;
 }
 
-#sessionSelector
-{
+#sessionSelector {
     .container;
     left: 0px;
     top: 0px;
@@ -118,36 +105,31 @@ body
     padding-top: 17px;
     overflow: hidden;
 
-    &:after
-    {
+    &:after {
         .containterLabel;
         content: "Session";
     }
 }
 
-.gatewaySelector
-{
+.gatewaySelector {
     display: block;
     width: 100%;
     margin-bottom: 10px;
 }
 
-#timeRange
-{
+#timeRange {
     .container;
     top: 0px;
     left: (@leftSidebar + @borderSpacing);
     height: @timeRangeHeight;
     right: @borderSpacing;
 
-    &:after
-    {
+    &:after {
         .containterLabel;
         content: "Time Range";
     }
 
-    span
-    {
+    span {
         display: inline-block;
         width: 20px;
         font-size: 20px;
@@ -159,15 +141,13 @@ body
         background-color: lighten(@labelBackgroundColor,65%);
         color: lighten(@labelBackgroundColor,35%);
 
-        &:hover
-        {
+        &:hover {
             background-color: lighten(@labelBackgroundColor,60%);
         }
     }
 }
 
-#timeRangeCanvas
-{
+#timeRangeCanvas {
     //position: absolute;
     //left: 0px;
     //top: 17px;
@@ -175,8 +155,7 @@ body
     width: ~"calc(100% - 40px)";
 }
 
-#helpView, #operationView
-{
+#helpView, #operationView {
     .container;
     top: 35px;
     left: 0px;
@@ -185,15 +164,13 @@ body
     overflow-y: hidden;
     display: none;
 
-    &:after
-    {
+    &:after {
         .containterLabel;
         content: "Help";
     }
 }
 
-#helpContent, #operationContent
-{
+#helpContent, #operationContent {
     padding: 10px;
     position: absolute;
     top: 15px;
@@ -203,21 +180,18 @@ body
     overflow-y: scroll;
     text-align: justify;
 
-    & table tr
-    {
+    & table tr {
         vertical-align: central;
     }
 
-    & a
-    {
+    & a {
         color: blue;
         text-decoration: none;
         font-weight: bold;
     }
 }
 
-.helpMiddleContainer
-{
+.helpMiddleContainer {
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
@@ -228,27 +202,22 @@ body
     padding: 0px 10px 20px 10px;
     border: solid 1px #F5F5F5;
 
-    .fig
-    {
+    .fig {
         font-weight: bold;
 
-        &:before
-        {
+        &:before {
             content: "(Fig. ";
             font-weight: bold;
         }
 
-        &:after
-        {
+        &:after {
             content: ")";
             font-weight: bold;
         }
     }
 
-    .actionToDo
-    {
-        &:before
-        {
+    .actionToDo {
+        &:before {
             content: "\21D2";
             margin-right: 10px;
             font-weight: bold;
@@ -257,22 +226,19 @@ body
         font-weight: bold;
     }
 
-    figure
-    {
+    figure {
         display: block;
         margin-top: 15px;
         margin-bottom: 15px;
 
-        img
-        {
+        img {
             border: 1px solid black;
             margin-left: auto;
             margin-right: auto;
             display: block;
         }
 
-        figcaption
-        {
+        figcaption {
             margin-top: 5px;
             text-align: center;
             font-weight: bold;
@@ -280,8 +246,7 @@ body
     }
 }
 
-#gatewaySessions
-{
+#gatewaySessions {
     font-size: 12px;
     top: 90px;
     left: 0px;
@@ -291,19 +256,16 @@ body
     .scrollbarStyle;
     height: ~"calc(100% - 90px)";
 
-    & table
-    {
+    & table {
         .dataTable;
     }
 
-    & table.k-selectable tbody > tr > td:nth-child(1), table.k-selectable tbody > tr > td:nth-child(2)
-    {
+    & table.k-selectable tbody > tr > td:nth-child(1), table.k-selectable tbody > tr > td:nth-child(2) {
         cursor: pointer;
     }
 }
 
-#fields
-{
+#fields {
     position: absolute;
     top: (@timeRangeHeight + @borderSpacing);
     left: (@leftSidebar + @borderSpacing);
@@ -311,8 +273,7 @@ body
     font-size: 12px;
 }
 
-#queryField
-{
+#queryField {
     position: absolute;
     top: (@timeRangeHeight + @borderSpacing * 2 + 25);
     left: (@leftSidebar + @borderSpacing);
@@ -320,8 +281,7 @@ body
     width: ~"calc(100vw - @{errorPanel} - 345px)";
 }
 
-#btnPremadeQueries
-{
+#btnPremadeQueries {
     .button;
     position: absolute;
     top: (@timeRangeHeight + @borderSpacing * 2 + 25);
@@ -332,8 +292,7 @@ body
     font-weight: bolder;
 }
 
-#premadeQueries
-{
+#premadeQueries {
     position: absolute;
     background-color: @suggestionBackground;
     right: @borderSpacing;
@@ -341,16 +300,14 @@ body
     padding: 5px;
     display: none;
 
-    div
-    {
+    div {
         cursor: pointer;
         color: blue;
         text-decoration: underline;
     }
 }
 
-#clients
-{
+#clients {
     .container;
     top: (@timeRangeHeight + @borderSpacing * 3 + 55);
     left: (@leftSidebar + @borderSpacing);
@@ -358,8 +315,7 @@ body
     height: ~"calc(50% - @{timeRangeHeight} - @{borderSpacing} - 69px)";
     padding-top: 16px;
     //display: none;
-    &:after
-    {
+    &:after {
         .containterLabel;
         content: "Clients";
     }
@@ -369,8 +325,7 @@ body
     }*/
 }
 
-#servers
-{
+#servers {
     .container;
     top: (@timeRangeHeight + @borderSpacing * 3 + 55);
     right: @borderSpacing;
@@ -379,15 +334,13 @@ body
     //display: none;
     padding-top: 16px;
 
-    &:after
-    {
+    &:after {
         .containterLabel;
         content: "Servers";
     }
 }
 
-#logs
-{
+#logs {
     .container;
     bottom: @borderSpacing;
     left: (@leftSidebar + @borderSpacing);
@@ -395,33 +348,28 @@ body
     height: ~"calc(50% - @{borderSpacing} - @{borderSpacing})";
     //display: none;
     //padding-top: 16px;
-    &:before
-    {
+    &:before {
         .containterLabel;
         content: "Logs";
     }
 }
 
-#logsContent
-{
+#logsContent {
     top: 50px;
     padding-top: 0px;
     overflow: hidden;
     height: ~"calc(100% - 53px)";
 }
 
-#logsContent tbody
-{
+#logsContent tbody {
     user-select: text !important;
 }
 
-#logsContent tbody > tr
-{
+#logsContent tbody > tr {
     cursor: pointer;
 }
 
-.listContent
-{
+.listContent {
     padding-top: 16px;
     overflow-y: hidden;
     position: absolute;
@@ -431,34 +379,29 @@ body
     bottom: 0px;
     .scrollbarStyle;
 
-    & table
-    {
+    & table {
         .dataTable;
     }
 }
 
-.title
-{
+.title {
     font-weight: bold;
     color: #6b6750;
 }
 
-select
-{
+select {
     padding: 3PX;
     outline: none;
 }
 
-.tabs
-{
+.tabs {
     margin-top: 16px;
     padding: 0px;
     padding-top: 2px;
     //background-color: lighten(@labelBackgroundColor, 35%);
     background-color: #3f51b5;
 
-    & li
-    {
+    & li {
         display: inline-block;
         //border: solid 1px @labelBackgroundColor;
         //background-color: #3f51b5;
@@ -469,22 +412,19 @@ select
         text-transform: uppercase;
         padding-top: 7px;
 
-        &:hover
-        {
+        &:hover {
             background-color: @menuHoverBgColor;
         }
     }
 
 
-    & .activeTab
-    {
+    & .activeTab {
         //background-color: white;
         border-bottom: #44d9d9 3px solid;
         font-weight: bold;
     }
 
-    & .inset
-    {
+    & .inset {
         border-bottom: 1px solid #7180d7;
         border-right: 1px solid #7180d7;
         border-top: 1px solid #122171;
@@ -492,24 +432,21 @@ select
     }
 }
 
-#clientsContent
-{
+#clientsContent {
     top: 0px;
     height: ~"calc(100% - 19px)";
     overflow: hidden;
     position: absolute;
 }
 
-#serversContent
-{
+#serversContent {
     top: 0px;
     height: ~"calc(100% - 19px)";
     overflow: hidden;
     position: absolute;
 }
 
-#mouseCapture
-{
+#mouseCapture {
     position: absolute;
     top: 0px;
     left: 0px;
@@ -519,8 +456,7 @@ select
     display: none;
 }
 
-#utcTime
-{
+#utcTime {
     .container;
     bottom: @borderSpacing * 3 + 80px;
     width: @leftSidebar;
@@ -529,20 +465,17 @@ select
     padding-top: 20px;
     text-align: center;
 
-    &:after
-    {
+    &:after {
         .containterLabel;
         content: "UTC Time";
     }
 }
 
-.dateInputs
-{
+.dateInputs {
     width: ~"calc(50vw - @{errorPanel} / 2 - 216px)";
 }
 
-#querySuggestions
-{
+#querySuggestions {
     position: absolute;
     box-sizing: border-box;
     left: 305px;
@@ -556,39 +489,33 @@ select
     font-family: sans-serif;
     font-size: 14px;
 
-    #suggestions
-    {
+    #suggestions {
         width: 100%;
         max-height: 193px;
         overflow-y: scroll;
         box-sizing: border-box;
         cursor: pointer;
 
-        .suggestion-item
-        {
+        .suggestion-item {
             color: #606060;
             padding: 5px;
             background: rgb(255, 253, 242);
         }
 
-        .suggestion-item:hover
-        {
+        .suggestion-item:hover {
             background: rgb(250, 250, 250);
         }
 
-        .suggestion-item.selected
-        {
+        .suggestion-item.selected {
             border: 2px solid #3f51b5;
         }
 
-        .hint
-        {
+        .hint {
             float: right;
         }
     }
 
-    #suggestionsFooter
-    {
+    #suggestionsFooter {
         width: 100%;
         height: 30px;
         box-sizing: border-box;
@@ -600,8 +527,7 @@ select
     }
 }
 
-#detailInfo
-{
+#detailInfo {
     position: absolute;
     box-sizing: border-box;
     left: 305px;
@@ -614,31 +540,26 @@ select
     display: none;
     overflow: hidden;
 
-    table
-    {
+    table {
         width: 100%;
     }
 
-    table tr
-    {
+    table tr {
         vertical-align: top;
     }
 
-    table td:nth-child(1), table td:nth-child(3)
-    {
+    table td:nth-child(1), table td:nth-child(3) {
         width: 40px;
         font-weight: bold;
     }
 }
 
-.closeDetails
-{
+.closeDetails {
     position: absolute;
     top: 3px;
     right: 3px;
 
-    &:before
-    {
+    &:before {
         content: "X";
         font-weight: bold;
         color: #E00000;
@@ -648,15 +569,13 @@ select
     }
 }
 
-.pseudoLink
-{
+.pseudoLink {
     color: #0000E0;
     text-decoration: underline;
     cursor: pointer;
 }
 
-#prevDay
-{
+#prevDay {
     border-top: 7px solid transparent;
     border-bottom: 7px solid transparent;
     border-right: 7px solid #3e3e3e;
@@ -665,14 +584,12 @@ select
     width: 10px;
     cursor: pointer;
 
-    &:hover
-    {
+    &:hover {
         border-right: 7px solid #a97373;
     }
 }
 
-#nextDay
-{
+#nextDay {
     border-top: 7px solid transparent;
     border-bottom: 7px solid transparent;
     border-left: 7px solid #3e3e3e;
@@ -681,14 +598,12 @@ select
     width: 10px;
     cursor: pointer;
 
-    &:hover
-    {
+    &:hover {
         border-left: 7px solid #a97373;
     }
 }
 
-#logView
-{
+#logView {
     display: none;
     position: absolute;
     top: 35px;
@@ -697,8 +612,7 @@ select
     bottom: 0px;
 }
 
-#gatewayView
-{
+#gatewayView {
     position: absolute;
     top: 35px;
     left: 0px;
@@ -706,16 +620,14 @@ select
     bottom: 0px;
 }
 
-#mainTabs
-{
+#mainTabs {
     position: absolute;
     top: -16px;
     left: 0px;
     right: 0px;
 }
 
-.GWDisplay
-{
+.GWDisplay {
     display: inline-block;
     background-color: white;
     text-align: center;
@@ -726,15 +638,13 @@ select
     box-shadow: #eeeeee 1px 1px 2px;
     cursor: pointer;
 
-    &:hover
-    {
+    &:hover {
         border: solid 1px #d3dae6;
         box-shadow: #c3c3c3 1px 1px 2px;
     }
 }
 
-#gatewayBeamlines
-{
+#gatewayBeamlines {
     float: left;
     width: ~"calc(100vw - @{errorPanel} - 330px)";
     margin-right: 5px;
@@ -745,14 +655,12 @@ select
     overflow: hidden;
     text-align: center;
 
-    & .GWDisplay
-    {
+    & .GWDisplay {
         width: 100px;
         font-size: 11px;
     }
 
-    &:before
-    {
+    &:before {
         content: "Beamline Gateways";
         display: block;
         text-align: center;
@@ -767,8 +675,7 @@ select
     }
 }
 
-#gatewayMains
-{
+#gatewayMains {
     float: right;
     margin-right: 5px;
     width: 310px;
@@ -777,8 +684,7 @@ select
     height: ~"calc(100% - 5px)";
     overflow: hidden;
 
-    &:before
-    {
+    &:before {
         content: "Main Gateways";
         display: block;
         text-align: center;
@@ -793,8 +699,7 @@ select
     }
 }
 
-#gatewayDetails
-{
+#gatewayDetails {
     position: absolute;
     top: 35px;
     left: 0px;
@@ -803,14 +708,12 @@ select
     overflow: hidden;
     display: none;
 
-    & h2
-    {
+    & h2 {
         margin: 0px;
     }
 }
 
-#graphs
-{
+#graphs {
     .container;
     top: 5px;
     left: 5px;
@@ -818,36 +721,31 @@ select
     bottom: 5px;
 }
 
-#cpuGraphTitle
-{
+#cpuGraphTitle {
     position: absolute;
     top: 5px;
     left: 5px;
 }
 
-#searchGraphTitle
-{
+#searchGraphTitle {
     position: absolute;
     top: ~"calc(25vh - 10px)";
     left: 5px;
 }
 
-#pvsGraphTitle
-{
+#pvsGraphTitle {
     position: absolute;
     bottom: ~"calc(50vh - 30px)";
     left: 5px;
 }
 
-#networkGraphTitle
-{
+#networkGraphTitle {
     position: absolute;
     bottom: ~"calc(25vh - 20px)";
     left: 5px;
 }
 
-#cpuGraph
-{
+#cpuGraph {
     position: absolute;
     top: 30px;
     left: 5px;
@@ -855,8 +753,7 @@ select
     height: ~"calc(25vh - 25px)";
 }
 
-#searchesGraph
-{
+#searchesGraph {
     position: absolute;
     top: ~"calc(25vh + 15px)";
     left: 0px;
@@ -864,8 +761,7 @@ select
     height: ~"calc(25vh - 45px)";
 }
 
-#pvsGraph
-{
+#pvsGraph {
     position: absolute;
     bottom: ~"calc(25vh - 5px)";
     left: 0px;
@@ -873,8 +769,7 @@ select
     height: ~"calc(25vh - 25px)";
 }
 
-#networkGraph
-{
+#networkGraph {
     position: absolute;
     bottom: 5px;
     left: 0px;
@@ -882,8 +777,7 @@ select
     height: ~"calc(25vh - 45px)";
 }
 
-#infos
-{
+#infos {
     .container;
     top: 5px;
     right: 5px;
@@ -892,8 +786,7 @@ select
     padding: 5px;
 }
 
-#errorsView
-{
+#errorsView {
     position: absolute;
     top: 35px;
     right: 0px;
@@ -902,15 +795,13 @@ select
     overflow: hidden;
     .container;
 
-    &:before
-    {
+    &:before {
         .containterLabel;
         content: "Errors";
     }
 }
 
-#errorsContent
-{
+#errorsContent {
     position: absolute;
     top: 16px;
     left: 0px;
@@ -919,16 +810,14 @@ select
     padding: 5px;
     overflow-y: scroll;
 
-    a
-    {
+    a {
         .button;
         background-color: #b60000;
         margin-bottom: 5px;
         width: ~"calc(100% - 10px)";
     }
 
-    span
-    {
+    span {
         display: inline-block;
         width: ~"calc(100% - 10px)";
         height: 64px;
@@ -947,8 +836,7 @@ select
     }
 }
 
-#currentTime
-{
+#currentTime {
     .container;
     bottom: 5px;
     right: 0px;
@@ -957,15 +845,13 @@ select
     padding-top: 17px;
     text-align: center;
 
-    &:after
-    {
+    &:after {
         .containterLabel;
         content: "UTC Time";
     }
 }
 
-#freeSpace
-{
+#freeSpace {
     .container;
     bottom: 85px;
     right: 0px;
@@ -974,15 +860,13 @@ select
     padding-top: 17px;
     text-align: center;
 
-    &:after
-    {
+    &:after {
         .containterLabel;
         content: "Free DB Space";
     }
 }
 
-#bufferSpace
-{
+#bufferSpace {
     .container;
     bottom: 45px;
     right: 0px;
@@ -991,36 +875,31 @@ select
     padding-top: 17px;
     text-align: center;
 
-    &:after
-    {
+    &:after {
         .containterLabel;
         content: "Buffer";
     }
 }
 
 
-#detailsButtons
-{
+#detailsButtons {
     position: absolute;
     bottom: 3px;
     left: 3px;
     right: 3px;
 
-    a, div
-    {
+    a, div {
         display: block;
         margin-top: 3px;
         text-align: center;
     }
 }
 
-.hamburger
-{
+.hamburger {
     display: inline-block;
     vertical-align: top;
 
-    div
-    {
+    div {
         border-radius: 2px;
         background-color: white;
         height: 3px;
@@ -1029,8 +908,7 @@ select
     }
 }
 
-#hamburgerMenu
-{
+#hamburgerMenu {
     position: fixed;
     top: 33px;
     bottom: 0px;
@@ -1042,27 +920,23 @@ select
     padding-top: 10px;
     transition: all 0.5s ease-in-out;
 
-    div
-    {
+    div {
         font-size: 16px;
         padding: 5px;
         cursor: pointer;
         margin-bottom: 3px;
 
-        &:hover
-        {
+        &:hover {
             background-color: @menuHoverBgColor;
         }
     }
 }
 
-.visibleHamburger
-{
+.visibleHamburger {
     left: 0px !important;
 }
 
-#reportView
-{
+#reportView {
     position: absolute;
     left: 0px;
     right: calc(@errorPanel + 10px);
@@ -1071,14 +945,12 @@ select
     background-color: @containerBackground;
     display: none;
 
-    .k-grid-content
-    {
+    .k-grid-content {
         height: ~"calc(100% - 32px)";
     }
 }
 
-.fixed
-{
+.fixed {
     position: absolute;
     top: 0px;
     left: 0px;
@@ -1086,37 +958,31 @@ select
     bottom: 0px;
 }
 
-.topClose
-{
+.topClose {
     position: fixed;
     z-index: 1000000;
     top: 60px;
     right: calc(@errorPanel + 35px);
 }
 
-.no-scrollbar .k-grid-header
-{
+.no-scrollbar .k-grid-header {
     padding: 0 !important;
 }
 
-.no-scrollbar .k-grid-content
-{
+.no-scrollbar .k-grid-content {
     overflow-y: visible;
 }
 
-.oldGatewayVersion
-{
+.oldGatewayVersion {
     background-color: #ffa4a4 !important;
 }
 
-.summary
-{
+.summary {
     background-color: #cdd3d4 !important;
     font-weight: bold;
 }
 
-#showLastBtn
-{
+#showLastBtn {
     position: absolute;
     bottom: ~"calc(50% - 30px - @{borderSpacing} - @{borderSpacing})";
     right: 30px;
@@ -1125,25 +991,21 @@ select
     box-shadow: rgba(0,0,0,0.8) 0px 0px 2px;
 }
 
-#dbgEpicsTable
-{
+#dbgEpicsTable {
     width: 500px;
 
-    & tr > td:first-child
-    {
+    & tr > td:first-child {
         font-weight: bold;
         white-space: nowrap;
         width: 1%;
     }
 
-    & input, & td > span
-    {
+    & input, & td > span {
         width: 100%;
     }
 }
 
-.dbgCheckResult
-{
+.dbgCheckResult {
     display: inline-block;
     width: ~"calc(25% - 6px)";
     overflow: hidden;
@@ -1152,33 +1014,28 @@ select
     word-wrap: break-word;
     margin: 3px;
 
-    & table
-    {
+    & table {
         width: 100%;
         white-space: nowrap;
     }
 
-    & table tr > td:first-child
-    {
+    & table tr > td:first-child {
         font-weight: bold;
         width: 1%;
     }
 }
 
-.dbgSucceed
-{
+.dbgSucceed {
     font-weight: bold;
     color: #007e06;
 }
 
-.dbgFail
-{
+.dbgFail {
     font-weight: bold;
     color: #cf0000;
 }
 
-#wrgChannelSearch
-{
+#wrgChannelSearch {
     position: absolute;
     top: 160px;
     left: 0px;
@@ -1186,8 +1043,7 @@ select
     bottom: 0px;
 }
 
-#subscriptionGrid
-{
+#subscriptionGrid {
     position: absolute;
     left: 0px;
     right: 0px;
@@ -1195,24 +1051,21 @@ select
     bottom: 40px;
 }
 
-#subscriptionButtons
-{
+#subscriptionButtons {
     position: absolute;
     text-align: center;
     left: 0px;
     right: 0px;
     bottom: 5px;
 
-    & span
-    {
+    & span {
         margin-right: 10px;
         padding-right: 10px;
         padding-left: 10px;
     }
 }
 
-#mapView
-{
+#mapView {
     .container;
     display: none;
     position: absolute;
@@ -1223,8 +1076,7 @@ select
     overflow: hidden;
     padding-top: 35px;
 
-    &:before
-    {
+    &:before {
         .containterLabel;
         content: "Map";
         position: fixed;
@@ -1235,8 +1087,7 @@ select
     }
 }
 
-#toolTip
-{
+#toolTip {
     background-color: rgba(80,80,80,0.9);
     position: absolute;
     padding: 5px;
@@ -1245,18 +1096,32 @@ select
     box-sizing: border-box;
 }
 
-#searchLi
-{
-    &:hover
-    {
+#searchLi {
+    &:hover {
         background-color: #3f51b5;
     }
 
     padding-top: 4px;
 
-    #searchInput
-    {
+    #searchInput {
         height: 16px;
         line-height: 16px;
+    }
+}
+
+#loadingScreen {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100vw;
+    bottom: 0px;
+    background-color: @labelBackgroundColor;
+    color: @labelColor;
+    font-size: 40px;
+    vertical-align: central;
+    text-align: center;
+
+    div {
+        margin-top: 50vh;
     }
 }

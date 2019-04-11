@@ -28,6 +28,14 @@ class Main
 
         setInterval(Main.Refresh, 1000);
         $(window).on("resize", Main.Resize);
+
+        setTimeout(() =>
+        {
+            $("#loadingScreen").animate({ left: "-100vw" }, "2s", () =>
+            {
+                $("#loadingScreen").hide();
+            });
+        }, 1000);
     }
 
     private static InitTooltips()
