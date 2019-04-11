@@ -10,7 +10,8 @@
     "gulp-typescript": "5.0.1",
     "gulp-util": "3.0.8",
     "gulp-watch": "5.0.1",
-    "typescript": "3.4.3"
+    "typescript": "3.4.3",
+    "gulp-plumber": "1.2.1"
   },
   "scripts": {
     "gulp": "gulp"

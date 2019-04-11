@@ -364,6 +364,7 @@
     <Content Include="favicon-16x16.png" />
     <Content Include="favicon-32x32.png" />
     <Content Include="favicon.ico" />
+    <TypeScriptCompile Include="Frontend\DTOs\GraphAnomalyInfo.ts" />
     <Content Include="Frontend\tsconfig.json" />
     <Content Include="graphtest.html" />
     <Content Include="gulpfile.js" />
@@ -574,6 +575,7 @@
     <Compile Include="Live\GatewayShortInformation.cs" />
     <Compile Include="Live\GatewayNullableValue.cs" />
     <Compile Include="Live\GatewayValue.cs" />
+    <Compile Include="Live\GraphAnomalyInfo.cs" />
     <Compile Include="Live\HistoricData.cs" />
     <Compile Include="Live\LiveInformation.cs" />
     <Compile Include="Logs.ashx.cs">

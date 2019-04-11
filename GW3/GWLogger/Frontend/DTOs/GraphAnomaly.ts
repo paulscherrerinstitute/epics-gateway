@@ -1,5 +1,5 @@
 ﻿class GraphAnomaly {
-    Filename: string;
+    FileName: string;
     Name: string;
     From: Date;
     To: Date;
@@ -22,10 +22,11 @@
         duringEventTypes: QueryResultValue[],
         history: GatewayHistory
     ) {
-        this.Filename = filename;
+        this.FileName = filename;
         this.Name = name;
         this.From = (from ? new Date(parseInt(from.substr(6, from.length - 8))) : null);
         this.To = (to ? new Date(parseInt(to.substr(6, to.length - 8))) : null);
+        this.InterestingEventTypeRemotes = interestingEventTypeRemotes;
         this.BeforeRemoteCounts = beforeRemoteCounts;
         this.DuringRemoteCounts = duringRemoteCounts;
         this.BeforeEventTypes = beforeEventTypes;
@@ -37,7 +38,7 @@
         if (!obj)
             return null;
         return new GraphAnomaly(
-            obj.Filename,
+            obj.FileName,
             obj.Name,
             obj.From,
             obj.To,

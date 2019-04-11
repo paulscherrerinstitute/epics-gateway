@@ -636,7 +636,7 @@ class Main
 
         if (Main.Path == "Anomalies")
         {
-            Anomalies.Refresh();
+            Anomalies.Show();
         }
 
         Live.RefreshShort();

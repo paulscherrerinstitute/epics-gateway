@@ -8,15 +8,21 @@ namespace GWLogger
     {
 
         [WebMethod]
-        public List<Live.GraphAnomaly> GetGraphAnomalies()
+        public List<Live.GraphAnomalyInfo> GetGraphAnomalies()
         {
             return Global.LiveInformation.GetGraphAnomalies();
         }
 
         [WebMethod]
-        public void DeleteAnomaly(string name)
+        public Live.GraphAnomaly GetGraphAnomaly(string filename)
         {
-            throw new Exception();
+            return Global.LiveInformation.GetGraphAnomaly(filename);
+        }
+
+        [WebMethod]
+        public void DeleteGraphAnomaly(string filename)
+        {
+            Global.LiveInformation.DeleteGraphAnomaly(filename);
         }
 
     }

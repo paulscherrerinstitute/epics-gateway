@@ -1,67 +1,68 @@
 ﻿class Anomalies
 {
-    private static OneSuccessfulLoad = false;
-    private static LoadedAnomalies: GraphAnomaly[] = null;
+    private static IsLoadingAnomalyInfos = false;
+    private static IsLoadingAnomalyDetail = false;
+    private static AllAnomalyInfos: GraphAnomalyInfo[] = null;
 
     public static Show(): void {
         Main.CurrentGateway = null;
         State.Set(true);
-        this.GetGraphAnomalies((anomalies) => {
-            this.OneSuccessfulLoad = true;
-            this.LoadedAnomalies = anomalies;
+
+        if (Main.DetailAnomaly == null) {
+            this.ShowOverviewSection();
+        } else {
+            this.ShowDetailSection(Main.DetailAnomaly);
+        }
+        
+    }
+
+    public static OpenDetailSection(filename: string) {
+        Main.DetailAnomaly = filename;
+        State.Set(true);
+        this.Show();
+    }
+
+    private static ShowOverviewSection() {
+        if (this.IsLoadingAnomalyInfos)
+            return;
+
+        this.IsLoadingAnomalyInfos = true;
+        this.Load("GetGraphAnomalies", null, (anomalyInfos: GraphAnomalyInfo[]) => {
+            anomalyInfos = anomalyInfos.map(v => GraphAnomalyInfo.CreateFromObject(v)); // Fix dates
+            this.IsLoadingAnomalyInfos = false;
+
+            this.AllAnomalyInfos = anomalyInfos;
             var html = "";
-            if (anomalies.length == 0) {
-                html += "<div class=\"no-anomalies\">No anomalies</div>";
+            if (anomalyInfos.length == 0) {
+                html += `<div class="no-anomalies">No anomalies</div>`;
             }
 
-            for (var anomaly of anomalies) {
-                html += "<div class=\"anomaly-card\" onclick=\"Anomalies.Detail('" + anomaly.Filename + "')\">" + Utils.FullUtcDateFormat(anomaly.From) + ": <b>" + anomaly.Name + "</b> " + this.DurationString(anomaly.To.getTime() - anomaly.From.getTime());
-                html += "<div id=\"anomaly_cpu_graph_" + anomaly.Filename + "\"></div>";
-                html += "</div>";
+            for (var anomaly of anomalyInfos) {
+                html += `<div class="anomaly-card" onclick="Anomalies.OpenDetailSection('${anomaly.FileName}')">${Utils.FullUtcDateFormat(anomaly.From)}: <b>${anomaly.Name}</b> ${this.DurationString(anomaly.To.getTime() - anomaly.From.getTime())}`;
+                html += `<div id="anomaly_cpu_graph_${anomaly.FileName}"></div>`;
+                html += `</div>`;
             }
             var scrolled = $("#anomalyView").scrollTop();
             $("#anomalyView").html(html);
-            for (var anomaly of anomalies) {
-                var graphData = <GraphData>{
-                    Values: anomaly.History.cpuHistory.map(v => <GraphPoint>{ Value: v.Value, Label: v.Date }),
-                };
-                var graph = new LineGraph("anomaly_cpu_graph_" + anomaly.Filename, graphData, {
-                    XLabelWidth: 50,
-                    MinY: 0,
-                    MaxY: 100,
-                    FontSize: 10,
-                    PlotColor: "#000080",
-                    LabelFormat: Utils.ShortGWDateFormat,
-                    HighlightSection: {
-                        StartLabel: anomaly.From,
-                        EndLabel: anomaly.To,
-                        HighlightColor: "#b60000",
-                    }
-                });
-            }
-
             $("#anomalyView").scrollTop(scrolled);
         });
     }
 
-    public static Refresh() {
-        if (this.OneSuccessfulLoad) {
-            this.Show();
-        }
-    }
-
-    public static Detail(filename: string) {
-        Main.DetailAnomaly = filename;
-        State.Set(true);
-
-        var anomaly = this.LoadedAnomalies.filter(v => v.Filename == filename)[0];
-
-        if (anomaly == null)
+    private static ShowDetailSection(filename: string) {
+        if (this.IsLoadingAnomalyDetail)
             return;
 
-        var html = `<div>${anomaly.Name}</div>`;
+        this.IsLoadingAnomalyDetail = true;
+        this.Load("GetGraphAnomaly", { filename: filename }, (anomaly: GraphAnomaly) => {
+            anomaly = GraphAnomaly.CreateFromObject(anomaly); // Fix dates
+            this.IsLoadingAnomalyDetail = false;
 
-        $("#anomalyView").html(html);
+            var html = `<div>${anomaly.Name}</div>`;
+
+
+
+            $("#anomalyView").html(html);
+        });
     }
 
     private static DurationString(millis: number): string {
@@ -82,22 +83,14 @@
         return duration;
     }
 
-    private static GetGraphAnomalies(callback: (a: GraphAnomaly[]) => void): void {
+    private static Load(method: string, params: any, success: (data: any) => void): void {
         $.ajax({
-            type: 'POST',
-            url: '/DataAccess.asmx/GetGraphAnomalies',
-            data: {},
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
-            success: (data) => {
-                var list = data.d;
-                if (list) {
-                    var anomalies = (<Array<any>>list).map(v => GraphAnomaly.CreateFromObject(v));
-                    callback(anomalies);
-                } else {
-                    callback(null);
-                }
-            },
+            type: "POST",
+            url: `/DataAccess.asmx/${method}`,
+            data: JSON.stringify(params ? params : {}),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: (data) => { success(data.d) },
         });
     }
 

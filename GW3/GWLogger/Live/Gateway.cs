@@ -256,7 +256,7 @@ namespace GWLogger.Live
                                     {
                                         anomaly = (GraphAnomaly)anomalySerializer.Deserialize(file);
                                         anomaly.IsDirty = false;
-                                        anomaly.Filename = Path.GetFileNameWithoutExtension(path);
+                                        anomaly.FileName = Path.GetFileNameWithoutExtension(path);
                                         anomaly.Name = Name;
                                     }
                                 }
@@ -374,7 +374,7 @@ namespace GWLogger.Live
                         var filename = $"{Name}_{anomaly.From.ToString(anomalyDateFormat, CultureInfo.InvariantCulture)}";
                         using (var xmlWriter = XmlWriter.Create(File.Open(Path.Combine(anomalyStorage, $"{filename}.xml"), FileMode.Create), new XmlWriterSettings { Indent = false }))
                         {
-                            anomaly.Filename = filename;
+                            anomaly.FileName = filename;
                             anomalySerializer.Serialize(xmlWriter, anomaly);
                         }
                         writingFailed = false;

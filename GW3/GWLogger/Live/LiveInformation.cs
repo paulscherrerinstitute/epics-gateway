@@ -166,7 +166,7 @@ namespace GWLogger.Live
             }
         }
 
-        public List<GraphAnomaly> GetGraphAnomalies()
+        public List<GraphAnomalyInfo> GetGraphAnomalies()
         {
             List<Gateway> snapshot;
             lock (Gateways)
@@ -174,7 +174,29 @@ namespace GWLogger.Live
             return snapshot
                 .SelectMany(gateway => gateway.GetGatewayAnomalies())
                 .OrderByDescending(anomaly => anomaly.From)
+                .Select(anomaly => new GraphAnomalyInfo {
+                    FileName = anomaly.FileName,
+                    Name = anomaly.Name,
+                    From = anomaly.From,
+                    To = anomaly.To,
+                })
                 .ToList();
+        }
+
+        public GraphAnomaly GetGraphAnomaly(string filename)
+        {
+            List<Gateway> snapshot;
+            lock (Gateways)
+                snapshot = Gateways.ToList();
+            return snapshot
+                .SelectMany(gateway => gateway.GetGatewayAnomalies())
+                .Where(anomaly => anomaly.FileName == filename)
+                .FirstOrDefault();
+        }
+
+        public void DeleteGraphAnomaly(string filename)
+        {
+            throw new NotImplementedException();
         }
 
         internal static void SendEmail(string destination, string subject, string content)
