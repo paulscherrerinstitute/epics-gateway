@@ -65,7 +65,8 @@
                         window.open("/sop_d.html", "help", "menubar=no,location=no,status=no,toolbar=no,width=800,height=600,scrollbars=yes");
                         break;
                     case "": // Hambuger
-                        $("#hamburgerMenu").toggleClass("visibleHamburger");
+                        if (evt.target.getAttribute("id") == "hamburgerDisplay" || evt.target.parentElement.getAttribute("id") == "hamburgerDisplay" || evt.target.parentElement.parentElement.getAttribute("id") == "hamburgerDisplay")
+                            $("#hamburgerMenu").toggleClass("visibleHamburger");
                         break;
                     default:
                         State.Set(true);

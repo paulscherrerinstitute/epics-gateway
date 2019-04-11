@@ -142,11 +142,11 @@
     <script>
         $(() =>
         {
-            Live.DisplayPaint("#canvas_all_fine", { CPU: 10, Searches: 20, State: 0 });
-            Live.DisplayPaint("#canvas_high_search", { CPU: 10, Searches: 291, State: 0 });
-            Live.DisplayPaint("#canvas_high_cpu", { CPU: 90, Searches: 20, State: 0 });
-            Live.DisplayPaint("#canvas_error", { CPU: 90, Searches: 20, State: 3 });
-            Main.QueriesHelp();
+            StatusGraph.DisplayPaint("#canvas_all_fine", { CPU: 10, Searches: 20, State: 0 });
+            StatusGraph.DisplayPaint("#canvas_high_search", { CPU: 10, Searches: 291, State: 0 });
+            StatusGraph.DisplayPaint("#canvas_high_cpu", { CPU: 90, Searches: 20, State: 0 });
+            StatusGraph.DisplayPaint("#canvas_error", { CPU: 90, Searches: 20, State: 3 });
+            LogsPage.QueriesHelp();
         });
     </script>
 </body>
