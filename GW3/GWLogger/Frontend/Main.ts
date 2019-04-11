@@ -30,7 +30,7 @@ class Main
         $(window).on("resize", Main.Resize);
     }
 
-    static InitTooltips()
+    private static InitTooltips()
     {
         $("*[tooltip]").each((idx, elem) =>
         {
@@ -45,7 +45,7 @@ class Main
         });
     }
 
-    static InitSearchGateway()
+    private static InitSearchGateway()
     {
         var gateways: string[] = [];
         $('.GWDisplay').each(function ()
@@ -61,7 +61,7 @@ class Main
         }).data("kendoAutoComplete");
     }
 
-    static UrlRedirect()
+    private static UrlRedirect()
     {
         var currentUrl = (document.location + "");
         if (currentUrl.toLowerCase().startsWith("http://caesar"))
@@ -82,14 +82,14 @@ class Main
         }
     }
 
-    static CheckTouch(): boolean
+    private static CheckTouch(): boolean
     {
         return (('ontouchstart' in window)
             || ((<any>navigator).MaxTouchPoints > 0)
             || ((<any>navigator).msMaxTouchPoints > 0));
     }
 
-    static Resize(): void
+    private static Resize(): void
     {
         if (Math.abs(window.innerHeight - screen.height) < 10 && Main.CheckTouch())
             $("#fullScreenMode").attr("media", "");
@@ -112,6 +112,7 @@ class Main
         Main.isLoading = true;
         try
         {
+            await Main.Status();
             await StatusPage.Refresh();
             await DetailPage.Refresh();
             await LogsPage.Refresh();
@@ -120,5 +121,21 @@ class Main
         {
         }
         Main.isLoading = false;
+    }
+
+    private static async Status()
+    {
+        try
+        {
+            var msg = await Utils.Loader("GetFreeSpace");
+            var free = <FreeSpace>msg.d;
+            $("#freeSpace").html("" + (Math.round(free.FreeMB * 1000 / free.TotMB) / 10) + "%");
+
+            var msg = await Utils.Loader("GetBufferUsage");
+            $("#bufferSpace").html("" + msg.d + "%");
+        }
+        catch (ex)
+        {
+        }
     }
 }

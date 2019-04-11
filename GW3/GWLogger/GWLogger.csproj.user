@@ -10,7 +10,7 @@
     <UseGlobalApplicationHostFile />
     <NameOfLastUsedPublishProfile>EPICSLOG</NameOfLastUsedPublishProfile>
     <ProjectView>ProjectFiles</ProjectView>
-    <LastActiveSolutionConfig>Debug Deadlock|Any CPU</LastActiveSolutionConfig>
+    <LastActiveSolutionConfig>Debug|Any CPU</LastActiveSolutionConfig>
     <ToolsVersionPromptShown>2.5</ToolsVersionPromptShown>
   </PropertyGroup>
   <ProjectExtensions>
