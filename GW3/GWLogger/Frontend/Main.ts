@@ -12,15 +12,28 @@ class Main
     static IsLast: boolean = true;
     static BaseTitle: string;
 
+    private static isLoading = false;
+
     public static async Refresh()
     {
-        await StatusPage.Refresh();
+        if (Main.isLoading)
+            return;
+        Main.isLoading = true;
+        try
+        {
+            await StatusPage.Refresh();
+            await DetailPage.Refresh();
+        }
+        catch (ex)
+        {
+        }
+        Main.isLoading = false;
     }
 
     public static Init(): void
     {
-        DetailPage.Init();
-        StatusPage.Init();
+        Sections.Init();
+        State.Init();
 
         setInterval(Main.Refresh, 1000);
     }

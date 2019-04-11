@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../../scripts/typings/kendo/kendo.all.d.ts" />
 
-class NotificationsMenu
+class Notifications
 {
     static notification: Notification = null;
     static notificationTimeout: number = null;
@@ -37,7 +37,7 @@ class NotificationsMenu
         if (Notification['permission'] === "granted")
         {
             // If it's okay let's create a notification
-            NotificationsMenu.Show("Notifications are already enabled.");
+            Notifications.Show("Notifications are already enabled.");
             return;
         }
 
@@ -46,7 +46,7 @@ class NotificationsMenu
             // If the user accepts, let's create a notification
             if (permission === "granted")
             {
-                NotificationsMenu.Show("Notifications are now enabled.");
+                Notifications.Show("Notifications are now enabled.");
                 return;
             }
         });
@@ -56,35 +56,35 @@ class NotificationsMenu
     {
         if (!("Notification" in window) || Notification['permission'] !== "granted")
             return;
-        if (NotificationsMenu.notification)
-            NotificationsMenu.notification.close();
-        NotificationsMenu.notification = null;
+        if (Notifications.notification)
+            Notifications.notification.close();
+        Notifications.notification = null;
 
-        if (NotificationsMenu.notificationTimeout)
-            clearTimeout(NotificationsMenu.notificationTimeout);
-        NotificationsMenu.notificationTimeout = null;
+        if (Notifications.notificationTimeout)
+            clearTimeout(Notifications.notificationTimeout);
+        Notifications.notificationTimeout = null;
 
         (<HTMLAudioElement>$("#notificationSound")[0]).play();
 
-        NotificationsMenu.notification = new Notification("CAESAR", <any>{ icon: '/favicon-32x32.png', body: text, silent: false });
-        NotificationsMenu.notification.onclick = (x) =>
+        Notifications.notification = new Notification("CAESAR", <any>{ icon: '/favicon-32x32.png', body: text, silent: false });
+        Notifications.notification.onclick = (x) =>
         {
             window.focus();
-            NotificationsMenu.notification.close();
-            NotificationsMenu.notification = null;
-            clearTimeout(NotificationsMenu.notificationTimeout);
-            NotificationsMenu.notificationTimeout = null;
+            Notifications.notification.close();
+            Notifications.notification = null;
+            clearTimeout(Notifications.notificationTimeout);
+            Notifications.notificationTimeout = null;
         };
-        NotificationsMenu.notificationTimeout = setTimeout(NotificationsMenu.Close, 4000);
+        Notifications.notificationTimeout = setTimeout(Notifications.Close, 4000);
     }
 
     static Close()
     {
-        NotificationsMenu.notification.close();
-        NotificationsMenu.notification = null;
+        Notifications.notification.close();
+        Notifications.notification = null;
 
-        if (NotificationsMenu.notificationTimeout)
-            clearTimeout(NotificationsMenu.notificationTimeout);
-        NotificationsMenu.notificationTimeout = null;
+        if (Notifications.notificationTimeout)
+            clearTimeout(Notifications.notificationTimeout);
+        Notifications.notificationTimeout = null;
     }
 }

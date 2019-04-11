@@ -1,5 +1,11 @@
 ﻿class State
 {
+    public static Init()
+    {
+        $(window).bind('popstate', State.Pop);
+        State.Pop(null);
+    }
+
     static Path(): string[]
     {
         return document.location.pathname.split('/');

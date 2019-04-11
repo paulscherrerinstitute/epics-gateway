@@ -1,4 +1,4 @@
-﻿class SubscriptionMenu
+﻿class Subscription
 {
     static Show()
     {
@@ -98,11 +98,11 @@
             dataType: 'json',
             success: function (msg)
             {
-                NotificationsMenu.Popup("Subscriptions updated.");
+                Notifications.Popup("Subscriptions updated.");
             },
             error: function (msg, textStatus)
             {
-                NotificationsMenu.Popup("Error: " + msg.responseText, "error");
+                Notifications.Popup("Error: " + msg.responseText, "error");
             }
         });
     }
@@ -125,7 +125,7 @@
             dataType: 'json',
             success: function (msg)
             {
-                NotificationsMenu.Popup("Unsubscribed to all.");
+                Notifications.Popup("Unsubscribed to all.");
 
                 var data = $("#subscriptionGrid").data("kendoGrid").dataSource.data();
                 for (var i = 0; i < data.length; i++)

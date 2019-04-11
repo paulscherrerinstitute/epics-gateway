@@ -146,6 +146,14 @@ class DetailPage
         await DetailPage.GetHistoricData();
     }
 
+    public static async Refresh()
+    {
+        if (!Main.CurrentGateway)
+            return;
+        await DetailPage.GetInformation();
+        await DetailPage.GetHistoricData();
+    }
+
     private static async GetInformation()
     {
         try

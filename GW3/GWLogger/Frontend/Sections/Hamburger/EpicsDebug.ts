@@ -1,4 +1,4 @@
-﻿class EpicsDebugMenu
+﻿class EpicsDebug
 {
     static Show()
     {

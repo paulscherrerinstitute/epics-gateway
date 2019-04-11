@@ -33,7 +33,7 @@ class MapPage
     static gateways: KnownNetwork[] = [];
     static HoverGateway: string = "";
 
-    static Init()
+    public static Init()
     {
         MapPage.AddNetwork(450, 500, "Office");
         MapPage.AddNetwork(800, 500, "SLS Machine");
@@ -117,7 +117,7 @@ class MapPage
         MapPage.AddGateway(350, 400, "CAESAR");
     }
 
-    static GetTooltipText(): string
+    public static GetTooltipText(): string
     {
         if (MapPage.HoverGateway == "CAESAR")
         {
@@ -145,7 +145,7 @@ class MapPage
         }
     }
 
-    static AddNetwork(x: number, y: number, label: string, netSize: number = 150, fontSize: number = 30)
+    private static AddNetwork(x: number, y: number, label: string, netSize: number = 150, fontSize: number = 30)
     {
         MapPage.nets.push({ X: x, Y: y, Name: label, Width: netSize });
         MapPage.Add("circle", { fill: "transparent", stroke_width: 2, stroke: "#E0E0E0", cx: x, cy: y, r: netSize });
@@ -154,7 +154,7 @@ class MapPage
 
     //static toolTip: kendo.ui.Tooltip;
 
-    static AddGateway(x: number, y: number, label: string, width: number = 200, fontSize: number = 18)
+    private static AddGateway(x: number, y: number, label: string, width: number = 200, fontSize: number = 18)
     {
         var h = 12 + fontSize;
 
@@ -240,14 +240,14 @@ class MapPage
         }
     }
 
-    static SetGatewayState(label: string, state: number, direction: string)
+    public static SetGatewayState(label: string, state: number, direction: string)
     {
         var colors: string[] = ["#b8f779", "#fff375", "#ffc942", "#ff9e91"];
         $("#svg_gw_" + label).attr("fill", colors[state]);
         $("#svg_gw_" + label + "_dir").attr("visibility", direction == "BIDIRECTIONAL" ? "visible" : "hidden");
     }
 
-    static Add(tag: string, attrs: {}, content?: string): SVGElement
+    private static Add(tag: string, attrs: {}, content?: string): SVGElement
     {
         var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
         for (var k in attrs)
@@ -258,7 +258,7 @@ class MapPage
         return el;
     }
 
-    static AddGatewayLink(gateway: string, network: string, netFoot: number)
+    private static AddGatewayLink(gateway: string, network: string, netFoot: number)
     {
         var gw: KnownNetwork;
         for (var i = 0; i < MapPage.gateways.length; i++)
@@ -295,7 +295,7 @@ class MapPage
             MapPage.Add("rect", { fill: "white", stroke_width: 2, stroke: "black", x: x2 - 3, y: y2 - 3, width: 6, height: 6 });
     }
 
-    static Angle(ad: number, op: number): number
+    private static Angle(ad: number, op: number): number
     {
         var angle = 0.0;
         if (ad == 0.0) // Avoid angles of 0 where it would make a division by 0
@@ -314,7 +314,7 @@ class MapPage
         return angle;
     }
 
-    static BorderPoint(rect: Rectangle, pt: Point, angle: number): Point
+    private static BorderPoint(rect: Rectangle, pt: Point, angle: number): Point
     {
 
         // catch cases where point is outside rectangle

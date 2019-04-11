@@ -605,14 +605,16 @@
     <TypeScriptCompile Include="Frontend\Sections\Details\DetailsCommands.ts" />
     <TypeScriptCompile Include="Frontend\Sections\Details\DetailsPage.ts" />
     <TypeScriptCompile Include="Frontend\Sections\Hamburger\EpicsDebug.ts" />
+    <TypeScriptCompile Include="Frontend\Sections\Hamburger\Hamburger.ts" />
     <TypeScriptCompile Include="Frontend\Sections\Hamburger\Notifications.ts" />
     <TypeScriptCompile Include="Frontend\Sections\Hamburger\Subscription.ts" />
     <TypeScriptCompile Include="Frontend\Sections\Hamburger\WrongChannels.ts" />
     <TypeScriptCompile Include="Frontend\Sections\Logs\LogsPage.ts" />
     <TypeScriptCompile Include="Frontend\Sections\Map\MapPage.ts" />
+    <TypeScriptCompile Include="Frontend\Sections\Sections.ts" />
     <TypeScriptCompile Include="Frontend\Sections\Status\StatusGraph.ts" />
     <TypeScriptCompile Include="Frontend\Sections\Status\StatusPage.ts" />
-    <TypeScriptCompile Include="Frontend\StatsBarGraph.ts" />
+    <TypeScriptCompile Include="Frontend\Sections\Logs\StatsBarGraph.ts" />
     <TypeScriptCompile Include="Frontend\Query.ts" />
     <TypeScriptCompile Include="Frontend\State.ts" />
     <TypeScriptCompile Include="Frontend\SuggestionInterface.ts" />

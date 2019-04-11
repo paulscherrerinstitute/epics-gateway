@@ -36,6 +36,14 @@
         });
     }
 
+    public static Show(): void
+    {
+        Main.CurrentGateway = null;
+        State.Set();
+        $("#gatewayView").show();
+        $("#gatewayDetails").hide();
+    }
+
     private static DisplayShort()
     {
         for (var i = 0; i < StatusPage.shortInfo.length; i++)
@@ -73,7 +81,7 @@
                 if ((!StatusPage.currentErrors || StatusPage.currentErrors.indexOf(StatusPage.shortInfo[i].Name) == -1) && errorDisplayed == false)
                 {
                     errorDisplayed = true;
-                    NotificationsMenu.Show(StatusPage.shortInfo[i].Name + " is on error.");
+                    Notifications.Show(StatusPage.shortInfo[i].Name + " is on error.");
                 }
                 newErrors.push(StatusPage.shortInfo[i].Name);
                 html += "<a href='/Status/" + StatusPage.shortInfo[i].Name + "'>" + StatusPage.shortInfo[i].Name + "</a>";

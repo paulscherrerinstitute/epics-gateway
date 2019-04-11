@@ -133,6 +133,12 @@ function isString(variable)
 
 var humanSizes = ["", "Kb", "Mb", "Gb", "Tb"];
 
+interface StoppablePromise
+{
+    xhr: JQueryXHR,
+    promise: IThenable<any>;
+}
+
 class Utils
 {
     static HumanReadable(size: number): string
@@ -279,6 +285,17 @@ class Utils
     }
 
     static async Loader(functionName: string, data: any = {})
+    {
+        return $.ajax({
+            type: 'POST',
+            url: 'DataAccess.asmx/' + functionName,
+            data: JSON.stringify(data),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json'
+        });
+    }
+
+    static LoaderXHR(functionName: string, data: any = {}): JQueryXHR
     {
         return $.ajax({
             type: 'POST',

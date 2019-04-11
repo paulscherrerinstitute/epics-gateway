@@ -1,4 +1,4 @@
-﻿class WrongChannelsMenu
+﻿class WrongChannels
 {
     static Show()
     {
