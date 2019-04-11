@@ -3,13 +3,23 @@
     public position: number = 0;
     public knownTokens: Token[] = [
         new TokenAnd(),
-        new TokenCloseParenthesis(),
+        new TokenAscending(),
+        new TokenComa(),
         new TokenCompare(),
+        new TokenOperation(),
+        new TokenDescending(),
+        new TokenGroup(),
+        new TokenLimit(),
+        new TokenSelect(),
+        new TokenOr(),
+        new TokenOrder(),
+        new TokenStar(),
+        new TokenWhere(),
+        new TokenString(),
         new TokenName(),
         new TokenNumber(),
         new TokenOpenParenthesis(),
-        new TokenOr(),
-        new TokenString()
+        new TokenCloseParenthesis()
     ];
 
     constructor(parser: QueryParser) {
@@ -20,7 +30,7 @@
                 this.tokens.push(possibleToken.extract(parser));
             } else {
                 if (typeof (parser.peekChar()) != "undefined") {
-                    this.tokens.push(new TokenEnd(parser.peekChar()));
+                    this.tokens.push(new TokenEnd(parser.peekString()));
                 } else {
                     this.tokens.push(new TokenEnd());
                 }

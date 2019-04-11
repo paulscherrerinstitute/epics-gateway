@@ -1138,7 +1138,7 @@ class Main
                     {
                         suggestions.forEach(sug =>
                         {
-                            suggestionList.append(`<div class="suggestion-item">${sug.suggestion.replace(sug.input, '<b>' + sug.input + '</b>')}<span class="hint">${sug.hint} ${typeof (sug.dataType) != "undefined" ? ": " + sug.dataType : ""}</span></div>`);
+                            suggestionList.append(`<div class="suggestion-item">${sug.suggestion.replace(sug.input, '<b>' + sug.input + '</b>')}<span class="hint">${typeof (sug.hint) != "undefined" ? sug.hint: "" } ${typeof (sug.dataType) != "undefined" ? ": " + sug.dataType : ""}</span></div>`);
                         });
                         suggestionList.children().each(function ()
                         {
