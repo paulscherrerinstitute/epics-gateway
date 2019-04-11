@@ -1,4 +1,4 @@
-﻿/// <reference path="../scripts/typings/kendo/kendo.all.d.ts" />
+﻿/*/// <reference path="../scripts/typings/kendo/kendo.all.d.ts" />
 
 interface GatewayShortInformation
 {
@@ -162,8 +162,6 @@ class Live
 
         $("#currentGW").html("Loading...");
         $("#gwInfos").html("");
-        /*$("#inventoryLink").attr("href", "https://inventory.psi.ch/#action=Part&system=" + encodeURIComponent(Main.CurrentGateway.toUpperCase()));
-        $("#logLink").attr("href", "/GW/" + Main.CurrentGateway);*/
 
         Live.cpuChart.SetDataSource({ Values: [] });
         Live.searchesChart.SetDataSource({ Values: [] });
@@ -195,8 +193,6 @@ class Live
 
     static RefreshShort(callback: () => void)
     {
-
-
         $.ajax({
             type: 'POST',
             url: 'DataAccess.asmx/GetShortInformation',
@@ -229,7 +225,7 @@ class Live
                     if ((!Live.currentErrors || Live.currentErrors.indexOf(Live.shortInfo[i].Name) == -1) && errorDisplayed == false)
                     {
                         errorDisplayed = true;
-                        Notifications.Show(Live.shortInfo[i].Name + " is on error.");
+                        NotificationsMenu.Show(Live.shortInfo[i].Name + " is on error.");
                     }
                     newErrors.push(Live.shortInfo[i].Name);
                     html += "<a href='/Status/" + Live.shortInfo[i].Name + "'>" + Live.shortInfo[i].Name + "</a>";
@@ -476,4 +472,4 @@ class Live
         ctx.fillStyle = "#A0A0A0";
         ctx.fillText(str, 50 - w / 2, 60);
     }
-}
+}*/

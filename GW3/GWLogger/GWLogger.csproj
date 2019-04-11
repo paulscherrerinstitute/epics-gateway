@@ -577,7 +577,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="Frontend\Commands.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\Connections.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\DataFileStats.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\FreeSpace.ts" />
@@ -587,12 +586,9 @@
     <TypeScriptCompile Include="Frontend\DTOs\KeyValuePair.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\LogEntry.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\SearchRequest.ts" />
-    <TypeScriptCompile Include="Frontend\EpicsDebug.ts" />
     <TypeScriptCompile Include="Frontend\LineGraph.ts" />
     <TypeScriptCompile Include="Frontend\Live.ts" />
     <TypeScriptCompile Include="Frontend\Main.ts" />
-    <TypeScriptCompile Include="Frontend\Map.ts" />
-    <TypeScriptCompile Include="Frontend\Notifications.ts" />
     <TypeScriptCompile Include="Frontend\Patterns.ts" />
     <TypeScriptCompile Include="Frontend\Query\QueryParser.ts" />
     <TypeScriptCompile Include="Frontend\Query\Tokenizer.ts" />
@@ -606,25 +602,28 @@
     <TypeScriptCompile Include="Frontend\Query\Tokens\TokenOpenParenthesis.ts" />
     <TypeScriptCompile Include="Frontend\Query\Tokens\TokenOr.ts" />
     <TypeScriptCompile Include="Frontend\Query\Tokens\TokenString.ts" />
+    <TypeScriptCompile Include="Frontend\Sections\Details\DetailsCommands.ts" />
+    <TypeScriptCompile Include="Frontend\Sections\Details\DetailsPage.ts" />
+    <TypeScriptCompile Include="Frontend\Sections\Hamburger\EpicsDebug.ts" />
+    <TypeScriptCompile Include="Frontend\Sections\Hamburger\Notifications.ts" />
+    <TypeScriptCompile Include="Frontend\Sections\Hamburger\Subscription.ts" />
+    <TypeScriptCompile Include="Frontend\Sections\Hamburger\WrongChannels.ts" />
+    <TypeScriptCompile Include="Frontend\Sections\Logs\LogsPage.ts" />
+    <TypeScriptCompile Include="Frontend\Sections\Map\MapPage.ts" />
+    <TypeScriptCompile Include="Frontend\Sections\Status\StatusGraph.ts" />
+    <TypeScriptCompile Include="Frontend\Sections\Status\StatusPage.ts" />
     <TypeScriptCompile Include="Frontend\StatsBarGraph.ts" />
     <TypeScriptCompile Include="Frontend\Query.ts" />
     <TypeScriptCompile Include="Frontend\State.ts" />
-    <TypeScriptCompile Include="Frontend\Subscription.ts" />
     <TypeScriptCompile Include="Frontend\SuggestionInterface.ts" />
     <TypeScriptCompile Include="Frontend\ToolTip.ts" />
     <TypeScriptCompile Include="Frontend\Utils.ts" />
-    <TypeScriptCompile Include="Frontend\WrongChannels.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\kendo\kendo.all.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\promise\promise.d.ts" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\LogFileHandling\LogFileHandling.csproj">
-      <Project>{6e617deb-8f84-45cf-913e-3258203fda50}</Project>
-      <Name>LogFileHandling</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
@@ -633,7 +632,12 @@
     <WCFMetadataStorage Include="Connected Services\Inventory.Controller\" />
     <WCFMetadataStorage Include="Connected Services\Inventory\" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\LogFileHandling\LogFileHandling.csproj">
+      <Project>{6e617deb-8f84-45cf-913e-3258203fda50}</Project>
+      <Name>LogFileHandling</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

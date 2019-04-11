@@ -1,4 +1,4 @@
-﻿class Patterns
+﻿/*class Patterns
 {
     static Show()
     {
@@ -53,4 +53,4 @@
             }
         });
     }
-}
+}*/

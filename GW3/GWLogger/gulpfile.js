@@ -24,7 +24,7 @@ function CompileFrontend()
         sourceMap: true
     });*/
 
-    return gulp.src(['./Frontend/**/*.ts', './Scripts/typings/**/*.d.ts'])
+    return gulp.src(['./Frontend/**/*.ts', './Scripts/typings/**/*.d.ts', './node_modules/es6-promise/dist/es6-promise.auto.min.js', './node_modules/es6-promise/dist/es6-promise.min.js'])
         .pipe(sourcemaps.init())
         .pipe(sourcemaps.identityMap())
         .pipe(tsMain())
@@ -59,8 +59,8 @@ var tsMain = typescript.createProject({
     module: "system",
     target: "es5",
     experimentalDecorators: true,
-    sourceMap: true
-});
+    sourceMap: true,
+    allowJs: true});
 
 gulp.task("watcher", function ()
 {

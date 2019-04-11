@@ -83,7 +83,7 @@ namespace GWLogger.Live
                 });
                 return result.Rows.Where(row => !string.IsNullOrWhiteSpace(row[0])).ToDictionary(key => key[0].ToUpper(), val => val[1]);
             }
-            catch (Exception ex)
+            catch
             {
 
             }

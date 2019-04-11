@@ -277,4 +277,15 @@ class Utils
             return JSON.parse(localStorage.getItem("preferences"));
         return {};
     }
+
+    static async Loader(functionName: string, data: any = {})
+    {
+        return $.ajax({
+            type: 'POST',
+            url: 'DataAccess.asmx/' + functionName,
+            data: JSON.stringify(data),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json'
+        });
+    }
 }

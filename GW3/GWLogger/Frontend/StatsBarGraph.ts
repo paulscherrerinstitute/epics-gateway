@@ -1,4 +1,4 @@
-﻿class StatsBarGraph
+﻿/*class StatsBarGraph
 {
     static DrawStats(): void
     {
@@ -258,4 +258,4 @@
 
         Main.LoadTimeInfo();
     }
-}
+}*/

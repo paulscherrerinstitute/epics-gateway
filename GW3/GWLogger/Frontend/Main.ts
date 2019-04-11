@@ -3,7 +3,31 @@
 // Main class...
 class Main
 {
+    public static CurrentGateway: string;
+    static Path: string = "Status";
+    static StartDate: Date = null;
+    static EndDate: Date = null;
+    static CurrentTime: Date;
+    static CurrentTab: number = 0;
+    static IsLast: boolean = true;
     static BaseTitle: string;
+
+    public static async Refresh()
+    {
+        await StatusPage.Refresh();
+    }
+
+    public static Init(): void
+    {
+        DetailPage.Init();
+        StatusPage.Init();
+
+        setInterval(Main.Refresh, 1000);
+    }
+}
+
+
+/*    static BaseTitle: string;
     static CurrentGateway: string;
     static Sessions: GatewaySession[];
     static Stats: GatewayStats;
@@ -47,7 +71,7 @@ class Main
                 });
 
                 if (Main.CurrentGateway && gateways.indexOf(Main.CurrentGateway) == -1 && Main.Path == "GW")
-                    Notifications.Alert("The selected gateway doesn't have logs.");
+                    NotificationsMenu.Alert("The selected gateway doesn't have logs.");
                 if (Main.CurrentGateway && gateways.indexOf(Main.CurrentGateway) != -1)
                 {
                     Main.GatewayChanged();
@@ -413,7 +437,6 @@ class Main
                 queryString += (queryString != "" ? "&" : "?") + "offset=" + this.Offset;
             if (Main.OffsetFile !== null)
                 queryString += (queryString != "" ? "&" : "?") + "filename=" + this.OffsetFile;
-            //(Main.Levels ? "?levels=" + Main.Levels + "&query=" + $("#queryField").val() : "?query=" + $("#queryField").val()
             url = '/Logs/' + Main.CurrentGateway + '/' + startDate.getTime() + '/' + endDate.getTime() + queryString;
         }
 
@@ -498,14 +521,6 @@ class Main
                             var row = <LogEntry>(<object>$("#logsContent").data("kendoGrid").dataItem($(evt.target).parent()));
                             var html = Main.DetailInfo(row);
 
-                            /*var rowId = parseInt(evt.target.parentElement.attributes["rowId"].value);
-                            if (rowId == -1)
-                            {
-                                Main.Offset = Main.Logs[Main.Logs.length - 1].Position;
-                                Main.OffsetFile = Main.Logs[Main.Logs.length - 1].CurrentFile;
-                                Main.LoadTimeInfo();
-                                return;
-                            }*/
                             if (Main.KeepOpenDetails)
                             {
                                 Main.KeepOpenDetails = false;
@@ -626,8 +641,6 @@ class Main
                         {
                             $("#bufferSpace").html("" + msg.d + "%");
 
-                            /*Main.LoadGateways(() =>
-                            {*/
                                 Live.RefreshShort(() =>
                                 {
                                     if (Main.Path == "GW" && Main.CurrentGateway)
@@ -640,7 +653,6 @@ class Main
                                     else
                                         Main.statsAreLoading = false;
                                 });
-                            //});
                         },
                         error: () =>
                         {
@@ -804,9 +816,6 @@ class Main
 
     static Init(): void
     {
-        /*if (/Trident\/|MSIE /.test("" + window.navigator.userAgent))
-            Notifications.Alert("Internet Explorer is not supported!");*/
-
         if (("" + document.location).startsWith("http://localhost"))
             $("#gatewayBeamlines").append(`<div class="GWDisplay" id="PBGW"></div>`);
 
@@ -827,7 +836,6 @@ class Main
                 var position = $(e.target).attr("tooltip-position");
                 if (!position)
                     position = "bottom";
-                //$(elem).kendoTooltip({ position: position, content: text, animation: false });
                 ToolTip.Show(e.target, (<any>position), text);
             });
         });
@@ -916,31 +924,9 @@ class Main
                         break;
                     case "Help":
                         window.open("/help.html", "help", "menubar=no,location=no,status=no,toolbar=no,width=800,height=600,scrollbars=yes");
-                        /*$(".inset").removeClass("inset");
-                        if ($("#operationView").is(":visible"))
-                            $("#operationView").hide();
-                        $("#reportView").hide();
-                        if ($("#helpView").is(":visible"))
-                            $("#helpView").hide();
-                        else
-                        {
-                            $("#helpView").show();
-                            $(evt.target).addClass("inset");
-                        }*/
                         break;
                     case "Operator Help":
                         window.open("/sop_d.html", "help", "menubar=no,location=no,status=no,toolbar=no,width=800,height=600,scrollbars=yes");
-                        /*$(".inset").removeClass("inset");
-                        if ($("#helpView").is(":visible"))
-                            $("#helpView").hide();
-                        $("#reportView").hide();
-                        if ($("#operationView").is(":visible"))
-                            $("#operationView").hide();
-                        else
-                        {
-                            $("#operationView").show();
-                            $(evt.target).addClass("inset");
-                        }*/
                         break;
                     case "": // Hambuger
                         $("#hamburgerMenu").toggleClass("visibleHamburger");
@@ -959,7 +945,6 @@ class Main
         });
 
         Main.BaseTitle = window.document.title;
-        //$("#gatewaySelector").kendoDropDownList();
         $("#gatewaySelector").on("change", Main.GatewayChanged);
         $(window).on("resize", Main.Resize);
         $("#timeRangeCanvas").on("mousedown", StatsBarGraph.TimeLineSelected);
@@ -1032,15 +1017,6 @@ class Main
             State.Set(true);
             State.Pop(null);
         });
-        /*$("#queryField").on("focus", () =>
-        {
-            $("#querySuggestions").show();
-            Main.ShowSuggestion();
-        });
-        $("#queryField").on("blur", () =>
-        {
-            $("#querySuggestions").hide();
-        });*/
 
         jQuery.fn.scrollTo = function (elem)
         {
@@ -1264,4 +1240,4 @@ class Main
                 cb();
         }, 500);
     }
-}
+}*/
