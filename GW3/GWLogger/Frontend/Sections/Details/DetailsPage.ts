@@ -135,6 +135,8 @@ class DetailPage
         DetailPage.cpuChart.SetDataSource({ Values: [] });
         DetailPage.searchesChart.SetDataSource({ Values: [] });
         DetailPage.pvsChart.SetDataSource({ Values: [] });
+
+        DetailPage.LoadDetails();
     }
 
     public static async LoadDetails()
