@@ -53,136 +53,35 @@
     }
 
     public static getProposals(query: string): SuggestionInterface[] {
-        return new QueryParser(query).getProposals();
+        return new QueryParser(query).getProposals(query);
     }
 
-    private getProposals(): SuggestionInterface[] {
-        var length = this.tokens.tokens.length;
-        if (length < 1) {
-            return this.getVariables();
+    private getProposals(query: string): SuggestionInterface[] {
+        let length = this.tokens.tokens.length;
+        let possibleTokens: Token[];
+        let suggestions: SuggestionInterface[] = [];
+        let input = length <= 0 ? "" : this.tokens.tokens[length - 1].value.toLowerCase();
+        if (length <= 1) {
+            possibleTokens = new TokenEnd().getProposals();
+        } else if (length == 2) {
+            possibleTokens = this.tokens.tokens[0].getProposals(this.tokens.tokens[1]);
+        } else {
+            possibleTokens = this.tokens.tokens[length - 3].getProposals(this.tokens.tokens[length - 2], this.tokens.tokens[length - 1]);
         }
-        var lastToken = this.tokens.tokens[length - 1];
-        var secondLastTokenType = typeof (this.tokens.tokens[length - 2]) == 'undefined' ? 'undefined' : (<any>this.tokens.tokens[length - 2].constructor).name;
-        var thirdLastTokenType = typeof (this.tokens.tokens[length - 3]) == 'undefined' ? 'undefined' : (<any>this.tokens.tokens[length - 3].constructor).name;
-        switch ((<any>lastToken.constructor).name) {
-            case "TokenEnd":
-                switch (lastToken.value) {
-                    case "":
-                        switch (secondLastTokenType) {
-                            case "TokenAnd":
-                            case "TokenOr":
-                            case "TokenOpenParenthesis":
-                                return this.getVariables();
-                            case "TokenName":
-                                if (thirdLastTokenType == "TokenCompare") {
-                                    return this.getBinaries();
-                                }
-                                return this.getOperators(lastToken.value);
-                            case "TokenNumber":
-                            case "TokenString":
-                            case "TokenCloseParenthesis":
-                                return this.getBinaries();
-                            default:
-                                return [];
-                        }
-                    case "&":
-                        return this.getBinaries("&");
-                    case "|":
-                        return this.getBinaries("|");
-                    default:
-                        if (lastToken.value.length == 1) {
-                            return this.getOperators(lastToken.value);
-                        }
-                }
-                return [];
-            case "TokenName":
-                switch (secondLastTokenType) {
-                    case "TokenString":
-                    case "TokenNumber":
-                    case "TokenName":
-                        switch (thirdLastTokenType) {
-                            case "TokenCompare":
-                                return this.getBinaries();
-                            default:
-                                return this.getOperators(lastToken.value);
-                        }
-                    case "TokenCompare":
-                        break;
-                    default:
-                        return this.getVariables(lastToken.value);
-                }
-                break;
-            case "TokenOpenParenthesis":
-                return this.getVariables();
-            case "TokenCompare":
-                if (lastToken.value.length == 1) {
-                    return this.getOperators(lastToken.value);
-                }
-            default:
-                if ((this.source.match(/\"/g) || []).length % 2 != 0) {
-                    return [<SuggestionInterface>{ suggestion: '"' }];
-                }
-                if ((this.source.match(/\'/g) || []).length % 2 != 0) {
-                    return [<SuggestionInterface>{ suggestion: "'" }];
-                }
-                if ((this.source.match(/\(/g) || []).length > (this.source.match(/\)/g) || []).length) {
-                    return [<SuggestionInterface>{ suggestion: ")" }];
-                }
-                return [];
+
+        if (query.split("(").length - 1 <= query.split(")").length - 1) {
+            possibleTokens = possibleTokens.filter(token => token.tokenType != TokenType.TokenCloseParenthesis);
         }
+
+        possibleTokens.forEach(token => {
+            suggestions = suggestions.concat(token.proposals.filter(prop => prop.suggestion.indexOf(input) > -1));
+        });
+
+        suggestions.forEach(suggestion => {
+            suggestion.input = input;
+        });
+
+        return suggestions;
     }
 
-    private getVariables(key: string = ""): SuggestionInterface[] {
-        key = key.toLowerCase();
-        return [
-            ["class", "Source class, path & function call", "Text"],
-            ["sourcefilepath", "Source file path", "Text"],
-            ["sourcemembername", "Function call", "Text"],
-            ["line", "Source line number", "Number"],
-            ["sourcelinenumber", "Source line number", "Number"],
-            ["channel", "EPICS Channel Name", "Text"],
-            ["channelname", "EPICS Channel Name", "Text"],
-            ["sid", "Server ID (IOC ID)", "Text"],
-            ["cid", "Client ID (EPICS client)", "Text"],
-            ["gwid", "Gateway ID", "Text"],
-            ["remote", "Remote IP & port (either client or IOC)", "Text"],
-            ["cmd", "Command id", "Text"],
-            ["commandid", "Command id", "Text"],
-            ["ip", "3rd party IP (<> remote)", "Text"],
-            ["exception", "Exception", "Text"],
-            ["datacount", "Channel data count", "Number"],
-            ["gatewaymonitorid", "Gateway Monitor Id", "Text"],
-            ["clientioid", "Client I/O ID", "Text"],
-            ["version", "Channel Access protocol's version", "Text"],
-            ["origin", "Origin", "Text"],
-            ["type", "Log message type", "Text"],
-            ["date", "Entry date", "Date"]
-        ]
-            .filter(variable => variable[0].indexOf(key) != -1)
-            .map(variable => <SuggestionInterface>{ suggestion: variable[0], hint: variable[1], dataType: variable[2], input: key });
-    }
-
-    private getOperators(key: string = ""): SuggestionInterface[] {
-        key = key.toLowerCase();
-        return [
-            ["!=", "Not equal"],
-            ["=", "Equal"],
-            [">", "Bigger than"],
-            ["<", "Smaller than"],
-            [">=", "Bigger or equal than"],
-            ["<=", "Smaller or equal than"],
-            ["contains", "Contains"],
-            ["starts", "Starts with"],
-            ["ends", "Ends with"]
-        ]
-            .filter(operator => operator[0].indexOf(key) != -1)
-            .map(operator => <SuggestionInterface>{ suggestion: operator[0], hint: operator[1], input: key });
-    }
-
-    private getBinaries(key: string = ""): SuggestionInterface[] {
-        key = key.toLowerCase();
-        return ["and", "or", "&&", "||"]
-            .filter(operator => operator.indexOf(key) != -1)
-            .map(operator => <SuggestionInterface>{ suggestion: operator, input: key });
-    }
 }

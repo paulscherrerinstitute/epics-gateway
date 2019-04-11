@@ -1,26 +1,18 @@
-﻿class TokenOr extends Token {
+class TokenWhere extends Token {
 
-    public tokenType: TokenType = TokenType.TokenOr;
+    public tokenType: TokenType = TokenType.TokenWhere;
 
-    public proposals: SuggestionInterface[] = <SuggestionInterface[]>[
-        { suggestion: "or" },
-        { suggestion: "||" }
-    ];
+    public proposals: SuggestionInterface[] = <SuggestionInterface[]>[{ suggestion: "where" }];
 
     public canBeUsed(parser: QueryParser): boolean {
         parser.skipSpaces();
-        return ((parser.peekChar() == '|' && parser.peekChar(1) == '|') || parser.peekString().toLowerCase() == "or");
+        return parser.peekString().toLowerCase() == "where";
     }
-
     public extract(parser: QueryParser): Token {
         parser.skipSpaces();
-        var token = new TokenOr();
-        if (parser.peekString().toLowerCase() == "or") {
-            parser.nextString();
-            token.value = "||";
-            return token;
-        }
-        token.value = parser.nextChar() + parser.nextChar();
+        parser.nextString();
+        let token = new TokenWhere();
+        token.value = "where";
         return token;
     }
 
