@@ -587,7 +587,6 @@
     <TypeScriptCompile Include="Frontend\DTOs\LogEntry.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\SearchRequest.ts" />
     <TypeScriptCompile Include="Frontend\LineGraph.ts" />
-    <TypeScriptCompile Include="Frontend\Live.ts" />
     <TypeScriptCompile Include="Frontend\Main.ts" />
     <TypeScriptCompile Include="Frontend\Patterns.ts" />
     <TypeScriptCompile Include="Frontend\Query\QueryParser.ts" />
