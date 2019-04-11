@@ -1,12 +1,14 @@
 ﻿class Anomalies
 {
     private static OneSuccessfulLoad = false;
+    private static LoadedAnomalies: GraphAnomaly[] = null;
 
     public static Show(): void {
         Main.CurrentGateway = null;
         State.Set(true);
         this.GetGraphAnomalies((anomalies) => {
             this.OneSuccessfulLoad = true;
+            this.LoadedAnomalies = anomalies;
             var html = "";
             if (anomalies.length == 0) {
                 html += "<div class=\"no-anomalies\">No anomalies</div>";
@@ -49,6 +51,17 @@
     }
 
     public static Detail(filename: string) {
+        Main.DetailAnomaly = filename;
+        State.Set(true);
+
+        var anomaly = this.LoadedAnomalies.filter(v => v.Filename == filename)[0];
+
+        if (anomaly == null)
+            return;
+
+        var html = `<div>${anomaly.Name}</div>`;
+
+        $("#anomalyView").html(html);
     }
 
     private static DurationString(millis: number): string {

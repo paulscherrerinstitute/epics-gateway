@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml;
 using System.Xml.Serialization;
 
 namespace GWLogger.Live
@@ -229,8 +230,8 @@ namespace GWLogger.Live
 
         public int State => Math.Max(CpuState, SearchState);
 
-        private readonly object PreviousAnomaliesLock = new object();
-        private List<GraphAnomaly> PreviousAnomalies = null;
+        private readonly object AllAnomaliesLock = new object();
+        private List<GraphAnomaly> AllAnomalies = null;
 
         internal void AnalyzeGraphs()
         {
@@ -238,46 +239,38 @@ namespace GWLogger.Live
             var anomalyStorage = Global.AnomalyStorage;
             var anomalySerializer = new XmlSerializer(typeof(GraphAnomaly));
 
-            lock (PreviousAnomaliesLock)
+            // Double-Checked locking
+            if(AllAnomalies == null)
             {
-                if(PreviousAnomalies == null)
+                lock (AllAnomaliesLock)
                 {
-                    var dateMatcher = Regex.Replace(anomalyDateFormat, @"([^-\s])", "?");
-                    PreviousAnomalies = Directory.EnumerateFiles(anomalyStorage, $"{Name}_{dateMatcher}.xml", SearchOption.TopDirectoryOnly)
-                        .Where(path => {
-                            var parts = Path.GetFileNameWithoutExtension(path).Split('_');
-                            if (parts.Length != 2)
-                                return false;
-
-                            if (!DateTime.TryParseExact(parts[1], anomalyDateFormat, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTime parsedDateTime))
-                                return false;
-
-                            if (parsedDateTime <= Global.ApplicationStartUtc)
-                                return false;
-                            return true;
-                        })
-                        .Select(path => {
-                            GraphAnomaly anomaly = null;
-                            try
-                            {
-                                using (var file = File.OpenRead(path))
+                    if(AllAnomalies == null)
+                    {
+                        var dateMatcher = Regex.Replace(anomalyDateFormat, @"([^-\s])", "?");
+                        AllAnomalies = Directory.EnumerateFiles(anomalyStorage, $"{Name}_{dateMatcher}.xml", SearchOption.TopDirectoryOnly)
+                            .Select(path => {
+                                GraphAnomaly anomaly = null;
+                                try
                                 {
-                                    anomaly = (GraphAnomaly)anomalySerializer.Deserialize(file);
-                                    anomaly.IsDirty = false;
-                                    anomaly.Filename = Path.GetFileNameWithoutExtension(path);
-                                    anomaly.Name = Name;
+                                    using (var file = File.OpenRead(path))
+                                    {
+                                        anomaly = (GraphAnomaly)anomalySerializer.Deserialize(file);
+                                        anomaly.IsDirty = false;
+                                        anomaly.Filename = Path.GetFileNameWithoutExtension(path);
+                                        anomaly.Name = Name;
+                                    }
                                 }
-                            }
-                            catch (Exception ex)
-                            {
-                                Debug.WriteLine("Exception while reading anomaly xml file: " + path);
-                                Debug.WriteLine(ex.GetType().Name + ": " + ex.Message);
-                            }
-                            return anomaly;
-                        })
-                        .Where(anomaly => anomaly != null)
-                        .OrderByDescending(anomaly => anomaly.From)
-                        .ToList();
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine("Exception while reading anomaly xml file: " + path);
+                                    Debug.WriteLine(ex.GetType().Name + ": " + ex.Message);
+                                }
+                                return anomaly;
+                            })
+                            .Where(anomaly => anomaly != null)
+                            .OrderByDescending(anomaly => anomaly.From)
+                            .ToList();
+                    }
                 }
             }
 
@@ -292,114 +285,107 @@ namespace GWLogger.Live
             if (cpuAnomalies.Count == 0)
                 return;
 
-            lock (PreviousAnomaliesLock)
+            lock (AllAnomaliesLock)
             {
                 foreach (var (From, To) in cpuAnomalies)
                 {
-                    var anomaly = PreviousAnomalies.FirstOrDefault(a => From <= a.To);
+                    if (From <= Global.ApplicationStartUtc)
+                        continue; // Skip events that occured before application was started
 
-                    if(anomaly != null)
-                    {
-                        // Combine the two
-                        anomaly.To = To;
-                    }
+                    // Try to get an already existing anomaly in this range
+                    var anomaly = AllAnomalies.FirstOrDefault(a =>  From >= a.From && From <= a.To);
+
+                    if(anomaly == null)
+                        anomaly = new GraphAnomaly { From = From, To = To, Name = Name, IsDirty = true }; // Create a new anomaly
                     else
+                        anomaly.To = To; // Combine the anomalies into one 
+
+                    // Skip querying and storing of data if the datetime range is still the same
+                    if (!anomaly.IsDirty)
+                        continue;
+
+                    // Collect data
+                    var before = From.Add(-(To - From));
+
+                    var typeQuery = "select count(*) nb, type group by type order by nb desc";
+                    var beforeEventTypes = Global.DataContext.ReadLog(Name, before, From, typeQuery)?.Select(o => new QueryResultValue(o)).ToList();
+                    var duringEventTypes = Global.DataContext.ReadLog(Name, From, To, typeQuery)?.Select(o => new QueryResultValue(o)).ToList();
+
+                    // Don't try to analyze if there is no log data available
+                    if (beforeEventTypes != null && duringEventTypes != null)
                     {
-                        // Add new anomaly
-                        anomaly = new GraphAnomaly { From = From, To = To, IsDirty = true };
-                    }
-
-                    // Only requery and store data if the range was changed
-                    if (anomaly.IsDirty)
-                    {
-                        // Collect data
-                        var before = From.Add(-(To - From));
-
-                        var typeQuery = "select count(*) nb, type group by type order by nb desc";
-                        var beforeEventTypes = Global.DataContext.ReadLog(Name, before, From, typeQuery)?.Select(o => new QueryResultValue(o)).ToList();
-                        var duringEventTypes = Global.DataContext.ReadLog(Name, From, To, typeQuery)?.Select(o => new QueryResultValue(o)).ToList();
-
-                        // Don't try to analyze if there is no log data available
-                        if (beforeEventTypes != null && duringEventTypes != null)
+                        var typeDifferences = beforeEventTypes
+                        .Concat(duringEventTypes)
+                        .GroupBy(g => g.Text)
+                        .Select(g => new QueryResultValue
                         {
-                            var typeDifferences = beforeEventTypes
-                            .Concat(duringEventTypes)
-                            .GroupBy(g => g.Text)
-                            .Select(g => new QueryResultValue
+                            Text = g.Key,
+                            Value = g.Max(q => q.Value) - g.Min(q => q.Value)
+                        });
+
+                        var interestingEventTypes = typeDifferences
+                            .OrderByDescending(v => v.Value)
+                            .Take(5)
+                            .ToList();
+
+                        var interestingEventTypeRemotes = new List<InterestingEventType>();
+
+                        foreach (var interestingEventType in interestingEventTypes)
+                        {
+                            var interestingTypeQuery = $"select count(*) nb, remote where type=\"{interestingEventType.Text.Replace("\"","")}\" group by remote order by nb desc";
+                            var groupedRemotes = new Dictionary<string, int>();
+
+                            foreach (var remote in Global.DataContext.ReadLog(Name, From, To, interestingTypeQuery).Select(o => new QueryResultValue(o)))
                             {
-                                Text = g.Key,
-                                Value = g.Max(q => q.Value) - g.Min(q => q.Value)
+                                var host = remote.Text.Split(':').First();
+                                if (groupedRemotes.TryGetValue(host, out int prev))
+                                    groupedRemotes[host] = prev + (int)remote.Value;
+                                else
+                                    groupedRemotes.Add(host, (int)remote.Value);
+                            }
+
+                            interestingEventTypeRemotes.Add(new InterestingEventType
+                            {
+                                EventType = interestingEventType,
+                                TopRemotes = groupedRemotes
+                                    .OrderByDescending(g => g.Value)
+                                    .Take(3)
+                                    .Select(r => new QueryResultValue { Text = r.Key, Value = r.Value })
+                                    .ToList()
                             });
-
-                            var interestingEventTypes = typeDifferences
-                                .OrderByDescending(v => v.Value)
-                                .Take(5)
-                                .ToList();
-
-                            var interestingEventTypeRemotes = new List<InterestingEventType>();
-
-                            foreach (var interestingEventType in interestingEventTypes)
-                            {
-                                var interestingTypeQuery = $"select count(*) nb, remote where type=\"{interestingEventType.Text.Replace("\"","")}\" group by remote order by nb desc";
-                                var groupedRemotes = new Dictionary<string, int>();
-
-                                foreach (var remote in Global.DataContext.ReadLog(Name, From, To, interestingTypeQuery).Select(o => new QueryResultValue(o)))
-                                {
-                                    var host = remote.Text.Split(':').First();
-                                    if (groupedRemotes.TryGetValue(host, out int prev))
-                                        groupedRemotes[host] = prev + (int)remote.Value;
-                                    else
-                                        groupedRemotes.Add(host, (int)remote.Value);
-                                }
-
-                                interestingEventTypeRemotes.Add(new InterestingEventType
-                                {
-                                    EventType = interestingEventType,
-                                    TopRemotes = groupedRemotes
-                                        .OrderByDescending(g => g.Value)
-                                        .Take(3)
-                                        .Select(r => new QueryResultValue { Text = r.Key, Value = r.Value })
-                                        .ToList()
-                                });
-                            }
-
-                            var remoteQuery = "select count(*) nb, remote group by remote order by nb desc";
-                            var beforeRemoteCounts = Global.DataContext.ReadLog(Name, before, From, remoteQuery).Select(o => new QueryResultValue(o)).ToList();
-                            var duringRemoteCounts = Global.DataContext.ReadLog(Name, From, To, remoteQuery).Select(o => new QueryResultValue(o)).ToList();
-
-                            anomaly.InterestingEventTypeRemotes = interestingEventTypeRemotes;
-                            anomaly.BeforeEventTypes = beforeEventTypes.Take(5).ToList();
-                            anomaly.DuringEventTypes = duringEventTypes.Take(5).ToList();
-                            anomaly.BeforeRemoteCounts = beforeRemoteCounts.Take(5).ToList();
-                            anomaly.DuringRemoteCounts = duringRemoteCounts.Take(5).ToList();
                         }
 
-                        anomaly.History = GetHistory();
+                        var remoteQuery = "select count(*) nb, remote group by remote order by nb desc";
+                        var beforeRemoteCounts = Global.DataContext.ReadLog(Name, before, From, remoteQuery).Select(o => new QueryResultValue(o)).ToList();
+                        var duringRemoteCounts = Global.DataContext.ReadLog(Name, From, To, remoteQuery).Select(o => new QueryResultValue(o)).ToList();
 
-                        var writingFailed = true;
-                        try
-                        {
-                            var filePath = Path.Combine(anomalyStorage, $"{Name}_{anomaly.From.ToString(anomalyDateFormat, CultureInfo.InvariantCulture)}.xml");
-                            using (var file = File.OpenWrite(filePath))
-
-                            {
-                                anomalySerializer.Serialize(file, anomaly);
-                            }
-                            writingFailed = false;
-                        }
-                        catch
-                        {
-                        }
-
-                        anomaly.IsDirty = writingFailed;
-                        PreviousAnomalies.Add(anomaly);
+                        anomaly.InterestingEventTypeRemotes = interestingEventTypeRemotes;
+                        anomaly.BeforeEventTypes = beforeEventTypes.Take(5).ToList();
+                        anomaly.DuringEventTypes = duringEventTypes.Take(5).ToList();
+                        anomaly.BeforeRemoteCounts = beforeRemoteCounts.Take(5).ToList();
+                        anomaly.DuringRemoteCounts = duringRemoteCounts.Take(5).ToList();
                     }
-                }
 
-                // Remove anomalies that are too old from memory
-                var lastDataPoint = cpuHistory.OrderBy(c => c.Date).FirstOrDefault();
-                if(lastDataPoint != null)
-                    PreviousAnomalies.RemoveAll(a => a.To < lastDataPoint.Date);
+                    anomaly.History = GetHistory();
+
+                    var writingFailed = true;
+                    try
+                    {
+                        var filename = $"{Name}_{anomaly.From.ToString(anomalyDateFormat, CultureInfo.InvariantCulture)}";
+                        using (var xmlWriter = XmlWriter.Create(File.Open(Path.Combine(anomalyStorage, $"{filename}.xml"), FileMode.Create), new XmlWriterSettings { Indent = false }))
+                        {
+                            anomaly.Filename = filename;
+                            anomalySerializer.Serialize(xmlWriter, anomaly);
+                        }
+                        writingFailed = false;
+                    }
+                    catch
+                    {
+                    }
+
+                    anomaly.IsDirty = writingFailed;
+                    AllAnomalies.Add(anomaly);
+                }
             }
         }
 
@@ -477,26 +463,10 @@ namespace GWLogger.Live
 
         public List<GraphAnomaly> GetGatewayAnomalies()
         {
-            var anomalyDateFormat = "yyyy-MM-dd-HH-mm-ss";
-            var anomalyStorage = Global.AnomalyStorage;
-            var anomalySerializer = new XmlSerializer(typeof(GraphAnomaly));
-
-            lock (PreviousAnomaliesLock)
-            {
-                var dateMatcher = Regex.Replace(anomalyDateFormat, @"([^-\s])", "?");
-                var files = Directory.EnumerateFiles(anomalyStorage, $"{Name}_{dateMatcher}.xml", SearchOption.TopDirectoryOnly);
-                return files.Select(path => {
-                    using (var file = File.OpenRead(path))
-                    {
-                        var anomaly = (GraphAnomaly)anomalySerializer.Deserialize(file);
-                        anomaly.IsDirty = false;
-                        anomaly.Filename = Path.GetFileNameWithoutExtension(path);
-                        anomaly.Name = Name;
-                        return anomaly;
-                    }
-                }).ToList();
-            }
+            lock (AllAnomaliesLock)
+                return AllAnomalies?.ToList() ?? new List<GraphAnomaly>();
         }
+
         /// <summary>
         /// Average PVs in the last 10 minutes
         /// </summary>

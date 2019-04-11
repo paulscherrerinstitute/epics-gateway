@@ -20,6 +20,7 @@ class Main
     static MessageTypes: string[] = [];
     static CurrentTab: number = 0;
     static Path: string = "Status";
+    static DetailAnomaly: string = null;
 
     static loadingLogs: JQueryXHR;
 

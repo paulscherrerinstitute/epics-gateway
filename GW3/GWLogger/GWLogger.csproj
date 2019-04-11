@@ -366,6 +366,7 @@
     <Content Include="favicon.ico" />
     <Content Include="Frontend\tsconfig.json" />
     <Content Include="graphtest.html" />
+    <Content Include="gulpfile.js" />
     <Content Include="help.html" />
     <Content Include="Images\all_green_map.png" />
     <Content Include="Images\bad_cycles.png" />
@@ -478,7 +479,6 @@
   <ItemGroup>
     <Content Include="DataAccess.asmx" />
     <Content Include="Global.asax" />
-    <Content Include="gulpfile.js" />
     <Content Include="index.html" />
     <Content Include="package.json" />
     <Content Include="styles\images\wp8_icons.png" />

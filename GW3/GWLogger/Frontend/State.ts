@@ -133,6 +133,10 @@
             Main.CurrentTab = parseInt(queryString["t"]);
         else
             Main.CurrentTab = 0;
+        if (queryString["f"])
+            Main.DetailAnomaly = queryString["f"];
+        else
+            Main.DetailAnomaly = null;
 
         $("#logFilter li").removeClass("activeTab");
         $($("#logFilter li")[Main.CurrentTab]).addClass("activeTab");
@@ -169,10 +173,8 @@
     {
         State.setStateTimeout = null;
         var params = "";
-        if (Main.Path == "GW")
-        {
-            if (Main.StartDate && Main.EndDate)
-            {
+        if (Main.Path == "GW") {
+            if (Main.StartDate && Main.EndDate) {
                 if (Main.CurrentTime)
                     params += (params != "" ? "&" : "#") + "c=" + Main.CurrentTime.getTime();
                 params += (params != "" ? "&" : "#") + "s=" + Main.StartDate.getTime();
@@ -182,6 +184,12 @@
                 params += (params != "" ? "&" : "#") + "q=" + encodeURIComponent($("#queryField").val());
             if (Main.CurrentTab != 0)
                 params += (params != "" ? "&" : "#") + "t=" + Main.CurrentTab;
+        }
+        else if (Main.Path == "Anomalies")
+        {
+            if (Main.DetailAnomaly) {
+                params += "#f=" + encodeURIComponent(Main.DetailAnomaly);
+            }
         }
         window.history.pushState(null, Main.BaseTitle + " - " + Main.CurrentGateway, '/' + Main.Path + '/' + (Main.CurrentGateway ? Main.CurrentGateway : "") + params);
     }

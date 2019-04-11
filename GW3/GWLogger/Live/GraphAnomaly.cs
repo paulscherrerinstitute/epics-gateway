@@ -19,7 +19,7 @@ namespace GWLogger.Live
                 return _From;
             }
             set {
-                if (_From.Equals(value))
+                if (Equals(_From, value))
                     return;
                 _From = value;
                 IsDirty = true;
@@ -34,7 +34,7 @@ namespace GWLogger.Live
             }
             set
             {
-                if (_To.Equals(value))
+                if (Equals(_To, value))
                     return;
                 _To = value;
                 IsDirty = true;
@@ -71,7 +71,10 @@ namespace GWLogger.Live
             Text = arr[1]?.ToString();
         }
 
+        [XmlAttribute]
         public double Value { get; set; }
+
+        [XmlAttribute]
         public string Text { get; set; }
     }
 

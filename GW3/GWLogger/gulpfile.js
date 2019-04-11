@@ -1,106 +1,56 @@
-﻿/// <binding Clean='clean:all' ProjectOpened='default' />
-"use strict";
-/*
-This file is the main entry point for defining Gulp tasks and using Gulp plugins.
-Click here to learn more. https://go.microsoft.com/fwlink/?LinkId=518007
-*/
+﻿"use strict";
 
 var gulp = require('gulp');
-var rimraf = require("rimraf");
-var typescript = require("gulp-typescript");
+var ts = require("gulp-typescript");
 var less = require("gulp-less");
-var util = require("gulp-util");
 var sourcemaps = require('gulp-sourcemaps');
 
-function CompileFrontend()
-{
-    process.chdir(__dirname);
+// Config
 
-    /*tsMain = typescript.createProject({
-        out: "main.js",
-        module: "system",
-        target: "es5",
-        experimentalDecorators: true,
-        sourceMap: true
-    });*/
+var typescriptOutDir = ".";
+var typescriptOutFile = "main.js";
 
-    return gulp.src(['./Frontend/**/*.ts', './Scripts/typings/**/*.d.ts'])
-        .pipe(sourcemaps.init())
-        .pipe(sourcemaps.identityMap())
-        .pipe(tsMain())
-        .pipe(sourcemaps.write(".", {
-            includeContent: false, addComment: true
-        }))
-        .pipe(gulp.dest("."))
-        .on('error', swallowError)
-        .on('finish', function ()
-        {
-            util.log(util.colors.cyan("Frontend compilation complete"));
-        });
-}
+var typescriptFileMatchers = [
+    "./Frontend/**/*.ts",
+    "./Scripts/typings/**/*.d.ts"
+];
 
-function clean(path)
-{
-    var fs = require("fs");
-    if (fs.existsSync(path))
-        fs.unlinkSync(path);
-}
-
-function swallowError(error)
-{
-    // If you want details of the error in the console
-    console.log("ERROR!");
-    console.log(error.toString());
-    this.emit('end');
-}
-
-var tsMain = typescript.createProject({
-    out: "main.js",
+var tsCompiler = ts.createProject({
+    out: typescriptOutFile,
     module: "system",
     target: "es5",
-    experimentalDecorators: true,
-    sourceMap: true
+    experimentalDecorators: true
 });
 
-gulp.task("watcher", function ()
-{
-    process.chdir(__dirname);
-    console.log("I will watch for you all the TS and LESS files and compile them as needed.");
-    console.log(" ");
-    //gulp.watch("Frontend/**/*.ts", gulp.series(["compile:frontend"]));
-    gulp.watch("Frontend/**/*.ts", CompileFrontend);
-    gulp.watch("**/*.less", gulp.series(["compile:less"]));
-});
+var lessOutDir = "./Less";
 
-gulp.task("default", gulp.series(["watcher"], function ()
-{
-}));
+var lessFileMatchers = [
+    "./Less/main.less"
+];
 
-gulp.task("compile:less", function ()
-{
-    process.chdir(__dirname);
-    return gulp.src(['./Less/main.less']).on('error', swallowError).on('finish', function ()
-    {
-        util.log(util.colors.cyan("Less compilation complete"));
-    }).pipe(less({})).pipe(gulp.dest('Less'));
-});
 
-gulp.task("clean:css", function (cb)
-{
-    process.chdir(__dirname);
-    clean('Less/main.css');
-    cb();
-});
+// Gulp tasks
 
-gulp.task("clean:js", function (cb)
-{
-    process.chdir(__dirname);
-    clean('./main.js');
-    clean('./main.js.map');
-    cb();
-});
+function buildTs(cb) {
+    return gulp.src(typescriptFileMatchers)
+        .pipe(sourcemaps.init())
+        .pipe(sourcemaps.identityMap())
+        .pipe(tsCompiler(ts.reporter.defaultReporter()))
+        .pipe(sourcemaps.write())
+        .pipe(gulp.dest(typescriptOutDir));
+}
 
-gulp.task('compile:frontend', CompileFrontend);
+function buildLess(cb) {
+    return gulp.src(lessFileMatchers)
+        .pipe(less({}))
+        .pipe(gulp.dest(lessOutDir));
+}
 
-gulp.task("compile:all", gulp.series(["compile:less", "compile:frontend"]));
-gulp.task("clean:all", gulp.series(["clean:css", "clean:js"]));
+gulp.task("default", gulp.series(buildTs, buildLess));
+gulp.task("build:ts", buildTs);
+gulp.task("build:less", buildLess);
+
+// Gulp watchers
+
+gulp.watch(typescriptFileMatchers, buildTs);
+gulp.watch(lessFileMatchers, buildLess);
