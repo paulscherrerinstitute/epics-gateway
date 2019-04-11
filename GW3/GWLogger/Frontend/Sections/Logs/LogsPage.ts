@@ -702,9 +702,9 @@
             return "";
         var html = "";
         html += "<table>";
-        html += "<tr><td>Message&nbsp;Type</td><td><span class='pseudoLink' onclick='LogsPages.AddFilter(event,\"type\");'>" + LogsPage.MessageTypes[row.Type] + "</span></td></tr>";
-        html += "<tr><td>Date</td><td><span class='pseudoLink' onclick='LogsPages.AddFilter(event,\"date\");'>" + Utils.GWDateFormatMilis(new Date(<number>row.Date)) + "</span></td>";
-        html += "<td>Remote</td><td><span class='pseudoLink' onclick='LogsPages.AddFilter(event,\"remote\");'>" + row.Remote + "</span></td></tr>";
+        html += "<tr><td>Message&nbsp;Type</td><td><span class='pseudoLink' onclick='LogsPage.AddFilter(event,\"type\");'>" + LogsPage.MessageTypes[row.Type] + "</span></td></tr>";
+        html += "<tr><td>Date</td><td><span class='pseudoLink' onclick='LogsPage.AddFilter(event,\"date\");'>" + Utils.GWDateFormatMilis(new Date(<number>row.Date)) + "</span></td>";
+        html += "<td>Remote</td><td><span class='pseudoLink' onclick='LogsPage.AddFilter(event,\"remote\");'>" + row.Remote + "</span></td></tr>";
         var n = 0;
         for (var i in row.Details)
         {
@@ -714,7 +714,7 @@
                 html += "<tr>";
             else if (n % 2 == 0)
                 html += "</tr><tr>";
-            html += "<td>" + i.replace(/(\w)([A-Z][a-z])/g, "$1&nbsp;$2") + "</td><td><span class='pseudoLink' onclick='LogsPages.AddFilter(event,\"" + i + "\");'>" + row.Details[i] + "</span></td>";
+            html += "<td>" + i.replace(/(\w)([A-Z][a-z])/g, "$1&nbsp;$2") + "</td><td><span class='pseudoLink' onclick='LogsPage.AddFilter(event,\"" + i + "\");'>" + row.Details[i] + "</span></td>";
             n++;
         }
         html += "</tr></table>";

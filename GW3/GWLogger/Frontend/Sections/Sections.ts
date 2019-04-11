@@ -4,6 +4,7 @@
     {
         DetailPage.Init();
         StatusPage.Init();
+        LogsPage.Init();
         MapPage.Init();
         Hamburger.Init();
         Sections.TopMenu();
