@@ -136,7 +136,7 @@ body
 {
     .container;
     top: 0px;
-    left: (@leftSidebar + @borderSpacing);
+    left: calc(@leftSidebar + @borderSpacing);
     height: @timeRangeHeight;
     right: @borderSpacing;
 
@@ -180,7 +180,7 @@ body
     .container;
     top: 35px;
     left: 0px;
-    right: calc(@errorPanel + 10);
+    right: calc(@errorPanel + 10px);
     bottom: 0px;
     overflow-y: hidden;
     display: none;
@@ -305,8 +305,8 @@ body
 #fields
 {
     position: absolute;
-    top: (@timeRangeHeight + @borderSpacing);
-    left: (@leftSidebar + @borderSpacing);
+    top: calc(@timeRangeHeight + @borderSpacing);
+    left: calc(@leftSidebar + @borderSpacing);
     right: @borderSpacing;
     font-size: 12px;
 }
@@ -314,8 +314,8 @@ body
 #queryField
 {
     position: absolute;
-    top: (@timeRangeHeight + @borderSpacing * 2 + 25);
-    left: (@leftSidebar + @borderSpacing);
+    top: calc(@timeRangeHeight + @borderSpacing * 2 + 25px);
+    left: calc(@leftSidebar + @borderSpacing);
     right: calc(@borderSpacing * 2 + @errorPanel - 25px);
     width: ~"calc(100vw - @{errorPanel} - 345px)";
 }
@@ -324,7 +324,7 @@ body
 {
     .button;
     position: absolute;
-    top: (@timeRangeHeight + @borderSpacing * 2 + 25);
+    top: calc(@timeRangeHeight + @borderSpacing * 2 + 25px);
     right: @borderSpacing;
     width: 20px;
     height: 20px;
@@ -337,7 +337,7 @@ body
     position: absolute;
     background-color: @suggestionBackground;
     right: @borderSpacing;
-    top: (@timeRangeHeight + @borderSpacing * 2 + 60);
+    top: calc(@timeRangeHeight + @borderSpacing * 2 + 60px);
     padding: 5px;
     display: none;
 
@@ -352,8 +352,8 @@ body
 #clients
 {
     .container;
-    top: (@timeRangeHeight + @borderSpacing * 3 + 55);
-    left: (@leftSidebar + @borderSpacing);
+    top: calc(@timeRangeHeight + @borderSpacing * 3 + 55px);
+    left: calc(@leftSidebar + @borderSpacing);
     width: ~"calc(50vw + 70px - @{errorPanel} - @{middleSidebar} - @{borderSpacing})";
     height: ~"calc(50% - @{timeRangeHeight} - @{borderSpacing} - 69px)";
     padding-top: 16px;
@@ -390,7 +390,7 @@ body
 {
     .container;
     bottom: @borderSpacing;
-    left: (@leftSidebar + @borderSpacing);
+    left: calc(@leftSidebar + @borderSpacing);
     right: @borderSpacing;
     height: ~"calc(50% - @{borderSpacing} - @{borderSpacing})";
     //display: none;
@@ -522,7 +522,7 @@ select
 #utcTime
 {
     .container;
-    bottom: @borderSpacing * 3 + 80px;
+    bottom: calc(@borderSpacing * 3 + 80px);
     width: @leftSidebar;
     left: 0px;
     height: 40px;
@@ -693,7 +693,7 @@ select
     position: absolute;
     top: 35px;
     left: 0px;
-    right: calc(@errorPanel + 5);
+    right: calc(@errorPanel + 5px);
     bottom: 0px;
 }
 
@@ -702,7 +702,7 @@ select
     position: absolute;
     top: 35px;
     left: 0px;
-    right: calc(@errorPanel + 5);
+    right: calc(@errorPanel + 5px);
     bottom: 0px;
 }
 
@@ -798,7 +798,7 @@ select
     position: absolute;
     top: 35px;
     left: 0px;
-    right: calc(@errorPanel + 5);
+    right: calc(@errorPanel + 5px);
     bottom: 0px;
     overflow: hidden;
     display: none;
@@ -897,7 +897,7 @@ select
     position: absolute;
     top: 35px;
     right: 0px;
-    width: calc(@errorPanel+4px);
+    width: calc(@errorPanel + 4px);
     bottom: 125px;
     overflow: hidden;
     .container;
@@ -936,7 +936,7 @@ select
         font-size: 16px;
         color: white;
         background-color: #00b725;
-        background-image: url('/Images/fine.png');
+        background-image: url("/Images/fine.png");
         background-repeat: no-repeat;
         margin-top: 10px;
         padding-right: 6px;
@@ -953,7 +953,7 @@ select
     bottom: 5px;
     right: 0px;
     height: 35px;
-    width: calc(@errorPanel+4px);
+    width: calc(@errorPanel + 4px);
     padding-top: 17px;
     text-align: center;
 
@@ -970,7 +970,7 @@ select
     bottom: 85px;
     right: 0px;
     height: 35px;
-    width: calc(@errorPanel+4px);
+    width: calc(@errorPanel + 4px);
     padding-top: 17px;
     text-align: center;
 
@@ -987,7 +987,7 @@ select
     bottom: 45px;
     right: 0px;
     height: 35px;
-    width: calc(@errorPanel+4px);
+    width: calc(@errorPanel + 4px);
     padding-top: 17px;
     text-align: center;
 
@@ -1218,7 +1218,7 @@ select
     position: absolute;
     top: 35px;
     left: 5px;
-    right: calc(@errorPanel + 8);
+    right: calc(@errorPanel + 8px);
     bottom: 5px;
     overflow: hidden;
     padding-top: 35px;
@@ -1230,7 +1230,7 @@ select
         position: fixed;
         top: 35px;
         left: 5px;
-        right: @errorPanel + 8;
+        right: calc(@errorPanel + 8px);
         width: auto;
     }
 }
@@ -1261,23 +1261,25 @@ select
     }
 }
 
-#anomalyView {
+#anomalyView
+{
     .container;
     position: absolute;
     top: 35px;
-    right: calc(@errorPanel + 8);
+    right: calc(@errorPanel + 8px);
     left: 5px;
     bottom: 5px;
     padding-top: 10px;
     overflow-y: scroll;
 
-    &:before {
+    &:before 
+    {
         .containterLabel;
         content: "Anomalies";
         position: fixed;
         top: 35px;
         left: 5px;
-        right: calc(@errorPanel + 8);
+        right: calc(@errorPanel + 8px);
         width: auto;
     }
 }
@@ -1306,4 +1308,14 @@ select
 {
     padding-top: 20px;
     text-align: center;
+}
+
+.anomaly-detail {
+
+
+
+    &:first-child 
+    {
+        margin-top: 5px;
+    }
 }

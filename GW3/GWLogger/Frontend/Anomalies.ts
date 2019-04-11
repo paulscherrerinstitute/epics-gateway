@@ -2,7 +2,6 @@
 {
     private static IsLoadingAnomalyInfos = false;
     private static IsLoadingAnomalyDetail = false;
-    private static AllAnomalyInfos: GraphAnomalyInfo[] = null;
 
     public static Show(): void {
         Main.CurrentGateway = null;
@@ -28,10 +27,12 @@
 
         this.IsLoadingAnomalyInfos = true;
         this.Load("GetGraphAnomalies", null, (anomalyInfos: GraphAnomalyInfo[]) => {
-            anomalyInfos = anomalyInfos.map(v => GraphAnomalyInfo.CreateFromObject(v)); // Fix dates
             this.IsLoadingAnomalyInfos = false;
+            if (Main.DetailAnomaly != null)
+                return;
 
-            this.AllAnomalyInfos = anomalyInfos;
+            anomalyInfos = anomalyInfos.map(v => GraphAnomalyInfo.CreateFromObject(v)); // Fix dates
+
             var html = "";
             if (anomalyInfos.length == 0) {
                 html += `<div class="no-anomalies">No anomalies</div>`;
@@ -54,14 +55,60 @@
 
         this.IsLoadingAnomalyDetail = true;
         this.Load("GetGraphAnomaly", { filename: filename }, (anomaly: GraphAnomaly) => {
-            anomaly = GraphAnomaly.CreateFromObject(anomaly); // Fix dates
             this.IsLoadingAnomalyDetail = false;
+            if (Main.DetailAnomaly == null)
+                return;
 
-            var html = `<div>${anomaly.Name}</div>`;
+            anomaly = GraphAnomaly.CreateFromObject(anomaly); // Fix dates
 
-
-
+            var html = `
+                <div class="anomaly-detail">
+                    <h2>${anomaly.Name}</h2>
+                    <p>From: ${Utils.FullUtcDateFormat(anomaly.From)}</p>
+                    <p>To: ${Utils.FullUtcDateFormat(anomaly.To)}</p>
+                    <hr />
+                    <p>CPU</p>
+                    <div id="anomaly-detail-cpu-graph"></div>
+                    <p>PVs</p>
+                    <div id="anomaly-detail-pv-graph"></div>
+                    <p>Searches</p>
+                    <div id="anomaly-detail-searches-graph"></div>
+                    <p>Network</p>
+                    <div id="anomaly-detail-network-graph"></div>
+                </div>`;
+            var scrolled = $("#anomalyView").scrollTop();
             $("#anomalyView").html(html);
+            $("#anomalyView").scrollTop(scrolled);
+
+            this.CreateGraph("anomaly-detail-cpu-graph", anomaly, anomaly.History.CPU, { MaxY: 100 });
+            this.CreateGraph("anomaly-detail-pv-graph", anomaly, anomaly.History.PVs);
+            this.CreateGraph("anomaly-detail-searches-graph", anomaly, anomaly.History.Searches);
+            this.CreateGraph("anomaly-detail-network-graph", anomaly, anomaly.History.Network);
+        });
+    }
+
+    private static CreateGraph(id: string, anomaly: GraphAnomaly, data: LogStat[], opts?: { MaxY: number }) {
+        if (data == null)
+            return;
+
+        var points = <GraphData>{
+            Values: data.map(v => <GraphPoint>{
+                Value: v.Value,
+                Label: v.Date
+            })
+        };
+        new LineGraph(id, points, {
+            XLabelWidth: 50,
+            MinY: 0,
+            MaxY: opts ? opts.MaxY : null,
+            FontSize: 10,
+            PlotColor: "#000080",
+            LabelFormat: Utils.ShortGWDateFormat,
+            HighlightSection: {
+                StartLabel: anomaly.From,
+                EndLabel: anomaly.To,
+                HighlightColor: "#b60000",
+            }
         });
     }
 

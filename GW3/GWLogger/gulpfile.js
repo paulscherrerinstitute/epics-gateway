@@ -9,22 +9,17 @@ var plumber = require('gulp-plumber');
 
 // Config
 
-var typescriptOutDir = ".";
-var typescriptOutFile = "main.js";
-
 var typescriptFileMatchers = [
     "./Frontend/**/*.ts",
     "./Scripts/typings/**/*.d.ts"
 ];
 
 var tsCompiler = ts.createProject({
-    out: typescriptOutFile,
+    out: "main.js",
     module: "system",
     target: "es5",
     experimentalDecorators: true
 });
-
-var lessOutDir = "./Less";
 
 var lessFileMatchers = [
     "./Less/main.less"
@@ -39,14 +34,14 @@ function buildTs(cb) {
         .pipe(sourcemaps.identityMap())
         .pipe(tsCompiler(ts.reporter.defaultReporter()))
         .pipe(sourcemaps.write())
-        .pipe(gulp.dest(typescriptOutDir));
+        .pipe(gulp.dest("."));
 }
 
 function buildLess(cb) {
     return gulp.src(lessFileMatchers)
         .pipe(plumber())
         .pipe(less({}))
-        .pipe(gulp.dest(lessOutDir));
+        .pipe(gulp.dest("./Less"));
 }
 
 function startTsWatcher(cb) {

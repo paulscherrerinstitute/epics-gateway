@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GWLogger.Backend;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -276,7 +277,7 @@ namespace GWLogger.Live
 
             List<(DateTime Created, double Value)> cpuAvg;
             lock (cpuHistory)
-                cpuAvg = PlateauAverage(cpuHistory);
+                cpuAvg = PlateauAverage(cpuHistory.Last(GraphPoints).ToList());
 
             var cpuAnomalies = FindAnomalies(cpuAvg, threshold: 5)
                 .Where(c => c.From > Global.ApplicationStartUtc) // Only handle events that happened after application start
@@ -366,7 +367,15 @@ namespace GWLogger.Live
                         anomaly.DuringRemoteCounts = duringRemoteCounts.Take(5).ToList();
                     }
 
-                    anomaly.History = GetHistory();
+                    anomaly.History = new GatewayHistoricData();
+                    lock (cpuHistory)
+                        anomaly.History.CPU = cpuHistory.Last(GraphPoints).ToList();
+                    lock (pvsHistory)
+                        anomaly.History.PVs = pvsHistory.Last(GraphPoints).ToList();
+                    lock (searchHistory)
+                        anomaly.History.Searches = searchHistory.Last(GraphPoints).ToList();
+                    lock (networkHistory)
+                        anomaly.History.Network = networkHistory.Last(GraphPoints).ToList();
 
                     var writingFailed = true;
                     try
@@ -384,7 +393,8 @@ namespace GWLogger.Live
                     }
 
                     anomaly.IsDirty = writingFailed;
-                    AllAnomalies.Add(anomaly);
+                    if(!AllAnomalies.Contains(anomaly))
+                        AllAnomalies.Add(anomaly);
                 }
             }
         }
@@ -396,10 +406,8 @@ namespace GWLogger.Live
             {
                 double sum = 0;
                 var count = 0;
-                var lastIndex = 0;
                 for (int j = 0; j < groupSize && i + j < rawData.Count; j++)
                 {
-                    lastIndex = i + j;
                     sum += rawData[i + j].Value ?? -1;
                     count++;
                 }
@@ -414,7 +422,6 @@ namespace GWLogger.Live
             var allRiseOrDrops = new List<(DateTime From, DateTime To)>();
             var totalDiff = 0.0;
             var lastUp = true;
-            int? lastEnd = null;
             DateTime? start = entries[0].Created;
             for (int i = 0; i < entries.Count - 1; i++)
             {
@@ -423,7 +430,6 @@ namespace GWLogger.Live
                 if (Math.Abs(diff) >= threshold)
                 {
                     allRiseOrDrops.Add((entries[i].Created, entries[i + 1].Created));
-                    lastEnd = i + 1;
                     totalDiff = 0;
                 }
 
@@ -435,7 +441,6 @@ namespace GWLogger.Live
                     if (start.HasValue && Math.Abs(totalDiff) >= threshold)
                     {
                         allRiseOrDrops.Add((start.Value, entries[i].Created));
-                        lastEnd = i;
                     }
 
                     start = entries[i].Created;

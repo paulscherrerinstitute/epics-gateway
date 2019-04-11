@@ -13,12 +13,6 @@ interface GatewayShortInformation
     Direction?: string;
 }
 
-interface HistoricData
-{
-    Value: number;
-    Date: Date;
-}
-
 var DebugChannels = {
     'CPU': '{0}:CPU', 'Mem': '{0}:MEM-FREE', 'Searches': '{0}:SEARCH-SEC', 'Build': '{0}:BUILD', 'Version': '{0}:VERSION', 'Messages': '{0}:MESSAGES-SEC', 'PVs': '{0}:PVTOTAL', 'RunningTime': '{0}:RUNNING-TIME', 'NbClients': '{0}:NBCLIENTS', 'NbServers': '{0}:NBSERVERS', 'Network': '({0}:NET-IN + {0}:NET-OUT) / (1024 * 1024)'
 };
@@ -243,57 +237,20 @@ class Live
                 {
                     $("#currentGW").html(Main.CurrentGateway.toUpperCase());
 
-                    var data: HistoricData[] = null;
-                    try
-                    {
-                        for (var i = 0; i < msg.d.length; i++)
-                        {
-                            switch (msg.d[i].Key)
-                            {
-                                case "CPU":
-                                    data = msg.d[i].Value;
-                                    Live.cpuChart.SetDataSource({
-                                        Values: data.map((c) =>
-                                        {
-                                            return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
-                                        })
-                                    });
-                                    break;
-                                case "Searches":
-                                    data = msg.d[i].Value;
-                                    Live.searchesChart.SetDataSource({
-                                        Values: data.map((c) =>
-                                        {
-                                            return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
-                                        })
-                                    });
-                                    break;
-                                case "PVs":
-                                    data = msg.d[i].Value;
-                                    Live.pvsChart.SetDataSource({
-                                        Values: data.map((c) =>
-                                        {
-                                            return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
-                                        })
-                                    });
-                                    break;
-                                case "Network":
-                                    data = msg.d[i].Value;
-                                    Live.networkChart.SetDataSource({
-                                        Values: data.map((c) =>
-                                        {
-                                            return { Label: Utils.DateFromNet(c.Date), Value: c.Value / (1024 * 1024) };
-                                        })
-                                    });
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                    }
-                    catch (ex)
-                    {
-                    }
+                    var data = GatewayHistoricData.CreateFromObject(msg.d);
+
+                    Live.cpuChart.SetDataSource({
+                        Values: data.CPU.map((c) => <GraphPoint>{ Value: c.Value, Label: c.Date })
+                    });
+                    Live.searchesChart.SetDataSource({
+                        Values: data.Searches.map((c) => <GraphPoint>{ Value: c.Value, Label: c.Date })
+                    });
+                    Live.pvsChart.SetDataSource({
+                        Values: data.PVs.map((c) => <GraphPoint>{ Value: c.Value, Label: c.Date })
+                    });
+                    Live.networkChart.SetDataSource({
+                        Values: data.Network.map((c) => <GraphPoint>{ Value: c.Value, Label: c.Date })
+                    });
                 }
             });
         }

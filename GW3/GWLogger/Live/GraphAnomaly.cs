@@ -52,7 +52,7 @@ namespace GWLogger.Live
         public List<QueryResultValue> BeforeEventTypes { get; set; }
         public List<QueryResultValue> DuringEventTypes { get; set; }
 
-        public GatewayHistory History { get; set; }
+        public GatewayHistoricData History { get; set; }
 
 
     }

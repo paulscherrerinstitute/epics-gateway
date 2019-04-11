@@ -61,6 +61,8 @@
                     $("#gatewayDetails").hide();
                     $("#anomalyView").show();
                     $("#logView").hide();
+                    if (Main.DetailAnomaly)
+                        Main.DetailAnomaly = null;
                     Anomalies.Show();
                     break;
                 default:

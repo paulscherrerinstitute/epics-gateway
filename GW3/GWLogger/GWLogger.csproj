@@ -365,6 +365,7 @@
     <Content Include="favicon-32x32.png" />
     <Content Include="favicon.ico" />
     <TypeScriptCompile Include="Frontend\DTOs\GraphAnomalyInfo.ts" />
+    <TypeScriptCompile Include="Frontend\DTOs\GatewayHistoricData.ts" />
     <Content Include="Frontend\tsconfig.json" />
     <Content Include="graphtest.html" />
     <Content Include="gulpfile.js" />
@@ -569,6 +570,7 @@
     <Compile Include="Introspection.ashx.cs">
       <DependentUpon>Introspection.ashx</DependentUpon>
     </Compile>
+    <Compile Include="Live\GatewayHistoricData.cs" />
     <Compile Include="Live\GraphAnomaly.cs" />
     <Compile Include="Live\Gateway.cs" />
     <Compile Include="Live\GatewayInformation.cs" />
@@ -589,7 +591,6 @@
     <TypeScriptCompile Include="Frontend\DTOs\Connections.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\DataFileStats.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\FreeSpace.ts" />
-    <TypeScriptCompile Include="Frontend\DTOs\GatewayHistory.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewayInformation.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewaySession.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewayStats.ts" />

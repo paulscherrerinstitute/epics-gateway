@@ -8,7 +8,7 @@
     DuringRemoteCounts: QueryResultValue[];
     BeforeEventTypes: QueryResultValue[];
     DuringEventTypes: QueryResultValue[];
-    History: GatewayHistory;
+    History: GatewayHistoricData;
 
     constructor(
         filename: string,
@@ -20,7 +20,7 @@
         duringRemoteCounts: QueryResultValue[],
         beforeEventTypes: QueryResultValue[],
         duringEventTypes: QueryResultValue[],
-        history: GatewayHistory
+        history: GatewayHistoricData
     ) {
         this.FileName = filename;
         this.Name = name;
@@ -47,7 +47,7 @@
             obj.DuringRemoteCounts,
             obj.BeforeEventTypes,
             obj.DuringEventTypes,
-            GatewayHistory.CreateFromObject(obj.History),
+            GatewayHistoricData.CreateFromObject(obj.History),
         );
     }
 }
