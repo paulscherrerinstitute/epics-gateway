@@ -257,4 +257,19 @@ class DetailPage
         {
         }
     }
+
+    static JumpLogs()
+    {
+        Main.Path = "GW";
+        State.Set(true);
+        State.Pop(null);
+    }
+
+    static JumpList()
+    {
+        Main.Path = "Status";
+        Main.CurrentGateway = null;
+        State.Set(true);
+        State.Pop(null);
+    }
 }

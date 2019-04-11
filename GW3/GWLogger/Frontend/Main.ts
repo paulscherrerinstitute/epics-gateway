@@ -14,8 +14,99 @@ class Main
 
     private static isLoading = false;
 
+    public static Init(): void
+    {
+        Sections.Init();
+        State.Init();
+
+        Main.InitTooltips();
+        Main.UrlRedirect();
+        Main.InitSearchGateway();
+        Main.BaseTitle = window.document.title;
+
+        State.Pop(null);
+
+        setInterval(Main.Refresh, 1000);
+        $(window).on("resize", Main.Resize);
+    }
+
+    static InitTooltips()
+    {
+        $("*[tooltip]").each((idx, elem) =>
+        {
+            $(elem).on("mouseover", (e) =>
+            {
+                var text = $(e.target).attr("tooltip");
+                var position = $(e.target).attr("tooltip-position");
+                if (!position)
+                    position = "bottom";
+                ToolTip.Show(e.target, (<any>position), text);
+            });
+        });
+    }
+
+    static InitSearchGateway()
+    {
+        var gateways: string[] = [];
+        $('.GWDisplay').each(function ()
+        {
+            gateways.push($(this).attr('id'));
+        });
+        $("#searchInput").kendoAutoComplete({
+            minLength: 1,
+            select: (e) => window.location.href = "Status/" + e.dataItem.toLowerCase(),
+            dataSource: gateways,
+            placeholder: "Search",
+            filter: "contains"
+        }).data("kendoAutoComplete");
+    }
+
+    static UrlRedirect()
+    {
+        var currentUrl = (document.location + "");
+        if (currentUrl.toLowerCase().startsWith("http://caesar"))
+        {
+            if (currentUrl.toLowerCase().startsWith("http://caesar/"))
+                document.location.replace(currentUrl.toLowerCase().replace("http://caesar/", "https://caesar.psi.ch/"));
+            else
+                document.location.replace(currentUrl.toLowerCase().replace("http://caesar", "https://caesar"));
+            return;
+        }
+        if (currentUrl.toLowerCase().startsWith("http://gfaepicslog"))
+        {
+            if (currentUrl.toLowerCase().startsWith("http://gfaepicslog/"))
+                document.location.replace(currentUrl.toLowerCase().replace("http://gfaepicslog/", "https://caesar.psi.ch/"));
+            else
+                document.location.replace(currentUrl.toLowerCase().replace("http://gfaepicslog", "https://caesar"));
+            return;
+        }
+    }
+
+    static CheckTouch(): boolean
+    {
+        return (('ontouchstart' in window)
+            || ((<any>navigator).MaxTouchPoints > 0)
+            || ((<any>navigator).msMaxTouchPoints > 0));
+    }
+
+    static Resize(): void
+    {
+        if (Math.abs(window.innerHeight - screen.height) < 10 && Main.CheckTouch())
+            $("#fullScreenMode").attr("media", "");
+        else
+            $("#fullScreenMode").attr("media", "max-width: 1px");
+        StatsBarGraph.DrawStats();
+        $(".k-grid").each((idx, elem) =>
+        {
+            $(elem).data("kendoGrid").resize(true);
+        });
+    }
+
     public static async Refresh()
     {
+        var now = new Date();
+        $("#currentTime").html(("" + now.getUTCHours()).padLeft("0", 2) + ":" + ("" + now.getUTCMinutes()).padLeft("0", 2) + ":" + ("" + now.getUTCSeconds()).padLeft("0", 2));
+
         if (Main.isLoading)
             return;
         Main.isLoading = true;
@@ -23,19 +114,12 @@ class Main
         {
             await StatusPage.Refresh();
             await DetailPage.Refresh();
+            await LogsPage.Refresh();
         }
         catch (ex)
         {
         }
         Main.isLoading = false;
-    }
-
-    public static Init(): void
-    {
-        Sections.Init();
-        State.Init();
-
-        setInterval(Main.Refresh, 1000);
     }
 }
 

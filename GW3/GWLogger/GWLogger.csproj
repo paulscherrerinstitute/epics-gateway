@@ -605,7 +605,9 @@
     <TypeScriptCompile Include="Frontend\Sections\Details\DetailsCommands.ts" />
     <TypeScriptCompile Include="Frontend\Sections\Details\DetailsPage.ts" />
     <TypeScriptCompile Include="Frontend\Sections\Hamburger\EpicsDebug.ts" />
+    <TypeScriptCompile Include="Frontend\Sections\Hamburger\GatewayVersions.ts" />
     <TypeScriptCompile Include="Frontend\Sections\Hamburger\Hamburger.ts" />
+    <TypeScriptCompile Include="Frontend\Sections\Hamburger\LogStatistics.ts" />
     <TypeScriptCompile Include="Frontend\Sections\Hamburger\Notifications.ts" />
     <TypeScriptCompile Include="Frontend\Sections\Hamburger\Subscription.ts" />
     <TypeScriptCompile Include="Frontend\Sections\Hamburger\WrongChannels.ts" />

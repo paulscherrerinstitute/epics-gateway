@@ -89,7 +89,7 @@
             <div id="detailsButtons">
                 <div class="button" onclick="Commands.Restart()">Restart Gateway</div>
                 <div class="button" onclick="Commands.Update()">Update Gateway</div>
-                <div id="logLink" class="button" onclick="Live.JumpLogs()">Logs</div>
+                <div id="logLink" class="button" onclick="DetailsPage.JumpLogs()">Logs</div>
                 <a id="inventoryLink" class="button" target="_blank" href="">Check configuration</a>
                 <div class="button" onclick="StatusPage.Show()">Close</div>
             </div>
@@ -172,8 +172,8 @@
         <div onclick="WrongChannels.Show()">Check Wrong Channels</div>
         <div onclick="Notifications.Enable()">Enable Notifications</div>
         <div onclick="EpicsDebug.Show()">EPICS Debug</div>
-        <div onclick="Main.GWVersions()">Gateway Versions</div>
-        <div onclick="Main.LogStatistics()">Log Statistics</div>
+        <div onclick="GatewayVersions.Show()">Gateway Versions</div>
+        <div onclick="LogStatistics.Show()">Log Statistics</div>
         <!--<div onclick="Patterns.Show()">Check Patterns</div>-->
         <div onclick="Subscription.Show()">Alert Subscription</div>
     </div>

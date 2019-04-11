@@ -73,5 +73,12 @@
                 }
             }
         });
+
+        $(".helpMiddleContainer a").on("click", (elem) =>
+        {
+            var href: string = elem.target.attributes["href"].value;
+            $(href)[0].scrollIntoView();
+            return false;
+        });
     }
 }
