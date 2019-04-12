@@ -509,7 +509,10 @@
                 var data = <any[]>msg.d;
 
                 if ($("#logsContent").data("kendoGrid"))
+                {
                     $("#logsContent").data("kendoGrid").destroy();
+                    $("#logsContent").empty();
+                }
                 $("#logsContent").html("").kendoGrid({
                     columns: [
                         { title: (FirstColumn[tab.getAttribute("report")]), field: "Key" },
@@ -586,7 +589,10 @@
             var tz = (new Date()).getTimezoneOffset() * 60000;
 
             if ($("#logsContent").data("kendoGrid"))
+            {
                 $("#logsContent").data("kendoGrid").destroy();
+                $("#logsContent").empty();
+            }
 
             if (data && data.length && !data[0].Details)
             {
@@ -746,7 +752,10 @@
             var serversMsg = await Utils.Loader("ActiveServers", { "gatewayName": Main.CurrentGateway, "datePoint": Utils.FullDateFormat(startDate) });
 
             if ($("#serversContent").data("kendoGrid"))
+            {
                 $("#serversContent").data("kendoGrid").destroy();
+                $("#serversContent").empty();
+            }
             $("#serversContent").html("").kendoGrid({
                 columns: [
                     { title: "Server", field: "Key" },
@@ -758,7 +767,10 @@
             });
 
             if ($("#clientsContent").data("kendoGrid"))
+            {
                 $("#clientsContent").data("kendoGrid").destroy();
+                $("#clientsContent").empty();
+            }
             $("#clientsContent").html("").kendoGrid({
                 columns: [
                     { title: "Client", field: "Key" },
