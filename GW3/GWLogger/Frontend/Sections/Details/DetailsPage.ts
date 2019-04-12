@@ -1,5 +1,4 @@
-﻿/// <reference path="../../../scripts/typings/promise/promise.d.ts" />
-/// <reference path="../../../scripts/typings/kendo/kendo.all.d.ts" />
+﻿/// <reference path="../../../scripts/typings/kendo/kendo.all.d.ts" />
 
 interface HistoricData
 {
