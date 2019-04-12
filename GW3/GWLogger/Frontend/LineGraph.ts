@@ -282,23 +282,53 @@ class LineGraph
         }
         ctx.stroke();
 
+        var highlightSection = this.graphOptions.HighlightSection;
+        var isHighlighted = false;
+
         // Let's plot the area of the values
         ctx.beginPath();
         ctx.globalAlpha = 0.1;
         ctx.fillStyle = this.plotColor;
         for (var i = 0; i < this.dataSource.Values.length; i++)
         {
-            var y = this.TransformY(this.dataSource.Values[i].Value);
+            var point = this.dataSource.Values[i];
+            var y_zero = this.TransformY(0);
+            var y = this.TransformY(point.Value);
             var x = this.TransformX(i, this.xLabelWidth + 2);
+
+            if (highlightSection) {
+
+                var comparer = point.Label instanceof Date ? (a, b) => this.AreDatesEqual(a, b) : (a, b) => a == b;
+
+                if (comparer(point.Label, highlightSection.StartLabel))
+                    isHighlighted = true;
+                if (comparer(point.Label, highlightSection.EndLabel))
+                    isHighlighted = false;
+
+                var newFillStyle = isHighlighted ? highlightSection.HighlightColor : this.plotColor;
+                if (ctx.fillStyle != newFillStyle) {
+                    ctx.lineTo(x, y);
+                    ctx.lineTo(x, y_zero);
+
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.fillStyle = newFillStyle;
+
+                    ctx.lineTo(x, y_zero);
+                    ctx.lineTo(x, y);
+                }
+            }
+
             if (i == 0)
             {
-                ctx.lineTo(x, this.TransformY(0));
+                ctx.lineTo(x, y_zero);
                 ctx.lineTo(x, y);
             }
             else
                 ctx.lineTo(x, y);
             if (i == this.dataSource.Values.length - 1)
-                ctx.lineTo(x, this.TransformY(0));
+                ctx.lineTo(x, y_zero);
         }
         ctx.fill();
         ctx.globalAlpha = 1;
@@ -309,8 +339,7 @@ class LineGraph
         ctx.strokeStyle = this.plotColor;
         ctx.lineWidth = this.plotLineWidth;
 
-        var highlightSection = this.graphOptions.HighlightSection;
-        var isHighlighted = false;
+        isHighlighted = false;
         for (var i = 0; i < this.dataSource.Values.length; i++)
         {
             var point = this.dataSource.Values[i];
@@ -327,8 +356,8 @@ class LineGraph
                 if (comparer(point.Label, highlightSection.EndLabel))
                     isHighlighted = false;
 
-                var newStrokeStyle = isHighlighted ? highlightSection.HighlightColor : this.plotColor;
-                if (ctx.strokeStyle != newStrokeStyle)
+                var newFillStyle = isHighlighted ? highlightSection.HighlightColor : this.plotColor;
+                if (ctx.strokeStyle != newFillStyle)
                 {
                     if (i == 0)
                         ctx.moveTo(x, y);
@@ -338,12 +367,11 @@ class LineGraph
                     ctx.stroke();
 
                     ctx.beginPath();
-                    ctx.strokeStyle = newStrokeStyle;
+                    ctx.strokeStyle = newFillStyle;
                     ctx.setLineDash([]);
                     ctx.lineWidth = this.plotLineWidth;
                 }
             }
-            
 
             if (i == 0)
                 ctx.moveTo(x, y);

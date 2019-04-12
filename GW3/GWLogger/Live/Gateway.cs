@@ -296,12 +296,23 @@ namespace GWLogger.Live
             if (cpuAnomalies.Count == 0)
                 return;
 
+
+
             lock (AllAnomaliesLock)
             {
+                var latestAnomaly = AllAnomalies.OrderByDescending(a => a.To).FirstOrDefault();
+
                 foreach (var (From, To) in cpuAnomalies)
                 {
+                    // Skip events that occured before application was started
                     if (From <= Global.ApplicationStartUtc)
-                        continue; // Skip events that occured before application was started
+                        continue;
+
+                    if(latestAnomaly != null)
+                    {
+                        if (From <= latestAnomaly.From)
+                            continue;
+                    }
 
                     // Try to get an already existing anomaly in this range
                     var anomaly = AllAnomalies.FirstOrDefault(a =>  From >= a.From && From <= a.To);

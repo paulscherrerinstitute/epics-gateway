@@ -25,7 +25,7 @@ class Main
         Main.InitSearchGateway();
         Main.BaseTitle = window.document.title;
 
-        State.Pop(null);
+        State.Pop();
 
         setInterval(Main.Refresh, 1000);
         $(window).on("resize", Main.Resize);

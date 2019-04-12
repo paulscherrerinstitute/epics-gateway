@@ -3,7 +3,7 @@
     public static Init()
     {
         $(window).bind('popstate', State.Pop);
-        State.Pop(null);
+        State.Pop();
     }
 
     static Path(): string[]
@@ -25,7 +25,7 @@
         return queryString;
     }
 
-    static Pop(jEvent: JQueryEventObject)
+    static Pop()
     {
         Main.CurrentGateway = null;
         Main.CurrentTime = null;
@@ -67,9 +67,6 @@
                     $("#gatewayDetails").hide();
                     $("#anomalyView").show();
                     $("#logView").hide();
-                    if (Main.DetailAnomaly)
-                        Main.DetailAnomaly = null;
-                    AnomaliesPage.Show();
                     break;
                 default:
                     Main.Path = "Status";

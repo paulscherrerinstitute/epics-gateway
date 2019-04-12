@@ -61,7 +61,7 @@ class DetailPage
                 Main.StartDate = new Date(label.getTime() - 12 * 3600000);
                 Main.EndDate = new Date(label.getTime() + 12 * 3600000);
                 State.Set(true);
-                State.Pop(null);
+                State.Pop();
             }
         });
         DetailPage.searchesChart = new LineGraph("searchesGraph", { Values: [] }, {
@@ -79,7 +79,7 @@ class DetailPage
                 Main.StartDate = new Date(label.getTime() - 12 * 3600000);
                 Main.EndDate = new Date(label.getTime() + 12 * 3600000);
                 State.Set(true);
-                State.Pop(null);
+                State.Pop();
             }
         });
         DetailPage.pvsChart = new LineGraph("pvsGraph", { Values: [] }, {
@@ -97,7 +97,7 @@ class DetailPage
                 Main.StartDate = new Date(Main.CurrentTime.getTime() - 12 * 3600000);
                 Main.EndDate = new Date(Main.CurrentTime.getTime() + 12 * 3600000);
                 State.Set(true);
-                State.Pop(null);
+                State.Pop();
             }
         });
         DetailPage.networkChart = new LineGraph("networkGraph", { Values: [] }, {
@@ -115,7 +115,7 @@ class DetailPage
                 Main.StartDate = new Date(Main.CurrentTime.getTime() - 12 * 3600000);
                 Main.EndDate = new Date(Main.CurrentTime.getTime() + 12 * 3600000);
                 State.Set(true);
-                State.Pop(null);
+                State.Pop();
             }
         });
     }
@@ -220,7 +220,7 @@ class DetailPage
     {
         Main.Path = "GW";
         State.Set(true);
-        State.Pop(null);
+        State.Pop();
     }
 
     static JumpList()
@@ -228,6 +228,6 @@ class DetailPage
         Main.Path = "Status";
         Main.CurrentGateway = null;
         State.Set(true);
-        State.Pop(null);
+        State.Pop();
     }
 }

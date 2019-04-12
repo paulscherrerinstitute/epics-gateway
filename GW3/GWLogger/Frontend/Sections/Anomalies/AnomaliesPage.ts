@@ -4,20 +4,14 @@
     private static IsLoadingAnomalyDetail = false;
 
     public static async Show() {
-        Main.CurrentGateway = null;
-        State.Set(true);
+        if (Main.Path != "Anomalies")
+            return;
 
         if (Main.DetailAnomaly == null) {
             await this.ShowOverviewSection();
         } else {
             await this.ShowDetailSection(Main.DetailAnomaly);
         }
-    }
-
-    public static OpenDetailSection(filename: string) {
-        Main.DetailAnomaly = filename;
-        State.Set(true);
-        this.Show().then(() => { });
     }
 
     public static async Refresh() {
@@ -34,6 +28,7 @@
         try {
             msg = await Utils.Loader("GetGraphAnomalies", null);
         } catch{
+            this.IsLoadingAnomalyInfos = false;
             console.error("Call to GetGraphAnomalies failed");
             return;
         }
@@ -47,45 +42,43 @@
         if (Main.DetailAnomaly != null)
             return;
 
-        var html = "";
-        if (anomalyInfos.length == 0) {
-            html += `<div class="no-anomalies">No anomalies</div>`;
-        }
-
-        for (var anomaly of anomalyInfos) {
-            html += `<div class="anomaly-card" onclick="AnomaliesPage.OpenDetailSection('${anomaly.FileName}')">${Utils.FullUtcDateFormat(anomaly.From)}: <b>${anomaly.Name}</b> ${Utils.DurationString(anomaly.To.getTime() - anomaly.From.getTime())}`;
-            html += `<div id="anomaly_cpu_graph_${anomaly.FileName}"></div>`;
-            html += `</div>`;
-        }
-        var scrolled = $("#anomalyView").scrollTop();
-        $("#anomalyView").html(html);
-        $("#anomalyView").scrollTop(scrolled);
-
-        //var grid = $("#gatewaySessions").kendoGrid({
-        //    columns: [{ title: "Start", field: "StartDate", format: "{0:MM/dd HH:mm:ss}" },
-        //    { title: "End", field: "EndDate", format: "{0:MM/dd HH:mm:ss}" },
-        //    { title: "NB&nbsp;Logs", field: "NbEntries", format: "{0:n0}", attributes: { style: "text-align:right;" } },
-        //    { title: "Reason", field: "RestartType", values: restartTypes }],
-        //    dataSource: { data: LogsPage.Sessions },
-        //    selectable: "single cell",
-        //    change: (arg) => {
-        //        var selected = arg.sender.select()[0];
-        //        var txt = selected.innerText;
-        //        var content = selected.textContent;
-        //        var uid = $(selected).parent().attr("data-uid");
-        //        var row = grid.dataSource.getByUid(uid);
-        //        if (row) {
-        //            if (kendo.format(grid.columns[0].format, row['StartDate']) == txt)
-        //                Main.CurrentTime = (<Date>row['StartDate']).toUtc();
-        //            else if (kendo.format(grid.columns[0].format, row['EndDate']) == txt)
-        //                Main.CurrentTime = (<Date>row['EndDate']).toUtc();
-        //            Main.StartDate = new Date(Main.CurrentTime.getTime() - 12 * 3600000);
-        //            Main.EndDate = new Date(Main.CurrentTime.getTime() + 12 * 3600000);
-        //            State.Set(true);
-        //            State.Pop(null);
-        //        }
-        //    }
-        //}).data("kendoGrid");
+        $("#anomalyView").html(`<div id="anomaly-overview-grid"></div>`);
+        var grid = $("#anomaly-overview-grid").kendoGrid({
+            columns: [
+                {
+                    title: "From",
+                    field: "From",
+                    format: "{0:MM/dd HH:mm:ss}",
+                },
+                {
+                    title: "To",
+                    field: "To",
+                    format: "{0:MM/dd HH:mm:ss}",
+                },
+                {
+                    title: "Gateway",
+                    field: "Name",
+                },
+                {
+                    title: "Duration",
+                    field: "Duration",
+                }
+            ],
+            sortable: true,
+            selectable: "row",
+            scrollable: false,
+            dataSource: { data: anomalyInfos },
+            change: (e: kendo.ui.GridChangeEvent) => {
+                e.sender.select().each(function(v) {
+                    var grid = $("#anomaly-overview-grid").data("kendoGrid");
+                    var dataItem = <any>grid.dataItem(this);
+                    Main.DetailAnomaly = dataItem.FileName;
+                    State.Set(true);
+                    State.Pop();
+                    AnomaliesPage.Show();
+                });
+            },
+        });
     }
 
     private static async ShowDetailSection(filename: string) {

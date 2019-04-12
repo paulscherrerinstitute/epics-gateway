@@ -7,6 +7,7 @@ class GraphAnomalyInfo {
     Name: string;
     From: Date;
     To: Date;
+    Duration: string;
 
     constructor(
         filename: string,
@@ -18,6 +19,11 @@ class GraphAnomalyInfo {
         this.Name = name;
         this.From = (from ? new Date(parseInt(from.substr(6, from.length - 8))) : null);
         this.To = (to ? new Date(parseInt(to.substr(6, to.length - 8))) : null);
+        if (this.From && this.To) {
+            this.Duration = Utils.DurationString(this.To.getTime() - this.From.getTime());
+        } else {
+            this.Duration = "";
+        }
     }
 
     public static CreateFromObject(o: any): GraphAnomalyInfo

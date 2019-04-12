@@ -210,7 +210,7 @@ class MapPage
                 Main.CurrentGateway = label.toLowerCase();
                 Main.Path = "Status";
                 State.Set(true);
-                State.Pop(null);
+                State.Pop();
 
             };
             elem.onmouseover = overFunction;
