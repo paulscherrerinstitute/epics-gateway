@@ -257,7 +257,25 @@ class Utils
         return new Date(parseInt(source));
     }
 
-    /**
+    public static DurationString(millis: number): string {
+        var duration = "";
+
+        var seconds = millis / 1000;
+        if (seconds >= 1)
+            duration = (seconds % 60).toFixed(0) + " s";
+
+        var minutes = seconds / 60;
+        if (minutes >= 1)
+            duration = (minutes % 60).toFixed(0) + " min " + duration;
+
+        var hours = minutes / 60;
+        if (hours >= 1)
+            duration = (hours % 24).toFixed(0) + " h " + duration;
+
+        return duration;
+    }
+
+/**
  * Save the preference object to local storage
  */
     static set Preferences(preferences: object)
@@ -283,7 +301,7 @@ class Utils
         return $.ajax({
             type: 'POST',
             url: 'DataAccess.asmx/' + functionName,
-            data: JSON.stringify(data),
+            data: data ? JSON.stringify(data) : {},
             contentType: 'application/json; charset=utf-8',
             dataType: 'json'
         });

@@ -4,6 +4,7 @@
 class Main
 {
     public static CurrentGateway: string;
+    public static DetailAnomaly: string;
     static Path: string = "Status";
     static StartDate: Date = null;
     static EndDate: Date = null;
@@ -124,6 +125,7 @@ class Main
             await StatusPage.Refresh();
             await DetailPage.Refresh();
             await LogsPage.Refresh();
+            await AnomaliesPage.Refresh();
         }
         catch (ex)
         {

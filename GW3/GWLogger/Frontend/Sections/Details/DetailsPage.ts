@@ -1,5 +1,4 @@
-﻿/// <reference path="../../../scripts/typings/promise/promise.d.ts" />
-/// <reference path="../../../scripts/typings/kendo/kendo.all.d.ts" />
+﻿/// <reference path="../../../scripts/typings/kendo/kendo.all.d.ts" />
 
 interface HistoricData
 {
@@ -203,57 +202,14 @@ class DetailPage
             var msg = await Utils.Loader("GetHistoricData", { gatewayName: Main.CurrentGateway.toUpperCase() });
             $("#currentGW").html(Main.CurrentGateway.toUpperCase());
 
-            var data: HistoricData[] = null;
-            try
-            {
-                for (var i = 0; i < msg.d.length; i++)
-                {
-                    switch (msg.d[i].Key)
-                    {
-                        case "CPU":
-                            data = msg.d[i].Value;
-                            DetailPage.cpuChart.SetDataSource({
-                                Values: data.map((c) =>
-                                {
-                                    return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
-                                })
-                            });
-                            break;
-                        case "Searches":
-                            data = msg.d[i].Value;
-                            DetailPage.searchesChart.SetDataSource({
-                                Values: data.map((c) =>
-                                {
-                                    return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
-                                })
-                            });
-                            break;
-                        case "PVs":
-                            data = msg.d[i].Value;
-                            DetailPage.pvsChart.SetDataSource({
-                                Values: data.map((c) =>
-                                {
-                                    return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
-                                })
-                            });
-                            break;
-                        case "Network":
-                            data = msg.d[i].Value;
-                            DetailPage.networkChart.SetDataSource({
-                                Values: data.map((c) =>
-                                {
-                                    return { Label: Utils.DateFromNet(c.Date), Value: c.Value / (1024 * 1024) };
-                                })
-                            });
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-            catch (ex)
-            {
-            }
+            var data: GatewayHistoricData = GatewayHistoricData.CreateFromObject(msg.d);
+
+            var pointMapper = (stat: LogStat) => <GraphPoint>{ Label: stat.Date, Value: stat.Value };
+
+            DetailPage.cpuChart.SetDataSource({ Values: data.CPU.map(pointMapper) });
+            DetailPage.searchesChart.SetDataSource({ Values: data.Searches.map(pointMapper) });
+            DetailPage.pvsChart.SetDataSource({ Values: data.PVs.map(pointMapper) });
+            DetailPage.networkChart.SetDataSource({ Values: data.Network.map(pointMapper) });
         }
         catch (ex)
         {

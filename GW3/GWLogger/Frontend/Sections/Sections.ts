@@ -58,6 +58,19 @@
                         State.Pop(null);
                         $(".inset").removeClass("inset");
                         break;
+                    case "Anomalies":
+                        $("#reportView").hide();
+                        if ($("#helpView").is(":visible"))
+                            $("#helpView").hide();
+                        if ($("#operationView").is(":visible"))
+                            $("#operationView").hide();
+                        Main.Path = "Anomalies";
+                        if (Main.DetailAnomaly)
+                            Main.DetailAnomaly = null;
+                        State.Set(true);
+                        State.Pop(null);
+                        $(".inset").removeClass("inset");
+                        break;
                     case "Help":
                         window.open("/help.html", "help", "menubar=no,location=no,status=no,toolbar=no,width=800,height=600,scrollbars=yes");
                         break;

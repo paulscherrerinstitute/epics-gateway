@@ -69,7 +69,7 @@
                     $("#logView").hide();
                     if (Main.DetailAnomaly)
                         Main.DetailAnomaly = null;
-                    Anomalies.Show();
+                    AnomaliesPage.Show();
                     break;
                 default:
                     Main.Path = "Status";

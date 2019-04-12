@@ -11,17 +11,25 @@ var plumber = require('gulp-plumber');
 
 var typescriptFileMatchers = [
     "./Frontend/**/*.ts",
-    "./Scripts/typings/**/*.d.ts",
-    "./node_modules/es6-promise/dist/es6-promise.auto.min.js",
-    "./node_modules/es6-promise/dist/es6-promise.min.js"
+    "./Scripts/typings/**/*.d.ts"
 ];
 
 var tsCompiler = ts.createProject({
     out: "main.js",
     module: "system",
     target: "es5",
-    experimentalDecorators: true
+    lib: [
+        "dom",
+        "es2015"
+    ],
+    experimentalDecorators: true,
+    allowJs: true,
 });
+
+var polyfills = [
+    "./node_modules/es6-promise/dist/es6-promise.auto.min.js",
+    "./node_modules/es6-promise/dist/es6-promise.min.js"
+];
 
 var lessFileMatchers = [
     "./Less/main.less"
@@ -30,7 +38,7 @@ var lessFileMatchers = [
 // Gulp tasks
 
 function buildTs(cb) {
-    return gulp.src(typescriptFileMatchers)
+    return gulp.src(typescriptFileMatchers.concat(polyfills))
         .pipe(plumber())
         .pipe(sourcemaps.init())
         .pipe(sourcemaps.identityMap())
@@ -44,6 +52,14 @@ function buildLess(cb) {
         .pipe(plumber())
         .pipe(less({}))
         .pipe(gulp.dest("./Less"));
+}
+
+function startTsWatcher(cb) {
+    return gulp.watch(typescriptFileMatchers, buildTs);
+}
+
+function startLessWatcher(cb) {
+    return gulp.watch(lessFileMatchers, buildLess);
 }
 
 gulp.task("default", gulp.series(buildTs, buildLess, gulp.parallel(startTsWatcher, startLessWatcher)));

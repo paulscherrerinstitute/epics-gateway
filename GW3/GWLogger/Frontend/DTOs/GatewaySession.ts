@@ -1,7 +1,6 @@
 ﻿/**
  * DTO of GWLogger.Backend.DTOs.GatewaySession
  */
-
 enum RestartType
 {
     Unknown = 0,

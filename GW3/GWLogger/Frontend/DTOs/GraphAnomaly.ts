@@ -1,4 +1,7 @@
-﻿class GraphAnomaly {
+﻿/**
+ * DTO of GWLogger.Live.GraphAnomaly
+ */
+class GraphAnomaly {
     FileName: string;
     Name: string;
     From: Date;
