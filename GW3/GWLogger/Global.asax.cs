@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -8,6 +9,9 @@ namespace GWLogger
     {
         public static string StorageDirectory { get; } = System.Configuration.ConfigurationManager.AppSettings["storageDirectory"];
         public static string HistoryStorage { get; } = System.Configuration.ConfigurationManager.AppSettings["historyStorage"] ?? StorageDirectory;
+        public static string AnomalyStorage { get; } = Path.Combine(StorageDirectory, "anomalies");
+        public static DateTime ApplicationStartUtc;
+
         public static Backend.DataContext.Context DataContext { get; } = new Backend.DataContext.Context(StorageDirectory);
         public static Live.LiveInformation LiveInformation { get; private set; } 
 
@@ -25,6 +29,10 @@ namespace GWLogger
             {
             }
 
+            Directory.CreateDirectory(AnomalyStorage);
+            ApplicationStartUtc = DateTime.UtcNow.AddSeconds(1);
+            Debug.WriteLine($"Application started at: {ApplicationStartUtc}");
+
             LiveInformation = new Live.LiveInformation();
 
             var doc = new HtmlAgilityPack.HtmlDocument();
@@ -32,15 +40,15 @@ namespace GWLogger
             doc.DocumentNode.SelectNodes("//div")
                 .Where(row => row.Attributes["class"]?.Value == "GWDisplay")
                 .Select(row => row.Attributes["id"]?.Value).ToList()
-                .ForEach(row => Global.LiveInformation.Register(row));
-            if (System.Diagnostics.Debugger.IsAttached) // Debug local
-                Global.LiveInformation.Register("PBGW");
+                .ForEach(row => LiveInformation.Register(row));
+            if (Debugger.IsAttached) // Debug local
+                LiveInformation.Register("PBGW");
             Backend.Controllers.LogController.CleanLogs();
 
             DataContext.StoreHistory += (file) =>
               {
                   var idxPos = Backend.DataContext.DataFile.IndexPosition(DateTime.UtcNow);
-                  var gw = Global.LiveInformation[file.Gateway];
+                  var gw = LiveInformation[file.Gateway];
                   if (gw == null)
                   {
                       file.Stats[idxPos, 3] = 0;
@@ -73,7 +81,7 @@ namespace GWLogger
 
             string fullOrigionalpath = Request.Url.AbsolutePath;
 
-            if (fullOrigionalpath.StartsWith("/GW/") || fullOrigionalpath.StartsWith("/Status/") || fullOrigionalpath.StartsWith("/Map/"))
+            if (fullOrigionalpath.StartsWith("/GW/") || fullOrigionalpath.StartsWith("/Status/") || fullOrigionalpath.StartsWith("/Map/") || fullOrigionalpath.StartsWith("/Anomalies"))
             {
                 Context.RewritePath("/index.html");
             }

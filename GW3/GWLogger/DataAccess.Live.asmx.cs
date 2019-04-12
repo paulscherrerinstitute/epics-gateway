@@ -4,7 +4,7 @@ using System.Web.Services;
 
 namespace GWLogger
 {
-    public partial class DataAccess : System.Web.Services.WebService
+    public partial class DataAccess : WebService
     {
         [WebMethod]
         public List<GatewayShortInformation> GetShortInformation()
@@ -43,14 +43,14 @@ namespace GWLogger
         }
 
         [WebMethod]
-        public List<KeyValuePair<string, List<HistoricData>>> GetHistoricData(string gatewayName)
+        public GatewayHistoricData GetHistoricData(string gatewayName)
         {
-            return new List<KeyValuePair<string, List<HistoricData>>>()
+            return new GatewayHistoricData()
             {
-                new KeyValuePair<string, List<HistoricData>>("CPU", CpuHistory(gatewayName)),
-                new KeyValuePair<string, List<HistoricData>>("Searches", SearchHistory(gatewayName)),
-                new KeyValuePair<string, List<HistoricData>>("PVs", PVsHistory(gatewayName)),
-                new KeyValuePair<string, List<HistoricData>>("Network", NetworkHistory(gatewayName))
+                CPU = CpuHistory(gatewayName),
+                Searches = SearchHistory(gatewayName),
+                PVs = PVsHistory(gatewayName),
+                Network = NetworkHistory(gatewayName),
             };
         }
     }
