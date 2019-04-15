@@ -183,6 +183,20 @@ namespace GWLogger.Live
                 .ToList();
         }
 
+        public List<HistoricData> GetGraphAnomalyPreview(string filename)
+        {
+            if (string.IsNullOrEmpty(filename))
+                throw new ArgumentNullException(nameof(filename));
+            var parts = filename.Split('_');
+            if (parts.Length != 2)
+                throw new ArgumentException(nameof(filename));
+            List<Gateway> snapshot;
+            lock (Gateways)
+                snapshot = Gateways.ToList();
+            var gateway = snapshot.FirstOrDefault(v => v.Name == parts[0]) ?? throw new ArgumentException(nameof(filename));
+            return gateway.GetGraphAnomalyPreview(filename);
+        }
+
         public GraphAnomaly GetGraphAnomaly(string filename)
         {
             List<Gateway> snapshot;
@@ -196,7 +210,16 @@ namespace GWLogger.Live
 
         public void DeleteGraphAnomaly(string filename)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(filename))
+                throw new ArgumentNullException(nameof(filename));
+            var parts = filename.Split('_');
+            if (parts.Length != 2)
+                throw new ArgumentException(nameof(filename));
+            List<Gateway> snapshot;
+            lock (Gateways)
+                snapshot = Gateways.ToList();
+            var gateway = snapshot.FirstOrDefault(v => v.Name == parts[0]) ?? throw new ArgumentException(nameof(filename));
+            gateway.DeleteGraphAnomaly(filename);
         }
 
         internal static void SendEmail(string destination, string subject, string content)

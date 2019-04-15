@@ -296,8 +296,6 @@ namespace GWLogger.Live
             if (cpuAnomalies.Count == 0)
                 return;
 
-
-
             lock (AllAnomaliesLock)
             {
                 var latestAnomaly = AllAnomalies.OrderByDescending(a => a.To).FirstOrDefault();
@@ -417,6 +415,27 @@ namespace GWLogger.Live
                     if(!AllAnomalies.Contains(anomaly))
                         AllAnomalies.Add(anomaly);
                 }
+            }
+        }
+
+        public List<HistoricData> GetGraphAnomalyPreview(string filename)
+        {
+            lock (AllAnomaliesLock)
+            {
+                if (AllAnomalies == null)
+                    return new List<HistoricData>();
+                var anomaly = AllAnomalies.FirstOrDefault(a => a.FileName == filename) ?? throw new ArgumentException(nameof(filename));
+                return anomaly.History.CPU.ToList();
+            }
+        }
+
+        public void DeleteGraphAnomaly(string filename)
+        {
+            lock (AllAnomaliesLock)
+            {
+                var anomaly = AllAnomalies.FirstOrDefault(a => a.FileName == filename) ?? throw new ArgumentException(nameof(filename));
+                File.Delete(Path.Combine(Global.AnomalyStorage, $"{anomaly.FileName}.xml"));
+                AllAnomalies.Remove(anomaly);
             }
         }
 

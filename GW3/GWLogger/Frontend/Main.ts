@@ -125,11 +125,11 @@ class Main
             await StatusPage.Refresh();
             await DetailPage.Refresh();
             await LogsPage.Refresh();
-            await AnomaliesPage.Refresh();
         }
         catch (ex)
         {
         }
+        await AnomaliesPage.Refresh();
         Main.isLoading = false;
     }
 

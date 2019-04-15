@@ -14,6 +14,12 @@ namespace GWLogger
         }
 
         [WebMethod]
+        public List<Live.HistoricData> GetGraphAnomalyPreview(string filename)
+        {
+            return Global.LiveInformation.GetGraphAnomalyPreview(filename);
+        }
+
+        [WebMethod]
         public Live.GraphAnomaly GetGraphAnomaly(string filename)
         {
             return Global.LiveInformation.GetGraphAnomaly(filename);

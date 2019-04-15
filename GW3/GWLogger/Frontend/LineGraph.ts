@@ -161,6 +161,10 @@ class LineGraph
     {
         var container = $("#" + this.elementContainer).first();
         var canvas = <HTMLCanvasElement>($("#canvas_" + this.elementContainer)[0]);
+        if (!canvas || !container) {
+            this.Dispose();
+            return;
+        }
         this.width = canvas.width = container.width();
         this.height = canvas.height = container.height();
         this.Plot();

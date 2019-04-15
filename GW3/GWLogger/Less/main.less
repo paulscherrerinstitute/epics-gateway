@@ -1118,7 +1118,7 @@ select {
     left: 5px;
     bottom: 5px;
     padding-top: 10px;
-    overflow-y: scroll;
+    overflow: hidden;
 
     &:before 
     {
@@ -1132,36 +1132,20 @@ select {
     }
 }
 
+#anomaly-overview-preview {
+    height: 160px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
 #anomaly-overview-grid {
-    margin-top: 6px;
-}
-
-.anomaly-card {
-    background-color: white;
-    padding: 5px;
-    cursor: pointer;
-    box-sizing: border-box;
     width: 100%;
-    max-width: 100%;
-
-    &:hover {
-        background-color: darken(white, 5%);
-    }
-
-    &:first-child {
-        margin-top: 5px;
-    }
-}
-
-.no-anomalies
-{
-    padding-top: 20px;
-    text-align: center;
+    height: ~"calc(100% - 170px)";
+    max-height: ~"calc(100% - 170px)";
+    /*overflow-y: scroll;*/
 }
 
 .anomaly-detail {
-
-
 
     &:first-child 
     {

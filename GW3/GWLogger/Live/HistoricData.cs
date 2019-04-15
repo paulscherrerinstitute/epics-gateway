@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Web.Script.Serialization;
 using System.Xml.Serialization;
 
 namespace GWLogger.Live
@@ -7,6 +8,7 @@ namespace GWLogger.Live
     public class HistoricData
     {
         [XmlAttribute(AttributeName = "Value")]
+        [ScriptIgnore]
         public double XmlValue
         {
             get
