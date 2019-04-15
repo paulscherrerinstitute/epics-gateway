@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Serialization;
@@ -370,7 +371,8 @@ namespace GWLogger.Live
                                 TopRemotes = groupedRemotes
                                     .OrderByDescending(g => g.Value)
                                     .Take(3)
-                                    .Select(r => new QueryResultValue { Text = r.Key, Value = r.Value })
+                                    .Select(r => new QueryResultValue { Text = r.Key, Value = r.Value})
+                                    .Select(PerformDNSLookup)
                                     .ToList()
                             });
                         }
@@ -382,8 +384,8 @@ namespace GWLogger.Live
                         anomaly.InterestingEventTypeRemotes = interestingEventTypeRemotes;
                         anomaly.BeforeEventTypes = beforeEventTypes.Take(5).ToList();
                         anomaly.DuringEventTypes = duringEventTypes.Take(5).ToList();
-                        anomaly.BeforeRemoteCounts = beforeRemoteCounts.Take(5).ToList();
-                        anomaly.DuringRemoteCounts = duringRemoteCounts.Take(5).ToList();
+                        anomaly.BeforeRemoteCounts = beforeRemoteCounts.Take(5).Select(PerformDNSLookup).ToList();
+                        anomaly.DuringRemoteCounts = duringRemoteCounts.Take(5).Select(PerformDNSLookup).ToList();
                     }
 
                     anomaly.History = new GatewayHistoricData();
@@ -437,6 +439,23 @@ namespace GWLogger.Live
                 File.Delete(Path.Combine(Global.AnomalyStorage, $"{anomaly.FileName}.xml"));
                 AllAnomalies.Remove(anomaly);
             }
+        }
+
+        private QueryResultValue PerformDNSLookup(QueryResultValue value)
+        {
+            try
+            {
+                var hostEntry = Dns.GetHostEntry(value.Text);
+                if (hostEntry == null)
+                    return value;
+                var host = hostEntry.HostName;
+                if (!string.IsNullOrEmpty(host))
+                    value.Text += $" ({host})";
+            }
+            catch
+            {
+            }
+            return value;
         }
 
         private List<(DateTime Created, double Value)> PlateauAverage(List<HistoricData> rawData, int groupSize = 10)

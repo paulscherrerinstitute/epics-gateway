@@ -156,7 +156,7 @@
                 Main.IsLast = false;
         }
 
-        Main.Refresh();
+        Main.Refresh(true);
         //Main.DelayedSearch(Main.LoadLogStats, true);
     }
 

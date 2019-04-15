@@ -111,7 +111,7 @@ class Main
         });
     }
 
-    public static async Refresh()
+    public static async Refresh(force?: boolean)
     {
         var now = new Date();
         $("#currentTime").html(("" + now.getUTCHours()).padLeft("0", 2) + ":" + ("" + now.getUTCMinutes()).padLeft("0", 2) + ":" + ("" + now.getUTCSeconds()).padLeft("0", 2));
@@ -129,7 +129,7 @@ class Main
         catch (ex)
         {
         }
-        await AnomaliesPage.Refresh();
+        await AnomaliesPage.Refresh(force);
         Main.isLoading = false;
     }
 

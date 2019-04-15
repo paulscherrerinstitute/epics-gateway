@@ -1145,12 +1145,19 @@ select {
     /*overflow-y: scroll;*/
 }
 
-.anomaly-detail {
+#anomaly-detail {
+    height: 100%;
+    max-height: 100%;
+    margin-top: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    box-sizing: border-box;
+    overflow-y: scroll;
+}
 
-    &:first-child 
-    {
-        margin-top: 5px;
-    }
+.anomaly-detail-interesting{
+    margin-bottom: 10px;
 }
 
 #loadingScreen {
