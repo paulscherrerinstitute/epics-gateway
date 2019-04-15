@@ -445,7 +445,12 @@ namespace GWLogger.Live
         {
             try
             {
-                var hostEntry = Dns.GetHostEntry(value.Text);
+                var ip = value.Text?.Trim();
+                if (ip == null)
+                    return value;
+                if (ip.Contains(':'))
+                    ip = ip.Split(':')[0];
+                var hostEntry = Dns.GetHostEntry(ip);
                 if (hostEntry == null)
                     return value;
                 var host = hostEntry.HostName;

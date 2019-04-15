@@ -55,6 +55,7 @@
         var elem = $("#anomaly-overview-preview");
         if (elem == null || elem.length == 0) {
             $("#anomalyView").html(`
+                <div id="anomaly-overview-preview-text">CPU-Usage preview:</div>
                 <div id="anomaly-overview-preview"></div>
                 <div id="anomaly-overview-grid"></div>
             `);
@@ -123,7 +124,7 @@
         var options: GraphOptions = {
             MaxY: 100,
             MinY: 0,
-            XLabelWidth: 50,
+            XLabelWidth: 30,
             FontSize: 10,
             PlotColor: "#000080",
             LabelFormat: Utils.ShortGWDateFormat,
@@ -210,9 +211,8 @@
             var childId = `anomaly-detail-interesting-event-types-${i}`;
             $("#anomaly-detail-interesting-event-types").append(`<div id="${childId}" class="anomaly-detail-interesting"></div>`);
             var childTable = anomaly.InterestingEventTypeRemotes[i];
-            this.CreateTable(childId, childTable.TopRemotes, `Remotes for '${childTable.EventType.Text}'-Event`, "Count");
+            this.CreateTable(childId, childTable.TopRemotes, `Top remotes for the ${childTable.EventType.Text}-EventType`, "Count");
         }
-        //this.CreateTable("anomaly-detail-before-event-types", anomaly.InterestingEventTypeRemotes);
 
         $("#anomaly-detail").scrollTop(scrolled);
     }
@@ -250,6 +250,7 @@
 
         State.Set(true);
         State.Pop();
+        Main.Refresh(true);
     }
 
     private static CreateGraph(id: string, anomaly: GraphAnomaly, data: LogStat[], opts?: { MaxY: number }) {
