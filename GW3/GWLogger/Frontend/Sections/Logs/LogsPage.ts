@@ -10,6 +10,7 @@
     static Levels: string;
     static KeepOpenDetails: boolean = false;
     static SearchTimeout: number = null;
+    static lastQuery: string = null;
 
     public static Init(): void
     {
@@ -141,8 +142,19 @@
         $("#queryField").on("keydown", (evt: JQueryEventObject) =>
         {
             var suggestionList = $("#suggestions");
+            var suggestionBox = $("#querySuggestions");
             switch (evt.keyCode)
             {
+                case 13: // Return
+                case 9: // Tab
+                    if (suggestionBox.is(":visible"))
+                    {
+                        $("#queryField").val(LogsPage.completedText(suggestionList.children(".selected").clone().children("span").remove().end().text()) + " ");
+                        LogsPage.Suggestion();
+                        if (evt.preventDefault)
+                            evt.preventDefault();
+                        return false;
+                    }
                 case 40:
                     var el = suggestionList.children(".selected").first();
                     if (el.next(".suggestion-item").length > 0)
@@ -153,12 +165,18 @@
                     }
                     break;
                 case 38:
-                    var el = suggestionList.children(".selected").first();
-                    if (el.prev(".suggestion-item").length > 0)
+                    if (suggestionBox.is(":visible"))
                     {
-                        el.prev(".suggestion-item").addClass("selected");
-                        el.removeClass("selected");
-                        suggestionList.scrollTo(".selected");
+                        var el = suggestionList.children(".selected").first();
+                        if (el.prev(".suggestion-item").length > 0)
+                        {
+                            el.prev(".suggestion-item").addClass("selected");
+                            el.removeClass("selected");
+                            suggestionList.scrollTo(".selected");
+                        }
+                        if (evt.preventDefault)
+                            evt.preventDefault();
+                        return false;
                     }
                     break;
             }
@@ -166,74 +184,75 @@
 
         $("#queryField").on("keyup", (evt: JQueryEventObject) =>
         {
-            var suggestionBox = $("#querySuggestions");
-            var suggestionList = $("#suggestions");
             switch (evt.keyCode)
             {
-                case 40:
-                case 38:
+                case 40: // Down
+                case 38: // Up
                     break;
-                case 13:
-                    if (suggestionBox.is(":visible"))
-                    {
-                        $("#queryField").val(LogsPage.completedText(suggestionList.children(".selected").clone().children("span").remove().end().text()) + " ");
-                    }
+                case 13: // Return
+                case 9: // Tab
+                    break;
                 default:
-                    suggestionList.empty();
-                    var suggestions = QueryParser.getProposals($("#queryField").val());
-                    if (suggestions.length > 0)
-                    {
-                        suggestions.forEach(sug =>
-                        {
-                            suggestionList.append(`<div class="suggestion-item">${sug.suggestion.replace(sug.input, '<b>' + sug.input + '</b>')}<span class="hint">${typeof (sug.hint) != "undefined" ? sug.hint : ""} ${typeof (sug.dataType) != "undefined" ? ": " + sug.dataType : ""}</span></div>`);
-                        });
-                        suggestionList.children().each(function ()
-                        {
-                            var element = this;
-                            element.onclick = (evt: JQueryEventObject) =>
-                            {
-                                if (element.classList.contains("suggestion-item"))
-                                {
-                                    $("#queryField").val(LogsPage.completedText($(element).clone().children("span").remove().end().text() + " "));
-                                    var e = jQuery.Event("keyup");
-                                    e.which = 32;
-                                    $("#queryField").trigger(e);
-                                    $("#queryField").focus();
-                                }
-                            }
-                        });
-                        if (suggestionList.children.length > 0)
-                        {
-                            suggestionList.children().first().addClass("selected");
-                            suggestionBox.show();
-                            suggestionList.scrollTo(".selected");
-                        }
-                    } else
-                    {
-                        suggestionBox.hide();
-                    }
+                    LogsPage.Suggestion();
             }
 
-            $.ajax({
-                type: 'POST',
-                url: '/DataAccess.asmx/CheckQuery',
-                data: JSON.stringify({ "query": $("#queryField").val() }),
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'json',
-                success: function (msg)
+            if (this.lastQuery != $("#queryField").val().trim())
+            {
+                Utils.Loader("CheckQuery", { "query": $("#queryField").val() }).then((msg) =>
                 {
                     if (msg.d === false)
                         $("#queryField").css("color", "red");
                     else
                         $("#queryField").css("color", "black");
-                }
-            });
-            LogsPage.Offset = null;
-            LogsPage.OffsetFile = null;
-            LogsPage.DelayedSearch(LogsPage.LoadTimeInfo);
+                });
+
+                LogsPage.Offset = null;
+                LogsPage.OffsetFile = null;
+                this.lastQuery = $("#queryField").val().trim();
+                LogsPage.DelayedSearch(LogsPage.LoadTimeInfo);
+            }
         });
 
         $("#logFilter li").click(LogsPage.LogFilter);
+    }
+
+    private static Suggestion()
+    {
+        var suggestionBox = $("#querySuggestions");
+        var suggestionList = $("#suggestions");
+
+        suggestionList.empty();
+        var suggestions = QueryParser.getProposals($("#queryField").val());
+        if (suggestions.length > 0)
+        {
+            suggestions.forEach(sug =>
+            {
+                suggestionList.append(`<div class="suggestion-item">${sug.suggestion.replace(sug.input, '<b>' + sug.input + '</b>')}<span class="hint">${typeof (sug.hint) != "undefined" ? sug.hint : ""} ${typeof (sug.dataType) != "undefined" ? ": " + sug.dataType : ""}</span></div>`);
+            });
+            suggestionList.children().each(function ()
+            {
+                var element = this;
+                element.onclick = (evt: JQueryEventObject) =>
+                {
+                    if (element.classList.contains("suggestion-item"))
+                    {
+                        $("#queryField").val(LogsPage.completedText($(element).clone().children("span").remove().end().text() + " "));
+                        var e = jQuery.Event("keyup");
+                        e.which = 32;
+                        $("#queryField").trigger(e);
+                        $("#queryField").focus();
+                    }
+                };
+            });
+            if (suggestionList.children.length > 0)
+            {
+                suggestionList.children().first().addClass("selected");
+                suggestionBox.show();
+                suggestionList.scrollTo(".selected");
+            }
+        }
+        else
+            suggestionBox.hide();
     }
 
     public static async Refresh()

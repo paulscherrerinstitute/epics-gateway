@@ -561,7 +561,16 @@ namespace GWLogger.Backend.DataContext
                         while (errors.BaseStream.Position < errors.BaseStream.Length)
                         {
                             Seek(errors.ReadInt64());
-                            var entry = ReadEntry(DataReader, start, streamLength);
+                            LogEntry entry = null;
+                            try
+                            {
+                                entry = ReadEntry(DataReader, start, streamLength);
+                            }
+                            catch
+                            {
+                            }
+                            if (entry == null)
+                                yield return null;
 
                             if (firstItem && query != null)
                             {

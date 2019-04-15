@@ -1,4 +1,5 @@
-﻿class TokenOr extends Token {
+﻿class TokenOr extends Token
+{
 
     public tokenType: TokenType = TokenType.TokenOr;
 
@@ -7,15 +8,18 @@
         { suggestion: "||" }
     ];
 
-    public canBeUsed(parser: QueryParser): boolean {
+    public canBeUsed(parser: QueryParser): boolean
+    {
         parser.skipSpaces();
         return ((parser.peekChar() == '|' && parser.peekChar(1) == '|') || parser.peekString().toLowerCase() == "or");
     }
 
-    public extract(parser: QueryParser): Token {
+    public extract(parser: QueryParser): Token
+    {
         parser.skipSpaces();
         var token = new TokenOr();
-        if (parser.peekString().toLowerCase() == "or") {
+        if (parser.peekString().toLowerCase() == "or")
+        {
             parser.nextString();
             token.value = "||";
             return token;
@@ -24,9 +28,12 @@
         return token;
     }
 
-    public getProposals(nextToken?: Token, afterNextToken?: Token): Token[] {
-        if (typeof nextToken != 'undefined' && typeof afterNextToken != 'undefined') {
-            switch (nextToken.tokenType) {
+    public getProposals(nextToken?: Token, afterNextToken?: Token): Token[]
+    {
+        if (typeof nextToken != 'undefined' && typeof afterNextToken != 'undefined')
+        {
+            switch (nextToken.tokenType)
+            {
                 case TokenType.TokenName:
                     return [new TokenCompare()];
                 case TokenType.TokenOpenParenthesis:

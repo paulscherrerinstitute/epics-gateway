@@ -1,22 +1,26 @@
-﻿class TokenNumber extends Token {
+﻿class TokenNumber extends Token
+{
 
 
     public proposals: SuggestionInterface[] = [];
     public tokenType: TokenType = TokenType.TokenNumber;
     private allowedChar: string = "0123456789";
 
-    public canBeUsed(parser: QueryParser): boolean {
+    public canBeUsed(parser: QueryParser): boolean
+    {
         parser.skipSpaces();
         if (parser.peekChar() == '.' && this.allowedChar.indexOf(parser.peekChar(1)) != -1)
             return true;
         return this.allowedChar.indexOf(parser.peekChar()) != -1 && parser.peekChar() != '.';
     }
 
-    public extract(parser: QueryParser): Token {
+    public extract(parser: QueryParser): Token
+    {
         var extracted = "";
         parser.skipSpaces();
 
-        while (parser.hasChar()) {
+        while (parser.hasChar())
+        {
             if (this.allowedChar.indexOf(parser.peekChar()) == -1 && parser.peekChar() != '.')
                 break;
             extracted += parser.nextChar();
@@ -26,9 +30,12 @@
         return token;
     }
 
-    public getProposals(nextToken?: Token, afterNextToken?: Token): Token[] {
-        if (typeof nextToken != 'undefined' && typeof afterNextToken != 'undefined') {
-            switch (nextToken.tokenType) {
+    public getProposals(nextToken?: Token, afterNextToken?: Token): Token[]
+    {
+        if (typeof nextToken != 'undefined' && typeof afterNextToken != 'undefined')
+        {
+            switch (nextToken.tokenType)
+            {
                 case TokenType.TokenAnd:
                 case TokenType.TokenOr:
                 case TokenType.TokenWhere:

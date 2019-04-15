@@ -192,6 +192,8 @@ namespace GWLogger.Backend.DataContext.Query.Statement
 
         public object[] Values(Context context, LogEntry entry)
         {
+            if (entry == null)
+                return null;
             if (logLevels == null && context != null)
             {
                 logLevels = context.MessageTypes.ToDictionary(key => key.Id, val => val.LogLevel);

@@ -1,17 +1,21 @@
-﻿class TokenString extends Token {
+﻿class TokenString extends Token
+{
 
     //public proposals: SuggestionInterface[] = <SuggestionInterface[]>[{ suggestion: "\"\"" }];
     public proposals: SuggestionInterface[] = [];
 
     public tokenType: TokenType = TokenType.TokenString;
 
-    public canBeUsed(parser: QueryParser): boolean {
+    public canBeUsed(parser: QueryParser): boolean
+    {
         parser.skipSpaces();
         return (parser.peekChar() == '\"' || parser.peekChar() == '\'');
     }
-    public extract(parser: QueryParser): Token {
+    public extract(parser: QueryParser): Token
+    {
         var extracted = "" + parser.nextChar();
-        while (parser.hasChar()) {
+        while (parser.hasChar())
+        {
             var c = parser.nextChar();
             extracted += c;
             if (c == extracted[0])
@@ -22,9 +26,12 @@
         return token;
     }
 
-    public getProposals(nextToken?: Token, afterNextToken?: Token): Token[] {
-        if (typeof nextToken != 'undefined' && typeof afterNextToken != 'undefined') {
-            switch (nextToken.tokenType) {
+    public getProposals(nextToken?: Token, afterNextToken?: Token): Token[]
+    {
+        if (typeof nextToken != 'undefined' && typeof afterNextToken != 'undefined')
+        {
+            switch (nextToken.tokenType)
+            {
                 case TokenType.TokenAnd:
                 case TokenType.TokenOr:
                 case TokenType.TokenWhere:

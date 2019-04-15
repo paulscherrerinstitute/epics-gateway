@@ -1,4 +1,5 @@
-﻿class TokenCompare extends Token {
+﻿class TokenCompare extends Token
+{
 
     public tokenType: TokenType = TokenType.TokenCompare;
 
@@ -16,7 +17,8 @@
 
     static keywords: string[] = ["contains", "starts", "ends"];
 
-    public canBeUsed(parser: QueryParser): boolean {
+    public canBeUsed(parser: QueryParser): boolean
+    {
         parser.skipSpaces();
         return ((parser.peekChar() == '=') ||
             parser.peekChar() == '<' ||
@@ -24,14 +26,17 @@
             (parser.peekChar() == '!' && parser.peekChar(1) == '=') || TokenCompare.keywords.indexOf(parser.peekString().toLowerCase()) > -1);
     }
 
-    public extract(parser: QueryParser): Token {
+    public extract(parser: QueryParser): Token
+    {
         parser.skipSpaces();
         var token = new TokenCompare()
-        if (TokenCompare.keywords.indexOf(parser.peekString().toLowerCase()) > -1) {
+        if (TokenCompare.keywords.indexOf(parser.peekString().toLowerCase()) > -1)
+        {
             token.value = parser.nextString().toLowerCase()
             return token;
         }
-        if ((parser.peekChar() == '<' || parser.peekChar() == '>' || parser.peekChar() == '=') && parser.peekChar(1) != '=') {
+        if ((parser.peekChar() == '<' || parser.peekChar() == '>' || parser.peekChar() == '=') && parser.peekChar(1) != '=')
+        {
             token.value = parser.nextChar();
             return token;
         }
@@ -39,9 +44,12 @@
         return token;
     }
 
-    public getProposals(nextToken?: Token, afterNextToken?: Token): Token[] {
-        if (typeof nextToken != 'undefined' && typeof afterNextToken != 'undefined') {
-            switch (nextToken.tokenType) {
+    public getProposals(nextToken?: Token, afterNextToken?: Token): Token[]
+    {
+        if (typeof nextToken != 'undefined' && typeof afterNextToken != 'undefined')
+        {
+            switch (nextToken.tokenType)
+            {
                 case TokenType.TokenCompare:
                     return [new TokenString(), new TokenName(), new TokenNumber()];
                 case TokenType.TokenString:

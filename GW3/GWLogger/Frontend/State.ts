@@ -72,6 +72,9 @@
         else if (path.length > 1 && path[1] == "GW")
             Main.CurrentGateway = null;
 
+        if (Main.CurrentGateway && path[1] == "GW")
+            LogsPage.LoadGateways();
+
         if (Main.Path == "Status" && Main.CurrentGateway)
         {
             $("#gatewayView").hide();

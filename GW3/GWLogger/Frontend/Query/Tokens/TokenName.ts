@@ -1,5 +1,5 @@
-﻿class TokenName extends Token {
-
+﻿class TokenName extends Token
+{
     public proposals: SuggestionInterface[] = <SuggestionInterface[]>[
         { suggestion: "class", hint: "Source class, path & function call", dataType: "Text" },
         { suggestion: "sourcefilepath", hint: "Source file path", dataType: "Text" },
@@ -22,23 +22,34 @@
         { suggestion: "version", hint: "Channel Access protocol's version", dataType: "Text" },
         { suggestion: "origin", hint: "Origin", dataType: "Text" },
         { suggestion: "type", hint: "Log message type", dataType: "Text" },
-        { suggestion: "date", hint: "Entry date", dataType: "Date" }
+        { suggestion: "date", hint: "Entry date", dataType: "Date" },
+        { suggestion: "reason", hint: "Reason of disconnection", dataType: "Text" },
+        { suggestion: "message", hint: "Additional message attached to an event", dataType: "Text" },
+        { suggestion: "hostname", hint: "Hostname part of the remote IP", dataType: "Text" },
+        { suggestion: "select", hint: "Defines which fields will be selected", dataType: "Fields" },
+        { suggestion: "where", hint: "Defines a filter rule", dataType: "Condition" },
+        { suggestion: "group", hint: "Defines a grouping rule", dataType: "Field" },
+        { suggestion: "order", hint: "Defines a order rule", dataType: "Field" },
+        { suggestion: "limit", hint: "Defines a number of rows to be returned", dataType: "Number" },
     ];
     public tokenType: TokenType = TokenType.TokenName;
     private allowedChar: string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
     private secondChar: string = "0123456789";
     static keywords: string[] = ["and", "or", "contains", "starts", "ends", "select", "where", "group", "order", "asc", "desc", "limit"];
 
-    public canBeUsed(parser: QueryParser): boolean {
+    public canBeUsed(parser: QueryParser): boolean
+    {
         parser.skipSpaces();
         return this.allowedChar.indexOf(parser.peekChar()) != -1 && TokenName.keywords.indexOf(parser.peekString().toLowerCase()) < 0;
     }
 
-    public extract(parser: QueryParser): Token {
+    public extract(parser: QueryParser): Token
+    {
         var extracted = "";
         parser.skipSpaces();
 
-        while (parser.hasChar()) {
+        while (parser.hasChar())
+        {
             if (extracted.length > 0 && this.allowedChar.indexOf(parser.peekChar()) < 0 && this.secondChar.indexOf(parser.peekChar()) < 0)
                 break;
             else if (extracted.length == 0 && this.allowedChar.indexOf(parser.peekChar()) < 0)
@@ -51,9 +62,12 @@
         return token;
     }
 
-    public getProposals(nextToken?: Token, afterNextToken?: Token): Token[] {
-        if (typeof nextToken != 'undefined' && typeof afterNextToken != 'undefined') {
-            switch (nextToken.tokenType) {
+    public getProposals(nextToken?: Token, afterNextToken?: Token): Token[]
+    {
+        if (typeof nextToken != 'undefined' && typeof afterNextToken != 'undefined')
+        {
+            switch (nextToken.tokenType)
+            {
                 case TokenType.TokenAnd:
                 case TokenType.TokenOr:
                 case TokenType.TokenWhere:
@@ -88,12 +102,10 @@
                 default:
                     return [];
             }
-        } else if (typeof nextToken != 'undefined') {
-            return [
-                new TokenCompare()
-            ];
-        } else {
-            return [new TokenName()];
         }
+        else if (typeof nextToken != 'undefined')
+            return [new TokenCompare()];
+        else
+            return [new TokenName()];
     }
 }

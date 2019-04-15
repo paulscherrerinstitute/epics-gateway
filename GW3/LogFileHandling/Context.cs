@@ -406,6 +406,8 @@ namespace GWLogger.Backend.DataContext
                 {
                     if (result.Count >= nbMaxEntries || cancellationToken.IsCancellationRequested)
                         break;
+                    if (entry == null)
+                        continue;
                     if (node == where || group != null)
                         result.Add(entry);
                     else

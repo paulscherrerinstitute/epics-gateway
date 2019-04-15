@@ -17,7 +17,8 @@
     "origin": "Origin",
     "type": "Log message type",
     "reason": "Reason of disconnection",
-    "message": "Additional message attached to an event"
+    "message": "Additional message attached to an event",
+    "hostname": "Hostname part of the remote IP"
 };
 
 var availableConditions = {
