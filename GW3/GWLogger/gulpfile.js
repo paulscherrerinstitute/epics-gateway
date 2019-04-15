@@ -6,6 +6,7 @@ var ts = require("gulp-typescript");
 var less = require("gulp-less");
 var sourcemaps = require('gulp-sourcemaps');
 var plumber = require('gulp-plumber');
+var uglify = require('gulp-uglify');
 
 // Config
 
@@ -40,10 +41,11 @@ var lessFileMatchers = [
 function buildTs(cb) {
     return gulp.src(typescriptFileMatchers.concat(polyfills))
         .pipe(plumber())
-        .pipe(sourcemaps.init())
+        .pipe(sourcemaps.init({}))
         .pipe(sourcemaps.identityMap())
         .pipe(tsCompiler(ts.reporter.defaultReporter()))
-        .pipe(sourcemaps.write())
+        //.pipe(uglify({}))
+        .pipe(sourcemaps.write("."))
         .pipe(gulp.dest("."));
 }
 

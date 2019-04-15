@@ -12,7 +12,8 @@
     "gulp-watch": "5.0.1",
     "typescript": "3.4.3",
     "gulp-plumber": "1.2.1",
-    "es6-promise": "4.2.6"
+    "es6-promise": "4.2.6",
+    "gulp-uglify": "3.0.2"
   },
   "scripts": {
     "gulp": "gulp"
