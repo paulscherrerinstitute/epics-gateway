@@ -47,12 +47,17 @@ namespace GraphAnomalyVisualizer
                         var detector = new AnomalyDetector(5, 100); // 500 Points
                         var anomalies = new List<AnomalyRange>();
                         var triggers = new List<AnomalyRange>();
+                        var thinSpikes = new List<AnomalyRange>();
                         detector.AnomalyDetected += anomalies.Add;
                         detector.TriggerFound += triggers.Add;
+                        detector.ThinSpikeFound += thinSpikes.Add;
 
                         foreach (var v in graphAnomalyFromFile.History.CPU)
                             detector.Update(v.Date, v.Value ?? -1);
                         detector.Finish();
+
+                        foreach (var thinSpike in thinSpikes)
+                            AddArea(model, null, OxyColor.FromAColor(60, OxyColors.Green), thinSpike.From, thinSpike.To, 0, 100);
 
                         foreach (var trigger in triggers)
                             AddArea(model, null, OxyColor.FromAColor(60, OxyColors.Fuchsia), trigger.From, trigger.To, 0, 100);

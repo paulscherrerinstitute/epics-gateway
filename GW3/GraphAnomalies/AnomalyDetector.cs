@@ -14,6 +14,8 @@ namespace GraphAnomalies
 
         public event AnomalyRangeEvent TriggerFound;
 
+        public event AnomalyRangeEvent ThinSpikeFound;
+
         #endregion Events
 
         private readonly LinkedList<AveragedTemporalValue> AveragedValues = new LinkedList<AveragedTemporalValue>();
@@ -21,6 +23,7 @@ namespace GraphAnomalies
         private AnomalyRange UnfinishedAnomaly = null;
         private int LastSign = 0;
         private double CumulativeValue = 0;
+        private DateTime? StartOfCumulativeValue = null;
 
         public int NumRawPerAveragedValues { get; private set; }
         public int MaxNumAveragedValues { get; private set; }
@@ -29,7 +32,7 @@ namespace GraphAnomalies
         public int AveragedValueThreshold { get; set; } = 5;
         public TimeSpan MinAnomalyDuration { get; set; } = TimeSpan.FromSeconds(70);
 
-        public TimeSpan GroupingSpan { get; set; } = TimeSpan.FromMinutes(5);
+        public TimeSpan GroupingSpan { get; set; } = TimeSpan.FromMinutes(2);
 
         public AnomalyDetector(int numRawPerAveragedValues, int maxNumAveragedValues)
         {
@@ -59,32 +62,51 @@ namespace GraphAnomalies
                 while (AveragedValues.Count > MaxNumAveragedValues)
                     AveragedValues.RemoveFirst();
 
-                if (last != null) {
-                    var stdevDiff = last.Value.StandardDeviation - averagedValue.StandardDeviation;
-                    if (Math.Abs(stdevDiff) > StandardDeviationThreshold)
-                    {
-                        TriggerFound?.Invoke(new AnomalyRange(last.Value.Date, averagedValue.Date));
-                    }
+                if (last != null)
+                {
+                    var previousAveragedValue = last.Value;
+                    var stdevDiff = previousAveragedValue.StandardDeviation - averagedValue.StandardDeviation;
+                    var valueDiff = previousAveragedValue.Value - averagedValue.Value;
+                    var currentSign = Math.Sign(valueDiff);
+                    var absValueDiff = Math.Abs(valueDiff);
 
-                    var valueDiff = last.Value.Value - averagedValue.Value;
-                    if (Math.Abs(valueDiff) > AveragedValueThreshold)
-                    {
-                        TriggerFound?.Invoke(ExpandValueRange(new AnomalyRange(last.Value.Date, averagedValue.Date)));
-                    }
+                    var thinSpike = averagedValue.StandardDeviation > averagedValue.Value;
 
-                    if(Math.Sign(valueDiff) == LastSign)
+                    if (thinSpike)
                     {
-                        CumulativeValue += Math.Abs(valueDiff);
-                        if(CumulativeValue >= AveragedValueThreshold)
-                        {
-                            TriggerFound?.Invoke(ExpandValueRange(new AnomalyRange(last.Value.Date, averagedValue.Date)));
-                            CumulativeValue = 0;
-                        }
+                        ThinSpikeFound?.Invoke(new AnomalyRange(averagedValue.Date.AddSeconds(-2.5), averagedValue.Date.AddSeconds(2.5)));
+                        LastSign = currentSign;
+                        CumulativeValue = absValueDiff;
+                        StartOfCumulativeValue = averagedValue.Date;
                     }
                     else
                     {
-                        LastSign = Math.Sign(valueDiff);
-                        CumulativeValue = Math.Abs(valueDiff);
+                        if (Math.Abs(stdevDiff) > StandardDeviationThreshold)
+                        {
+                            TriggerFound?.Invoke(new AnomalyRange(previousAveragedValue.Date, averagedValue.Date));
+                        }
+
+                        if (absValueDiff > AveragedValueThreshold)
+                        {
+                            TriggerFound?.Invoke(new AnomalyRange(previousAveragedValue.Date, averagedValue.Date));
+                        }
+
+                        if (currentSign == LastSign && absValueDiff >= 0.25)
+                        {
+                            CumulativeValue += absValueDiff;
+                            if (StartOfCumulativeValue == null)
+                                StartOfCumulativeValue = previousAveragedValue.Date;
+                            if (CumulativeValue >= AveragedValueThreshold)
+                            {
+                                TriggerFound?.Invoke(new AnomalyRange(StartOfCumulativeValue.Value, averagedValue.Date));
+                            }
+                        }
+                        else
+                        {
+                            LastSign = currentSign;
+                            CumulativeValue = absValueDiff;
+                            StartOfCumulativeValue = previousAveragedValue.Date;
+                        }
                     }
                 }
 
@@ -98,34 +120,6 @@ namespace GraphAnomalies
                     }
                 }
             }
-        }
-
-        private AnomalyRange ExpandValueRange(AnomalyRange range)
-        {
-            var from = range.From;
-            var start = AveragedValues.Last;
-            while(start.Previous != null && start.Value.Date != from)
-                start = start.Previous;
-            var startValue = start.Value.Value;
-            while (start.Previous != null && start.Value.Value < startValue - 0.5)
-            {
-                from = start.Value.Date;
-                startValue = start.Value.Value;
-                start = start.Previous;
-            }
-
-            var to = range.To;
-            var last = AveragedValues.First;
-            while (last.Next != null && last.Value.Date != to)
-                last = last.Next;
-            var lastValue = last.Value.Value;
-            while (last.Next != null && last.Value.Value < startValue - 0.5)
-            {
-                to = last.Value.Date;
-                lastValue = last.Value.Value;
-                last = last.Next;
-            }
-            return new AnomalyRange(from, to);
         }
 
         private void ProcessTrigger(AnomalyRange range)
@@ -161,8 +155,8 @@ namespace GraphAnomalies
 
         public void Finish()
         {
-            if(UnfinishedAnomaly != null)
-                AnomalyDetected?.Invoke(UnfinishedAnomaly);
+            if (UnfinishedAnomaly != null)
+                TryFinishAnomaly();
         }
 
         public List<AveragedTemporalValue> ReadonlyAveragedValues
