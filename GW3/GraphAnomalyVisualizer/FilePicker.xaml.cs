@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,8 @@ namespace GraphAnomalyVisualizer
         public FilePicker()
         {
             InitializeComponent();
-            AnomalyFilesList.ItemsSource = Directory.EnumerateFiles(@"C:\temp\t2\anomalies");
+            var exampleFilesPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "ExampleFiles");
+            AnomalyFilesList.ItemsSource = Directory.EnumerateFiles(exampleFilesPath).Concat(Directory.EnumerateFiles(@"C:\temp\t2\anomalies"));
             AnomalyFilesList.SelectionMode = SelectionMode.Single;
 
             KeyUp += (sender, e) =>
@@ -41,6 +43,11 @@ namespace GraphAnomalyVisualizer
             {
                 new MainWindow((string)item.Content).ShowDialog();
             }
+        }
+
+        private void OpenGenerator(object sender, RoutedEventArgs e)
+        {
+            new GraphGenerator().ShowDialog();
         }
     }
 }

@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -286,6 +287,7 @@ namespace GWLogger.Live
             var anomalyDateFormat = "yyyy-MM-dd-HH-mm-ss";
             var anomalyStorage = Global.AnomalyStorage;
             var anomalySerializer = new XmlSerializer(typeof(GraphAnomaly));
+            var dnsCache = new Dictionary<string, string>();
 
             lock (AllAnomaliesLock)
             {
@@ -343,7 +345,7 @@ namespace GWLogger.Live
                                 .OrderByDescending(g => g.Value)
                                 .Take(3)
                                 .Select(r => new QueryResultValue { Text = r.Key, Value = r.Value })
-                                .Select(PerformDNSLookup)
+                                .Select(v => PerformDNSLookup(v, dnsCache))
                                 .ToList()
                         });
                     }
@@ -355,13 +357,13 @@ namespace GWLogger.Live
                     anomaly.InterestingEventTypeRemotes = interestingEventTypeRemotes;
                     anomaly.BeforeEventTypes = beforeEventTypes.Take(5).ToList();
                     anomaly.DuringEventTypes = duringEventTypes.Take(5).ToList();
-                    anomaly.BeforeRemoteCounts = beforeRemoteCounts.Take(5).Select(PerformDNSLookup).ToList();
-                    anomaly.DuringRemoteCounts = duringRemoteCounts.Take(5).Select(PerformDNSLookup).ToList();
+                    anomaly.BeforeRemoteCounts = beforeRemoteCounts.Take(5).Select(v => PerformDNSLookup(v, dnsCache)).ToList();
+                    anomaly.DuringRemoteCounts = duringRemoteCounts.Take(5).Select(v => PerformDNSLookup(v, dnsCache)).ToList();
                 }
 
                 anomaly.History = new GatewayHistoricData
                 {
-                    // We are already in the cpu lock through the anomaly event
+                    // We are already in the cpu lock through the anomaly event caused by the call to Update();
                     CPU = cpuHistory.Last(GraphPoints).ToList()
                 };
 
@@ -388,6 +390,7 @@ namespace GWLogger.Live
                     }
                     catch
                     {
+                        Thread.Sleep(10);
                         failCount++;
                     }
                 }
@@ -418,93 +421,40 @@ namespace GWLogger.Live
             }
         }
 
-        private QueryResultValue PerformDNSLookup(QueryResultValue value)
+        private QueryResultValue PerformDNSLookup(QueryResultValue value, Dictionary<string, string> cache)
         {
+            var ip = value.Text?.Trim();
+            if (ip == null)
+                return value;
+            if (ip.Contains(':'))
+                ip = ip.Split(':')[0];
+
+            if (cache.TryGetValue(ip, out string hostname))
+            {
+                if(hostname != null)
+                    value.Text += $" ({hostname})";
+                return value;
+            }
+
+            IPHostEntry hostEntry = null;
             try
             {
-                var ip = value.Text?.Trim();
-                if (ip == null)
-                    return value;
-                if (ip.Contains(':'))
-                    ip = ip.Split(':')[0];
-                var hostEntry = Dns.GetHostEntry(ip);
-                if (hostEntry == null)
-                    return value;
-                var host = hostEntry.HostName;
-                if (!string.IsNullOrEmpty(host))
-                    value.Text += $" ({host})";
+                hostEntry = Dns.GetHostEntry(ip);
             }
             catch
             {
             }
+
+            var host = hostEntry?.HostName;
+            if (!string.IsNullOrEmpty(host))
+            {
+                cache.Add(ip, host);
+                value.Text += $" ({host})";
+                return value;
+            }
+
+            cache.Add(ip, null);
             return value;
-        }
-
-        private List<(DateTime Created, double Value)> PlateauAverage(List<HistoricData> rawData, int groupSize = 10)
-        {
-            var averaged = new List<(DateTime Created, double Value)>();
-            for (int i = 0; i < rawData.Count; i += groupSize)
-            {
-                double sum = 0;
-                var count = 0;
-                for (int j = 0; j < groupSize && i + j < rawData.Count; j++)
-                {
-                    sum += rawData[i + j].Value ?? -1;
-                    count++;
-                }
-                var avgValue = Math.Round(sum / count, 1, MidpointRounding.AwayFromZero);
-                averaged.Add((rawData[i].Date, avgValue));
-            }
-            return averaged;
-        }
-
-        private List<(DateTime From, DateTime To)> FindAnomalies(List<(DateTime Created, double Value)> entries, double threshold)
-        {
-            var allRiseOrDrops = new List<(DateTime From, DateTime To)>();
-            var totalDiff = 0.0;
-            var lastUp = true;
-            DateTime? start = entries[0].Created;
-            for (int i = 0; i < entries.Count - 1; i++)
-            {
-                var diff = entries[i + 1].Value - entries[i].Value;
-
-                if (Math.Abs(diff) >= threshold)
-                {
-                    allRiseOrDrops.Add((entries[i].Created, entries[i + 1].Created));
-                    totalDiff = 0;
-                }
-
-                var up = diff >= 0;
-                if (up != lastUp)
-                {
-                    lastUp = up;
-
-                    if (start.HasValue && Math.Abs(totalDiff) >= threshold)
-                    {
-                        allRiseOrDrops.Add((start.Value, entries[i].Created));
-                    }
-
-                    start = entries[i].Created;
-                    totalDiff = 0;
-                }
-
-                totalDiff += diff;
-            }
-
-            return CombineOverlappingRanges(allRiseOrDrops);
-        }
-
-        private List<(DateTime, DateTime)> CombineOverlappingRanges(List<(DateTime From, DateTime To)> ranges)
-        {
-            var combined = new List<(DateTime, DateTime)>();
-            for (int i = 0; i < ranges.Count - 1; i++)
-            {
-                var startOfRange = ranges[i].From;
-                while (i < ranges.Count - 1 && ranges[i + 1].From <= ranges[i].To)
-                    i++;
-                combined.Add((startOfRange, ranges[i].To));
-            }
-            return combined;
         }
 
         public List<GraphAnomaly> GetGatewayAnomalies()

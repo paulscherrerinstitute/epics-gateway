@@ -8,7 +8,7 @@
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
-    <NameOfLastUsedPublishProfile>EPICSLOG</NameOfLastUsedPublishProfile>
+    <NameOfLastUsedPublishProfile>EPICSLOG02</NameOfLastUsedPublishProfile>
     <ProjectView>ProjectFiles</ProjectView>
     <LastActiveSolutionConfig>Debug Deadlock|Any CPU</LastActiveSolutionConfig>
     <ToolsVersionPromptShown>2.5</ToolsVersionPromptShown>

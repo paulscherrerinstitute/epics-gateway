@@ -29,7 +29,7 @@ namespace GraphAnomalyVisualizer
 
                         var model = new PlotModel { Title = "Anomaly: " + Path.GetFileNameWithoutExtension(path) };
 
-                        var cpuMax = 100;
+                        var cpuMax = 110;
                         var cpuMin = 0;
                         model.Axes.Add(new LinearAxis()
                         {
@@ -38,24 +38,27 @@ namespace GraphAnomalyVisualizer
                             AbsoluteMinimum = cpuMin,
                             Maximum = cpuMax,
                             Minimum = cpuMin,
+                            IsPanEnabled = false,
+                            IsZoomEnabled = false,
                         });
 
-                        model.Axes.Add(new DateTimeAxis()
-                        {
-                            Position = AxisPosition.Bottom,
-                        });
+                        model.Axes.Add(new DateTimeAxis() { Position = AxisPosition.Bottom });
 
                         var detector = new AnomalyDetector(5, 100); // 500 Points
                         var anomalies = new List<AnomalyRange>();
-                        var averages = new List<AnomalyRange>();
+                        var triggers = new List<AnomalyRange>();
                         detector.AnomalyDetected += anomalies.Add;
+                        detector.TriggerFound += triggers.Add;
 
                         foreach (var v in graphAnomalyFromFile.History.CPU)
                             detector.Update(v.Date, v.Value ?? -1);
+                        detector.Finish();
 
-                        int i = 0;
+                        foreach (var trigger in triggers)
+                            AddArea(model, null, OxyColor.FromAColor(60, OxyColors.Fuchsia), trigger.From, trigger.To, 0, 100);
+
                         foreach (var anomaly in anomalies)
-                            AddArea(model, $"Anomaly {++i}", OxyColor.FromAColor(120, OxyColors.Orange), anomaly.From, anomaly.To, 0, 100);
+                            AddArea(model, null, OxyColor.FromAColor(120, OxyColors.Orange), anomaly.From, anomaly.To, 100, 110);
 
                         AddPlotLine(model, "Actual data", OxyColors.Gray, graphAnomalyFromFile.History.CPU);
                         AddPlotLine(model, "Averaged values", OxyColors.BlueViolet, detector.ReadonlyAveragedValues.Select(ToHistoricData));

@@ -7,7 +7,12 @@
         mc:Ignorable="d"
         Title="Choose anomaly file:" WindowStartupLocation="CenterScreen" Height="900" Width="1600">
     <Grid>
-        <ListView Margin="10" x:Name="AnomalyFilesList">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <Button Content="Open Generator" Grid.Row="0" Margin="10,10,1482,10" Click="OpenGenerator" />
+        <ListView Margin="10" x:Name="AnomalyFilesList"  Grid.Row="1">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Anomaly file" />

@@ -65,6 +65,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="GraphGenerator.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -76,6 +80,10 @@
     <Compile Include="FilePicker.xaml.cs">
       <DependentUpon>FilePicker.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GraphGenerator.xaml.cs">
+      <DependentUpon>GraphGenerator.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GraphGeneratorViewModel.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -118,6 +126,24 @@
       <Project>{B8FD6239-E447-4DC5-A97A-9E65A29C459E}</Project>
       <Name>GWLogger</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="ExampleFiles\NOISE.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExampleFiles\NOISE_2.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExampleFiles\SLOWER_RISE.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExampleFiles\SLOW_RISE.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExampleFiles\TWO_HILLS.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
