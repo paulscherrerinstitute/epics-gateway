@@ -129,7 +129,6 @@ class Main
         catch (ex)
         {
         }
-        await AnomaliesPage.Refresh(force);
         Main.isLoading = false;
     }
 

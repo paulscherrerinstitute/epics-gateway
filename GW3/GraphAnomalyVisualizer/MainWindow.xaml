@@ -6,7 +6,7 @@
         xmlns:oxy="http://oxyplot.org/wpf"
         xmlns:local="clr-namespace:GraphAnomalyVisualizer"
         mc:Ignorable="d"
-        Title="Graph anomaly visualizer" WindowStartupLocation="CenterScreen" Height="450" Width="800">
+        Title="Graph anomaly visualizer" WindowStartupLocation="CenterScreen" Height="900" Width="1600">
     <Grid>
         <oxy:PlotView Model="{Binding Plot}" />
     </Grid>

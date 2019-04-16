@@ -64,7 +64,9 @@ class Notifications
             clearTimeout(Notifications.notificationTimeout);
         Notifications.notificationTimeout = null;
 
-        (<HTMLAudioElement>$("#notificationSound")[0]).play();
+        var audioElement = (<HTMLAudioElement>$("#notificationSound")[0]);
+        if(audioElement)
+            audioElement.play();
 
         Notifications.notification = new Notification("CAESAR", <any>{ icon: '/favicon-32x32.png', body: text, silent: false });
         Notifications.notification.onclick = (x) =>

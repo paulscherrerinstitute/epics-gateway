@@ -21,6 +21,7 @@ namespace GraphAnomalies
 
         public int StandardDeviationThreshold { get; set; } = 5;
         public int AveragedValueThreshold { get; set; } = 5;
+        public TimeSpan MinAnomalyDuration { get; set; } = TimeSpan.FromSeconds(55);
 
         public TimeSpan GroupingSpan { get; set; } = TimeSpan.FromMinutes(1);
 
@@ -30,8 +31,9 @@ namespace GraphAnomalies
             MaxNumAveragedValues = maxNumAveragedValues;
         }
 
-        public void Update(RawTemporalValue rawValue)
+        public void Update(DateTime dateTime, double value)
         {
+            var rawValue = new RawTemporalValue(dateTime, value);
             RawValues.Add(rawValue);
             if(RawValues.Count >= NumRawPerAveragedValues)
             {
@@ -53,19 +55,13 @@ namespace GraphAnomalies
                     var stdevDiff = last.Value.StandardDeviation - averagedValue.StandardDeviation;
                     if (Math.Abs(stdevDiff) > StandardDeviationThreshold)
                     {
-                        var earliest = last;
-                        while (earliest.Previous != null && Math.Sign(earliest.Previous.Value.StandardDeviation - earliest.Value.StandardDeviation) == Math.Sign(stdevDiff))
-                            earliest = earliest.Previous;
-                        TriggerForRange(new AnomalyRange(earliest.Value.Date, averagedValue.Date));
+                        TriggerForRange(new AnomalyRange(last.Value.Date, averagedValue.Date));
                     }
 
                     var valueDiff = last.Value.Value - averagedValue.Value;
                     if (Math.Abs(valueDiff) > AveragedValueThreshold)
                     {
-                        var earliest = last;
-                        while (earliest.Previous != null && Math.Sign(earliest.Previous.Value.Value - earliest.Value.Value) == Math.Sign(valueDiff))
-                            earliest = earliest.Previous;
-                        TriggerForRange( new AnomalyRange(earliest.Value.Date, averagedValue.Date));
+                        TriggerForRange(new AnomalyRange(last.Value.Date, averagedValue.Date));
                     }
 
                     if(Math.Sign(valueDiff) == LastSign)
@@ -73,17 +69,14 @@ namespace GraphAnomalies
                         CumulativeValue += Math.Abs(valueDiff);
                         if(CumulativeValue >= AveragedValueThreshold)
                         {
-                            var earliest = last;
-                            while (earliest.Previous != null && Math.Sign(earliest.Previous.Value.Value - earliest.Value.Value) == Math.Sign(valueDiff))
-                                earliest = earliest.Previous;
-                            TriggerForRange(new AnomalyRange(earliest.Value.Date, averagedValue.Date));
+                            TriggerForRange(new AnomalyRange(last.Value.Date, averagedValue.Date));
                             CumulativeValue = 0;
                         }
                     }
                     else
                     {
                         LastSign = Math.Sign(valueDiff);
-                        CumulativeValue = 0;
+                        CumulativeValue = Math.Abs(valueDiff);
                     }
                 }
 
@@ -97,7 +90,7 @@ namespace GraphAnomalies
             {
                 if (UnfinishedAnomaly.To + GroupingSpan < dateTime)
                 {
-                    AnomalyDetected?.Invoke(UnfinishedAnomaly);
+                    CheckAnomalyDuration(UnfinishedAnomaly);
                     UnfinishedAnomaly = null;
                 }
             }
@@ -117,9 +110,17 @@ namespace GraphAnomalies
                 }
                 else
                 {
-                    AnomalyDetected?.Invoke(UnfinishedAnomaly);
+                    CheckAnomalyDuration(UnfinishedAnomaly);
                     UnfinishedAnomaly = range;
                 }
+            }
+        }
+
+        private void CheckAnomalyDuration(AnomalyRange range)
+        {
+            if(range.To - range.From >= MinAnomalyDuration)
+            {
+                AnomalyDetected?.Invoke(range);
             }
         }
 

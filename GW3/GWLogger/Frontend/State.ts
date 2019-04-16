@@ -95,6 +95,10 @@
             $("#gatewayDetails").hide();
         }
 
+        if (Main.Path == "Anomalies") {
+            AnomaliesPage.Show();
+        }
+
         /*var url = "" + document.location;
         //console.log(url);
         if (url.indexOf("#") == -1)

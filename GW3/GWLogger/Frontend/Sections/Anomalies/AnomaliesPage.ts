@@ -5,27 +5,14 @@
     private static LastAnomalyInfos: GraphAnomalyInfo[] = [];
     private static CurrentPreview: string = null;
     private static PreviewGraph: LineGraph = null;
-    private static RefreshCount = 0;
 
     public static async Show() {
-        if (Main.Path != "Anomalies")
-            return;
-
-        this.RefreshCount = 0;
         if (Main.DetailAnomaly == null) {
             await this.ShowOverviewSection();
         } else {
             this.CurrentPreview = null;
             await this.ShowDetailSection(Main.DetailAnomaly);
         }
-    }
-
-    public static async Refresh(force?: boolean) {
-        this.RefreshCount++;
-
-        if (this.RefreshCount < 15 && !force)
-            return;
-        await this.Show();
     }
 
     private static async ShowOverviewSection() {
@@ -61,7 +48,7 @@
             `);
         }
 
-        if (anomalyInfos.length > 0 && this.CurrentPreview == null) {
+        if (anomalyInfos.length > 0) {
             this.ShowAnomalyPreview(anomalyInfos[0].FileName);
         }
 
@@ -86,19 +73,27 @@
                     field: "Duration",
                 }
             ],
-            sortable: false,
+            /*Kendo definitions do not allow strings even though the api supports templates */
+            toolbar: <any>`
+                <div>
+                    <a class="k-button" onclick="AnomaliesPage.Show()"><span class="k-icon k-i-reload"></span>&nbsp;Refresh</a>
+                </div>
+            `,
             selectable: "row",
+            sortable: true,
             scrollable: true,
             height: "100%",
             rowTemplate: `
                 <tr data-uid="#= uid #" onmouseover="AnomaliesPage.ShowAnomalyPreview('#: FileName #')">
-                    <td>#: Utils.FullDateFormat(From) #</td>
+                    <td>#: Utils.FullUtcDateFormat(From) #</td>
                     <td>#: Name #</td>
                     <td>#: Duration #</td>
                 </tr>`,
-            dataSource: { data: anomalyInfos },
+            dataSource: {
+                data: anomalyInfos,
+            },
             change: (e: kendo.ui.GridChangeEvent) => {
-                e.sender.select().each(function(i, e) {
+                e.sender.select().each(function (i, e) {
                     var grid = $("#anomaly-overview-grid").data("kendoGrid");
                     var dataItem = <any>grid.dataItem(this);
                     Main.DetailAnomaly = dataItem.FileName;
@@ -168,30 +163,32 @@
             <div id="anomaly-detail">
                 <h2>${anomaly.Name}</h2>
                 <div style="float: left;">
-                    <p>From: ${Utils.FullUtcDateFormat(anomaly.From)}</p>
-                    <p>To: ${Utils.FullUtcDateFormat(anomaly.To)}</p>
+                    <p><b>From</b>: ${Utils.FullUtcDateFormat(anomaly.From)}</p>
+                    <p><b>To</b>: ${Utils.FullUtcDateFormat(anomaly.To)}</p>
                 </div>
                 <div style="float: right; padding: 5px;">
                     <div class="button" onclick="AnomaliesPage.DeleteDetail('${filename}')">Delete Anomaly</div>
                 </div>
                 <hr style="clear:both;"/>
-                <p>CPU</p>
+
+                <h4>CPU</h4>
                 <div id="anomaly-detail-cpu-graph"></div>
-                <p>PVs</p>
+                <h4>PVs</h4>
                 <div id="anomaly-detail-pv-graph"></div>
-                <p>Searches</p>
+                <h4>Searches</h4>
                 <div id="anomaly-detail-searches-graph"></div>
-                <p>Network</p>
+                <h4>Network</h4>
                 <div id="anomaly-detail-network-graph"></div>
-                <p>BeforeEventTypes</p>
+
+                <h4>EventTypes before the anomaly</h4>
                 <div id="anomaly-detail-before-event-types"></div>
-                <p>DuringEventTypes</p>
+                <h4>EventTypes during the anomaly</h4>
                 <div id="anomaly-detail-during-event-types"></div>
-                <p>InterestingEventTypeRemotes</p>
+                <h4>Interesting EventType remotes</h4>
                 <div id="anomaly-detail-interesting-event-types"></div>
-                <p>BeforeRemoteCounts</p>
+                <h4>Remotes before the anomaly</h4>
                 <div id="anomaly-detail-before-remote-counts"></div>
-                <p>DuringRemoteCounts</p>
+                <h4>Remotes during the anomaly</h4>
                 <div id="anomaly-detail-during-remote-counts"></div>
             </div>`;
         var scrolled = $("#anomaly-detail").scrollTop();
@@ -207,11 +204,13 @@
         this.CreateTable("anomaly-detail-before-remote-counts", anomaly.BeforeRemoteCounts, "Remote", "Count");
         this.CreateTable("anomaly-detail-during-remote-counts", anomaly.DuringRemoteCounts, "Remote", "Count");
 
-        for (var i = 0; i < anomaly.InterestingEventTypeRemotes.length; i++) {
-            var childId = `anomaly-detail-interesting-event-types-${i}`;
-            $("#anomaly-detail-interesting-event-types").append(`<div id="${childId}" class="anomaly-detail-interesting"></div>`);
-            var childTable = anomaly.InterestingEventTypeRemotes[i];
-            this.CreateTable(childId, childTable.TopRemotes, `Top remotes for the ${childTable.EventType.Text}-EventType`, "Count");
+        if (anomaly.InterestingEventTypeRemotes) {
+            for (var i = 0; i < anomaly.InterestingEventTypeRemotes.length; i++) {
+                var childId = `anomaly-detail-interesting-event-types-${i}`;
+                $("#anomaly-detail-interesting-event-types").append(`<div id="${childId}" class="anomaly-detail-interesting"></div>`);
+                var childTable = anomaly.InterestingEventTypeRemotes[i];
+                this.CreateTable(childId, childTable.TopRemotes, `Top remotes for the ${childTable.EventType.Text}-EventType`, "Count");
+            }
         }
 
         $("#anomaly-detail").scrollTop(scrolled);
@@ -277,5 +276,4 @@
             }
         });
     }
-
 }

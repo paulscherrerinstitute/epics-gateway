@@ -7,39 +7,11 @@ namespace GWLogger.Live
     public class GraphAnomaly
     {
         [XmlIgnore]
-        public bool IsDirty { get; set; } = false;
-
-        [XmlIgnore]
         public string FileName { get; set; }
 
-        private DateTime _From = DateTime.MinValue;
-        public DateTime From {
+        public DateTime From { get; set; } = DateTime.MinValue;
 
-            get {
-                return _From;
-            }
-            set {
-                if (Equals(_From, value))
-                    return;
-                _From = value;
-                IsDirty = true;
-            }
-        }
-
-        private DateTime _To = DateTime.MinValue;
-        public DateTime To {
-            get
-            {
-                return _To;
-            }
-            set
-            {
-                if (Equals(_To, value))
-                    return;
-                _To = value;
-                IsDirty = true;
-            }
-        }
+        public DateTime To { get; set; } = DateTime.MinValue;
 
         public string Name { get; set; }
 
@@ -48,20 +20,16 @@ namespace GWLogger.Live
         public List<QueryResultValue> BeforeRemoteCounts { get; set; }
         public List<QueryResultValue> DuringRemoteCounts { get; set; }
 
-
         public List<QueryResultValue> BeforeEventTypes { get; set; }
         public List<QueryResultValue> DuringEventTypes { get; set; }
 
         public GatewayHistoricData History { get; set; }
-
-
     }
 
     public class QueryResultValue
     {
         public QueryResultValue()
         {
-
         }
 
         public QueryResultValue(object o)
@@ -82,7 +50,5 @@ namespace GWLogger.Live
     {
         public QueryResultValue EventType { get; set; }
         public List<QueryResultValue> TopRemotes { get; set; }
-
     }
-
 }

@@ -80,7 +80,7 @@ Date.prototype.toUtc = function ()
 }
 
 /**
-* Transorms the string into a CSS valid ID
+* Transforms the string into a CSS valid ID
 */
 String.prototype.id = function ()
 {

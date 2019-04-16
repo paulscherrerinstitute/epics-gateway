@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GraphAnomalyVisualizer"
         mc:Ignorable="d"
-        Title="Choose anomaly file:" WindowStartupLocation="CenterScreen" Height="450" Width="800">
+        Title="Choose anomaly file:" WindowStartupLocation="CenterScreen" Height="900" Width="1600">
     <Grid>
         <ListView Margin="10" x:Name="AnomalyFilesList">
             <ListView.View>

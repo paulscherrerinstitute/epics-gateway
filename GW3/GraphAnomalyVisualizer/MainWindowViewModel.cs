@@ -51,7 +51,7 @@ namespace GraphAnomalyVisualizer
                         detector.AnomalyDetected += anomalies.Add;
 
                         foreach (var v in graphAnomalyFromFile.History.CPU)
-                            detector.Update(new RawTemporalValue { Date = v.Date, Value = v.Value ?? -1 });
+                            detector.Update(v.Date, v.Value ?? -1);
 
                         int i = 0;
                         foreach (var anomaly in anomalies)

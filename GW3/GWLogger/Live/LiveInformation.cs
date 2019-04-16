@@ -18,7 +18,6 @@ namespace GWLogger.Live
 
         private Dictionary<string, GatewayHistory> historicData = null;
 
-
         public LiveInformation()
         {
             if (System.Diagnostics.Debugger.IsAttached)
@@ -86,7 +85,6 @@ namespace GWLogger.Live
             }
             catch
             {
-
             }
             return null;
         }
@@ -135,8 +133,6 @@ namespace GWLogger.Live
                 }
                 else
                     sleepCounter++;
-
-                snapshot.ForEach(row => row.AnalyzeGraphs());
 
                 // Check if we have some gateways on errors
                 var emails = new Dictionary<string, string>();
