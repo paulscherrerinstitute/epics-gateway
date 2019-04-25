@@ -129,10 +129,19 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="ExampleFiles\CLIMBER.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ExampleFiles\NOISE.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ExampleFiles\NOISE_2.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExampleFiles\PEAK_LONG.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExampleFiles\PEAK_SMALL.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ExampleFiles\SLOWER_RISE.xml">

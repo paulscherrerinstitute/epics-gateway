@@ -16,16 +16,16 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>10/17/2018 08:41:28</publishTime>
     </File>
     <File Include="bin/GraphAnomalies.dll">
-      <publishTime>04/16/2019 16:05:52</publishTime>
+      <publishTime>04/25/2019 08:20:39</publishTime>
     </File>
     <File Include="bin/GraphAnomalies.pdb">
-      <publishTime>04/16/2019 16:05:52</publishTime>
+      <publishTime>04/25/2019 08:20:39</publishTime>
     </File>
     <File Include="bin/GWLogger.dll">
-      <publishTime>04/16/2019 16:05:56</publishTime>
+      <publishTime>04/25/2019 08:58:13</publishTime>
     </File>
     <File Include="bin/GWLogger.pdb">
-      <publishTime>04/16/2019 16:05:56</publishTime>
+      <publishTime>04/25/2019 08:58:13</publishTime>
     </File>
     <File Include="bin/HtmlAgilityPack.dll">
       <publishTime>08/19/2018 20:56:18</publishTime>
@@ -796,7 +796,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>02/18/2019 09:09:24</publishTime>
     </File>
     <File Include="Less/main.css">
-      <publishTime>04/16/2019 08:19:59</publishTime>
+      <publishTime>04/25/2019 07:39:17</publishTime>
     </File>
     <File Include="Less/main.less">
       <publishTime>04/15/2019 14:25:54</publishTime>
@@ -805,7 +805,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>02/18/2019 09:09:24</publishTime>
     </File>
     <File Include="main.js">
-      <publishTime>04/16/2019 11:49:34</publishTime>
+      <publishTime>04/25/2019 07:39:17</publishTime>
     </File>
     <File Include="main.js.map">
       <publishTime>04/10/2019 11:58:07</publishTime>
@@ -1162,7 +1162,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>11/05/2018 11:11:16</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>04/16/2019 16:05:57</publishTime>
+      <publishTime>04/16/2019 17:47:52</publishTime>
     </File>
   </ItemGroup>
 </Project>

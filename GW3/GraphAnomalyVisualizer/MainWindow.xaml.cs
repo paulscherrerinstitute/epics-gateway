@@ -20,9 +20,12 @@ namespace GraphAnomalyVisualizer
     /// </summary>
     public partial class MainWindow : Window
     {
+        private MainWindowViewModel ViewModel;
+
         public MainWindow(string path)
         {
-            DataContext = new MainWindowViewModel(path);
+            ViewModel = new MainWindowViewModel(path);
+            DataContext = ViewModel;
             InitializeComponent();
             KeyUp += (sender, e) =>
             {

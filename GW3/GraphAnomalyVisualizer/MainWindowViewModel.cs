@@ -44,30 +44,32 @@ namespace GraphAnomalyVisualizer
 
                         model.Axes.Add(new DateTimeAxis() { Position = AxisPosition.Bottom });
 
-                        var detector = new AnomalyDetector(5, 100); // 500 Points
+                        var detector = new AnomalyDetector();
                         var anomalies = new List<AnomalyRange>();
-                        var triggers = new List<AnomalyRange>();
-                        var thinSpikes = new List<AnomalyRange>();
+                        var rises = new List<AnomalyRange>();
+                        var falls = new List<AnomalyRange>();
+                        var unexpected = new List<AnomalyRange>();
                         detector.AnomalyDetected += anomalies.Add;
-                        detector.TriggerFound += triggers.Add;
-                        detector.ThinSpikeFound += thinSpikes.Add;
+                        detector.RiseDetected += rises.Add;
+                        detector.FallDetected += falls.Add;
+                        detector.UnexpectedDetected += unexpected.Add;
 
                         foreach (var v in graphAnomalyFromFile.History.CPU)
                             detector.Update(v.Date, v.Value ?? -1);
-                        detector.Finish();
 
-                        foreach (var thinSpike in thinSpikes)
-                            AddArea(model, null, OxyColor.FromAColor(60, OxyColors.Green), thinSpike.From, thinSpike.To, 0, 100);
-
-                        foreach (var trigger in triggers)
-                            AddArea(model, null, OxyColor.FromAColor(60, OxyColors.Fuchsia), trigger.From, trigger.To, 0, 100);
+                        foreach (var v in rises)
+                            AddArea(model, null, OxyColor.FromAColor(60, OxyColors.Green), v.From, v.To, 0, 100);
+                        foreach (var v in falls)
+                            AddArea(model, null, OxyColor.FromAColor(60, OxyColors.Red), v.From, v.To, 0, 100);
+                        foreach (var v in unexpected)
+                            AddArea(model, null, OxyColor.FromAColor(60, OxyColors.Fuchsia), v.From, v.To, 0, 100);
 
                         foreach (var anomaly in anomalies)
                             AddArea(model, null, OxyColor.FromAColor(120, OxyColors.Orange), anomaly.From, anomaly.To, 100, 110);
 
                         AddPlotLine(model, "Actual data", OxyColors.Gray, graphAnomalyFromFile.History.CPU);
                         AddPlotLine(model, "Averaged values", OxyColors.BlueViolet, detector.ReadonlyAveragedValues.Select(ToHistoricData));
-                        AddPlotLine(model, "Standard deviation", OxyColors.LightGreen, detector.ReadonlyAveragedValues.Select(v => new HistoricData
+                        AddPlotLine(model, "Standard deviation", OxyColors.DeepSkyBlue, detector.ReadonlyAveragedValues.Select(v => new HistoricData
                         {
                             Date = v.Date,
                             Value = v.StandardDeviation,
@@ -92,7 +94,7 @@ namespace GraphAnomalyVisualizer
 
         public static PlotModel AddPlotLine(PlotModel model, string title, OxyColor color, IEnumerable<HistoricData> entries)
         {
-            var line = new LineSeries { Color = color };
+            var line = new LineSeries { Color = color, LineStyle = LineStyle.Solid };
             foreach (var entry in entries)
             {
                 line.Points.Add(DateTimeAxis.CreateDataPoint(entry.Date, entry.Value ?? -1));

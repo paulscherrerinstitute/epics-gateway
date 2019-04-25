@@ -12,48 +12,53 @@ namespace GraphAnomalies
 
         public event AnomalyRangeEvent AnomalyDetected;
 
-        public event AnomalyRangeEvent TriggerFound;
+        public event AnomalyRangeEvent UnexpectedDetected;
 
-        public event AnomalyRangeEvent ThinSpikeFound;
+        public event AnomalyRangeEvent RiseDetected;
+
+        public event AnomalyRangeEvent FallDetected;
 
         #endregion Events
 
+        #region Configuration
+
+        public int NumRawPerAveragedValues { get; set; } = 5;
+        public int MaxNumAveragedValues { get; set; } = 100;
+
+        public int CumulativeValueThreshold { get; set; } = 5;
+        public TimeSpan MinAnomalyDuration { get; set; } = TimeSpan.FromSeconds(70);
+        public TimeSpan RiseWithoutFallTimeout { get; set; } = TimeSpan.FromMinutes(5);
+        public double ValueCutoff { get; set; } = 0.125;
+
+        #endregion Configuration
+
+        public List<AveragedTemporalValue> ReadonlyAveragedValues => AveragedValues.Select(v => new AveragedTemporalValue(v)).ToList();
         private readonly LinkedList<AveragedTemporalValue> AveragedValues = new LinkedList<AveragedTemporalValue>();
         private readonly List<RawTemporalValue> RawValues = new List<RawTemporalValue>();
-        private AnomalyRange UnfinishedAnomaly = null;
-        private int LastSign = 0;
-        private double CumulativeValue = 0;
-        private DateTime? StartOfCumulativeValue = null;
 
-        public int NumRawPerAveragedValues { get; private set; }
-        public int MaxNumAveragedValues { get; private set; }
-
-        public int StandardDeviationThreshold { get; set; } = 5;
-        public int AveragedValueThreshold { get; set; } = 5;
-        public TimeSpan MinAnomalyDuration { get; set; } = TimeSpan.FromSeconds(70);
-
-        public TimeSpan GroupingSpan { get; set; } = TimeSpan.FromMinutes(2);
-
-        public AnomalyDetector(int numRawPerAveragedValues, int maxNumAveragedValues)
+        public AnomalyDetector()
         {
-            NumRawPerAveragedValues = numRawPerAveragedValues;
-            MaxNumAveragedValues = maxNumAveragedValues;
-
-            TriggerFound += ProcessTrigger;
+            RiseDetected += RiseHandler;
+            FallDetected += FallHandler;
         }
+
+        private int LastSign = -2;
+        private double CumulativeValue = 0;
+        private bool ReachedCumulativeThreshold = false;
+        private AnomalyRange CurrentCumulativeRange = null;
 
         public void Update(DateTime dateTime, double value)
         {
             var rawValue = new RawTemporalValue(dateTime, value);
             RawValues.Add(rawValue);
-            if(RawValues.Count >= NumRawPerAveragedValues)
+            if (RawValues.Count >= NumRawPerAveragedValues)
             {
                 var averagedValue = new AveragedTemporalValue()
                 {
                     Date = RawValues.First().Date,
                     Value = RawValues.Average(v => v.Value),
                 };
-                averagedValue.StandardDeviation = Math.Sqrt(RawValues.Sum(v => (v.Value - averagedValue.Value) * (v.Value - averagedValue.Value)) / RawValues.Count);
+                averagedValue.StandardDeviation = Math.Sqrt(RawValues.Sum(v => (v.Value - averagedValue.Value) * (v.Value - averagedValue.Value)) / (RawValues.Count - 1));
 
                 RawValues.Clear();
 
@@ -62,114 +67,86 @@ namespace GraphAnomalies
                 while (AveragedValues.Count > MaxNumAveragedValues)
                     AveragedValues.RemoveFirst();
 
-                if (last != null)
+                if (last == null)
+                    return;
+
+                var previousAveragedValue = last.Value;
+                var valueDiff = averagedValue.Value - previousAveragedValue.Value;
+                var currentSign = Math.Sign(valueDiff);
+                var absValueDiff = Math.Abs(valueDiff);
+
+                if (currentSign == LastSign && absValueDiff >= ValueCutoff)
                 {
-                    var previousAveragedValue = last.Value;
-                    var stdevDiff = previousAveragedValue.StandardDeviation - averagedValue.StandardDeviation;
-                    var valueDiff = previousAveragedValue.Value - averagedValue.Value;
-                    var currentSign = Math.Sign(valueDiff);
-                    var absValueDiff = Math.Abs(valueDiff);
-
-                    var thinSpike = averagedValue.StandardDeviation > averagedValue.Value;
-
-                    if (thinSpike)
+                    CumulativeValue += absValueDiff;
+                    if (CumulativeValue >= CumulativeValueThreshold)
                     {
-                        ThinSpikeFound?.Invoke(new AnomalyRange(averagedValue.Date.AddSeconds(-2.5), averagedValue.Date.AddSeconds(2.5)));
-                        LastSign = currentSign;
-                        CumulativeValue = absValueDiff;
-                        StartOfCumulativeValue = averagedValue.Date;
-                    }
-                    else
-                    {
-                        if (Math.Abs(stdevDiff) > StandardDeviationThreshold)
-                        {
-                            TriggerFound?.Invoke(new AnomalyRange(previousAveragedValue.Date, averagedValue.Date));
-                        }
-
-                        if (absValueDiff > AveragedValueThreshold)
-                        {
-                            TriggerFound?.Invoke(new AnomalyRange(previousAveragedValue.Date, averagedValue.Date));
-                        }
-
-                        if (currentSign == LastSign && absValueDiff >= 0.25)
-                        {
-                            CumulativeValue += absValueDiff;
-                            if (StartOfCumulativeValue == null)
-                                StartOfCumulativeValue = previousAveragedValue.Date;
-                            if (CumulativeValue >= AveragedValueThreshold)
-                            {
-                                TriggerFound?.Invoke(new AnomalyRange(StartOfCumulativeValue.Value, averagedValue.Date));
-                            }
-                        }
-                        else
-                        {
-                            LastSign = currentSign;
-                            CumulativeValue = absValueDiff;
-                            StartOfCumulativeValue = previousAveragedValue.Date;
-                        }
+                        ReachedCumulativeThreshold = true;
+                        if (CurrentCumulativeRange.To < averagedValue.Date)
+                            CurrentCumulativeRange.To = averagedValue.Date;
                     }
                 }
-
-                // Trigger if there was no trigger for longer than the GroupingSpan
-                if (UnfinishedAnomaly != null)
+                else
                 {
-                    if (UnfinishedAnomaly.To + GroupingSpan < averagedValue.Date)
+                    if (ReachedCumulativeThreshold)
                     {
-                        TryFinishAnomaly();
-                        UnfinishedAnomaly = null;
+                        if (LastSign == 1)
+                            RiseDetected?.Invoke(CurrentCumulativeRange);
+                        else if (LastSign == -1)
+                            FallDetected?.Invoke(CurrentCumulativeRange);
                     }
+
+                    LastSign = currentSign;
+                    CumulativeValue = absValueDiff;
+                    ReachedCumulativeThreshold = false;
+                    CurrentCumulativeRange = new AnomalyRange(previousAveragedValue.Date, averagedValue.Date);
                 }
+
+                CheckTimeouts(averagedValue);
             }
         }
 
-        private void ProcessTrigger(AnomalyRange range)
+        private void CheckTimeouts(AveragedTemporalValue averagedValue)
         {
-            if(UnfinishedAnomaly == null)
+            if (LastRise != null && LastRise.To + RiseWithoutFallTimeout < averagedValue.Date)
             {
-                UnfinishedAnomaly = range;
+                VerifyAndTriggerAnomaly(new AnomalyRange(LastRise.From, averagedValue.Date), hasGap: true);
+                LastRise = null;
+            }
+        }
+
+        private AnomalyRange LastRise = null;
+
+        private void RiseHandler(AnomalyRange range)
+        {
+            if (LastRise == null)
+            {
+                LastRise = range;
             }
             else
             {
-                // If they overlap, extend the current anomaly
-                if(UnfinishedAnomaly.To + GroupingSpan >= range.From)
-                {
-                    if(range.To > UnfinishedAnomaly.To)
-                        UnfinishedAnomaly.To = range.To;
-                }
-                // If they don't, send the anomaly and use the new range for the new anomaly
-                else
-                {
-                    TryFinishAnomaly();
-                    UnfinishedAnomaly = range;
-                }
+                UnexpectedDetected?.Invoke(range);
             }
         }
 
-        private void TryFinishAnomaly()
+        private void FallHandler(AnomalyRange range)
         {
-            if(UnfinishedAnomaly.To - UnfinishedAnomaly.From >= MinAnomalyDuration)
+            if (LastRise != null)
             {
-                AnomalyDetected?.Invoke(UnfinishedAnomaly);
+                VerifyAndTriggerAnomaly(new AnomalyRange(LastRise.From, range.To), hasGap: LastRise.To < range.From);
+                LastRise = null;
+            }
+            else
+            {
+                UnexpectedDetected?.Invoke(range);
             }
         }
 
-        public void Finish()
+        private void VerifyAndTriggerAnomaly(AnomalyRange range, bool hasGap)
         {
-            if (UnfinishedAnomaly != null)
-                TryFinishAnomaly();
+            if(hasGap && range.To - range.From >= MinAnomalyDuration)
+            {
+                AnomalyDetected?.Invoke(range);
+            }
         }
-
-        public List<AveragedTemporalValue> ReadonlyAveragedValues
-        {
-            get { return AveragedValues.Select(v => new AveragedTemporalValue(v)).ToList(); }
-        }
-    }
-
-    public enum AnomalyDetectorState
-    {
-        Normal,
-        AnomalyRising,
-        AnomalySinking,
-        AnomalySteady,
     }
 }

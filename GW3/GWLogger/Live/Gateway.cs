@@ -65,7 +65,7 @@ namespace GWLogger.Live
         private List<HistoricData> serversHistory = new List<HistoricData>();
         private List<HistoricData> networkHistory = new List<HistoricData>();
 
-        private readonly AnomalyDetector CPUAnomalyDetector = new AnomalyDetector(5, 100); // 500 Points
+        private readonly AnomalyDetector CPUAnomalyDetector = new AnomalyDetector();
 
         public Gateway(LiveInformation liveInformation, string gatewayName)
         {
