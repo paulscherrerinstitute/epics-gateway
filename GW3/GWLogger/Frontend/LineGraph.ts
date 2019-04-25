@@ -150,11 +150,7 @@ class LineGraph
             label = this.graphOptions.TooltipLabelFormat(label);
         else if (this.graphOptions.LabelFormat)
             label = this.graphOptions.LabelFormat(label);
-        ToolTip.Show(document.getElementById(this.elementContainer), "bottom", "" + label + ": " + this.dataSource.Values[idx].Value);
-        setTimeout(() =>
-        {
-            $("#toolTip").css({ width: "200px", left: (x - 90) + "px", top: (y + 30) + "px" });
-        }, 10);
+        ToolTip.Show(document.getElementById(this.elementContainer), "bottom", "" + label + ": " + this.dataSource.Values[idx].Value, { width: "200px", left: (x - 90) + "px", top: (y + 30) + "px" });
     }
 
     public Resize(): void

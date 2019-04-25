@@ -56,6 +56,7 @@ namespace GraphAnomalyVisualizer
 
                         foreach (var v in graphAnomalyFromFile.History.CPU)
                             detector.Update(v.Date, v.Value ?? -1);
+                        detector.Finish();
 
                         foreach (var v in rises)
                             AddArea(model, null, OxyColor.FromAColor(60, OxyColors.Green), v.From, v.To, 0, 100);

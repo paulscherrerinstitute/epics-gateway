@@ -273,7 +273,8 @@
                 StartLabel: anomaly.From,
                 EndLabel: anomaly.To,
                 HighlightColor: "#b60000",
-            }
+            },
+            ToolTip: true,
         });
     }
 }

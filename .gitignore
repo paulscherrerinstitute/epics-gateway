@@ -18,3 +18,9 @@
 **/GWLogger/styles/**/*.*
 **/*.vpp~*
 /GW3/TestResults
+
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates

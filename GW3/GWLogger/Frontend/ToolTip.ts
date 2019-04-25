@@ -2,18 +2,17 @@
 {
     static currentElement: HTMLElement | Element = null;
     static currentPosition: "left" | "top" | "bottom" | "right";
-    static lastCall: Date = null;
+    static manualCss: { width?: string; left: string; top: string; } = null;
 
-    public static Show(element: HTMLElement | Element, position: "left" | "top" | "bottom" | "right", content: string)
+    public static Show(element: HTMLElement | Element, position: "left" | "top" | "bottom" | "right", content: string, manualCss?: { width?: string; left: string; top: string; })
     {
-
         ToolTip.currentElement = element;
         ToolTip.currentPosition = position;
+        ToolTip.manualCss = manualCss;
 
-        $("#toolTip").html(content).show().css({ left: "-1000px", top: "-1000px" });
-        setTimeout(ToolTip.SetPosition, 0);
+        $("#toolTip").html(content).show();
+        ToolTip.SetPosition();
         $(element).on("mouseout", ToolTip.MouseOut);
-        ToolTip.lastCall = new Date();
     }
 
     public static SetPosition()
@@ -58,21 +57,20 @@
         if (y + th > window.innerHeight)
             y = window.innerHeight - th;
 
-        $("#toolTip").css({ left: Math.round(x) + "px", top: Math.round(y) + "px" });
+        var css = { left: Math.round(x) + "px", top: Math.round(y) + "px" };
+        var manualCss = ToolTip.manualCss;
+        if (manualCss) {
+            if (manualCss.width)
+                (<any>css).width = manualCss.width;
+            css.left = manualCss.left;
+            css.top = manualCss.top;
+        }
+        $("#toolTip").css(css);
     }
 
     public static MouseOut(e: JQueryMouseEventObject)
     {
-        /*if (ToolTip.lastCall)
-        {
-            var diff = (new Date()).getTime() - ToolTip.lastCall.getTime();
-            if (diff < 50)
-                return;
-        }*/
-
-        ToolTip.currentElement = null;
-        $("#toolTip").hide();
-        $(e.target).off("mouseout", ToolTip.MouseOut);
+        ToolTip.Hide();
     }
 
     public static Hide()
