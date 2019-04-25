@@ -1,11 +1,24 @@
 ﻿using GWLogger.Live;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Web.Services;
 
 namespace GWLogger
 {
     public partial class DataAccess : System.Web.Services.WebService
     {
+        [WebMethod]
+        public string JsHash()
+        {
+            using (HashAlgorithm algorithm = SHA256.Create())
+            {
+                return string.Join("", algorithm.ComputeHash(Encoding.UTF8.GetBytes(File.ReadAllText(Context.Server.MapPath("~/main.js")))).Select(c => c.ToString("X2")));
+            }
+        }
+
         [WebMethod]
         public List<GatewayShortInformation> GetShortInformation()
         {

@@ -110,6 +110,7 @@ class Main
         });
     }
 
+    private static nbRefreshes: number = 0;
     public static async Refresh()
     {
         var now = new Date();
@@ -118,8 +119,11 @@ class Main
         if (Main.isLoading)
             return;
         Main.isLoading = true;
+        Main.nbRefreshes = (Main.nbRefreshes + 1) % 60;
         try
         {
+            if (Main.nbRefreshes == 30)
+                await Main.CheckJsCodeVersion();
             await Main.Status();
             await StatusPage.Refresh();
             await DetailPage.Refresh();
@@ -129,6 +133,17 @@ class Main
         {
         }
         Main.isLoading = false;
+    }
+
+    // Stores the hash of the JS code served by the server.
+    private static lastVersion: string = null;
+    private static async CheckJsCodeVersion()
+    {
+        var msg = await Utils.Loader("JsHash");
+        var version = <string>msg.d;
+        if (Main.lastVersion && Main.lastVersion != version)
+            window.location.reload(true);
+        Main.lastVersion = version;
     }
 
     private static async Status()
