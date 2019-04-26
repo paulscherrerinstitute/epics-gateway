@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Web.Services;
 
@@ -55,6 +56,14 @@ namespace GWLogger
         public double GetBufferUsage()
         {
             return Global.DataContext.BufferUsage;
+        }
+
+
+
+        [WebMethod]
+        public double GetCpu()
+        {
+            return Global.CPU;
         }
 
         [WebMethod]

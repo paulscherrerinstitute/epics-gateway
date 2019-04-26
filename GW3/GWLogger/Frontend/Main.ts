@@ -122,8 +122,10 @@ class Main
         Main.nbRefreshes = (Main.nbRefreshes + 1) % 60;
         try
         {
-            if (Main.nbRefreshes == 30)
+            if (Main.nbRefreshes % 30 == 0)
                 await Main.CheckJsCodeVersion();
+            if (Main.nbRefreshes % 5 == 0)
+                await Main.CPUUpdate();
             await Main.Status();
             await StatusPage.Refresh();
             await DetailPage.Refresh();
@@ -134,6 +136,14 @@ class Main
         }
         Main.isLoading = false;
     }
+
+    private static async CPUUpdate()
+    {
+        var msg = await Utils.Loader("GetCpu");
+        var cpu = <number>msg.d;
+        $("#cpuSpace").html("" + Math.round(cpu) + " %");
+    }
+
 
     // Stores the hash of the JS code served by the server.
     private static lastVersion: string = null;

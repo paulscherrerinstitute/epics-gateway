@@ -139,10 +139,10 @@
             <div query='select date, reason, message, hostname  where type starts "client"'>Client disconnection reason</div>
             <div query='select count(*) nb, reason where type starts "client" group by reason order by nb desc limit 100'>NB Disconnect per reason</div>
         </div>
-            <div id="detailInfo"></div>
-            <div id="showLastBtn">Last entries</div>
-            <div id="mouseCapture"></div>
-        </div>
+        <div id="detailInfo"></div>
+        <div id="showLastBtn">Last entries</div>
+        <div id="mouseCapture"></div>
+    </div>
     <div id="mapView">
         <svg id="svgMap" xml:space="preserve" viewBox="0 0 1250 950" style="width:100%;height:100%;" preserveAspectRatio="xMidYMid meet"></svg>
     </div>
@@ -151,6 +151,7 @@
         <div id="reportContent" class="fixed"></div>
     </div>
     <div id="errorsView"><div id="errorsContent"></div></div>
+    <div id="cpuSpace" tooltip="Shows the % of CPU usage on the server." tooltip-position="left">---</div>
     <div id="bufferSpace" tooltip="Shows the % of memory buffer is used before blocking new log entries." tooltip-position="left"></div>
     <div id="freeSpace" tooltip="Shows how much storage is free on the DB disk." tooltip-position="left"></div>
     <div id="currentTime" tooltip="Current time in UTC (as log are stored)." tooltip-position="left"></div>

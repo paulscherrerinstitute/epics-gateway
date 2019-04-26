@@ -791,7 +791,7 @@ select {
     top: 35px;
     right: 0px;
     width: calc(@errorPanel + 4px);
-    bottom: 125px;
+    bottom: 165px;
     overflow: hidden;
     .container;
 
@@ -851,9 +851,24 @@ select {
     }
 }
 
-#freeSpace {
+#cpuSpace {
     .container;
     bottom: 85px;
+    right: 0px;
+    height: 35px;
+    width: calc(@errorPanel + 4px);
+    padding-top: 17px;
+    text-align: center;
+
+    &:after {
+        .containterLabel;
+        content: "CPU";
+    }
+}
+
+#freeSpace {
+    .container;
+    bottom: 125px;
     right: 0px;
     height: 35px;
     width: calc(@errorPanel + 4px);

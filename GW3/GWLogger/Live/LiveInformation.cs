@@ -55,7 +55,7 @@ namespace GWLogger.Live
                      }
                  }
              });
-            if (!task.Wait(2000))
+            if (!task.Wait(20000))
                 taskTread.Abort();
 
             backgroundUpdater = new Thread(UpdateGateways);
