@@ -127,7 +127,8 @@
                 StartLabel: anomalyInfo.From,
                 EndLabel: anomalyInfo.To,
                 HighlightColor: "#b60000",
-            }
+            },
+            ToolTip: true,
         };
         if (this.PreviewGraph) {
             this.PreviewGraph.Dispose();
