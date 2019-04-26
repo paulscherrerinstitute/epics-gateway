@@ -26,10 +26,9 @@ namespace GraphAnomalies
         public int MaxNumAveragedValues { get; set; } = 100;
 
         public int CumulativeValueThreshold { get; set; } = 7;
-        public TimeSpan MinAnomalyDuration { get; set; } = TimeSpan.FromMinutes(3);
-        public TimeSpan RiseWithoutFallTimeout { get; set; } = TimeSpan.FromMinutes(5);
+        public TimeSpan MinAnomalyDuration { get; set; } = TimeSpan.FromMinutes(5); //.Add(TimeSpan.FromSeconds(30));
         public TimeSpan AnomalyGroupingTimeout { get; set; } = TimeSpan.FromMinutes(3);
-        public double ValueCutoff { get; set; } = 0.5;
+        public double ValueCutoff { get; set; } = 0.125;
 
         #endregion Configuration
 
@@ -116,6 +115,7 @@ namespace GraphAnomalies
             if (LastRise == null)
             {
                 LastRise = range;
+                VerifyAndTriggerAnomaly(new AnomalyRange(range), false);
             }
             else
             {
@@ -138,21 +138,20 @@ namespace GraphAnomalies
 
         private void CheckTimeouts(AveragedTemporalValue averagedValue)
         {
-            if (LastRise != null && LastRise.To + RiseWithoutFallTimeout < averagedValue.Date)
+            // Rise without fall should trigger anomaly after timeout
+            if (LastRise != null && LastRise.To + AnomalyGroupingTimeout < averagedValue.Date)
             {
                 VerifyAndTriggerAnomaly(new AnomalyRange(LastRise.From, averagedValue.Date), hasGap: true);
                 LastRise = null;
             }
 
-            if (LastAnomaly != null)
+            if (LastAnomaly != null && LastAnomaly.To + AnomalyGroupingTimeout < averagedValue.Date)
             {
-                if (LastAnomaly.To + AnomalyGroupingTimeout < averagedValue.Date)
+                if (LastAnomalyHasGaps || LastAnomaly.To - LastAnomaly.From >= MinAnomalyDuration)
                 {
-                    if (LastAnomalyHasGaps && LastAnomaly.To - LastAnomaly.From >= MinAnomalyDuration)
-                    {
-                        AnomalyDetected?.Invoke(LastAnomaly);
-                        LastAnomaly = null;
-                    }
+                    AnomalyDetected?.Invoke(LastAnomaly);
+                    LastAnomaly = null;
+                    LastAnomalyHasGaps = false;
                 }
             }
         }
@@ -165,7 +164,7 @@ namespace GraphAnomalies
             if(LastAnomaly != null)
             {
                 // Check if the anomaly has passed enough time wihout another
-                if(LastAnomaly.To < range.From)
+                if(LastAnomaly.To + AnomalyGroupingTimeout < range.From)
                 {
                     if(LastAnomalyHasGaps || LastAnomaly.To - LastAnomaly.From >= MinAnomalyDuration)
                         AnomalyDetected?.Invoke(LastAnomaly);
@@ -177,26 +176,14 @@ namespace GraphAnomalies
                     if (hasGap)
                         LastAnomalyHasGaps = true;
 
-                    LastAnomaly.To = LastAnomaly.To > range.To ? LastAnomaly.To : range.To;
                     LastAnomaly.From = LastAnomaly.From < range.From ? LastAnomaly.From : range.From;
+                    LastAnomaly.To = LastAnomaly.To > range.To ? LastAnomaly.To : range.To;
                 }
             }
             else
             {
                 LastAnomaly = range;
                 LastAnomalyHasGaps = hasGap;
-            }
-        }
-
-        public void Finish()
-        {
-            if (LastAnomaly != null)
-            {
-                if (LastAnomalyHasGaps && LastAnomaly.To - LastAnomaly.From >= MinAnomalyDuration)
-                {
-                    AnomalyDetected?.Invoke(LastAnomaly);
-                    LastAnomaly = null;
-                }
             }
         }
     }

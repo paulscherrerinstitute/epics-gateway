@@ -5,7 +5,6 @@ by editing this MSBuild file. In order to learn more about this please visit htt
 -->
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <TimeStampOfAssociatedLegacyPublishXmlFile />
     <_PublishTargetUrl>\\EPICSLOG02\www</_PublishTargetUrl>
   </PropertyGroup>
   <ItemGroup>
@@ -16,16 +15,16 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>10/17/2018 08:41:28</publishTime>
     </File>
     <File Include="bin/GraphAnomalies.dll">
-      <publishTime>04/25/2019 08:20:39</publishTime>
+      <publishTime>04/26/2019 10:06:23</publishTime>
     </File>
     <File Include="bin/GraphAnomalies.pdb">
-      <publishTime>04/25/2019 08:20:39</publishTime>
+      <publishTime>04/26/2019 10:06:23</publishTime>
     </File>
     <File Include="bin/GWLogger.dll">
-      <publishTime>04/25/2019 08:58:13</publishTime>
+      <publishTime>04/26/2019 10:06:26</publishTime>
     </File>
     <File Include="bin/GWLogger.pdb">
-      <publishTime>04/25/2019 08:58:13</publishTime>
+      <publishTime>04/26/2019 10:06:26</publishTime>
     </File>
     <File Include="bin/HtmlAgilityPack.dll">
       <publishTime>08/19/2018 20:56:18</publishTime>
@@ -40,7 +39,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>04/16/2019 16:05:52</publishTime>
     </File>
     <File Include="bin/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll">
-      <publishTime>09/05/2018 16:10:50</publishTime>
+      <publishTime>05/09/2018 16:10:50</publishTime>
     </File>
     <File Include="bin/Microsoft.Win32.Primitives.dll">
       <publishTime>03/13/2019 08:16:51</publishTime>
@@ -94,10 +93,10 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>08/08/2018 12:09:42</publishTime>
     </File>
     <File Include="bin/roslyn/Microsoft.DiaSymReader.Native.amd64.dll">
-      <publishTime>12/05/2017 09:36:44</publishTime>
+      <publishTime>05/12/2017 09:36:44</publishTime>
     </File>
     <File Include="bin/roslyn/Microsoft.DiaSymReader.Native.x86.dll">
-      <publishTime>12/05/2017 09:36:44</publishTime>
+      <publishTime>05/12/2017 09:36:44</publishTime>
     </File>
     <File Include="bin/roslyn/Microsoft.Managed.Core.targets">
       <publishTime>08/08/2018 12:09:42</publishTime>
@@ -106,85 +105,85 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>08/08/2018 12:09:42</publishTime>
     </File>
     <File Include="bin/roslyn/Microsoft.Win32.Primitives.dll">
-      <publishTime>11/05/2016 18:55:32</publishTime>
+      <publishTime>05/11/2016 18:55:32</publishTime>
     </File>
     <File Include="bin/roslyn/System.AppContext.dll">
-      <publishTime>11/05/2016 18:55:34</publishTime>
+      <publishTime>05/11/2016 18:55:34</publishTime>
     </File>
     <File Include="bin/roslyn/System.Collections.Immutable.dll">
       <publishTime>05/16/2018 03:29:34</publishTime>
     </File>
     <File Include="bin/roslyn/System.Console.dll">
-      <publishTime>11/05/2016 18:55:48</publishTime>
+      <publishTime>05/11/2016 18:55:48</publishTime>
     </File>
     <File Include="bin/roslyn/System.Diagnostics.DiagnosticSource.dll">
-      <publishTime>11/05/2016 18:55:52</publishTime>
+      <publishTime>05/11/2016 18:55:52</publishTime>
     </File>
     <File Include="bin/roslyn/System.Diagnostics.FileVersionInfo.dll">
-      <publishTime>11/05/2016 18:55:56</publishTime>
+      <publishTime>05/11/2016 18:55:56</publishTime>
     </File>
     <File Include="bin/roslyn/System.Diagnostics.StackTrace.dll">
-      <publishTime>11/05/2016 18:55:52</publishTime>
+      <publishTime>05/11/2016 18:55:52</publishTime>
     </File>
     <File Include="bin/roslyn/System.Globalization.Calendars.dll">
-      <publishTime>11/05/2016 18:56:02</publishTime>
+      <publishTime>05/11/2016 18:56:02</publishTime>
     </File>
     <File Include="bin/roslyn/System.IO.Compression.dll">
-      <publishTime>11/05/2016 18:56:08</publishTime>
+      <publishTime>05/11/2016 18:56:08</publishTime>
     </File>
     <File Include="bin/roslyn/System.IO.Compression.ZipFile.dll">
-      <publishTime>11/05/2016 18:56:04</publishTime>
+      <publishTime>05/11/2016 18:56:04</publishTime>
     </File>
     <File Include="bin/roslyn/System.IO.FileSystem.dll">
-      <publishTime>11/05/2016 18:56:08</publishTime>
+      <publishTime>05/11/2016 18:56:08</publishTime>
     </File>
     <File Include="bin/roslyn/System.IO.FileSystem.Primitives.dll">
-      <publishTime>11/05/2016 18:56:08</publishTime>
+      <publishTime>05/11/2016 18:56:08</publishTime>
     </File>
     <File Include="bin/roslyn/System.Net.Http.dll">
-      <publishTime>11/05/2016 18:56:30</publishTime>
+      <publishTime>05/11/2016 18:56:30</publishTime>
     </File>
     <File Include="bin/roslyn/System.Net.Sockets.dll">
-      <publishTime>11/05/2016 18:56:34</publishTime>
+      <publishTime>05/11/2016 18:56:34</publishTime>
     </File>
     <File Include="bin/roslyn/System.Reflection.Metadata.dll">
       <publishTime>05/16/2018 03:29:44</publishTime>
     </File>
     <File Include="bin/roslyn/System.Runtime.InteropServices.RuntimeInformation.dll">
-      <publishTime>11/05/2016 18:57:00</publishTime>
+      <publishTime>05/11/2016 18:57:00</publishTime>
     </File>
     <File Include="bin/roslyn/System.Security.Cryptography.Algorithms.dll">
-      <publishTime>11/05/2016 18:57:14</publishTime>
+      <publishTime>05/11/2016 18:57:14</publishTime>
     </File>
     <File Include="bin/roslyn/System.Security.Cryptography.Encoding.dll">
-      <publishTime>11/05/2016 18:57:08</publishTime>
+      <publishTime>05/11/2016 18:57:08</publishTime>
     </File>
     <File Include="bin/roslyn/System.Security.Cryptography.Primitives.dll">
-      <publishTime>11/05/2016 18:57:18</publishTime>
+      <publishTime>05/11/2016 18:57:18</publishTime>
     </File>
     <File Include="bin/roslyn/System.Security.Cryptography.X509Certificates.dll">
-      <publishTime>11/05/2016 18:57:18</publishTime>
+      <publishTime>05/11/2016 18:57:18</publishTime>
     </File>
     <File Include="bin/roslyn/System.Text.Encoding.CodePages.dll">
-      <publishTime>11/05/2016 18:57:20</publishTime>
+      <publishTime>05/11/2016 18:57:20</publishTime>
     </File>
     <File Include="bin/roslyn/System.Threading.Tasks.Extensions.dll">
-      <publishTime>11/05/2016 18:57:24</publishTime>
+      <publishTime>05/11/2016 18:57:24</publishTime>
     </File>
     <File Include="bin/roslyn/System.ValueTuple.dll">
-      <publishTime>11/05/2016 18:57:30</publishTime>
+      <publishTime>05/11/2016 18:57:30</publishTime>
     </File>
     <File Include="bin/roslyn/System.Xml.ReaderWriter.dll">
-      <publishTime>11/05/2016 18:57:36</publishTime>
+      <publishTime>05/11/2016 18:57:36</publishTime>
     </File>
     <File Include="bin/roslyn/System.Xml.XmlDocument.dll">
-      <publishTime>11/05/2016 18:57:34</publishTime>
+      <publishTime>05/11/2016 18:57:34</publishTime>
     </File>
     <File Include="bin/roslyn/System.Xml.XPath.dll">
-      <publishTime>11/05/2016 18:57:40</publishTime>
+      <publishTime>05/11/2016 18:57:40</publishTime>
     </File>
     <File Include="bin/roslyn/System.Xml.XPath.XDocument.dll">
-      <publishTime>11/05/2016 18:57:34</publishTime>
+      <publishTime>05/11/2016 18:57:34</publishTime>
     </File>
     <File Include="bin/roslyn/vbc.exe">
       <publishTime>08/08/2018 05:38:48</publishTime>
@@ -796,7 +795,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>02/18/2019 09:09:24</publishTime>
     </File>
     <File Include="Less/main.css">
-      <publishTime>04/25/2019 07:39:17</publishTime>
+      <publishTime>04/26/2019 07:53:02</publishTime>
     </File>
     <File Include="Less/main.less">
       <publishTime>04/15/2019 14:25:54</publishTime>
@@ -805,7 +804,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>02/18/2019 09:09:24</publishTime>
     </File>
     <File Include="main.js">
-      <publishTime>04/25/2019 07:39:17</publishTime>
+      <publishTime>04/26/2019 07:53:02</publishTime>
     </File>
     <File Include="main.js.map">
       <publishTime>04/10/2019 11:58:07</publishTime>
@@ -832,13 +831,13 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/22/2018 11:31:38</publishTime>
     </File>
     <File Include="Scripts/Kendo-EULA.txt">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="Scripts/kendo.all.min.js">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="Scripts/kendo.angular.min.js">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="sop.html">
       <publishTime>03/29/2019 08:28:32</publishTime>
@@ -847,319 +846,319 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>03/29/2019 08:28:32</publishTime>
     </File>
     <File Include="styles/Bootstrap/editor.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Bootstrap/imagebrowser.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Bootstrap/indeterminate.gif">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Bootstrap/loading-image.gif">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Bootstrap/loading.gif">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Bootstrap/loading_2x.gif">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Bootstrap/markers.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Bootstrap/markers_2x.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Bootstrap/slider-h.gif">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Bootstrap/slider-v.gif">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Bootstrap/sprite.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Bootstrap/sprite_2x.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Bootstrap/sprite_kpi.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Bootstrap/sprite_kpi_2x.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Default/editor.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Default/imagebrowser.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Default/indeterminate.gif">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Default/loading-image.gif">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Default/loading.gif">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Default/loading_2x.gif">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Default/markers.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Default/markers_2x.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Default/slider-h.gif">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Default/slider-v.gif">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Default/sprite.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Default/sprite_2x.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Default/sprite_kpi.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Default/sprite_kpi_2x.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Flat/editor.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Flat/imagebrowser.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Flat/indeterminate.gif">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Flat/loading-image.gif">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Flat/loading.gif">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Flat/loading_2x.gif">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Flat/markers.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Flat/markers_2x.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Flat/slider-h.gif">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Flat/slider-v.gif">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Flat/sprite.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Flat/sprite_2x.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Flat/sprite_kpi.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Flat/sprite_kpi_2x.png">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/fonts/DejaVu/DejaVuSans-Bold.ttf">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/fonts/DejaVu/DejaVuSans-BoldOblique.ttf">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/fonts/DejaVu/DejaVuSans-ExtraLight.ttf">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/fonts/DejaVu/DejaVuSans-Oblique.ttf">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/fonts/DejaVu/DejaVuSans.ttf">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/fonts/DejaVu/DejaVuSansMono-Bold.ttf">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/fonts/DejaVu/DejaVuSansMono-BoldOblique.ttf">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/fonts/DejaVu/DejaVuSansMono-Oblique.ttf">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/fonts/DejaVu/DejaVuSansMono.ttf">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/fonts/DejaVu/DejaVuSerif-Bold.ttf">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/fonts/DejaVu/DejaVuSerif-BoldItalic.ttf">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/fonts/DejaVu/DejaVuSerif-Italic.ttf">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/fonts/DejaVu/DejaVuSerif.ttf">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/fonts/DejaVu/LICENSE.txt">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/fonts/glyphs/KendoUIGlyphs.eot">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/fonts/glyphs/KendoUIGlyphs.svg">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/fonts/glyphs/KendoUIGlyphs.ttf">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/fonts/glyphs/KendoUIGlyphs.woff">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/fonts/glyphs/WebComponentsIcons.eot">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/fonts/glyphs/WebComponentsIcons.svg">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/fonts/glyphs/WebComponentsIcons.ttf">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/fonts/glyphs/WebComponentsIcons.woff">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/images/back.png">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/images/kendoui.svg">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/images/kendoui.ttf">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/images/kendoui.woff">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/images/wp8_icons.png">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/images/wp8_inverseicons.png">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/kendo.bootstrap-v4.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.bootstrap.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.bootstrap.mobile.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.common-bootstrap.core.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.common-bootstrap.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.common-material.core.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.common-material.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.common.core.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.common.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.dataviz.bootstrap.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.dataviz.default.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.dataviz.flat.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.dataviz.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.dataviz.mobile.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.default-v2.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.default.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.default.mobile.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.flat.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.flat.mobile.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.material.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/kendo.material.mobile.min.css">
-      <publishTime>11/05/2018 11:11:14</publishTime>
+      <publishTime>05/11/2018 11:11:14</publishTime>
     </File>
     <File Include="styles/Material/editor.png">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/Material/imagebrowser.png">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/Material/indeterminate.gif">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/Material/loading-image.gif">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/Material/loading.gif">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/Material/loading_2x.gif">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/Material/markers.png">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/Material/markers_2x.png">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/Material/slider-h.gif">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/Material/slider-v.gif">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/Material/sprite.png">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/Material/sprite_2x.png">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/Material/sprite_kpi.png">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="styles/Material/sprite_kpi_2x.png">
-      <publishTime>11/05/2018 11:11:16</publishTime>
+      <publishTime>05/11/2018 11:11:16</publishTime>
     </File>
     <File Include="Web.config">
       <publishTime>04/16/2019 17:47:52</publishTime>

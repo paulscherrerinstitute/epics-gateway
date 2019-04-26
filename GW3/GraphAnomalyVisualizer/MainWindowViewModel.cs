@@ -54,9 +54,17 @@ namespace GraphAnomalyVisualizer
                         detector.FallDetected += falls.Add;
                         detector.UnexpectedDetected += unexpected.Add;
 
+                        var last = graphAnomalyFromFile.History.CPU.Last();
+                        var lastValue = last.Value ?? -1;
+                        var lastDate = last.Date;
+                        for (int i = 0; i < 100; i++)
+                        {
+                            lastDate = lastDate.AddSeconds(5);
+                            graphAnomalyFromFile.History.CPU.Add(new HistoricData { Date = lastDate, Value = lastValue });
+                        }
+
                         foreach (var v in graphAnomalyFromFile.History.CPU)
                             detector.Update(v.Date, v.Value ?? -1);
-                        detector.Finish();
 
                         foreach (var v in rises)
                             AddArea(model, null, OxyColor.FromAColor(60, OxyColors.Green), v.From, v.To, 0, 100);
@@ -88,6 +96,7 @@ namespace GraphAnomalyVisualizer
                 }
                 success = true;
             }
+
             while (!success);
         }
 
