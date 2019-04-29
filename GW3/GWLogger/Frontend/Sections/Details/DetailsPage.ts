@@ -209,7 +209,7 @@ class DetailPage
             DetailPage.cpuChart.SetDataSource({ Values: data.CPU.map(pointMapper) });
             DetailPage.searchesChart.SetDataSource({ Values: data.Searches.map(pointMapper) });
             DetailPage.pvsChart.SetDataSource({ Values: data.PVs.map(pointMapper) });
-            DetailPage.networkChart.SetDataSource({ Values: data.Network.map(pointMapper) });
+            DetailPage.networkChart.SetDataSource({ Values: data.Network.map(pointMapper).map(v => { v.Value /= (1024 * 1024); return v; }) });
         }
         catch (ex)
         {

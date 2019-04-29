@@ -95,10 +95,6 @@
             $("#gatewayDetails").hide();
         }
 
-        if (Main.Path == "Anomalies") {
-            AnomaliesPage.Show();
-        }
-
         /*var url = "" + document.location;
         //console.log(url);
         if (url.indexOf("#") == -1)
@@ -161,6 +157,9 @@
         }
 
         Main.Refresh(true);
+        if (Main.Path == "Anomalies") {
+            AnomaliesPage.Show();
+        }
         //Main.DelayedSearch(Main.LoadLogStats, true);
     }
 

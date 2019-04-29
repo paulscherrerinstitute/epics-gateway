@@ -178,7 +178,7 @@
                 <div id="anomaly-detail-pv-graph"></div>
                 <h4>Searches</h4>
                 <div id="anomaly-detail-searches-graph"></div>
-                <h4>Network</h4>
+                <h4>Network (MB/s)</h4>
                 <div id="anomaly-detail-network-graph"></div>
 
                 <h4>EventTypes before the anomaly</h4>
@@ -198,7 +198,7 @@
         this.CreateGraph("anomaly-detail-cpu-graph", anomaly, anomaly.History.CPU, { MaxY: 100 });
         this.CreateGraph("anomaly-detail-pv-graph", anomaly, anomaly.History.PVs);
         this.CreateGraph("anomaly-detail-searches-graph", anomaly, anomaly.History.Searches);
-        this.CreateGraph("anomaly-detail-network-graph", anomaly, anomaly.History.Network);
+        this.CreateGraph("anomaly-detail-network-graph", anomaly, anomaly.History.Network.map(v => { v.Value /= (1024 * 1024); return v; }));
 
         this.CreateTable("anomaly-detail-before-event-types", anomaly.BeforeEventTypes, "EventType", "Count");
         this.CreateTable("anomaly-detail-during-event-types", anomaly.DuringEventTypes, "EventType", "Count");
