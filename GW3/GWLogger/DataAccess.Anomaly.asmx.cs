@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic; 
+using System.Collections.Generic;
 using System.Web.Services;
 
 namespace GWLogger
 {
     public partial class DataAccess
     {
-
         [WebMethod]
         public List<Live.GraphAnomalyInfo> GetGraphAnomalies()
         {
@@ -14,13 +13,13 @@ namespace GWLogger
         }
 
         [WebMethod]
-        public List<Live.HistoricData> GetGraphAnomalyPreview(string filename)
+        public List<GraphAnomalies.HistoricData> GetGraphAnomalyPreview(string filename)
         {
             return Global.LiveInformation.GetGraphAnomalyPreview(filename);
         }
 
         [WebMethod]
-        public Live.GraphAnomaly GetGraphAnomaly(string filename)
+        public GraphAnomalies.GraphAnomaly GetGraphAnomaly(string filename)
         {
             return Global.LiveInformation.GetGraphAnomaly(filename);
         }
@@ -30,6 +29,5 @@ namespace GWLogger
         {
             Global.LiveInformation.DeleteGraphAnomaly(filename);
         }
-
     }
 }

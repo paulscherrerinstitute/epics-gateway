@@ -1,5 +1,4 @@
 ﻿using GraphAnomalies;
-using GWLogger.Live;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
