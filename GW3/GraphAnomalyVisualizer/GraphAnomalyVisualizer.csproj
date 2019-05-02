@@ -119,12 +119,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GraphAnomalies\GraphAnomalies.csproj">
-      <Project>{600d7f19-6130-47c3-b7cc-85d5f9c77622}</Project>
-      <Name>GraphAnomalies</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="ExampleFiles\CLIMBER.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -149,6 +143,12 @@
     <Content Include="ExampleFiles\TWO_HILLS.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GraphAnomalies\GraphAnomalies.csproj">
+      <Project>{dfbf31c2-894c-4fd1-a674-d323e7dd2fde}</Project>
+      <Name>GraphAnomalies</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
