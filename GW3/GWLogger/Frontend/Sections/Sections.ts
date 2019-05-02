@@ -29,7 +29,7 @@
                             Main.CurrentGateway = null;
                         Main.Path = "Status";
                         State.Set(true);
-                        State.Pop(null);
+                        State.Pop();
                         $(".inset").removeClass("inset");
                         break;
                     case "Logs":
@@ -42,7 +42,7 @@
                             break;
                         Main.Path = "GW";
                         State.Set(true);
-                        State.Pop(null);
+                        State.Pop();
                         $(".inset").removeClass("inset");
                         break;
                     case "Map":
@@ -55,7 +55,20 @@
                             break;
                         Main.Path = "Map";
                         State.Set(true);
-                        State.Pop(null);
+                        State.Pop();
+                        $(".inset").removeClass("inset");
+                        break;
+                    case "Anomalies":
+                        $("#reportView").hide();
+                        if ($("#helpView").is(":visible"))
+                            $("#helpView").hide();
+                        if ($("#operationView").is(":visible"))
+                            $("#operationView").hide();
+                        if (Main.DetailAnomaly)
+                            Main.DetailAnomaly = null;
+                        Main.Path = "Anomalies";
+                        State.Set(true);
+                        State.Pop();
                         $(".inset").removeClass("inset");
                         break;
                     case "Help":
@@ -70,7 +83,7 @@
                         break;
                     default:
                         State.Set(true);
-                        State.Pop(null);
+                        State.Pop();
                         break;
                 }
             }

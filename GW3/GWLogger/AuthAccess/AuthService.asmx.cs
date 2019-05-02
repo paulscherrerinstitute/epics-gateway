@@ -15,7 +15,7 @@ namespace GWLogger.AuthAccess
     [WebService(Namespace = "http://caesar.psi.ch/AuthAccess/AuthService.asmx")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
     [System.ComponentModel.ToolboxItem(false)]
-    // To allow this Web Service to be called from script, using ASP.NET AJAX, uncomment the following line. 
+    // To allow this Web Service to be called from script, using ASP.NET AJAX, uncomment the following line.
     [System.Web.Script.Services.ScriptService]
     public class AuthService : System.Web.Services.WebService
     {
@@ -92,7 +92,6 @@ namespace GWLogger.AuthAccess
             // get a DirectorySearcher object
             using (var ldap = new LdapConnection(ConfigurationManager.AppSettings["ldapServer"]))
             {
-
                 // specify the search filter
                 var filter = string.Format("(&(objectClass=user)(objectCategory=person)(samAccountName={0}))", CurrentUser().Split('\\').Last());
                 //var searchAttributes = new string[] { "samAccountName", "sn", "givenName", "mail", "telephoneNumber", "physicalDeliveryOfficeName" };

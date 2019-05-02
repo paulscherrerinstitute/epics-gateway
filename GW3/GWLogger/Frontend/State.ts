@@ -3,7 +3,7 @@
     public static Init()
     {
         $(window).bind('popstate', State.Pop);
-        State.Pop(null);
+        State.Pop();
     }
 
     static Path(): string[]
@@ -25,7 +25,7 @@
         return queryString;
     }
 
-    static Pop(jEvent: JQueryEventObject)
+    static Pop()
     {
         Main.CurrentGateway = null;
         Main.CurrentTime = null;
@@ -47,6 +47,7 @@
                     $("#mapView").hide();
                     $("#gatewayView").hide();
                     $("#gatewayDetails").hide();
+                    $("#anomalyView").hide();
                     $("#logView").show();
                     break;
                 case "Map":
@@ -55,6 +56,16 @@
                     $("#mapView").show();
                     $("#gatewayView").hide();
                     $("#gatewayDetails").hide();
+                    $("#anomalyView").hide();
+                    $("#logView").hide();
+                    break;
+                case "Anomalies":
+                    Main.Path = "Anomalies";
+                    $($("#mainTabs li")[4]).addClass("activeTab");
+                    $("#mapView").hide();
+                    $("#gatewayView").hide();
+                    $("#gatewayDetails").hide();
+                    $("#anomalyView").show();
                     $("#logView").hide();
                     break;
                 default:
@@ -64,6 +75,7 @@
                     $("#gatewayView").show();
                     $("#gatewayDetails").hide();
                     $("#logView").hide();
+                    $("#anomalyView").hide();
             }
         }
 
@@ -129,6 +141,10 @@
             Main.CurrentTab = parseInt(queryString["t"]);
         else
             Main.CurrentTab = 0;
+        if (queryString["f"])
+            Main.DetailAnomaly = queryString["f"];
+        else
+            Main.DetailAnomaly = null;
 
         $("#logFilter li").removeClass("activeTab");
         $($("#logFilter li")[Main.CurrentTab]).addClass("activeTab");
@@ -143,7 +159,10 @@
                 Main.IsLast = false;
         }
 
-        Main.Refresh();
+        Main.Refresh(true);
+        if (Main.Path == "Anomalies") {
+            AnomaliesPage.Show();
+        }
         //Main.DelayedSearch(Main.LoadLogStats, true);
     }
 
@@ -164,10 +183,8 @@
     {
         State.setStateTimeout = null;
         var params = "";
-        if (Main.Path == "GW")
-        {
-            if (Main.StartDate && Main.EndDate)
-            {
+        if (Main.Path == "GW") {
+            if (Main.StartDate && Main.EndDate) {
                 if (Main.CurrentTime)
                     params += (params != "" ? "&" : "#") + "c=" + Main.CurrentTime.getTime();
                 params += (params != "" ? "&" : "#") + "s=" + Main.StartDate.getTime();
@@ -177,6 +194,12 @@
                 params += (params != "" ? "&" : "#") + "q=" + encodeURIComponent($("#queryField").val());
             if (Main.CurrentTab != 0)
                 params += (params != "" ? "&" : "#") + "t=" + Main.CurrentTab;
+        }
+        else if (Main.Path == "Anomalies")
+        {
+            if (Main.DetailAnomaly) {
+                params += "#f=" + encodeURIComponent(Main.DetailAnomaly);
+            }
         }
         window.history.pushState(null, Main.BaseTitle + " - " + Main.CurrentGateway, '/' + Main.Path + '/' + (Main.CurrentGateway ? Main.CurrentGateway : "") + params);
     }

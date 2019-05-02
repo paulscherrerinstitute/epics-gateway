@@ -61,7 +61,7 @@ class DetailPage
                 Main.StartDate = new Date(label.getTime() - 12 * 3600000);
                 Main.EndDate = new Date(label.getTime() + 12 * 3600000);
                 State.Set(true);
-                State.Pop(null);
+                State.Pop();
             }
         });
         DetailPage.searchesChart = new LineGraph("searchesGraph", { Values: [] }, {
@@ -79,7 +79,7 @@ class DetailPage
                 Main.StartDate = new Date(label.getTime() - 12 * 3600000);
                 Main.EndDate = new Date(label.getTime() + 12 * 3600000);
                 State.Set(true);
-                State.Pop(null);
+                State.Pop();
             }
         });
         DetailPage.pvsChart = new LineGraph("pvsGraph", { Values: [] }, {
@@ -97,7 +97,7 @@ class DetailPage
                 Main.StartDate = new Date(Main.CurrentTime.getTime() - 12 * 3600000);
                 Main.EndDate = new Date(Main.CurrentTime.getTime() + 12 * 3600000);
                 State.Set(true);
-                State.Pop(null);
+                State.Pop();
             }
         });
         DetailPage.networkChart = new LineGraph("networkGraph", { Values: [] }, {
@@ -115,7 +115,7 @@ class DetailPage
                 Main.StartDate = new Date(Main.CurrentTime.getTime() - 12 * 3600000);
                 Main.EndDate = new Date(Main.CurrentTime.getTime() + 12 * 3600000);
                 State.Set(true);
-                State.Pop(null);
+                State.Pop();
             }
         });
     }
@@ -202,57 +202,14 @@ class DetailPage
             var msg = await Utils.Loader("GetHistoricData", { gatewayName: Main.CurrentGateway.toUpperCase() });
             $("#currentGW").html(Main.CurrentGateway.toUpperCase());
 
-            var data: HistoricData[] = null;
-            try
-            {
-                for (var i = 0; i < msg.d.length; i++)
-                {
-                    switch (msg.d[i].Key)
-                    {
-                        case "CPU":
-                            data = msg.d[i].Value;
-                            DetailPage.cpuChart.SetDataSource({
-                                Values: data.map((c) =>
-                                {
-                                    return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
-                                })
-                            });
-                            break;
-                        case "Searches":
-                            data = msg.d[i].Value;
-                            DetailPage.searchesChart.SetDataSource({
-                                Values: data.map((c) =>
-                                {
-                                    return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
-                                })
-                            });
-                            break;
-                        case "PVs":
-                            data = msg.d[i].Value;
-                            DetailPage.pvsChart.SetDataSource({
-                                Values: data.map((c) =>
-                                {
-                                    return { Label: Utils.DateFromNet(c.Date), Value: c.Value };
-                                })
-                            });
-                            break;
-                        case "Network":
-                            data = msg.d[i].Value;
-                            DetailPage.networkChart.SetDataSource({
-                                Values: data.map((c) =>
-                                {
-                                    return { Label: Utils.DateFromNet(c.Date), Value: c.Value / (1024 * 1024) };
-                                })
-                            });
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-            catch (ex)
-            {
-            }
+            var data: GatewayHistoricData = GatewayHistoricData.CreateFromObject(msg.d);
+
+            var pointMapper = (stat: LogStat) => <GraphPoint>{ Label: stat.Date, Value: stat.Value };
+
+            DetailPage.cpuChart.SetDataSource({ Values: data.CPU.map(pointMapper) });
+            DetailPage.searchesChart.SetDataSource({ Values: data.Searches.map(pointMapper) });
+            DetailPage.pvsChart.SetDataSource({ Values: data.PVs.map(pointMapper) });
+            DetailPage.networkChart.SetDataSource({ Values: data.Network.map(pointMapper).map(v => { v.Value /= (1024 * 1024); return v; }) });
         }
         catch (ex)
         {
@@ -263,7 +220,7 @@ class DetailPage
     {
         Main.Path = "GW";
         State.Set(true);
-        State.Pop(null);
+        State.Pop();
     }
 
     static JumpList()
@@ -271,6 +228,6 @@ class DetailPage
         Main.Path = "Status";
         Main.CurrentGateway = null;
         State.Set(true);
-        State.Pop(null);
+        State.Pop();
     }
 }

@@ -14,14 +14,19 @@ namespace GWLogger.Backend
     {
         [DataMember]
         public string Channel { get; set; }
+
         [DataMember]
         public string RecordType { get; set; }
+
         [DataMember]
         public string Description { get; set; }
+
         [DataMember]
         public string IOC { get; set; }
+
         [DataMember]
         public string Facility { get; set; }
+
         [DataMember]
         public string SubmittedOn { get; set; }
 

@@ -20,6 +20,13 @@ interface GraphOptions
     LabelFormat?: (value: any) => string;
     TooltipLabelFormat?: (value: any) => string;
     OnClick?: (label: any, value: number) => void;
+    HighlightSection?: HighlightSection;
+}
+
+interface HighlightSection {
+    StartLabel: any;
+    EndLabel: any;
+    HighlightColor: string;
 }
 
 interface Math
@@ -143,17 +150,17 @@ class LineGraph
             label = this.graphOptions.TooltipLabelFormat(label);
         else if (this.graphOptions.LabelFormat)
             label = this.graphOptions.LabelFormat(label);
-        ToolTip.Show(document.getElementById(this.elementContainer), "bottom", "" + label + ": " + this.dataSource.Values[idx].Value);
-        setTimeout(() =>
-        {
-            $("#toolTip").css({ width: "200px", left: (x - 90) + "px", top: (y + 30) + "px" });
-        }, 10);
+        ToolTip.Show(document.getElementById(this.elementContainer), "bottom", "" + label + ": " + this.dataSource.Values[idx].Value, { width: "200px", left: (x - 90) + "px", top: (y + 30) + "px" });
     }
 
     public Resize(): void
     {
         var container = $("#" + this.elementContainer).first();
         var canvas = <HTMLCanvasElement>($("#canvas_" + this.elementContainer)[0]);
+        if (!canvas || !container) {
+            this.Dispose();
+            return;
+        }
         this.width = canvas.width = container.width();
         this.height = canvas.height = container.height();
         this.Plot();
@@ -275,23 +282,53 @@ class LineGraph
         }
         ctx.stroke();
 
+        var highlightSection = this.graphOptions.HighlightSection;
+        var isHighlighted = false;
+
         // Let's plot the area of the values
         ctx.beginPath();
         ctx.globalAlpha = 0.1;
         ctx.fillStyle = this.plotColor;
         for (var i = 0; i < this.dataSource.Values.length; i++)
         {
-            var y = this.TransformY(this.dataSource.Values[i].Value);
+            var point = this.dataSource.Values[i];
+            var y_zero = this.TransformY(0);
+            var y = this.TransformY(point.Value);
             var x = this.TransformX(i, this.xLabelWidth + 2);
+
+            if (highlightSection) {
+
+                var comparer = point.Label instanceof Date ? (a, b) => this.AreDatesEqual(a, b) : (a, b) => a == b;
+
+                if (comparer(point.Label, highlightSection.StartLabel))
+                    isHighlighted = true;
+                if (comparer(point.Label, highlightSection.EndLabel))
+                    isHighlighted = false;
+
+                var newFillStyle = isHighlighted ? highlightSection.HighlightColor : this.plotColor;
+                if (ctx.fillStyle != newFillStyle) {
+                    ctx.lineTo(x, y);
+                    ctx.lineTo(x, y_zero);
+
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.fillStyle = newFillStyle;
+
+                    ctx.lineTo(x, y_zero);
+                    ctx.lineTo(x, y);
+                }
+            }
+
             if (i == 0)
             {
-                ctx.lineTo(x, this.TransformY(0));
+                ctx.lineTo(x, y_zero);
                 ctx.lineTo(x, y);
             }
             else
                 ctx.lineTo(x, y);
             if (i == this.dataSource.Values.length - 1)
-                ctx.lineTo(x, this.TransformY(0));
+                ctx.lineTo(x, y_zero);
         }
         ctx.fill();
         ctx.globalAlpha = 1;
@@ -301,10 +338,41 @@ class LineGraph
         ctx.setLineDash([]);
         ctx.strokeStyle = this.plotColor;
         ctx.lineWidth = this.plotLineWidth;
+
+        isHighlighted = false;
         for (var i = 0; i < this.dataSource.Values.length; i++)
         {
-            var y = this.TransformY(this.dataSource.Values[i].Value);
+            var point = this.dataSource.Values[i];
+
+            var y = this.TransformY(point.Value);
             var x = this.TransformX(i, this.xLabelWidth + 2);
+
+            if (highlightSection) {
+
+                var comparer = point.Label instanceof Date ? (a,b) => this.AreDatesEqual(a,b) : (a, b) => a == b;
+
+                if (comparer(point.Label, highlightSection.StartLabel))
+                    isHighlighted = true;
+                if (comparer(point.Label, highlightSection.EndLabel))
+                    isHighlighted = false;
+
+                var newFillStyle = isHighlighted ? highlightSection.HighlightColor : this.plotColor;
+                if (ctx.strokeStyle != newFillStyle)
+                {
+                    if (i == 0)
+                        ctx.moveTo(x, y);
+                    else
+                        ctx.lineTo(x, y);
+
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = newFillStyle;
+                    ctx.setLineDash([]);
+                    ctx.lineWidth = this.plotLineWidth;
+                }
+            }
+
             if (i == 0)
                 ctx.moveTo(x, y);
             else
@@ -312,6 +380,15 @@ class LineGraph
         }
         ctx.stroke();
     }
+
+    private AreDatesEqual(a: Date, b: Date): boolean {
+        return a.getUTCFullYear() == b.getUTCFullYear() &&
+            a.getUTCMonth() == b.getUTCMonth() &&
+            a.getUTCDate() == b.getUTCDate() &&
+            a.getUTCHours() == b.getUTCHours() &&
+            a.getUTCMinutes() == b.getUTCMinutes() &&
+            a.getUTCSeconds() == b.getUTCSeconds();
+    } 
 
     // Transforms the X value in the screen coordinate
     private TransformX(x: number, xLabelWidth: number)

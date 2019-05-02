@@ -1,6 +1,16 @@
-﻿using System;
+﻿using GraphAnomalies;
+using GWLogger.Backend;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace GWLogger.Live
 {
@@ -19,9 +29,11 @@ namespace GWLogger.Live
     public class Gateway
     {
         public const int GraphPoints = 500;
+
         //private const int NbHistoricPoint = 500;
         //private const int NbHistoricPoint = 90000; // 5 days at 5 sec interval
         private const int NbHistoricPoint = 5000;
+
         private const int NbStateAvg = 24;
 
         private LiveInformation liveInformation;
@@ -53,6 +65,8 @@ namespace GWLogger.Live
         private List<HistoricData> serversHistory = new List<HistoricData>();
         private List<HistoricData> networkHistory = new List<HistoricData>();
 
+        private readonly AnomalyDetector CPUAnomalyDetector = new AnomalyDetector();
+
         public Gateway(LiveInformation liveInformation, string gatewayName)
         {
             this.liveInformation = liveInformation;
@@ -74,6 +88,35 @@ namespace GWLogger.Live
             nbCreates = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NBCREATECHANNEL");
             netIn = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NET-IN");
             netOut = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NET-OUT");
+
+            CPUAnomalyDetector.AnomalyDetected += CPUAnomalyDetected;
+
+            var anomalyDateFormat = "yyyy-MM-dd-HH-mm-ss";
+            var anomalyStorage = Global.AnomalyStorage;
+            var anomalySerializer = new XmlSerializer(typeof(GraphAnomaly));
+            var dateMatcher = Regex.Replace(anomalyDateFormat, @"([^-\s])", "?");
+            AllAnomalies = Directory.EnumerateFiles(anomalyStorage, $"{Name}_{dateMatcher}.xml", SearchOption.TopDirectoryOnly)
+                .Select(path => {
+                    GraphAnomaly anomaly = null;
+                    try
+                    {
+                        using (var file = File.OpenRead(path))
+                        {
+                            anomaly = (GraphAnomaly)anomalySerializer.Deserialize(file);
+                            anomaly.FileName = Path.GetFileNameWithoutExtension(path);
+                            anomaly.Name = Name;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine("Exception while reading anomaly xml file: " + path);
+                        Debug.WriteLine(ex.GetType().Name + ": " + ex.Message);
+                    }
+                    return anomaly;
+                })
+                .Where(anomaly => anomaly != null)
+                .OrderByDescending(anomaly => anomaly.From)
+                .ToList();
         }
 
         internal GatewayHistory GetHistory()
@@ -184,9 +227,11 @@ namespace GWLogger.Live
         {
             lock (cpuHistory)
             {
-                cpuHistory.Add(new HistoricData { Value = cpuChannel.Value });
+                var cpuData = new HistoricData { Value = cpuChannel.Value };
+                cpuHistory.Add(cpuData);
                 while (cpuHistory.Count > NbHistoricPoint)
                     cpuHistory.RemoveAt(0);
+                CPUAnomalyDetector.Update(cpuData.Date, cpuData.Value ?? -1);
             }
 
             lock (searchHistory)
@@ -233,6 +278,190 @@ namespace GWLogger.Live
         }
 
         public int State => Math.Max(CpuState, SearchState);
+
+        private readonly object AllAnomaliesLock = new object();
+        private List<GraphAnomaly> AllAnomalies = null;
+
+        private void CPUAnomalyDetected(AnomalyRange range)
+        {
+            var anomalyDateFormat = "yyyy-MM-dd-HH-mm-ss";
+            var anomalyStorage = Global.AnomalyStorage;
+            var anomalySerializer = new XmlSerializer(typeof(GraphAnomaly));
+            var dnsCache = new Dictionary<string, string>();
+
+            lock (AllAnomaliesLock)
+            {
+                var anomaly = new GraphAnomaly()
+                {
+                    From = range.From,
+                    To = range.To,
+                    Name = Name,
+                };
+
+                // Collect data
+                var before = range.From.Add(-(range.To - range.From));
+
+                var typeQuery = "select count(*) nb, type group by type order by nb desc";
+                var beforeEventTypes = Global.DataContext.ReadLog(Name, before, range.From, typeQuery)?.Select(o => new QueryResultValue(o)).ToList();
+                var duringEventTypes = Global.DataContext.ReadLog(Name, range.From, range.To, typeQuery)?.Select(o => new QueryResultValue(o)).ToList();
+
+                // Don't try to analyze if there is no log data available
+                if (beforeEventTypes != null && duringEventTypes != null)
+                {
+                    var typeDifferences = beforeEventTypes
+                    .Concat(duringEventTypes)
+                    .GroupBy(g => g.Text)
+                    .Select(g => new QueryResultValue
+                    {
+                        Text = g.Key,
+                        Value = g.Max(q => q.Value) - g.Min(q => q.Value)
+                    });
+
+                    var interestingEventTypes = typeDifferences
+                        .OrderByDescending(v => v.Value)
+                        .Take(5)
+                        .ToList();
+
+                    var interestingEventTypeRemotes = new List<InterestingEventType>();
+
+                    foreach (var interestingEventType in interestingEventTypes)
+                    {
+                        var interestingTypeQuery = $"select count(*) nb, remote where type=\"{interestingEventType.Text.Replace("\"", "")}\" group by remote order by nb desc";
+                        var groupedRemotes = new Dictionary<string, int>();
+
+                        foreach (var remote in Global.DataContext.ReadLog(Name, range.From, range.To, interestingTypeQuery).Select(o => new QueryResultValue(o)))
+                        {
+                            var host = remote.Text.Split(':').First();
+                            if (groupedRemotes.TryGetValue(host, out int prev))
+                                groupedRemotes[host] = prev + (int)remote.Value;
+                            else
+                                groupedRemotes.Add(host, (int)remote.Value);
+                        }
+
+                        interestingEventTypeRemotes.Add(new InterestingEventType
+                        {
+                            EventType = interestingEventType,
+                            TopRemotes = groupedRemotes
+                                .OrderByDescending(g => g.Value)
+                                .Take(3)
+                                .Select(r => new QueryResultValue { Text = r.Key, Value = r.Value })
+                                .Select(v => PerformDNSLookup(v, dnsCache))
+                                .ToList()
+                        });
+                    }
+
+                    var remoteQuery = "select count(*) nb, remote group by remote order by nb desc";
+                    var beforeRemoteCounts = Global.DataContext.ReadLog(Name, before, range.From, remoteQuery).Select(o => new QueryResultValue(o)).ToList();
+                    var duringRemoteCounts = Global.DataContext.ReadLog(Name, range.From, range.To, remoteQuery).Select(o => new QueryResultValue(o)).ToList();
+
+                    anomaly.InterestingEventTypeRemotes = interestingEventTypeRemotes;
+                    anomaly.BeforeEventTypes = beforeEventTypes.Take(5).ToList();
+                    anomaly.DuringEventTypes = duringEventTypes.Take(5).ToList();
+                    anomaly.BeforeRemoteCounts = beforeRemoteCounts.Take(5).Select(v => PerformDNSLookup(v, dnsCache)).ToList();
+                    anomaly.DuringRemoteCounts = duringRemoteCounts.Take(5).Select(v => PerformDNSLookup(v, dnsCache)).ToList();
+                }
+
+                anomaly.History = new GatewayHistoricData
+                {
+                    // We are already in the cpu lock through the anomaly event caused by the call to Update();
+                    CPU = cpuHistory.Last(GraphPoints).ToList()
+                };
+
+                lock (pvsHistory)
+                    anomaly.History.PVs = pvsHistory.Last(GraphPoints).ToList();
+                lock (searchHistory)
+                    anomaly.History.Searches = searchHistory.Last(GraphPoints).ToList();
+                lock (networkHistory)
+                    anomaly.History.Network = networkHistory.Last(GraphPoints).ToList();
+
+                var writingFailed = true;
+                var failCount = 0;
+                do
+                {
+                    try
+                    {
+                        var filename = $"{Name}_{anomaly.From.ToString(anomalyDateFormat, CultureInfo.InvariantCulture)}";
+                        using (var xmlWriter = XmlWriter.Create(File.Open(Path.Combine(anomalyStorage, $"{filename}.xml"), FileMode.Create), new XmlWriterSettings { Indent = false }))
+                        {
+                            anomaly.FileName = filename;
+                            anomalySerializer.Serialize(xmlWriter, anomaly);
+                        }
+                        writingFailed = false;
+                    }
+                    catch
+                    {
+                        Thread.Sleep(10);
+                        failCount++;
+                    }
+                }
+                while (writingFailed && failCount <= 5);
+
+                AllAnomalies.Add(anomaly);
+            }
+        }
+
+        public List<HistoricData> GetGraphAnomalyPreview(string filename)
+        {
+            lock (AllAnomaliesLock)
+            {
+                if (AllAnomalies == null)
+                    return new List<HistoricData>();
+                var anomaly = AllAnomalies.FirstOrDefault(a => a.FileName == filename) ?? throw new ArgumentException(nameof(filename));
+                return anomaly.History.CPU.ToList();
+            }
+        }
+
+        public void DeleteGraphAnomaly(string filename)
+        {
+            lock (AllAnomaliesLock)
+            {
+                var anomaly = AllAnomalies.FirstOrDefault(a => a.FileName == filename) ?? throw new ArgumentException(nameof(filename));
+                File.Delete(Path.Combine(Global.AnomalyStorage, $"{anomaly.FileName}.xml"));
+                AllAnomalies.Remove(anomaly);
+            }
+        }
+
+        private QueryResultValue PerformDNSLookup(QueryResultValue value, Dictionary<string, string> cache)
+        {
+            var ip = value.Text?.Trim();
+            if (ip == null)
+                return value;
+            if (ip.Contains(':'))
+                ip = ip.Split(':')[0];
+
+            if (cache.TryGetValue(ip, out string hostname))
+            {
+                if(hostname != null)
+                    value.Text += $" ({hostname})";
+                return value;
+            }
+
+            IPHostEntry hostEntry = null;
+            try
+            {
+                hostEntry = Dns.GetHostEntry(ip);
+            }
+            catch
+            {
+            }
+
+            var host = hostEntry?.HostName;
+            if (!string.IsNullOrEmpty(host))
+            {
+                cache.Add(ip, host);
+                value.Text += $" ({host})";
+                return value;
+            }
+
+            cache.Add(ip, null);
+            return value;
+        }
+
+        public List<GraphAnomaly> GetGatewayAnomalies()
+        {
+            lock (AllAnomaliesLock)
+                return AllAnomalies?.ToList() ?? new List<GraphAnomaly>();
+        }
 
         /// <summary>
         /// Average PVs in the last 10 minutes
@@ -433,6 +662,7 @@ namespace GWLogger.Live
                     return networkHistory.ToList();
             }
         }
+
         public List<HistoricData> PvsHistory
         {
             get

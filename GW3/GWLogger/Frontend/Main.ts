@@ -4,6 +4,7 @@
 class Main
 {
     public static CurrentGateway: string;
+    public static DetailAnomaly: string;
     static Path: string = "Status";
     static StartDate: Date = null;
     static EndDate: Date = null;
@@ -24,7 +25,7 @@ class Main
         Main.InitSearchGateway();
         Main.BaseTitle = window.document.title;
 
-        State.Pop(null);
+        State.Pop();
 
         setInterval(Main.Refresh, 1000);
         $(window).on("resize", Main.Resize);
@@ -143,7 +144,6 @@ class Main
         var cpu = <number>msg.d;
         $("#cpuSpace").html("" + Math.round(cpu) + " %");
     }
-
 
     // Stores the hash of the JS code served by the server.
     private static lastVersion: string = null;

@@ -1,0 +1,28 @@
+﻿<Window x:Class="GraphAnomalyVisualizer.FilePicker"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GraphAnomalyVisualizer"
+        mc:Ignorable="d"
+        Title="Choose anomaly file:" WindowStartupLocation="CenterScreen" Height="900" Width="1600">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <Button Content="Open Generator" Grid.Row="0" Margin="10,10,1482,10" Click="OpenGenerator" />
+        <ListView Margin="10" x:Name="AnomalyFilesList"  Grid.Row="1">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Anomaly file" />
+                </GridView>
+            </ListView.View>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <EventSetter Event="PreviewMouseDown" Handler="Item_Click" />
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
+    </Grid>
+</Window>

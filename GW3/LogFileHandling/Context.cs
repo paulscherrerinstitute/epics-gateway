@@ -404,7 +404,7 @@ namespace GWLogger.Backend.DataContext
 
                 foreach (var entry in files[gatewayName].ReadLog(start, end, where, messageTypes, false, startFile, offset))
                 {
-                    if (result.Count >= nbMaxEntries || cancellationToken.IsCancellationRequested)
+                    if ((nbMaxEntries > 0 && result.Count >= nbMaxEntries) || cancellationToken.IsCancellationRequested)
                         break;
                     if (entry == null)
                         continue;

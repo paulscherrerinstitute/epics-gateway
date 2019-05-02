@@ -87,7 +87,7 @@
             Main.CurrentTime = null;
             $("#queryField").val("");
             State.Set(true);
-            State.Pop(null);
+            State.Pop();
         });
 
         jQuery.fn.scrollTo = function (elem)
@@ -403,7 +403,7 @@
                         Main.StartDate = new Date(Main.CurrentTime.getTime() - 12 * 3600000);
                         Main.EndDate = new Date(Main.CurrentTime.getTime() + 12 * 3600000);
                         State.Set(true);
-                        State.Pop(null);
+                        State.Pop();
                     }
                 }
             }).data("kendoGrid");

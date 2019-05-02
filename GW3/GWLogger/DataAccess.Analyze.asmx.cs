@@ -7,7 +7,7 @@ using System.Web.Services;
 
 namespace GWLogger
 {
-    public partial class DataAccess : System.Web.Services.WebService
+    public partial class DataAccess : WebService
     {
         [WebMethod]
         public List<string> GetGatewaysList()
@@ -52,6 +52,9 @@ namespace GWLogger
         [WebMethod]
         public List<KeyValuePair<string, int>> SearchesPerformed(string gatewayName, DateTime datePoint)
         {
+            if (string.IsNullOrEmpty(gatewayName))
+                return new List<KeyValuePair<string, int>>();
+
             var searches = Global.DataContext.ReadLog<Backend.DataContext.LogEntry>(gatewayName, datePoint, datePoint.AddMinutes(5), "type = \"SearchRequest\"", 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
             if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
                 return null;
@@ -63,6 +66,9 @@ namespace GWLogger
         [WebMethod]
         public List<KeyValuePair<string, int>> SearchesOnChannelsPerformed(string gatewayName, DateTime datePoint)
         {
+            if (string.IsNullOrEmpty(gatewayName))
+                return new List<KeyValuePair<string, int>>();
+
             var searches = Global.DataContext.ReadLog<Backend.DataContext.LogEntry>(gatewayName, datePoint, datePoint.AddMinutes(5), "type = \"SearchRequest\"", 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
             if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
                 return null;
@@ -106,6 +112,9 @@ namespace GWLogger
         [WebMethod]
         public List<KeyValuePair<string, int>> ActiveClients(string gatewayName, DateTime datePoint)
         {
+            if (string.IsNullOrEmpty(gatewayName))
+                return new List<KeyValuePair<string, int>>();
+
             // Retrieves up to 20K lines of logs
             var searches = Global.DataContext.ReadLog<Backend.DataContext.LogEntry>(gatewayName, datePoint, datePoint.AddMinutes(5), null, 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
             if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
@@ -139,6 +148,9 @@ namespace GWLogger
         [WebMethod]
         public List<KeyValuePair<string, int>> ActiveServers(string gatewayName, DateTime datePoint)
         {
+            if (string.IsNullOrEmpty(gatewayName))
+                return new List<KeyValuePair<string, int>>();
+
             // Retrieves up to 20K lines of logs
             var searches = Global.DataContext.ReadLog<Backend.DataContext.LogEntry>(gatewayName, datePoint, datePoint.AddMinutes(5), null, 20000, null, null, 0, Context.Response.ClientDisconnectedToken);
             if (Context.Response.ClientDisconnectedToken.IsCancellationRequested)
