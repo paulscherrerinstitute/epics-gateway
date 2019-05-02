@@ -79,7 +79,7 @@
       <Name>GWLogger</Name>
     </ProjectReference>
     <ProjectReference Include="..\LogFileHandling\LogFileHandling.csproj">
-      <Project>{6e617deb-8f84-45cf-913e-3258203fda50}</Project>
+      <Project>{4d3d9b73-3315-4084-a489-e38bcd622938}</Project>
       <Name>LogFileHandling</Name>
     </ProjectReference>
   </ItemGroup>

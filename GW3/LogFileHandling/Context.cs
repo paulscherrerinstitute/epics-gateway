@@ -23,7 +23,9 @@ namespace GWLogger.Backend.DataContext
         private object lockObject = new object();
 
         public delegate void DataFileEvent(DataFile file);
+
         public event DataFileEvent StoreHistory;
+
         public string StorageDirectory { get; }
 
         internal Dictionary<string, int> memberNames = new Dictionary<string, int>();
@@ -173,7 +175,6 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-
         public GatewayStats GetStats(string gatewayName, DateTime start, DateTime end)
         {
             lock (lockObject)
@@ -271,6 +272,7 @@ namespace GWLogger.Backend.DataContext
         }
 
         private List<DTOs.MessageType> messageTypes = new List<DTOs.MessageType>();
+
         public List<DTOs.MessageType> MessageTypes
         {
             get
@@ -348,6 +350,7 @@ namespace GWLogger.Backend.DataContext
         public List<int> errorMessages { get; private set; }
 
         private int maxMessageTypes = -1;
+
         public int MaxMessageTypes
         {
             get

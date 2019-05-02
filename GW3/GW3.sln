@@ -31,8 +31,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GWLogger", "GWLogger\GWLogg
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataCleaner", "DataCleaner\DataCleaner.csproj", "{1B6FB420-5121-4BC0-9F5D-6061283E5D8C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogFileHandling", "LogFileHandling\LogFileHandling.csproj", "{6E617DEB-8F84-45CF-913E-3258203FDA50}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GWConsoleLogger", "GWConsoleLogger\GWConsoleLogger.csproj", "{20E20EE5-B155-4556-85F2-55ECF23E9EE5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParserUnitTests", "ParserUnitTests\ParserUnitTests.csproj", "{9B93D364-086D-4EF8-A4CF-77ABF1C828EC}"
@@ -46,6 +44,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphAnomalyVisualizer", "GraphAnomalyVisualizer\GraphAnomalyVisualizer.csproj", "{0FA3B01B-8843-446F-AD0C-B151E325A586}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphAnomalies", "GraphAnomalies\GraphAnomalies.csproj", "{DFBF31C2-894C-4FD1-A674-D323E7DD2FDE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogFileHandling", "LogFileHandling\LogFileHandling.csproj", "{4D3D9B73-3315-4084-A489-E38BCD622938}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -185,18 +185,6 @@ Global
 		{1B6FB420-5121-4BC0-9F5D-6061283E5D8C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1B6FB420-5121-4BC0-9F5D-6061283E5D8C}.Release|x86.ActiveCfg = Release|Any CPU
 		{1B6FB420-5121-4BC0-9F5D-6061283E5D8C}.Release|x86.Build.0 = Release|Any CPU
-		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Debug Deadlock|Any CPU.ActiveCfg = Debug Deadlock|Any CPU
-		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Debug Deadlock|Any CPU.Build.0 = Debug Deadlock|Any CPU
-		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Debug Deadlock|x86.ActiveCfg = Debug Deadlock|Any CPU
-		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Debug Deadlock|x86.Build.0 = Debug Deadlock|Any CPU
-		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Debug|x86.Build.0 = Debug|Any CPU
-		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Release|x86.ActiveCfg = Release|Any CPU
-		{6E617DEB-8F84-45CF-913E-3258203FDA50}.Release|x86.Build.0 = Release|Any CPU
 		{20E20EE5-B155-4556-85F2-55ECF23E9EE5}.Debug Deadlock|Any CPU.ActiveCfg = Debug|Any CPU
 		{20E20EE5-B155-4556-85F2-55ECF23E9EE5}.Debug Deadlock|Any CPU.Build.0 = Debug|Any CPU
 		{20E20EE5-B155-4556-85F2-55ECF23E9EE5}.Debug Deadlock|x86.ActiveCfg = Debug|Any CPU
@@ -281,6 +269,18 @@ Global
 		{DFBF31C2-894C-4FD1-A674-D323E7DD2FDE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DFBF31C2-894C-4FD1-A674-D323E7DD2FDE}.Release|x86.ActiveCfg = Release|Any CPU
 		{DFBF31C2-894C-4FD1-A674-D323E7DD2FDE}.Release|x86.Build.0 = Release|Any CPU
+		{4D3D9B73-3315-4084-A489-E38BCD622938}.Debug Deadlock|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D3D9B73-3315-4084-A489-E38BCD622938}.Debug Deadlock|Any CPU.Build.0 = Debug|Any CPU
+		{4D3D9B73-3315-4084-A489-E38BCD622938}.Debug Deadlock|x86.ActiveCfg = Debug|Any CPU
+		{4D3D9B73-3315-4084-A489-E38BCD622938}.Debug Deadlock|x86.Build.0 = Debug|Any CPU
+		{4D3D9B73-3315-4084-A489-E38BCD622938}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D3D9B73-3315-4084-A489-E38BCD622938}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D3D9B73-3315-4084-A489-E38BCD622938}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4D3D9B73-3315-4084-A489-E38BCD622938}.Debug|x86.Build.0 = Debug|Any CPU
+		{4D3D9B73-3315-4084-A489-E38BCD622938}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D3D9B73-3315-4084-A489-E38BCD622938}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D3D9B73-3315-4084-A489-E38BCD622938}.Release|x86.ActiveCfg = Release|Any CPU
+		{4D3D9B73-3315-4084-A489-E38BCD622938}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
