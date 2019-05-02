@@ -159,7 +159,7 @@
                 Main.IsLast = false;
         }
 
-        Main.Refresh(true);
+        Main.Refresh();
         if (Main.Path == "Anomalies") {
             AnomaliesPage.Show();
         }

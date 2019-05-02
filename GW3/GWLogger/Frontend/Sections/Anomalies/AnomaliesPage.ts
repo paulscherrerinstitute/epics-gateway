@@ -250,7 +250,7 @@
 
         State.Set(true);
         State.Pop();
-        Main.Refresh(true);
+        Main.Refresh();
     }
 
     private static CreateGraph(id: string, anomaly: GraphAnomaly, data: LogStat[], opts?: { MaxY: number }) {
