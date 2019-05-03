@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.572
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.352
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GWConsole", "GWConsole\GWConsole.csproj", "{9417ADE6-2AD0-4802-8813-F6E86285B578}"
 EndProject
@@ -12,8 +12,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GwUnitTests", "GwUnitTests\GwUnitTests.csproj", "{A2D9A7B6-00D7-4AD5-A755-91D3941DED70}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedTest", "SpeedTest\SpeedTest.csproj", "{D63E9444-0762-48E7-B40E-7D957EF98186}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayDebugData", "GatewayDebugData\GatewayDebugData.csproj", "{37612E86-33F4-45B8-BB15-01969E4622CE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StressTest", "StressTest\StressTest.csproj", "{35F09657-5166-48E8-B2C3-E0762F5C1804}"
 EndProject
@@ -117,14 +115,6 @@ Global
 		{D63E9444-0762-48E7-B40E-7D957EF98186}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D63E9444-0762-48E7-B40E-7D957EF98186}.Release|x86.ActiveCfg = Release|Any CPU
 		{D63E9444-0762-48E7-B40E-7D957EF98186}.Release|x86.Build.0 = Release|Any CPU
-		{37612E86-33F4-45B8-BB15-01969E4622CE}.Debug Deadlock|Any CPU.ActiveCfg = Debug Deadlock|x86
-		{37612E86-33F4-45B8-BB15-01969E4622CE}.Debug Deadlock|x86.ActiveCfg = Debug Deadlock|x86
-		{37612E86-33F4-45B8-BB15-01969E4622CE}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{37612E86-33F4-45B8-BB15-01969E4622CE}.Debug|x86.ActiveCfg = Debug|x86
-		{37612E86-33F4-45B8-BB15-01969E4622CE}.Debug|x86.Build.0 = Debug|x86
-		{37612E86-33F4-45B8-BB15-01969E4622CE}.Release|Any CPU.ActiveCfg = Release|x86
-		{37612E86-33F4-45B8-BB15-01969E4622CE}.Release|x86.ActiveCfg = Release|x86
-		{37612E86-33F4-45B8-BB15-01969E4622CE}.Release|x86.Build.0 = Release|x86
 		{35F09657-5166-48E8-B2C3-E0762F5C1804}.Debug Deadlock|Any CPU.ActiveCfg = Debug Deadlock|Any CPU
 		{35F09657-5166-48E8-B2C3-E0762F5C1804}.Debug Deadlock|Any CPU.Build.0 = Debug Deadlock|Any CPU
 		{35F09657-5166-48E8-B2C3-E0762F5C1804}.Debug Deadlock|x86.ActiveCfg = Debug Deadlock|Any CPU
