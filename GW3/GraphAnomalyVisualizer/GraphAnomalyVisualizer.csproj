@@ -143,6 +143,9 @@
     <Content Include="ExampleFiles\TWO_HILLS.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="ExampleFiles\WRONG_PEAK.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GraphAnomalies\GraphAnomalies.csproj">
