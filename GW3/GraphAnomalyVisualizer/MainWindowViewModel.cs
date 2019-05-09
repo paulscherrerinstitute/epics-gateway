@@ -62,7 +62,6 @@ namespace GraphAnomalyVisualizer
                         var serializer = new XmlSerializer(typeof(GraphAnomaly));
                         var graphAnomalyFromFile = (GraphAnomaly)serializer.Deserialize(file);
                         var cpuHistory = graphAnomalyFromFile.History.CPU.Skip(startOffset).ToList();
-                        var movingAverageCpuHistory = AnomalyDetector.MovingAverageExponential(cpuHistory);
 
                         var model = new PlotModel { Title = "Anomaly: " + Path.GetFileNameWithoutExtension(FilePath) };
 
@@ -81,10 +80,10 @@ namespace GraphAnomalyVisualizer
 
                         model.Axes.Add(new DateTimeAxis() { Position = AxisPosition.Bottom });
 
-                        //var detectorData = cpuHistory;
-                        var detectorData = movingAverageCpuHistory;
-
-                        var detector = new AnomalyDetector();
+                        var detector = new AnomalyDetector()
+                        {
+                            MaxNumAveragedValues = 10000, // Do not begin deleting older data for visualization purposes
+                        };
                         var anomalies = new List<AnomalyRange>();
                         var rises = new List<AnomalyRange>();
                         var falls = new List<AnomalyRange>();
@@ -93,16 +92,16 @@ namespace GraphAnomalyVisualizer
                         detector.RiseDetected += rises.Add;
                         detector.FallDetected += falls.Add;
                         detector.UnexpectedDetected += unexpected.Add;
-                        var last = detectorData.Last();
+                        var last = cpuHistory.Last();
                         var lastValue = last.Value ?? -1;
                         var lastDate = last.Date;
                         for (int i = 0; i < 100; i++)
                         {
                             lastDate = lastDate.AddSeconds(5);
-                            detectorData.Add(new HistoricData { Date = lastDate, Value = lastValue });
+                            cpuHistory.Add(new HistoricData { Date = lastDate, Value = lastValue });
                         }
 
-                        foreach (var v in detectorData)
+                        foreach (var v in cpuHistory)
                             detector.Update(v.Date, v.Value ?? -1);
 
                         foreach (var v in rises)
@@ -115,11 +114,11 @@ namespace GraphAnomalyVisualizer
                         foreach (var anomaly in anomalies)
                             AddArea(model, null, OxyColor.FromAColor(120, OxyColors.Orange), anomaly.From, anomaly.To, 100, 110);
 
+                        var averagedCpuHistory = detector.ReadonlyValues.Select(ToHistoricData).ToList();
                         AddPlotLine(model, "Actual data", OxyColors.Gray, cpuHistory);
-                        AddPlotLine(model, "Moving average (exponential)", OxyColors.Brown, movingAverageCpuHistory);
-                        AddPlotLine(model, "Averaged values", OxyColors.BlueViolet, detector.ReadonlyValues.Select(ToHistoricData));
+                        AddPlotLine(model, "Averaged values", OxyColors.Brown, averagedCpuHistory);
 
-                        Plot = model;
+                         Plot = model;
                     }
                 }
                 catch (IOException)

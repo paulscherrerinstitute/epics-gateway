@@ -22,17 +22,19 @@ namespace GraphAnomalies
 
         #region Configuration
 
+        public int RunningAverageDistance { get; set; } = 10;
         public int MaxNumAveragedValues { get; set; } = 500;
 
-        public int CumulativeValueThreshold { get; set; } = 7;
+        public int CumulativeValueThreshold { get; set; } = 6;
         public TimeSpan MinAnomalyDuration { get; set; } = TimeSpan.FromMinutes(5); //.Add(TimeSpan.FromSeconds(30));
         public TimeSpan AnomalyGroupingTimeout { get; set; } = TimeSpan.FromMinutes(3);
-        public double ValueCutoff { get; set; } = 0.125;
+        public double ValueCutoff { get; set; } = 0;
 
         #endregion Configuration
 
         public List<TemporalValue> ReadonlyValues => Values.Select(v => new TemporalValue(v)).ToList();
         private readonly LinkedList<TemporalValue> Values = new LinkedList<TemporalValue>();
+        private readonly LinkedList<TemporalValue> LastRawValues = new LinkedList<TemporalValue>();
 
         public AnomalyDetector()
         {
@@ -48,10 +50,22 @@ namespace GraphAnomalies
 
         public void Update(DateTime dateTime, double value)
         {
-            var temporalValue = new TemporalValue { Date = dateTime, Value = value };
+            var rawValue = new TemporalValue { Date = dateTime, Value = value };
+            LastRawValues.AddLast(rawValue);
+            while (LastRawValues.Count > RunningAverageDistance)
+                LastRawValues.RemoveFirst();
+
+            if (LastRawValues.Count < RunningAverageDistance)
+                return;
+
+            var averagedValue = new TemporalValue {
+                Date = dateTime,
+                Value = LastRawValues.Select((v, i) => v.Value * i).Sum() / (RunningAverageDistance * (RunningAverageDistance + 1) / 2),
+                // See https://en.wikipedia.org/wiki/Moving_average, Section "Exponential moving average"
+            };
 
             var last = Values.Last;
-            Values.AddLast(temporalValue);
+            Values.AddLast(averagedValue);
             while (Values.Count > MaxNumAveragedValues)
                 Values.RemoveFirst();
 
@@ -59,7 +73,7 @@ namespace GraphAnomalies
                 return;
 
             var previousAveragedValue = last.Value;
-            var valueDiff = temporalValue.Value - previousAveragedValue.Value;
+            var valueDiff = averagedValue.Value - previousAveragedValue.Value;
             var currentSign = Math.Sign(valueDiff);
             var absValueDiff = Math.Abs(valueDiff);
 
@@ -69,8 +83,8 @@ namespace GraphAnomalies
                 if (CumulativeValue >= CumulativeValueThreshold)
                 {
                     ReachedCumulativeThreshold = true;
-                    if (CurrentCumulativeRange.To < temporalValue.Date)
-                        CurrentCumulativeRange.To = temporalValue.Date;
+                    if (CurrentCumulativeRange.To < averagedValue.Date)
+                        CurrentCumulativeRange.To = averagedValue.Date;
                 }
             }
             else
@@ -88,10 +102,10 @@ namespace GraphAnomalies
                 ReachedCumulativeThreshold = false;
                 if (absValueDiff >= CumulativeValueThreshold)
                     ReachedCumulativeThreshold = true;
-                CurrentCumulativeRange = new AnomalyRange(previousAveragedValue.Date, temporalValue.Date);
+                CurrentCumulativeRange = new AnomalyRange(previousAveragedValue.Date, averagedValue.Date);
             }
 
-            CheckTimeouts(temporalValue);
+            CheckTimeouts(averagedValue);
         }
 
         private AnomalyRange LastRise = null;
@@ -172,30 +186,5 @@ namespace GraphAnomalies
                 LastAnomalyHasGaps = hasGap;
             }
         }
-
-#region Transformations
-
-        public static List<HistoricData> MovingAverageExponential(List<HistoricData> historicData)
-        {
-            var data = new List<HistoricData>();
-            var distance = 20;
-
-            for (int i = 0; i < historicData.Count - distance; i++)
-            {
-                var values = historicData.Skip(i).Take(distance).Select(d => d.Value ?? 0).ToArray();
-                for (int j = 0; j < distance; j++)
-                    values[j] *= j;
-                var sum = values.Sum();
-                data.Add(new HistoricData()
-                {
-                    Date = historicData[i + (distance / 2)].Date,
-                    Value = sum / (distance * (distance + 1) / 2),
-                });
-            }
-
-            return data;
-        }
-
-#endregion Transformations
     }
 }
