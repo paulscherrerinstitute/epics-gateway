@@ -387,6 +387,8 @@ namespace GWLogger.Backend.DataContext
         public DateTime DateOfFile(string filename)
         {
             var dt = filename.Split(new char[] { '.' }).Reverse().Take(2).Last();
+            if(dt == "data")
+                dt = filename.Split(new char[] { '.' }).Reverse().Take(3).Last();
             return new DateTime(int.Parse(dt.Substring(0, 4)), int.Parse(dt.Substring(4, 2)), int.Parse(dt.Substring(6, 2)));
 
         }
