@@ -57,24 +57,31 @@ namespace GatewayLogic
 
         public static double GetCPUUsage()
         {
-            FileTime f_idleTime, f_kernelTime, f_userTime;
-            if (!GetSystemTimes(out f_idleTime, out f_kernelTime, out f_userTime))
-                throw new Exception("Native call to GetSystemTimes() failed");
-            var idleTime = ULong(f_idleTime);
-            var kernelTime = ULong(f_kernelTime);
-            var userTime = ULong(f_userTime);
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                FileTime f_idleTime, f_kernelTime, f_userTime;
+                if (!GetSystemTimes(out f_idleTime, out f_kernelTime, out f_userTime))
+                    throw new Exception("Native call to GetSystemTimes() failed");
+                var idleTime = ULong(f_idleTime);
+                var kernelTime = ULong(f_kernelTime);
+                var userTime = ULong(f_userTime);
 
-            var usr = userTime - lastUserTime;
-            var ker = kernelTime - lastKernelTime;
-            var idl = idleTime - lastIdleTime;
+                var usr = userTime - lastUserTime;
+                var ker = kernelTime - lastKernelTime;
+                var idl = idleTime - lastIdleTime;
 
-            var sys = ker + usr;
-            double cpu = (double)((sys - idl) * 100) / sys;
+                var sys = ker + usr;
+                double cpu = (double)((sys - idl) * 100) / sys;
 
-            lastIdleTime = idleTime;
-            lastKernelTime = kernelTime;
-            lastUserTime = userTime;
-            return cpu;
+                lastIdleTime = idleTime;
+                lastKernelTime = kernelTime;
+                lastUserTime = userTime;
+                return cpu;
+            }
+            else
+            {
+                return 0.0;
+            }
         }
 
         public static double GetMemoryUsage()
@@ -85,13 +92,22 @@ namespace GatewayLogic
 
         public static double GetMemoryUsage(out UInt64 total, out UInt64 available)
         {
-            var res = GlobalMemoryStatusEx();
-            var a = res.AvailablePhysical;
-            var t = res.TotalPhysical;
-            total = t / 1000000;
-            available = a / 1000000;
-            var used = t - a;
-            return 100 * used / (double)t;
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                var res = GlobalMemoryStatusEx();
+                var a = res.AvailablePhysical;
+                var t = res.TotalPhysical;
+                total = t / 1000000;
+                available = a / 1000000;
+                var used = t - a;
+                return 100 * used / (double)t;
+            }
+            else
+            {
+                total = 0;
+                available = 0;
+                return 0.0;
+            }
         }
 
         private static ulong ULong(FileTime filetime)

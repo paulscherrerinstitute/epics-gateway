@@ -1,4 +1,4 @@
-﻿using GatewayLogic.GWLoggerSoap;
+﻿using GWLoggerSoap;
 using System.Collections.Generic;
 
 namespace GatewayLogic.Services

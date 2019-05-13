@@ -32,7 +32,8 @@ namespace GatewayLogic.Connections
 
             receiver = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             receiver.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            receiver.IOControl(SioUdpConnReset, new byte[] { 0, 0, 0, 0 }, null);
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                receiver.IOControl(SioUdpConnReset, new byte[] { 0, 0, 0, 0 }, null);
             receiver.Bind(endPoint);
             this.EndPoint = endPoint;
 

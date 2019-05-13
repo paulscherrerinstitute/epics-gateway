@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic.Services
 {
-    public enum LogLevel : int
+    /*public enum LogLevel : int
     {
         Detail = 0,
         Command = 1,
         Connection = 2,
         Error = 3,
         Critical = 4
-    }
+    }*/
 
     public class TextLogger : IDisposable
     {
