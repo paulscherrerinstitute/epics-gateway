@@ -180,10 +180,11 @@ namespace GatewayLogic
             networkIn.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
             networkIn.PrepareRecord += (evt, obj) =>
             {
-                var v = NetworkInterface.GetAllNetworkInterfaces().Sum(row => row.GetIPv4Statistics().BytesReceived);
+                /*var v = NetworkInterface.GetAllNetworkInterfaces().Sum(row => row.GetIPv4Statistics().BytesReceived);
                 if (lastBytesIn.HasValue)
                     networkIn.Value = (int)(v - lastBytesIn.Value);
-                lastBytesIn = v;
+                lastBytesIn = v;*/
+                networkIn.Value = (int)DiagnosticInfo.TotalNetworkIn();
             };
 
             // Network out
@@ -192,10 +193,11 @@ namespace GatewayLogic
             networkOut.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
             networkOut.PrepareRecord += (evt, obj) =>
             {
-                var v = NetworkInterface.GetAllNetworkInterfaces().Sum(row => row.GetIPv4Statistics().BytesSent);
+                /*var v = NetworkInterface.GetAllNetworkInterfaces().Sum(row => row.GetIPv4Statistics().BytesSent);
                 if (lastBytesOut.HasValue)
                     networkOut.Value = (int)(v - lastBytesOut.Value);
-                lastBytesOut = v;
+                lastBytesOut = v;*/
+                networkOut.Value = (int)DiagnosticInfo.TotalNetworkOut();
             };
 
             // Restart channel

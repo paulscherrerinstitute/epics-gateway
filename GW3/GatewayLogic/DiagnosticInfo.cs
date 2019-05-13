@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using FileTime = System.Runtime.InteropServices.ComTypes.FILETIME;
 
@@ -30,6 +33,25 @@ namespace GatewayLogic
         private static extern bool GlobalMemoryStatusEx(
             [In, Out] IntPtr lpBuffer
         );
+
+        private static string ProcessOutput(string command, string arguments = null)
+        {
+            using (var proc = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = command,
+                    Arguments = arguments,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                }
+            })
+            {
+                proc.Start();
+                return proc.StandardOutput.ReadToEnd();
+            }
+        }
 
         private static MemoryStatusEx GlobalMemoryStatusEx()
         {
@@ -80,7 +102,8 @@ namespace GatewayLogic
             }
             else
             {
-                return 0.0;
+                var vmstat = ProcessOutput("/bin/iostat").Split(new char[] { '\n' })[3].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(row => double.Parse(row)).ToArray();
+                return 100 - vmstat[5];
             }
         }
 
@@ -104,9 +127,57 @@ namespace GatewayLogic
             }
             else
             {
-                total = 0;
-                available = 0;
-                return 0.0;
+                var freeinfo = ProcessOutput("/bin/free").Split(new char[] { '\n' })[1].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).Select(row => ulong.Parse(row)).ToArray();
+                total = freeinfo[0];
+                available = freeinfo[2];
+                var used = total - available;
+                return 100.0 * used / total;
+            }
+        }
+
+        static long? lastBytesIn = null;
+        public static long TotalNetworkIn()
+        {
+            long result = 0;
+            long v;
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                v = NetworkInterface.GetAllNetworkInterfaces().Sum(row => row.GetIPv4Statistics().BytesReceived);
+                if (lastBytesIn.HasValue)
+                    result = (int)(v - lastBytesIn.Value);
+                lastBytesIn = v;
+                return result;
+            }
+            else
+            {
+                var ifstat = ProcessOutput("/sbin/ifstat").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Skip(3).ToArray();
+                v = 0;
+                for (var i = 0; i < ifstat.Length; i += 2)
+                    v += ifstat[i].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).Select(row => row.EndsWith("K") ? long.Parse(row.Replace("K", "")) * 1000 : long.Parse(row)).ToArray()[4];
+                return v;
+            }
+        }
+
+        static long? lastBytesOut = null;
+        public static long TotalNetworkOut()
+        {
+            long result = 0;
+            long v;
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                v = NetworkInterface.GetAllNetworkInterfaces().Sum(row => row.GetIPv4Statistics().BytesSent);
+                if (lastBytesOut.HasValue)
+                    result = (int)(v - lastBytesIn.Value);
+                lastBytesOut = v;
+                return result;
+            }
+            else
+            {
+                var ifstat = ProcessOutput("/sbin/ifstat").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Skip(3).ToArray();
+                v = 0;
+                for (var i = 0; i < ifstat.Length; i += 2)
+                    v += ifstat[i].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).Select(row => row.EndsWith("K") ? long.Parse(row.Replace("K", "")) * 1000 : long.Parse(row)).ToArray()[6];
+                return v;
             }
         }
 
@@ -114,6 +185,5 @@ namespace GatewayLogic
         {
             return ((ulong)filetime.dwHighDateTime << 32) + (uint)filetime.dwLowDateTime;
         }
-
     }
 }
