@@ -19,7 +19,7 @@ namespace GatewayLogic.Services
                 if (soapLogger != null)
                     MessageHandler += soapLogger.MessageLogger_MessageHandler;
             }
-            catch
+            catch(Exception ex)
             {
                 Console.WriteLine("!!! SOAP Message logger not available even if requested");
                 soapLogger = null;
