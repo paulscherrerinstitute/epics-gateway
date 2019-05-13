@@ -22,19 +22,19 @@ namespace GraphAnomalies
 
         #region Configuration
 
-        public int NumRawPerAveragedValues { get; set; } = 7;
-        public int MaxNumAveragedValues { get; set; } = 100;
+        public int RunningAverageDistance { get; set; } = 10;
+        public int MaxNumAveragedValues { get; set; } = 500;
 
-        public int CumulativeValueThreshold { get; set; } = 7;
+        public int CumulativeValueThreshold { get; set; } = 6;
         public TimeSpan MinAnomalyDuration { get; set; } = TimeSpan.FromMinutes(5); //.Add(TimeSpan.FromSeconds(30));
         public TimeSpan AnomalyGroupingTimeout { get; set; } = TimeSpan.FromMinutes(3);
-        public double ValueCutoff { get; set; } = 0.125;
+        public double ValueCutoff { get; set; } = 0;
 
         #endregion Configuration
 
-        public List<AveragedTemporalValue> ReadonlyAveragedValues => AveragedValues.Select(v => new AveragedTemporalValue(v)).ToList();
-        private readonly LinkedList<AveragedTemporalValue> AveragedValues = new LinkedList<AveragedTemporalValue>();
-        private readonly List<RawTemporalValue> RawValues = new List<RawTemporalValue>();
+        public List<TemporalValue> ReadonlyValues => Values.Select(v => new TemporalValue(v)).ToList();
+        private readonly LinkedList<TemporalValue> Values = new LinkedList<TemporalValue>();
+        private readonly LinkedList<TemporalValue> LastRawValues = new LinkedList<TemporalValue>();
 
         public AnomalyDetector()
         {
@@ -50,62 +50,62 @@ namespace GraphAnomalies
 
         public void Update(DateTime dateTime, double value)
         {
-            var rawValue = new RawTemporalValue(dateTime, value);
-            RawValues.Add(rawValue);
-            if (RawValues.Count >= NumRawPerAveragedValues)
+            var rawValue = new TemporalValue { Date = dateTime, Value = value };
+            LastRawValues.AddLast(rawValue);
+            while (LastRawValues.Count > RunningAverageDistance)
+                LastRawValues.RemoveFirst();
+
+            if (LastRawValues.Count < RunningAverageDistance)
+                return;
+
+            var averagedValue = new TemporalValue {
+                Date = dateTime,
+                Value = LastRawValues.Select((v, i) => v.Value * i).Sum() / (RunningAverageDistance * (RunningAverageDistance + 1) / 2),
+                // See https://en.wikipedia.org/wiki/Moving_average, Section "Exponential moving average"
+            };
+
+            var last = Values.Last;
+            Values.AddLast(averagedValue);
+            while (Values.Count > MaxNumAveragedValues)
+                Values.RemoveFirst();
+
+            if (last == null)
+                return;
+
+            var previousAveragedValue = last.Value;
+            var valueDiff = averagedValue.Value - previousAveragedValue.Value;
+            var currentSign = Math.Sign(valueDiff);
+            var absValueDiff = Math.Abs(valueDiff);
+
+            if (currentSign == LastSign && absValueDiff >= ValueCutoff)
             {
-                var averagedValue = new AveragedTemporalValue()
+                CumulativeValue += absValueDiff;
+                if (CumulativeValue >= CumulativeValueThreshold)
                 {
-                    Date = RawValues.First().Date,
-                    Value = RawValues.Average(v => v.Value),
-                };
-                averagedValue.StandardDeviation = Math.Sqrt(RawValues.Sum(v => (v.Value - averagedValue.Value) * (v.Value - averagedValue.Value)) / (RawValues.Count - 1));
-
-                RawValues.Clear();
-
-                var last = AveragedValues.Last;
-                AveragedValues.AddLast(averagedValue);
-                while (AveragedValues.Count > MaxNumAveragedValues)
-                    AveragedValues.RemoveFirst();
-
-                if (last == null)
-                    return;
-
-                var previousAveragedValue = last.Value;
-                var valueDiff = averagedValue.Value - previousAveragedValue.Value;
-                var currentSign = Math.Sign(valueDiff);
-                var absValueDiff = Math.Abs(valueDiff);
-
-                if (currentSign == LastSign && absValueDiff >= ValueCutoff)
-                {
-                    CumulativeValue += absValueDiff;
-                    if (CumulativeValue >= CumulativeValueThreshold)
-                    {
-                        ReachedCumulativeThreshold = true;
-                        if (CurrentCumulativeRange.To < averagedValue.Date)
-                            CurrentCumulativeRange.To = averagedValue.Date;
-                    }
+                    ReachedCumulativeThreshold = true;
+                    if (CurrentCumulativeRange.To < averagedValue.Date)
+                        CurrentCumulativeRange.To = averagedValue.Date;
                 }
-                else
-                {
-                    if (ReachedCumulativeThreshold)
-                    {
-                        if (LastSign == 1)
-                            RiseDetected?.Invoke(CurrentCumulativeRange);
-                        else if (LastSign == -1)
-                            FallDetected?.Invoke(CurrentCumulativeRange);
-                    }
-
-                    LastSign = currentSign;
-                    CumulativeValue = absValueDiff;
-                    ReachedCumulativeThreshold = false;
-                    if (absValueDiff >= CumulativeValueThreshold)
-                        ReachedCumulativeThreshold = true;
-                    CurrentCumulativeRange = new AnomalyRange(previousAveragedValue.Date, averagedValue.Date);
-                }
-
-                CheckTimeouts(averagedValue);
             }
+            else
+            {
+                if (ReachedCumulativeThreshold)
+                {
+                    if (LastSign == 1)
+                        RiseDetected?.Invoke(CurrentCumulativeRange);
+                    else if (LastSign == -1)
+                        FallDetected?.Invoke(CurrentCumulativeRange);
+                }
+
+                LastSign = currentSign;
+                CumulativeValue = absValueDiff;
+                ReachedCumulativeThreshold = false;
+                if (absValueDiff >= CumulativeValueThreshold)
+                    ReachedCumulativeThreshold = true;
+                CurrentCumulativeRange = new AnomalyRange(previousAveragedValue.Date, averagedValue.Date);
+            }
+
+            CheckTimeouts(averagedValue);
         }
 
         private AnomalyRange LastRise = null;
@@ -136,7 +136,7 @@ namespace GraphAnomalies
             }
         }
 
-        private void CheckTimeouts(AveragedTemporalValue averagedValue)
+        private void CheckTimeouts(TemporalValue averagedValue)
         {
             // Rise without fall should trigger anomaly after timeout
             if (LastRise != null && LastRise.To + AnomalyGroupingTimeout < averagedValue.Date)

@@ -44,12 +44,11 @@
   <ItemGroup>
     <Compile Include="AnomalyDetector.cs" />
     <Compile Include="AnomalyRange.cs" />
-    <Compile Include="AveragedTemporalValue.cs" />
     <Compile Include="GatewayHistoricData.cs" />
     <Compile Include="GraphAnomaly.cs" />
     <Compile Include="HistoricData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RawTemporalValue.cs" />
+    <Compile Include="TemporalValue.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

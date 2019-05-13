@@ -4,10 +4,8 @@ namespace GraphAnomalies
 {
     public class AnomalyRange
     {
-        public AnomalyRange(AnomalyRange range)
+        public AnomalyRange(AnomalyRange range) : this(range.From, range.To)
         {
-            From = range.From;
-            To = range.To;
         }
 
         public AnomalyRange(DateTime from, DateTime to)

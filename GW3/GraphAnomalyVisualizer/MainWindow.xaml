@@ -8,6 +8,12 @@
         mc:Ignorable="d"
         Title="Graph anomaly visualizer" WindowStartupLocation="CenterScreen" Height="900" Width="1600">
     <Grid>
+        <!--<Grid.RowDefinitions>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <Slider Value="{Binding StartOffset}" Grid.Row="0" Margin="0,0,1393.714,0" Maximum="7" SmallChange="1" TickPlacement="BottomRight"></Slider>
+        <Label Content="{Binding StartOffset}" Grid.Row="0" Margin="198.286,0,1135.286,0"></Label>-->
         <oxy:PlotView Model="{Binding Plot}" Grid.Row="1" />
     </Grid>
 </Window>

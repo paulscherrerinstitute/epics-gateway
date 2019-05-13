@@ -2,9 +2,13 @@
 
 namespace GraphAnomalies
 {
-    public struct RawTemporalValue
+    public struct TemporalValue
     {
-        public RawTemporalValue(DateTime date, double value)
+        public TemporalValue(TemporalValue v) : this(v.Date, v.Value)
+        {
+        }
+
+        public TemporalValue(DateTime date, double value)
         {
             Date = date;
             Value = value;

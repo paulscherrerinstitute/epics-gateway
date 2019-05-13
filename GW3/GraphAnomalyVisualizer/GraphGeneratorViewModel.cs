@@ -16,7 +16,7 @@ namespace GraphAnomalyVisualizer
     public class GraphGeneratorViewModel : INotifyPropertyChanged
     {
         public PlotModel Graph { get; set; } = new PlotModel();
-        private readonly List<RawTemporalValue> Values = new List<RawTemporalValue>();
+        private readonly List<TemporalValue> Values = new List<TemporalValue>();
 
         private int _BaseValue = 5;
 
@@ -108,7 +108,7 @@ namespace GraphAnomalyVisualizer
                 lastValue += step + noise;
                 lastValue = Math.Max(0, Math.Min(100, lastValue));
                 line.Points.Add(DateTimeAxis.CreateDataPoint(date, lastValue));
-                Values.Add(new RawTemporalValue(date, lastValue));
+                Values.Add(new TemporalValue(date, lastValue));
                 date = date.AddSeconds(5);
             }
             Graph.Series.Add(line);
