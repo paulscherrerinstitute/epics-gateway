@@ -12,6 +12,7 @@ namespace LoadPerformance
         static public string ClientSearchAddress = "127.0.0.1:5064";
         static public int NbServers = 40;
         static public int NbClients = 1;
+        static public int ServerPort = 5064;
 
         public const int CA_PROTO_VERSION = 13;
 
@@ -67,6 +68,11 @@ namespace LoadPerformance
                     i++;
                     ClientSearchAddress = args[i];
                 }
+                else if (args[i] == "--sport")
+                {
+                    i++;
+                    ServerPort = int.Parse(args[i]);
+                }
             }
 
             var didSomething = false;
@@ -87,7 +93,7 @@ namespace LoadPerformance
             {
                 didSomething = true;
                 Console.WriteLine("Starting server...");
-                server = new LoadServer(ServerAddress, 5064, NbServers);
+                server = new LoadServer(ServerAddress, ServerPort, NbServers);
 
                 if (args[0] == "--server")
                     waitInput();
@@ -96,7 +102,7 @@ namespace LoadPerformance
             {
                 didSomething = true;
                 Console.WriteLine("Starting server...");
-                server = new LoadServer(ServerAddress, 5064, NbServers);
+                server = new LoadServer(ServerAddress, ServerPort, NbServers);
 
                 using (var writer = new StreamWriter(File.Create(args[1])))
                 {
@@ -184,6 +190,7 @@ namespace LoadPerformance
             Console.WriteLine("--nbsteps <nb>         specifies how steps for the report");
             Console.WriteLine("--size <nb>            specifies the array size");
             Console.WriteLine("--saddr <addr>         specifies the server address");
+            Console.WriteLine("--sport <port>         specifies the server port when serving");
             Console.WriteLine("--caddr <addr:port>    specifies the client search address & port");
         }
 

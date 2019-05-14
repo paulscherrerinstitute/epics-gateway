@@ -23,10 +23,55 @@ namespace GatewayLogic
     /// Handles messages between workers.
     /// Can contain either a TCP/UDP packet or an EPICS message
     /// </summary>
-    public class DataPacket : ICloneable /*, IDisposable */
+    public class DataPacket : ICloneable// , IDisposable
     {
+        private static Dictionary<int, Queue<byte[]>> memoryPool = new Dictionary<int, Queue<byte[]>>();
+        const int BufferPooledLimit = 1600;
+        public static long nbNewBlocks = 0;
+        public static long nbTotalBlocks = 0;
+
+        private static byte[] Allocate(int size)
+        {
+            //return new byte[size];
+            System.Threading.Interlocked.Increment(ref nbTotalBlocks);
+            if ((size > BufferPooledLimit))
+            {
+                System.Threading.Interlocked.Increment(ref nbNewBlocks);
+                return new byte[size];
+            }
+            lock (memoryPool)
+            {
+                if (!memoryPool.ContainsKey(size) || memoryPool[size].Count == 0)
+                {
+                    nbNewBlocks++;
+                    return new byte[size];
+                }
+                return memoryPool[size].Dequeue();
+            }
+        }
+
+        ~DataPacket()
+        {
+            if (this.Reuse)
+                return;
+            if ((this.Data.Length > BufferPooledLimit))
+                return;
+            /*if (System.Diagnostics.Process.GetCurrentProcess().PrivateMemorySize64 > 1024L * 1024L * 1024L * 1024L)
+                return;*/
+            lock (memoryPool)
+            {
+                if (!memoryPool.ContainsKey(this.Data.Length))
+                    memoryPool.Add(this.Data.Length, new Queue<byte[]>());
+                for (var i = 0; i < this.Data.Length; i++)
+                    this.Data[i] = 0;
+                memoryPool[this.Data.Length].Enqueue(this.Data);
+            }
+        }
+
         public DataPacketKind Kind = DataPacketKind.RAW;
         public byte[] Data;
+        private bool Reuse = false;
+
         //public bool NeedToFlush = false;
 
         public IPEndPoint Destination;
@@ -128,7 +173,9 @@ namespace GatewayLogic
                     if (value > 16000)
                     {
                         DataPacket oldPacket = (DataPacket)this.Clone();
-                        Data = new byte[BufferSize + 8];
+
+                        //Data = new byte[BufferSize + 8];
+                        Data = Allocate(BufferSize + 8);
                         if (oldPacket.PayloadSize > 0)
                             Buffer.BlockCopy(oldPacket.Data, (int)oldPacket.HeaderSize, Data, 24, (int)oldPacket.PayloadSize);
                         this.Command = oldPacket.Command;
@@ -307,6 +354,7 @@ namespace GatewayLogic
                 p.bufferSize = BufferSize - (int)size;
                 p.Offset = Offset + (int)size;
                 p.Data = Data;
+                p.Reuse = true;
                 return p;
             }
             else
@@ -329,10 +377,9 @@ namespace GatewayLogic
         {
             //DataPacket p = DataPacket.Create((int)this.BufferSize, false);
             var p = new DataPacket();
-            p.Data = new byte[(int)this.BufferSize];
-            //p.Data = new byte[(int)this.MessageSize];
+            //p.Data = new byte[(int)this.BufferSize];
+            p.Data = Allocate(this.BufferSize);
             Buffer.BlockCopy(this.Data, this.Offset, p.Data, 0, this.BufferSize);
-            //Buffer.BlockCopy(this.Data, this.Offset, p.Data, 0, (int)this.MessageSize);
             p.Offset = this.Offset;
             p.bufferSize = this.bufferSize;
             p.Sender = this.Sender;
@@ -345,7 +392,8 @@ namespace GatewayLogic
         {
             //DataPacket p = DataPacket.Create(buff.Length, false);
             var p = new DataPacket();
-            p.Data = new byte[buff.Length];
+            //p.Data = new byte[buff.Length];
+            p.Data = Allocate(buff.Length);
             Buffer.BlockCopy(buff, 0, p.Data, 0, buff.Length);
             return p;
         }
@@ -358,7 +406,8 @@ namespace GatewayLogic
         public static DataPacket Create(int payloadSize, bool countHeader = true)
         {
             var p = new DataPacket();
-            p.Data = new byte[payloadSize + (countHeader ? 16 : 0)];
+            //p.Data = new byte[payloadSize + (countHeader ? 16 : 0)];
+            p.Data = Allocate(payloadSize + (countHeader ? 16 : 0));
             if (countHeader)
                 p.SetUInt16(2, (UInt16)payloadSize);
             return p;
@@ -367,7 +416,8 @@ namespace GatewayLogic
         public static DataPacket CreatePacketSize(int size)
         {
             var p = new DataPacket();
-            p.Data = new byte[size];
+            //p.Data = new byte[size];
+            p.Data = Allocate(size);
             p.bufferSize = size;
             return p;
         }
@@ -397,12 +447,14 @@ namespace GatewayLogic
                 DataPacket p = new DataPacket();
                 p.Data = buff;
                 p.bufferSize = size;
+                p.Reuse = true;
                 return p;
             }
             else
             {
                 DataPacket p = new DataPacket();
-                p.Data = new byte[size];
+                //p.Data = new byte[size];
+                p.Data = Allocate(size);
                 Buffer.BlockCopy(buff, 0, p.Data, 0, size);
                 return p;
             }

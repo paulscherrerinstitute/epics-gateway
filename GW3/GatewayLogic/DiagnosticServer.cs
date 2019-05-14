@@ -17,6 +17,7 @@ namespace GatewayLogic
         private readonly CADoubleRecord channelCpu;
         private readonly CADoubleRecord channelMem;
         private readonly CADoubleRecord channelAverageCpu;
+        private readonly CADoubleRecord channelBlockReuses;
         private readonly CAIntRecord channelNbClientConn;
         private readonly CAIntRecord channelNbServerConn;
         private readonly CAIntRecord channelKnownChannels;
@@ -129,6 +130,19 @@ namespace GatewayLogic
             channelNbMessagesPerSec.CanBeRemotlySet = false;
             channelNbMessagesPerSec.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC5;
             channelNbMessagesPerSec.PrepareRecord += new EventHandler(channelNbMessagesPerSec_PrepareRecord);
+
+            // Nb Blocks
+            channelBlockReuses = diagServer.CreateRecord<CADoubleRecord>(gateway.Configuration.GatewayName + ":BLOCKS-REUSE");
+            channelBlockReuses.CanBeRemotlySet = false;
+            channelBlockReuses.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC5;
+            channelBlockReuses.DisplayPrecision = 3;
+            channelBlockReuses.EngineeringUnits = "%";
+            channelBlockReuses.PrepareRecord += (e, v) =>
+            {
+                channelBlockReuses.Value = ((double)(DataPacket.nbTotalBlocks - DataPacket.nbNewBlocks)) * 100.0 / ((double)DataPacket.nbTotalBlocks);
+                DataPacket.nbTotalBlocks = 0;
+                DataPacket.nbNewBlocks = 0;
+            };
 
             // DataPacket sent per sec
             channelNbCreatedPacketPerSec = diagServer.CreateRecord<CAIntRecord>(gateway.Configuration.GatewayName + ":NEWDATA-SEC");

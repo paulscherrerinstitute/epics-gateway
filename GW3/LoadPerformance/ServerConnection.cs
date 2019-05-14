@@ -80,7 +80,7 @@ namespace LoadPerformance
                     }
                 }
                 sw.Stop();
-                var toWait = 100 - (int)sw.ElapsedMilliseconds;
+                var toWait = 10 - (int)sw.ElapsedMilliseconds;
                 if (toWait > 0)
                     Thread.Sleep(toWait);
             }
