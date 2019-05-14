@@ -1295,11 +1295,13 @@ namespace GwUnitTests
                 // Serverside
                 using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
                 {
-                    var serverChannel = server.CreateArrayRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAIntSubArrayRecord>("TEST-SUBARR", 20);
+                    var serverChannel = server.CreateArrayRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAIntArrayRecord>("TEST-ARR", 20);
+                    var subArrChannel = server.CreateSubArrayRecord("TEST-SUBARR", serverChannel);
                     serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
                     for (var i = 0; i < 20; i++)
-                        serverChannel.Value.Data[i] = i;
-                    serverChannel.Value.SetSubArray(0, 5);
+                        serverChannel.Value[i] = i;
+                    subArrChannel.Index = 0;
+                    subArrChannel.Length = 5;
 
                     // Client
                     using (var client = new CAClient())
@@ -1433,11 +1435,13 @@ namespace GwUnitTests
                 // Serverside
                 using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
                 {
-                    var serverChannel = server.CreateArrayRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAIntSubArrayRecord>("TEST-SUBARR", 20);
+                    var serverChannel = server.CreateArrayRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAIntArrayRecord>("TEST-ARR", 20);
+                    var subArray = server.CreateSubArrayRecord("TEST-SUBARR", serverChannel);
                     serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
                     for (var i = 0; i < 20; i++)
-                        serverChannel.Value.Data[i] = i;
-                    serverChannel.Value.SetSubArray(0, 5);
+                        serverChannel.Value[i] = i;
+                    subArray.Index = 0;
+                    subArray.Length = 5;
 
                     // Client
                     using (var client = new CAClient())
