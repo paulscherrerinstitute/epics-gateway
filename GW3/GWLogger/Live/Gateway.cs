@@ -1,4 +1,6 @@
 ﻿using GraphAnomalies;
+using GraphAnomalies.Processors;
+using GraphAnomalies.Types;
 using GWLogger.Backend;
 using System;
 using System.Collections.Generic;
@@ -65,7 +67,7 @@ namespace GWLogger.Live
         private List<HistoricData> serversHistory = new List<HistoricData>();
         private List<HistoricData> networkHistory = new List<HistoricData>();
 
-        private readonly AnomalyDetector CPUAnomalyDetector = new AnomalyDetector();
+        private readonly AnomalyDetector CPUAnomalyDetector;
 
         public Gateway(LiveInformation liveInformation, string gatewayName)
         {
@@ -89,6 +91,11 @@ namespace GWLogger.Live
             netIn = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NET-IN");
             netOut = new GatewayNullableValue<int>(this.liveInformation.Client, gatewayName + ":NET-OUT");
 
+            var chain = ProcessorChainBuilder
+                .From(new WeightedMovingAverage(20))
+                .Chain(new Rounding())
+                .Build();
+            CPUAnomalyDetector = new AnomalyDetector(chain);
             CPUAnomalyDetector.AnomalyDetected += CPUAnomalyDetected;
 
             var anomalyDateFormat = "yyyy-MM-dd-HH-mm-ss";
@@ -231,7 +238,7 @@ namespace GWLogger.Live
                 cpuHistory.Add(cpuData);
                 while (cpuHistory.Count > NbHistoricPoint)
                     cpuHistory.RemoveAt(0);
-                CPUAnomalyDetector.Update(cpuData.Date, cpuData.Value ?? -1);
+                CPUAnomalyDetector.Update(new TemporalValue(cpuData.Date, cpuData.Value ?? -1));
             }
 
             lock (searchHistory)
@@ -280,17 +287,17 @@ namespace GWLogger.Live
         public int State => Math.Max(CpuState, SearchState);
 
         private readonly object AllAnomaliesLock = new object();
-        private List<GraphAnomaly> AllAnomalies = null;
+        private readonly List<GraphAnomaly> AllAnomalies = null;
 
         private void CPUAnomalyDetected(AnomalyRange range)
         {
-            var anomalyDateFormat = "yyyy-MM-dd-HH-mm-ss";
-            var anomalyStorage = Global.AnomalyStorage;
-            var anomalySerializer = new XmlSerializer(typeof(GraphAnomaly));
-            var dnsCache = new Dictionary<string, string>();
+            ThreadPool.QueueUserWorkItem((state) => {
+                var queryMsTimeout = 4000;
+                var anomalyDateFormat = "yyyy-MM-dd-HH-mm-ss";
+                var anomalyStorage = Global.AnomalyStorage;
+                var anomalySerializer = new XmlSerializer(typeof(GraphAnomaly));
+                var dnsCache = new Dictionary<string, string>();
 
-            lock (AllAnomaliesLock)
-            {
                 var anomaly = new GraphAnomaly()
                 {
                     From = range.From,
@@ -302,8 +309,8 @@ namespace GWLogger.Live
                 var before = range.From.Add(-(range.To - range.From));
 
                 var typeQuery = "select count(*) nb, type group by type order by nb desc";
-                var beforeEventTypes = Global.DataContext.ReadLog(Name, before, range.From, typeQuery)?.Select(o => new QueryResultValue(o)).ToList();
-                var duringEventTypes = Global.DataContext.ReadLog(Name, range.From, range.To, typeQuery)?.Select(o => new QueryResultValue(o)).ToList();
+                var beforeEventTypes = Global.DataContext.ReadLog(Name, before, range.From, typeQuery, cancellationToken: new CancellationTokenSource(queryMsTimeout).Token)?.Select(o => new QueryResultValue(o)).ToList();
+                var duringEventTypes = Global.DataContext.ReadLog(Name, range.From, range.To, typeQuery, cancellationToken: new CancellationTokenSource(queryMsTimeout).Token)?.Select(o => new QueryResultValue(o)).ToList();
 
                 // Don't try to analyze if there is no log data available
                 if (beforeEventTypes != null && duringEventTypes != null)
@@ -329,7 +336,7 @@ namespace GWLogger.Live
                         var interestingTypeQuery = $"select count(*) nb, remote where type=\"{interestingEventType.Text.Replace("\"", "")}\" group by remote order by nb desc";
                         var groupedRemotes = new Dictionary<string, int>();
 
-                        foreach (var remote in Global.DataContext.ReadLog(Name, range.From, range.To, interestingTypeQuery).Select(o => new QueryResultValue(o)))
+                        foreach (var remote in Global.DataContext.ReadLog(Name, range.From, range.To, interestingTypeQuery, cancellationToken: new CancellationTokenSource(queryMsTimeout).Token).Select(o => new QueryResultValue(o)))
                         {
                             var host = remote.Text.Split(':').First();
                             if (groupedRemotes.TryGetValue(host, out int prev))
@@ -351,8 +358,8 @@ namespace GWLogger.Live
                     }
 
                     var remoteQuery = "select count(*) nb, remote group by remote order by nb desc";
-                    var beforeRemoteCounts = Global.DataContext.ReadLog(Name, before, range.From, remoteQuery).Select(o => new QueryResultValue(o)).ToList();
-                    var duringRemoteCounts = Global.DataContext.ReadLog(Name, range.From, range.To, remoteQuery).Select(o => new QueryResultValue(o)).ToList();
+                    var beforeRemoteCounts = Global.DataContext.ReadLog(Name, before, range.From, remoteQuery, cancellationToken: new CancellationTokenSource(queryMsTimeout).Token).Select(o => new QueryResultValue(o)).ToList();
+                    var duringRemoteCounts = Global.DataContext.ReadLog(Name, range.From, range.To, remoteQuery, cancellationToken: new CancellationTokenSource(queryMsTimeout).Token).Select(o => new QueryResultValue(o)).ToList();
 
                     anomaly.InterestingEventTypeRemotes = interestingEventTypeRemotes;
                     anomaly.BeforeEventTypes = beforeEventTypes.Take(5).ToList();
@@ -361,12 +368,9 @@ namespace GWLogger.Live
                     anomaly.DuringRemoteCounts = duringRemoteCounts.Take(5).Select(v => PerformDNSLookup(v, dnsCache)).ToList();
                 }
 
-                anomaly.History = new GatewayHistoricData
-                {
-                    // We are already in the cpu lock through the anomaly event caused by the call to Update();
-                    CPU = cpuHistory.Last(GraphPoints).ToList()
-                };
-
+                anomaly.History = new GatewayHistoricData();
+                lock (cpuHistory)
+                    anomaly.History.CPU = cpuHistory.Last(GraphPoints).ToList();
                 lock (pvsHistory)
                     anomaly.History.PVs = pvsHistory.Last(GraphPoints).ToList();
                 lock (searchHistory)
@@ -376,11 +380,11 @@ namespace GWLogger.Live
 
                 var writingFailed = true;
                 var failCount = 0;
+                var filename = $"{Name}_{anomaly.From.ToString(anomalyDateFormat, CultureInfo.InvariantCulture)}";
                 do
                 {
                     try
                     {
-                        var filename = $"{Name}_{anomaly.From.ToString(anomalyDateFormat, CultureInfo.InvariantCulture)}";
                         using (var xmlWriter = XmlWriter.Create(File.Open(Path.Combine(anomalyStorage, $"{filename}.xml"), FileMode.Create), new XmlWriterSettings { Indent = false }))
                         {
                             anomaly.FileName = filename;
@@ -388,16 +392,24 @@ namespace GWLogger.Live
                         }
                         writingFailed = false;
                     }
-                    catch
+                    catch(Exception ex)
                     {
+                        using (EventLog eventLog = new EventLog("Application"))
+                        {
+                            eventLog.Source = "Application";
+                            eventLog.WriteEntry($"Error writing to file '{filename}' (attempt {failCount}): {ex}", EventLogEntryType.Error);
+                        }
                         Thread.Sleep(10);
                         failCount++;
                     }
                 }
-                while (writingFailed && failCount <= 5);
+                while (writingFailed && failCount <= 3);
 
-                AllAnomalies.Add(anomaly);
-            }
+                lock (AllAnomaliesLock)
+                {
+                    AllAnomalies.Add(anomaly);
+                }
+            });
         }
 
         public List<HistoricData> GetGraphAnomalyPreview(string filename)

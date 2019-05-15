@@ -43,12 +43,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnomalyDetector.cs" />
-    <Compile Include="AnomalyRange.cs" />
-    <Compile Include="GatewayHistoricData.cs" />
-    <Compile Include="GraphAnomaly.cs" />
-    <Compile Include="HistoricData.cs" />
+    <Compile Include="ProcessorChainBuilder.cs" />
+    <Compile Include="Processors\Passthrough.cs" />
+    <Compile Include="Processors\ValueCollector.cs" />
+    <Compile Include="Types\AnomalyRange.cs" />
+    <Compile Include="Types\GatewayHistoricData.cs" />
+    <Compile Include="Types\GraphAnomaly.cs" />
+    <Compile Include="Types\HistoricData.cs" />
+    <Compile Include="Processor.cs" />
+    <Compile Include="Processors\WeightedMovingAverage.cs" />
+    <Compile Include="Processors\Rounding.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TemporalValue.cs" />
+    <Compile Include="Types\InterestingEventType.cs" />
+    <Compile Include="Types\ProcessorChain.cs" />
+    <Compile Include="Types\QueryResultValue.cs" />
+    <Compile Include="Types\TemporalValue.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

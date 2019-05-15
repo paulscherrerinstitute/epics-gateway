@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Xml.Serialization;
 
-namespace GraphAnomalies
+namespace GraphAnomalies.Types
 {
     public class GraphAnomaly
     {
@@ -25,31 +24,5 @@ namespace GraphAnomalies
         public List<QueryResultValue> DuringEventTypes { get; set; }
 
         public GatewayHistoricData History { get; set; }
-    }
-
-    public class QueryResultValue
-    {
-        public QueryResultValue()
-        {
-        }
-
-        public QueryResultValue(object o)
-        {
-            var arr = (object[])o;
-            Value = double.Parse(arr[0]?.ToString() ?? "0");
-            Text = arr[1]?.ToString();
-        }
-
-        [XmlAttribute]
-        public double Value { get; set; }
-
-        [XmlAttribute]
-        public string Text { get; set; }
-    }
-
-    public class InterestingEventType
-    {
-        public QueryResultValue EventType { get; set; }
-        public List<QueryResultValue> TopRemotes { get; set; }
     }
 }

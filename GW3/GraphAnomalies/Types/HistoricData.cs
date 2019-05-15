@@ -2,7 +2,7 @@
 using System.Web.Script.Serialization;
 using System.Xml.Serialization;
 
-namespace GraphAnomalies
+namespace GraphAnomalies.Types
 {
     [Serializable]
     public class HistoricData

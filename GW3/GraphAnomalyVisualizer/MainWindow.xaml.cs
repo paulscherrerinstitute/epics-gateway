@@ -20,7 +20,7 @@ namespace GraphAnomalyVisualizer
     /// </summary>
     public partial class MainWindow : Window
     {
-        private MainWindowViewModel ViewModel;
+        private readonly MainWindowViewModel ViewModel;
 
         public MainWindow(string path)
         {

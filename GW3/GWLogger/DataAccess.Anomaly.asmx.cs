@@ -13,13 +13,13 @@ namespace GWLogger
         }
 
         [WebMethod]
-        public List<GraphAnomalies.HistoricData> GetGraphAnomalyPreview(string filename)
+        public List<GraphAnomalies.Types.HistoricData> GetGraphAnomalyPreview(string filename)
         {
             return Global.LiveInformation.GetGraphAnomalyPreview(filename);
         }
 
         [WebMethod]
-        public GraphAnomalies.GraphAnomaly GetGraphAnomaly(string filename)
+        public GraphAnomalies.Types.GraphAnomaly GetGraphAnomaly(string filename)
         {
             return Global.LiveInformation.GetGraphAnomaly(filename);
         }

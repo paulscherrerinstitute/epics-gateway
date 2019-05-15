@@ -20,7 +20,7 @@ namespace GraphAnomalyVisualizer
     /// </summary>
     public partial class GraphGenerator : Window
     {
-        private GraphGeneratorViewModel ViewModel;
+        private readonly GraphGeneratorViewModel ViewModel;
 
         public GraphGenerator()
         {
