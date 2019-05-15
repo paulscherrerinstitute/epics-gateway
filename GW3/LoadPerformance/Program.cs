@@ -13,7 +13,7 @@ namespace LoadPerformance
         static public int NbServers = 40;
         static public int NbClients = 1;
         static public int ServerPort = 5064;
-
+        static public int RefreshRate = 10;
         public const int CA_PROTO_VERSION = 13;
 
         private static void Main(string[] args)
@@ -73,6 +73,11 @@ namespace LoadPerformance
                     i++;
                     ServerPort = int.Parse(args[i]);
                 }
+                else if (args[i] == "--rate")
+                {
+                    i++;
+                    RefreshRate = int.Parse(args[i]);
+                }
             }
 
             var didSomething = false;
@@ -92,7 +97,7 @@ namespace LoadPerformance
             if (args[0] == "--server" || args[0] == "--both")
             {
                 didSomething = true;
-                Console.WriteLine("Starting server...");
+                Console.WriteLine($"Starting server ({ServerAddress}:{ServerPort})...");
                 server = new LoadServer(ServerAddress, ServerPort, NbServers);
 
                 if (args[0] == "--server")
@@ -101,7 +106,7 @@ namespace LoadPerformance
             if (args[0] == "--report")
             {
                 didSomething = true;
-                Console.WriteLine("Starting server...");
+                Console.WriteLine($"Starting server ({ServerAddress}:{ServerPort})...");
                 server = new LoadServer(ServerAddress, ServerPort, NbServers);
 
                 using (var writer = new StreamWriter(File.Create(args[1])))
@@ -191,6 +196,7 @@ namespace LoadPerformance
             Console.WriteLine("--size <nb>            specifies the array size");
             Console.WriteLine("--saddr <addr>         specifies the server address");
             Console.WriteLine("--sport <port>         specifies the server port when serving");
+            Console.WriteLine("--rate <rate>          specifies the refresh rate used (default 10 Hz)");
             Console.WriteLine("--caddr <addr:port>    specifies the client search address & port");
         }
 

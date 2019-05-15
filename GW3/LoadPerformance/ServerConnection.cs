@@ -80,7 +80,7 @@ namespace LoadPerformance
                     }
                 }
                 sw.Stop();
-                var toWait = 10 - (int)sw.ElapsedMilliseconds;
+                var toWait = (1000 / Program.RefreshRate) - (int)sw.ElapsedMilliseconds;
                 if (toWait > 0)
                     Thread.Sleep(toWait);
             }
@@ -277,7 +277,7 @@ namespace LoadPerformance
             {
 
             }*/
-            
+
             try
             {
                 socketLock.Wait();

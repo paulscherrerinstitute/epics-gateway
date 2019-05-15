@@ -66,9 +66,9 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>IF DEFINED system_teamProject GOTO END
-copy /y "$(TargetDir)\*.dll" \\testcagw01\c$\temp
-copy /y "$(TargetDir)\*.pdb" \\testcagw01\c$\temp
-copy /y "$(TargetDir)\*.exe" \\testcagw01\c$\temp
+copy /y "$(TargetDir)\*.dll" \\testcagw01\temp
+copy /y "$(TargetDir)\*.pdb" \\testcagw01\temp
+copy /y "$(TargetDir)\*.exe" \\testcagw01\temp
 
 copy /y "$(TargetDir)\*.dll" \\testcagw02\temp
 copy /y "$(TargetDir)\*.pdb" \\testcagw02\temp
