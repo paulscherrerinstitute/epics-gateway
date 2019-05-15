@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.28803.352
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GWConsole", "GWConsole\GWConsole.csproj", "{9417ADE6-2AD0-4802-8813-F6E86285B578}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayLogic", "GatewayLogic\GatewayLogic.csproj", "{0DCCC8C2-9FF8-42F6-AEA5-5D59337D7D79}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GatewayLogic", "GatewayLogic\GatewayLogic.csproj", "{0DCCC8C2-9FF8-42F6-AEA5-5D59337D7D79}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GWTest", "GWTest\GWTest.csproj", "{40ADE3B0-4887-4439-922D-32229B673730}"
 EndProject
@@ -44,6 +44,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphAnomalies", "GraphAnomalies\GraphAnomalies.csproj", "{DFBF31C2-894C-4FD1-A674-D323E7DD2FDE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogFileHandling", "LogFileHandling\LogFileHandling.csproj", "{4D3D9B73-3315-4084-A489-E38BCD622938}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GWCoreConsole", "GWCoreConsole\GWCoreConsole.csproj", "{6DE6195A-B20B-4611-B079-3020947F2B93}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -271,6 +273,18 @@ Global
 		{4D3D9B73-3315-4084-A489-E38BCD622938}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4D3D9B73-3315-4084-A489-E38BCD622938}.Release|x86.ActiveCfg = Release|Any CPU
 		{4D3D9B73-3315-4084-A489-E38BCD622938}.Release|x86.Build.0 = Release|Any CPU
+		{6DE6195A-B20B-4611-B079-3020947F2B93}.Debug Deadlock|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DE6195A-B20B-4611-B079-3020947F2B93}.Debug Deadlock|Any CPU.Build.0 = Debug|Any CPU
+		{6DE6195A-B20B-4611-B079-3020947F2B93}.Debug Deadlock|x86.ActiveCfg = Debug|Any CPU
+		{6DE6195A-B20B-4611-B079-3020947F2B93}.Debug Deadlock|x86.Build.0 = Debug|Any CPU
+		{6DE6195A-B20B-4611-B079-3020947F2B93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DE6195A-B20B-4611-B079-3020947F2B93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DE6195A-B20B-4611-B079-3020947F2B93}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6DE6195A-B20B-4611-B079-3020947F2B93}.Debug|x86.Build.0 = Debug|Any CPU
+		{6DE6195A-B20B-4611-B079-3020947F2B93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DE6195A-B20B-4611-B079-3020947F2B93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DE6195A-B20B-4611-B079-3020947F2B93}.Release|x86.ActiveCfg = Release|Any CPU
+		{6DE6195A-B20B-4611-B079-3020947F2B93}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

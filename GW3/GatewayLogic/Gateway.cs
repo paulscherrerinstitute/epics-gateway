@@ -15,12 +15,13 @@ namespace GatewayLogic
 
     public class Gateway : IDisposable
     {
-        public const int BUFFER_SIZE = 8192 * 30;
+        public const int BUFFER_SIZE = 8192 * 2;
+        //public const int BUFFER_SIZE = 1450;
         public const int MAX_UDP_PACKET_SIZE = 1400; // Discussion with Karel
         public const UInt16 CA_PROTO_VERSION = 13;
         //public const UInt16 CA_PROTO_VERSION = 11;
 
-        public Configuration.Configuration Configuration { get; internal set; } = new GatewayLogic.Configuration.Configuration();
+        public Configuration.Configuration Configuration { get; set; } = new GatewayLogic.Configuration.Configuration();
 
         internal UdpReceiver udpSideA;
         internal UdpReceiver udpSideB;

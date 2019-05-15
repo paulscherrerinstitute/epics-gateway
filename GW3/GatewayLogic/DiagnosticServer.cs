@@ -17,6 +17,7 @@ namespace GatewayLogic
         private readonly CADoubleRecord channelCpu;
         private readonly CADoubleRecord channelMem;
         private readonly CADoubleRecord channelAverageCpu;
+        private readonly CADoubleRecord channelBlockReuses;
         private readonly CAIntRecord channelNbClientConn;
         private readonly CAIntRecord channelNbServerConn;
         private readonly CAIntRecord channelKnownChannels;
@@ -130,6 +131,19 @@ namespace GatewayLogic
             channelNbMessagesPerSec.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC5;
             channelNbMessagesPerSec.PrepareRecord += new EventHandler(channelNbMessagesPerSec_PrepareRecord);
 
+            // Nb Blocks
+            channelBlockReuses = diagServer.CreateRecord<CADoubleRecord>(gateway.Configuration.GatewayName + ":BLOCKS-REUSE");
+            channelBlockReuses.CanBeRemotlySet = false;
+            channelBlockReuses.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC5;
+            channelBlockReuses.DisplayPrecision = 3;
+            channelBlockReuses.EngineeringUnits = "%";
+            channelBlockReuses.PrepareRecord += (e, v) =>
+            {
+                channelBlockReuses.Value = ((double)(DataPacket.nbTotalBlocks - DataPacket.nbNewBlocks)) * 100.0 / ((double)DataPacket.nbTotalBlocks);
+                DataPacket.nbTotalBlocks = 0;
+                DataPacket.nbNewBlocks = 0;
+            };
+
             // DataPacket sent per sec
             channelNbCreatedPacketPerSec = diagServer.CreateRecord<CAIntRecord>(gateway.Configuration.GatewayName + ":NEWDATA-SEC");
             channelNbCreatedPacketPerSec.CanBeRemotlySet = false;
@@ -180,10 +194,11 @@ namespace GatewayLogic
             networkIn.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
             networkIn.PrepareRecord += (evt, obj) =>
             {
-                var v = NetworkInterface.GetAllNetworkInterfaces().Sum(row => row.GetIPv4Statistics().BytesReceived);
+                /*var v = NetworkInterface.GetAllNetworkInterfaces().Sum(row => row.GetIPv4Statistics().BytesReceived);
                 if (lastBytesIn.HasValue)
                     networkIn.Value = (int)(v - lastBytesIn.Value);
-                lastBytesIn = v;
+                lastBytesIn = v;*/
+                networkIn.Value = (int)DiagnosticInfo.TotalNetworkIn();
             };
 
             // Network out
@@ -192,10 +207,11 @@ namespace GatewayLogic
             networkOut.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
             networkOut.PrepareRecord += (evt, obj) =>
             {
-                var v = NetworkInterface.GetAllNetworkInterfaces().Sum(row => row.GetIPv4Statistics().BytesSent);
+                /*var v = NetworkInterface.GetAllNetworkInterfaces().Sum(row => row.GetIPv4Statistics().BytesSent);
                 if (lastBytesOut.HasValue)
                     networkOut.Value = (int)(v - lastBytesOut.Value);
-                lastBytesOut = v;
+                lastBytesOut = v;*/
+                networkOut.Value = (int)DiagnosticInfo.TotalNetworkOut();
             };
 
             // Restart channel
@@ -397,7 +413,7 @@ namespace GatewayLogic
                 int secondsSince1970 = System.BitConverter.ToInt32(b, i + cLinkerTimestampOffset);
                 DateTime dt = new DateTime(1970, 1, 1, 0, 0, 0);
                 dt = dt.AddSeconds(secondsSince1970);
-                dt = dt.AddHours(TimeZone.CurrentTimeZone.GetUtcOffset(dt).Hours);
+                dt = dt.AddHours(TimeZoneInfo.Local.GetUtcOffset(dt).Hours);
                 return dt;
             }
         }

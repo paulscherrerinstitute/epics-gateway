@@ -16,7 +16,7 @@ namespace GWLogger
         {
             using (HashAlgorithm algorithm = SHA256.Create())
             {
-                return string.Join("", algorithm.ComputeHash(Encoding.UTF8.GetBytes(File.ReadAllText(Context.Server.MapPath("~/main.js")))).Select(c => c.ToString("X2")));
+                return string.Join("", algorithm.ComputeHash(Encoding.UTF8.GetBytes(File.ReadAllText(Context.Server.MapPath("~/main.js")) + File.ReadAllText(Context.Server.MapPath("~/index.html")) + File.ReadAllText(Context.Server.MapPath("~/Less/main.css")))).Select(c => c.ToString("X2")));
             }
         }
 

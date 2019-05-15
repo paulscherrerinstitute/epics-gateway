@@ -105,7 +105,7 @@ namespace GwUnitTests
                         {
                         }
                         var a = clientChannel.ElapsedTimings;
-                        Assert.AreEqual(6, a.Count);
+                        Assert.AreEqual(7, a.Count);
 
                         var clientChannel2 = client.CreateChannel<string>("TEST-DATE2");
                         try
@@ -116,7 +116,7 @@ namespace GwUnitTests
                         {
                         }
                         var a2 = clientChannel2.ElapsedTimings;
-                        Assert.AreEqual(0, a2.Count);
+                        Assert.AreEqual(1, a2.Count);
                         //Assert.AreEqual("Works fine!", clientChannel.Get());
                     }
                 }
@@ -1295,11 +1295,13 @@ namespace GwUnitTests
                 // Serverside
                 using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
                 {
-                    var serverChannel = server.CreateArrayRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAIntSubArrayRecord>("TEST-SUBARR", 20);
+                    var serverChannel = server.CreateArrayRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAIntArrayRecord>("TEST-ARR", 20);
+                    var subArrChannel = server.CreateSubArrayRecord("TEST-SUBARR", serverChannel);
                     serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
                     for (var i = 0; i < 20; i++)
-                        serverChannel.Value.Data[i] = i;
-                    serverChannel.Value.SetSubArray(0, 5);
+                        serverChannel.Value[i] = i;
+                    subArrChannel.Index = 0;
+                    subArrChannel.Length = 5;
 
                     // Client
                     using (var client = new CAClient())
@@ -1419,7 +1421,7 @@ namespace GwUnitTests
         }*/
 
         [TestMethod]
-        [Timeout(3000)]
+        [Timeout(10000)]
         public void CheckSubArrayPut()
         {
             using (var gateway = new Gateway())
@@ -1433,22 +1435,23 @@ namespace GwUnitTests
                 // Serverside
                 using (var server = new CAServer(IPAddress.Parse("127.0.0.1"), 5056, 5056))
                 {
-                    var serverChannel = server.CreateArrayRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAIntSubArrayRecord>("TEST-SUBARR", 20);
+                    var serverChannel = server.CreateArrayRecord<EpicsSharp.ChannelAccess.Server.RecordTypes.CAIntArrayRecord>("TEST-ARR", 20);
+                    var subArray = server.CreateSubArrayRecord("TEST-SUBARR", serverChannel);
                     serverChannel.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC1;
                     for (var i = 0; i < 20; i++)
-                        serverChannel.Value.Data[i] = i;
-                    serverChannel.Value.SetSubArray(0, 5);
+                        serverChannel.Value[i] = i;
+                    subArray.Index = 0;
+                    subArray.Length = 5;
 
                     // Client
                     using (var client = new CAClient())
                     {
                         client.Configuration.SearchAddress = "127.0.0.1:5432";
-                        var clientChannel = client.CreateChannel<int[]>("TEST-SUBARR");
+                        var clientChannel = client.CreateChannel<int[]>("TEST-ARR");
                         server.Start();
 
                         var putArr = new int[] { 4, 3, 2, 1, 0 };
                         clientChannel.Put(putArr);
-                        Assert.AreEqual(5, serverChannel.Value.Length);
                         for (var i = 0; i < 5; i++)
                         {
                             Assert.AreEqual(putArr[i], serverChannel.Value[i]);

@@ -1,4 +1,4 @@
-﻿using GatewayLogic.GWLoggerSoap;
+﻿using GWLoggerSoap;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -40,9 +40,9 @@ namespace GatewayLogic.Services
                       try
                       {
                           if (System.Configuration.ConfigurationManager.AppSettings["soapURL"] != null)
-                              soapLogger = new GWLoggerSoap.DataAccessSoapClient(new System.ServiceModel.BasicHttpBinding(), new EndpointAddress(System.Configuration.ConfigurationManager.AppSettings["soapURL"]));
+                              soapLogger = new DataAccessSoapClient(new System.ServiceModel.BasicHttpBinding(), new EndpointAddress(System.Configuration.ConfigurationManager.AppSettings["soapURL"]));
                           else
-                              soapLogger = new GWLoggerSoap.DataAccessSoapClient();
+                              soapLogger = new DataAccessSoapClient(new System.ServiceModel.BasicHttpBinding(), new EndpointAddress("http://caesar.psi.ch/DataAccess.asmx"));
                       }
                       catch
                       {
@@ -65,7 +65,7 @@ namespace GatewayLogic.Services
                       try
                       {
                           // Sends all message types to the server
-                          soapLogger.RegisterLogMessageType(Enum.GetValues(typeof(LogMessageType))
+                          soapLogger.RegisterLogMessageTypeAsync(Enum.GetValues(typeof(LogMessageType))
                               .AsQueryable()
                               .OfType<LogMessageType>()
                               .Select(row => new MessageType
@@ -77,7 +77,7 @@ namespace GatewayLogic.Services
                               }).ToArray());
 
                           // Sends all message type details to the server
-                          soapLogger.RegisterLogMessageDetailType(Enum.GetValues(typeof(MessageDetail))
+                          soapLogger.RegisterLogMessageDetailTypeAsync(Enum.GetValues(typeof(MessageDetail))
                               .AsQueryable()
                               .OfType<MessageDetail>()
                               .Select(row => new IdValue
@@ -216,7 +216,7 @@ namespace GatewayLogic.Services
                         }
                         try
                         {
-                            soapLogger.BinaryLogEntries(gatewayName, mem.ToArray());
+                            soapLogger.BinaryLogEntriesAsync(gatewayName, mem.ToArray()).Wait(10000);
 
                             //soapLogger.LogEntries(toSend.ToArray());
                         }

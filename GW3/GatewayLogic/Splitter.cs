@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GatewayLogic
 {
-    class Splitter : IDisposable
+    public class Splitter : IDisposable
     {
         DataPacket remainingPacket = null;
         uint dataMissing = 0;

@@ -194,7 +194,7 @@ namespace LoadPerformance
         {
             get
             {
-                return Program.ArraySize * 4 * 10 * nbMons;
+                return Program.ArraySize * 4 * Program.RefreshRate * nbMons;
             }
         }
 
