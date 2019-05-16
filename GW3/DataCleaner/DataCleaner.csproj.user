@@ -4,6 +4,6 @@
     <StartArguments>\\gfa-synonas-03\cagw_logging 5</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug Deadlock|AnyCPU'">
-    <StartArguments>c:\temp\tt 5</StartArguments>
+    <StartArguments>C:\temp\day11 5 +xml</StartArguments>
   </PropertyGroup>
 </Project>
