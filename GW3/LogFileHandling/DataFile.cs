@@ -211,17 +211,27 @@ namespace GWLogger.Backend.DataContext
         {
             if (file != null)
                 CloseFiles();
+            try
+            {
 
-            currentFile = filename ?? FileName();
-            file = System.IO.File.Open(currentFile, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            DataWriter = new BinaryWriter(file, System.Text.Encoding.UTF8, true);
-            DataReader = new BinaryReader(file, System.Text.Encoding.UTF8, true);
+                currentFile = filename ?? FileName();
+                file = System.IO.File.Open(currentFile, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                DataWriter = new BinaryWriter(file, System.Text.Encoding.UTF8, true);
+                DataReader = new BinaryReader(file, System.Text.Encoding.UTF8, true);
 
-            file.Seek(0, SeekOrigin.End);
-            isAtEnd = true;
+                file.Seek(0, SeekOrigin.End);
+                isAtEnd = true;
 
-            ReadIndex();
-            ReadStats();
+                ReadIndex();
+                ReadStats();
+            }
+            catch
+            {
+                if(file != null)
+                    CloseFiles();
+                file = null;
+                throw;
+            }
         }
 
         public void SaveIndex()

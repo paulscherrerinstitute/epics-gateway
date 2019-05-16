@@ -31,6 +31,7 @@ namespace GatewayLogic.Connections
             splitter = new Splitter();
 
             receiver = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            receiver.EnableBroadcast = true;
             receiver.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
                 receiver.IOControl(SioUdpConnReset, new byte[] { 0, 0, 0, 0 }, null);
@@ -194,7 +195,7 @@ namespace GatewayLogic.Connections
 
             try
             {
-                //Gateway.Log.Write(Services.LogLevel.Detail, "Receiving: " + epSender.ToString());
+                Gateway.Log.Write(Services.LogLevel.Detail, "Receiving: " + epSender.ToString());
                 splitter.Reset();
                 foreach (var p in splitter.Split(data))
                 {

@@ -32,7 +32,6 @@ namespace GatewayLogic
 
         private static byte[] Allocate(int size)
         {
-            //return new byte[size];
             System.Threading.Interlocked.Increment(ref nbTotalBlocks);
             if ((size > BufferPooledLimit))
             {
@@ -56,8 +55,6 @@ namespace GatewayLogic
                 return;
             if ((this.Data.Length > BufferPooledLimit))
                 return;
-            /*if (System.Diagnostics.Process.GetCurrentProcess().PrivateMemorySize64 > 1024L * 1024L * 1024L * 1024L)
-                return;*/
             lock (memoryPool)
             {
                 if (!memoryPool.ContainsKey(this.Data.Length))
