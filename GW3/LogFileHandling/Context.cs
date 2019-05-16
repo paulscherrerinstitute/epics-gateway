@@ -221,10 +221,18 @@ namespace GWLogger.Backend.DataContext
                 }
                 catch
                 {
-                    break;
+                    continue;
                 }
-                while (bufferedEntries.Count > 0)
-                    entries.Add(bufferedEntries.Receive(cancelOperation.Token));
+                try
+                {
+                    while (bufferedEntries.Count > 0)
+                        entries.Add(bufferedEntries.Receive(cancelOperation.Token));
+                }
+                catch
+                {
+                    continue;
+                }
+
                 if (entries.Count == 0)
                     break;
                 List<int> knownErrors;
@@ -254,10 +262,8 @@ namespace GWLogger.Backend.DataContext
                             lastGateway.Save(entry, knownErrors.Contains(entry.MessageTypeId));
                         }
                     }
-                    finally
+                    catch
                     {
-                        /*if (lastGateway != null)
-                            lastGateway.Release();*/
                     }
                 }
             }
