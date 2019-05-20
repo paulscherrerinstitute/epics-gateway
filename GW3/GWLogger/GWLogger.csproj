@@ -369,6 +369,7 @@
     <Content Include="Frontend\tsconfig.json" />
     <Content Include="graphtest.html" />
     <Content Include="gulpfile.js" />
+    <Content Include="Health.asmx" />
     <Content Include="help.html" />
     <Content Include="Images\all_green_map.png" />
     <Content Include="Images\bad_cycles.png" />
@@ -391,6 +392,8 @@
     <None Include="Properties\PublishProfiles\EPICSLOG.pubxml" />
     <None Include="Properties\PublishProfiles\EPICSLOG02.pubxml" />
     <Content Include="main.js" />
+    <None Include="Properties\PublishProfiles\TEST epicslogvm02.pubxml" />
+    <None Include="Properties\PublishProfiles\TEST epicslogvm03.pubxml" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.3.1.js" />
     <Content Include="Scripts\jquery-3.3.1.min.js" />
@@ -568,6 +571,10 @@
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Health.asmx.cs">
+      <DependentUpon>Health.asmx</DependentUpon>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Introspection.ashx.cs">
       <DependentUpon>Introspection.ashx</DependentUpon>
