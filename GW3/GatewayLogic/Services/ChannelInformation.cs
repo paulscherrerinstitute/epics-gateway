@@ -182,7 +182,7 @@ namespace GatewayLogic.Services
                         }
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     gateway.MessageLogger.Write(null, Services.LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex.ToString() + "\n" + ex.StackTrace } });
                 }
@@ -234,8 +234,9 @@ namespace GatewayLogic.Services
 
         public ChannelInformationDetails Get(uint id)
         {
-            if (uidDictionary.ContainsKey(id))
-                return uidDictionary[id];
+            ChannelInformationDetails res;
+            if (uidDictionary.TryGetValue(id, out res))
+                return res;
             return null;
         }
 
@@ -277,8 +278,8 @@ namespace GatewayLogic.Services
 
             channel.Dispose();
             ChannelInformationDetails res;
-            uidDictionary.Remove(dictionary[channel.ChannelName].GatewayId);
-            dictionary.Remove(channel.ChannelName);
+            if (dictionary.TryRemove(channel.ChannelName, out res))
+                uidDictionary.Remove(res.GatewayId);
             gateway.MonitorInformation.Drop(channel.GatewayId);
         }
 
@@ -299,9 +300,9 @@ namespace GatewayLogic.Services
         internal void ServerDrop(uint gatewayId)
         {
             IEnumerable<Client> clients;
-            if (!uidDictionary.ContainsKey(gatewayId))
+            ChannelInformationDetails channel;
+            if (!uidDictionary.TryGetValue(gatewayId, out channel))
                 return;
-            var channel = uidDictionary[gatewayId];
             clients = channel.GetClientConnections();
             ChannelInformationDetails res;
             uidDictionary.TryRemove(gatewayId, out res);

@@ -45,7 +45,7 @@ namespace GatewayLogic.Commands
                 //connection.Gateway.Log.Write(Services.LogLevel.Detail, "First event");
                 monitor.FirstTime = false;
 
-                monitor.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter2 });
+                monitor.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter2, Connection = connection });
                 newPacket = (DataPacket)packet.Clone();
                 newPacket.Parameter1 = channel.ServerId.Value;
                 newPacket.Parameter2 = monitor.GatewayId;
@@ -56,7 +56,7 @@ namespace GatewayLogic.Commands
             // We must send a Read Notify to get the first result
             else if (monitor.HasReceivedFirstResult == true)
             {
-                monitor.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter2, WaitingReadyNotify = true });
+                monitor.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter2, WaitingReadyNotify = true, Connection = connection });
 
                 var read = connection.Gateway.ReadNotifyInformation.Get(channel, packet.Parameter2, (TcpClientConnection)connection);
                 read.IsEventAdd = true;
@@ -75,7 +75,7 @@ namespace GatewayLogic.Commands
             else
             {
                 connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EventAddMonitorList, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channel.ChannelName }, new LogMessageDetail { TypeId = MessageDetail.CID, Value = packet.Parameter2.ToString() }, new LogMessageDetail { TypeId = MessageDetail.GatewayMonitorId, Value = monitor.GatewayId.ToString() } });
-                monitor.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter2 });
+                monitor.AddClient(new ClientId { Client = packet.Sender, Id = packet.Parameter2, Connection = connection });
             }
             //}
             if (newPacket != null)
@@ -111,11 +111,10 @@ namespace GatewayLogic.Commands
             foreach (var client in clients)
             {
                 if (client.WaitingReadyNotify)
-                {
-                    //connection.Gateway.MessageLogger.Write(client.Client.ToString(), Services.LogMessageType.EventAddResponseSkipForRead, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = monitor.ChannelInformation.ChannelName } });
                     continue;
-                }
-                var conn = connection.Gateway.ClientConnection.Get(client.Client);
+
+                //var conn = connection.Gateway.ClientConnection.Get(client.Client);
+                var conn = client.Connection;
                 if (conn == null)
                 {
                     connection.Gateway.MessageLogger.Write(client.Client.ToString(), Services.LogMessageType.EventAddResponseClientDisappeared, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = monitor.ChannelInformation.ChannelName } });
@@ -129,17 +128,9 @@ namespace GatewayLogic.Commands
 
                 System.Threading.Interlocked.Increment(ref connection.Gateway.DiagnosticServer.NbCAMONAnswers);
 
-                /*var newPacket = (DataPacket)packet.Clone();
-                newPacket.Destination = conn.RemoteEndPoint;
-                newPacket.Parameter2 = client.Id;
-                conn.Send(newPacket);*/
-
-                packet.Destination = conn.RemoteEndPoint;
+                //packet.Destination = ((TcpClientConnection)conn).RemoteEndPoint;
                 packet.Parameter2 = client.Id;
                 conn.Send(packet);
-
-
-                //connection.Gateway.MessageLogger.Write(client.Client.ToString(), Services.LogMessageType.EventAddResponseSending, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = monitor.ChannelInformation.ChannelName }, new LogMessageDetail { TypeId = MessageDetail.CID, Value = client.Id.ToString() } });
             }
         }
     }
