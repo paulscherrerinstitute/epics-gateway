@@ -1,4 +1,6 @@
 ﻿using GraphAnomalies;
+using GraphAnomalies.Processors;
+using GraphAnomalies.Types;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
@@ -80,10 +82,25 @@ namespace GraphAnomalyVisualizer
 
                         model.Axes.Add(new DateTimeAxis() { Position = AxisPosition.Bottom });
 
-                        var detector = new AnomalyDetector()
-                        {
-                            MaxNumAveragedValues = 10000, // Do not begin deleting older data for visualization purposes
-                        };
+                        var weightedMovingAverageCollector = new ValueCollector();
+
+                        var chain = ProcessorChainBuilder
+                            .From(new WeightedMovingAverage(20))
+                            .Chain(new Rounding())
+                            .Chain(weightedMovingAverageCollector)
+                            .Build();
+
+                        //var chain = ProcessorChainBuilder
+                        //     //.From(new Rounding())
+                        //     .From(new WeightedMovingAverage(10))
+                        //     //.Chain(new Rounding())
+                        //     .Chain(new WeightedMovingAverage(20))
+                        //     .Chain(new Rounding())
+                        //     .Chain(weightedMovingAverageCollector)
+                        //     .Build();
+
+                        var detector = new AnomalyDetector(chain);
+
                         var anomalies = new List<AnomalyRange>();
                         var rises = new List<AnomalyRange>();
                         var falls = new List<AnomalyRange>();
@@ -95,14 +112,14 @@ namespace GraphAnomalyVisualizer
                         var last = cpuHistory.Last();
                         var lastValue = last.Value ?? -1;
                         var lastDate = last.Date;
-                        for (int i = 0; i < 100; i++)
+                        for (int i = 0; i < 300; i++)
                         {
                             lastDate = lastDate.AddSeconds(5);
                             cpuHistory.Add(new HistoricData { Date = lastDate, Value = lastValue });
                         }
 
                         foreach (var v in cpuHistory)
-                            detector.Update(v.Date, v.Value ?? -1);
+                            detector.Update(ToTemporalValue(v));
 
                         foreach (var v in rises)
                             AddArea(model, null, OxyColor.FromAColor(60, OxyColors.Green), v.From, v.To, 0, 100);
@@ -114,11 +131,11 @@ namespace GraphAnomalyVisualizer
                         foreach (var anomaly in anomalies)
                             AddArea(model, null, OxyColor.FromAColor(120, OxyColors.Orange), anomaly.From, anomaly.To, 100, 110);
 
-                        var averagedCpuHistory = detector.ReadonlyValues.Select(ToHistoricData).ToList();
                         AddPlotLine(model, "Actual data", OxyColors.Gray, cpuHistory);
-                        AddPlotLine(model, "Averaged values", OxyColors.Brown, averagedCpuHistory);
 
-                         Plot = model;
+                        AddPlotLine(model, "Weighted Moving Averages", OxyColors.Blue, weightedMovingAverageCollector.CollectedValues.Select(ToHistoricData));
+
+                        Plot = model;
                     }
                 }
                 catch (IOException)
@@ -137,7 +154,7 @@ namespace GraphAnomalyVisualizer
 
         public static PlotModel AddPlotLine(PlotModel model, string title, OxyColor color, IEnumerable<HistoricData> entries)
         {
-            var line = new LineSeries { Color = color, LineStyle = LineStyle.Solid };
+            var line = new LineSeries { Color = color, LineStyle = LineStyle.Solid, Title = title };
             foreach (var entry in entries)
             {
                 line.Points.Add(DateTimeAxis.CreateDataPoint(entry.Date, entry.Value ?? -1));
@@ -174,6 +191,15 @@ namespace GraphAnomalyVisualizer
             {
                 Date = value.Date,
                 Value = value.Value,
+            };
+        }
+
+        private TemporalValue ToTemporalValue(HistoricData value)
+        {
+            return new TemporalValue
+            {
+                Date = value.Date,
+                Value = value.Value ?? -1,
             };
         }
     }

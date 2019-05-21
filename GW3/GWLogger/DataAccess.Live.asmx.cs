@@ -1,4 +1,4 @@
-﻿using GraphAnomalies;
+﻿using GraphAnomalies.Types;
 using GWLogger.Live;
 using System.Collections.Generic;
 using System.IO;

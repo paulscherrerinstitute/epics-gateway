@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GraphAnomalies
+namespace GraphAnomalies.Types
 {
     public class AnomalyRange
     {

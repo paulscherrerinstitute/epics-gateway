@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using GraphAnomalies.Types;
+using System;
 
 namespace GraphAnomalies
 {
@@ -22,69 +21,58 @@ namespace GraphAnomalies
 
         #region Configuration
 
-        public int RunningAverageDistance { get; set; } = 10;
-        public int MaxNumAveragedValues { get; set; } = 500;
-
-        public int CumulativeValueThreshold { get; set; } = 6;
-        public TimeSpan MinAnomalyDuration { get; set; } = TimeSpan.FromMinutes(5); //.Add(TimeSpan.FromSeconds(30));
-        public TimeSpan AnomalyGroupingTimeout { get; set; } = TimeSpan.FromMinutes(3);
-        public double ValueCutoff { get; set; } = 0;
+        public int CumulativeValueThreshold { get; set; } = 7;
+        public TimeSpan MinAnomalyDuration { get; set; } = TimeSpan.FromMinutes(4);
+        public TimeSpan AnomalyGroupingTimeout { get; set; } = TimeSpan.FromMinutes(5);
+        public TimeSpan FlatTimeout { get; set; } = TimeSpan.FromMinutes(2);
 
         #endregion Configuration
 
-        public List<TemporalValue> ReadonlyValues => Values.Select(v => new TemporalValue(v)).ToList();
-        private readonly LinkedList<TemporalValue> Values = new LinkedList<TemporalValue>();
-        private readonly LinkedList<TemporalValue> LastRawValues = new LinkedList<TemporalValue>();
+        public readonly ProcessorChain PreProcessorChain;
 
-        public AnomalyDetector()
+        private TemporalValue? LastValue = null;
+
+        public AnomalyDetector(ProcessorChain preProcessorChain)
         {
+            PreProcessorChain = preProcessorChain;
             RiseDetected += RiseHandler;
             FallDetected += FallHandler;
             UnexpectedDetected += range => VerifyAndTriggerAnomaly(new AnomalyRange(range), hasGap: false);
+            preProcessorChain.LastProcessor.ValueProcessed += HandleProcessedValue;
         }
 
         private int LastSign = -2;
         private double CumulativeValue = 0;
         private bool ReachedCumulativeThreshold = false;
         private AnomalyRange CurrentCumulativeRange = null;
+        private DateTime? StartFlat = null;
 
-        public void Update(DateTime dateTime, double value)
+        public void Update(TemporalValue rawValue)
         {
-            var rawValue = new TemporalValue { Date = dateTime, Value = value };
-            LastRawValues.AddLast(rawValue);
-            while (LastRawValues.Count > RunningAverageDistance)
-                LastRawValues.RemoveFirst();
+            PreProcessorChain.FirstProcessor.Update(rawValue);
+        }
 
-            if (LastRawValues.Count < RunningAverageDistance)
+        public void HandleProcessedValue(TemporalValue processedValue)
+        {
+            if (LastValue == null)
+            {
+                LastValue = processedValue;
                 return;
+            }
 
-            var averagedValue = new TemporalValue {
-                Date = dateTime,
-                Value = LastRawValues.Select((v, i) => v.Value * i).Sum() / (RunningAverageDistance * (RunningAverageDistance + 1) / 2),
-                // See https://en.wikipedia.org/wiki/Moving_average, Section "Exponential moving average"
-            };
-
-            var last = Values.Last;
-            Values.AddLast(averagedValue);
-            while (Values.Count > MaxNumAveragedValues)
-                Values.RemoveFirst();
-
-            if (last == null)
-                return;
-
-            var previousAveragedValue = last.Value;
-            var valueDiff = averagedValue.Value - previousAveragedValue.Value;
-            var currentSign = Math.Sign(valueDiff);
+            var previouslyProcessedValue = LastValue.Value;
+            var valueDiff = processedValue.Value - previouslyProcessedValue.Value;
             var absValueDiff = Math.Abs(valueDiff);
+            var currentSign = Math.Sign(valueDiff);
 
-            if (currentSign == LastSign && absValueDiff >= ValueCutoff)
+            if (currentSign == LastSign || currentSign == 0)
             {
                 CumulativeValue += absValueDiff;
                 if (CumulativeValue >= CumulativeValueThreshold)
                 {
                     ReachedCumulativeThreshold = true;
-                    if (CurrentCumulativeRange.To < averagedValue.Date)
-                        CurrentCumulativeRange.To = averagedValue.Date;
+                    if (CurrentCumulativeRange.To < processedValue.Date)
+                        CurrentCumulativeRange.To = processedValue.Date;
                 }
             }
             else
@@ -99,13 +87,38 @@ namespace GraphAnomalies
 
                 LastSign = currentSign;
                 CumulativeValue = absValueDiff;
-                ReachedCumulativeThreshold = false;
-                if (absValueDiff >= CumulativeValueThreshold)
-                    ReachedCumulativeThreshold = true;
-                CurrentCumulativeRange = new AnomalyRange(previousAveragedValue.Date, averagedValue.Date);
+                ReachedCumulativeThreshold = absValueDiff >= CumulativeValueThreshold;
+                CurrentCumulativeRange = new AnomalyRange(previouslyProcessedValue.Date, processedValue.Date);
             }
 
-            CheckTimeouts(averagedValue);
+            if (currentSign == 0)
+            {
+                if (!StartFlat.HasValue)
+                    StartFlat = processedValue.Date;
+
+                if(processedValue.Date - StartFlat >= FlatTimeout)
+                {
+                    if (ReachedCumulativeThreshold)
+                    {
+                        if (LastSign == 1)
+                            RiseDetected?.Invoke(CurrentCumulativeRange);
+                        else if (LastSign == -1)
+                            FallDetected?.Invoke(CurrentCumulativeRange);
+                    }
+
+                    CumulativeValue = 0;
+                    ReachedCumulativeThreshold = false;
+                    CurrentCumulativeRange = new AnomalyRange(previouslyProcessedValue.Date, processedValue.Date);
+                }
+            }
+            else
+            {
+                StartFlat = null;
+            }
+
+            CheckTimeouts(processedValue);
+
+            LastValue = processedValue;
         }
 
         private AnomalyRange LastRise = null;
@@ -153,6 +166,7 @@ namespace GraphAnomalies
                     LastAnomaly = null;
                     LastAnomalyHasGaps = false;
                 }
+                //VerifyAndTriggerAnomaly(LastAnomaly, LastAnomalyHasGaps);
             }
         }
 

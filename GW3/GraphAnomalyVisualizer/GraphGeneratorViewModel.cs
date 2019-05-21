@@ -1,4 +1,4 @@
-﻿using GraphAnomalies;
+﻿using GraphAnomalies.Types;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;

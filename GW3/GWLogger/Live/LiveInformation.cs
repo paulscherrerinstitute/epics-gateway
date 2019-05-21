@@ -5,7 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using GraphAnomalies;
+using GraphAnomalies.Types;
 using GWLogger.Backend;
 
 namespace GWLogger.Live

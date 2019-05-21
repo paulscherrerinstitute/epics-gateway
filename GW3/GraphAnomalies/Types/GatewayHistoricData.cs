@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GraphAnomalies
+namespace GraphAnomalies.Types
 {
     public class GatewayHistoricData
     {
