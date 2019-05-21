@@ -115,7 +115,7 @@ namespace GatewayLogic.Commands
 
                 //var conn = connection.Gateway.ClientConnection.Get(client.Client);
                 var conn = client.Connection;
-                if (conn == null)
+                if (conn == null || conn.IsDisposed)
                 {
                     connection.Gateway.MessageLogger.Write(client.Client.ToString(), Services.LogMessageType.EventAddResponseClientDisappeared, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = monitor.ChannelInformation.ChannelName } });
                     monitor.RemoveClient(connection.Gateway, client.Client, client.Id);

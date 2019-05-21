@@ -8,6 +8,8 @@ namespace GatewayLogic.Connections
     {
         public IList<IPEndPoint> Destinations { get; set; }
         public Gateway Gateway { get; }
+        public abstract bool IsDisposed { get; }
+
         public GatewayConnection(Gateway gateway)
         {
             this.Gateway = gateway;

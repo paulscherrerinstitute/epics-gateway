@@ -57,6 +57,8 @@ namespace GatewayLogic.Connections
             flusher.Start();
         }
 
+        public override bool IsDisposed => disposed;
+
         public override void Dispose(LogMessageType commandReason, string message = null)
         {
             disposed = true;

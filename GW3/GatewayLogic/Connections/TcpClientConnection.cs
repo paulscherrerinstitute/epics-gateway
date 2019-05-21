@@ -14,8 +14,7 @@ namespace GatewayLogic.Connections
         private readonly byte[] buffer = new byte[Gateway.BUFFER_SIZE];
         private object disposedLock = new object();
         private bool disposed = false;
-        //private SafeLock socketLock = new SafeLock();
-        private SemaphoreSlim socketLock = new SemaphoreSlim(1);
+        //private SemaphoreSlim socketLock = new SemaphoreSlim(1);
 
         private Splitter splitter;
 
@@ -89,11 +88,8 @@ namespace GatewayLogic.Connections
 
             try
             {
-                socketLock.Wait();
-                //using (socketLock.Aquire())
-                //{
+                //socketLock.Wait();
                 socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
-                //}
             }
             catch (Exception ex)
             {
@@ -101,7 +97,7 @@ namespace GatewayLogic.Connections
             }
             finally
             {
-                socketLock.Release();
+                //socketLock.Release();
             }
         }
 
@@ -148,20 +144,14 @@ namespace GatewayLogic.Connections
             }
             catch (Exception ex)
             {
-                /*if (Log.WillDisplay(System.Diagnostics.TraceEventType.Error))
-                    Log.TraceEvent(System.Diagnostics.TraceEventType.Error, Chain.ChainId, ex.Message);*/
                 Gateway.MessageLogger.Write(RemoteEndPoint.ToString(), LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex.ToString() } });
-                //Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
                 Dispose(LogMessageType.Exception, ex.ToString());
                 return;
             }
-            //Log.Write("Client received " + n + " bytes from " + this.RemoteEndPoint);
 
             // Time to quit!
             if (n == 0)
             {
-                /*if (Log.WillDisplay(System.Diagnostics.TraceEventType.Verbose))
-                    Log.TraceEvent(System.Diagnostics.TraceEventType.Verbose, Chain.ChainId, "Socket closed on the other side");*/
                 Dispose(LogMessageType.SocketClosed);
                 return;
             }
@@ -169,14 +159,6 @@ namespace GatewayLogic.Connections
             this.LastMessage = DateTime.UtcNow;
 
             var mainPacket = DataPacket.Create(buffer, n);
-
-            /*// We receive a debug port request.
-            if (buffer[0] == 126)
-            {
-                Gateway.ClientConnection.Remove(this);
-                Gateway.ClientConnection.Add(new DebugPortConnection(Gateway, this.Socket, this.RemoteEndPoint, (IPEndPoint)this.Socket.LocalEndPoint, mainPacket));
-                return;
-            }*/
 
             try
             {
@@ -186,19 +168,15 @@ namespace GatewayLogic.Connections
                     {
                         Gateway.DiagnosticServer.NbMessages++;
 
-                        //Console.WriteLine("=> Packet size " + p.MessageSize + " (command " + p.Command + ")");
-                        //Log.Write("Packet number " + (pi++) + " command " + p.Command);
                         if (!socket.Connected)
                             break;
                         p.Sender = (IPEndPoint)socket.RemoteEndPoint;
                         Commands.CommandHandler.ExecuteRequestHandler(p.Command, this, p);
                     }
-                    //Console.WriteLine(" ==> End of packet");
                 }
             }
             catch (Exception ex)
             {
-                //Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
                 Gateway.MessageLogger.Write(RemoteEndPoint.ToString(), LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex.ToString() } });
                 Dispose(LogMessageType.Exception, ex.ToString());
             }
@@ -217,7 +195,6 @@ namespace GatewayLogic.Connections
             }
             catch (Exception ex)
             {
-                //Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
                 Gateway.MessageLogger.Write(RemoteEndPoint.ToString(), LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex.ToString() } });
                 Dispose(LogMessageType.SocketErrorReceiving, ex.ToString());
             }
@@ -228,8 +205,10 @@ namespace GatewayLogic.Connections
 
         ~TcpClientConnection()
         {
-            socketLock.Dispose();
+            //socketLock.Dispose();
         }
+
+        public override bool IsDisposed => disposed;
 
         public override void Dispose(LogMessageType commandReason, string message = null)
         {

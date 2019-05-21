@@ -15,8 +15,7 @@ namespace GatewayLogic.Connections
         private Socket socket;
         private SafeLock lockObject = new SafeLock();
 
-        //SafeLock socketLock = new SafeLock();
-        private SemaphoreSlim socketLock = new SemaphoreSlim(1);
+        //private SemaphoreSlim socketLock = new SemaphoreSlim(1);
         private bool isConnected = false;
         private List<Action> toCallWhenReady = new List<Action>();
         private readonly byte[] buffer = new byte[Gateway.BUFFER_SIZE];
@@ -140,8 +139,8 @@ namespace GatewayLogic.Connections
             }
 
             this.LastMessage = DateTime.UtcNow;
-            var mainPacket = DataPacket.Create(buffer, size, false);
-            //var mainPacket = DataPacket.Create(buffer, size, true);
+            //var mainPacket = DataPacket.Create(buffer, size, false);
+            var mainPacket = DataPacket.Create(buffer, size, true);
 
             foreach (var p in splitter.Split(mainPacket))
             {
@@ -214,11 +213,8 @@ namespace GatewayLogic.Connections
 
             try
             {
-                socketLock.Wait();
-                //using (socketLock.Aquire())
-                //{
+                //socketLock.Wait();
                 socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
-                //}
             }
             catch (Exception ex)
             {
@@ -226,16 +222,18 @@ namespace GatewayLogic.Connections
             }
             finally
             {
-                socketLock.Release();
+                //socketLock.Release();
             }
         }
 
         ~TcpServerConnection()
         {
             lockObject.Dispose();
-            socketLock.Dispose();
+            //socketLock.Dispose();
             channelsLock.Dispose();
         }
+
+        public override bool IsDisposed => disposed;
 
         public override void Dispose(LogMessageType commandReason, string message = null)
         {

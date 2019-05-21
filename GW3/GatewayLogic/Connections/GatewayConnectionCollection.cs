@@ -27,9 +27,10 @@ namespace GatewayLogic.Connections
             // Dispose old one
             List<TType> toDelete;
             List<TType> toCheck;
+            var now = DateTime.UtcNow;
 
-            toDelete = dictionary.Values.Where(row => (DateTime.UtcNow - row.LastMessage).TotalSeconds > 90).ToList();
-            toCheck = dictionary.Values.Where(row => (DateTime.UtcNow - row.LastMessage).TotalSeconds > 35 && !toDelete.Contains(row)).ToList();
+            toDelete = dictionary.Values.Where(row => (now - row.LastMessage).TotalSeconds > 90).ToList();
+            toCheck = dictionary.Values.Where(row => (now - row.LastMessage).TotalSeconds > 35 && (now - row.LastEcho).TotalSeconds > 30 && !toDelete.Contains(row)).ToList();
 
             //toDelete.ForEach(row => row.Dispose(Services.LogMessageType.EchoNeverAnswered));
 
