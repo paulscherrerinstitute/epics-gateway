@@ -15,7 +15,7 @@ namespace GatewayLogic.Commands
             ChannelInformation.ChannelInformationDetails channel;
 
             channel = connection.Gateway.ChannelInformation.Get(packet.Parameter1);
-            if (channel == null)
+            if (channel == null || channel.ConnectionIsBuilding)
             {
                 connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.EventAddWrongChannel);
                 connection.Dispose(Services.LogMessageType.EventAddWrongChannel);

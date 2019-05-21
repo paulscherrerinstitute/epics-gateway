@@ -21,7 +21,13 @@ namespace GatewayLogic.Services
             Gateway = gateway;
             gateway.TenSecUpdate += (sender, evt) =>
               {
-                  List<ChannelInformationDetails> toDrop = dictionary.Select(row => row.Value).Where(row => (row.ConnectionIsBuilding && (DateTime.UtcNow - row.StartBuilding).TotalSeconds > 5) || row.ShouldDrop).ToList();
+                  List<ChannelInformationDetails> toRebuild = dictionary.Select(row => row.Value).Where(row => row.ShouldRebuild).ToList();
+                  toRebuild.ForEach(row =>
+                  {
+                      row.Rebuild(Gateway);
+                  });
+
+                  List<ChannelInformationDetails> toDrop = dictionary.Select(row => row.Value).Where(row => row.ShouldDrop).ToList();
                   toDrop.ForEach(row =>
                       {
                           row.Drop(Gateway);
@@ -107,7 +113,8 @@ namespace GatewayLogic.Services
                 {
                     try
                     {
-                        connection.Gateway.Log.Write(LogLevel.Error, ex.ToString() + "\n" + ex.StackTrace);
+                        connection.Gateway.MessageLogger.Write(connection.RemoteEndPoint.ToString(), Services.LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex.ToString() + "\n" + ex.StackTrace } });
+                        //connection.Gateway.Log.Write(LogLevel.Error, ex.ToString() + "\n" + ex.StackTrace);
                     }
                     catch
                     {
@@ -115,46 +122,78 @@ namespace GatewayLogic.Services
                 }
             }
 
+            internal void Rebuild(Gateway gateway)
+            {
+                var size = this.ChannelName.Length + DataPacket.Padding(this.ChannelName.Length);
+                var newPacket = DataPacket.Create(size);
+                newPacket.Command = 18;
+                newPacket.PayloadSize = (uint)size;
+                newPacket.Parameter1 = this.GatewayId;
+                newPacket.Parameter2 = Gateway.CA_PROTO_VERSION;
+                newPacket.SetDataAsString(this.ChannelName);
+                TcpConnection.Send(newPacket);
+            }
+
             internal void Drop(Gateway gateway)
             {
-                if (ServerId.HasValue && ConnectionIsBuilding == false)
+                try
                 {
-                    gateway.MonitorInformation.Drop(GatewayId);
+                    if (ServerId.HasValue && ConnectionIsBuilding == false)
+                    {
+                        gateway.MonitorInformation.Drop(GatewayId);
 
-                    // Send clear channel
-                    var newPacket = DataPacket.Create(0);
-                    newPacket.Command = 12;
-                    newPacket.Parameter1 = GatewayId;
-                    newPacket.Parameter2 = ServerId.Value;
-                    TcpConnection.Send(newPacket);
+                        // Send clear channel
+                        var newPacket = DataPacket.Create(0);
+                        newPacket.Command = 12;
+                        newPacket.Parameter1 = GatewayId;
+                        newPacket.Parameter2 = ServerId.Value;
+                        TcpConnection.Send(newPacket);
+                    }
+                    else
+                    {
+                        // Drop the search information as well as it was certainly wrong
+                        gateway.SearchInformation.Remove(this.ChannelName);
+
+                        List<Client> clients;
+                        lock (connectedClients)
+                            clients = connectedClients.ToList();
+
+                        // Send channel disconnected
+                        var newPacket = DataPacket.Create(0);
+                        newPacket.Command = 27;
+                        foreach (var client in clients)
+                        {
+                            newPacket.Parameter1 = client.Id;
+                            client.Connection.Send(newPacket);
+                        }
+
+                        TcpConnection?.RemoveChannel(this);
+                        if (TcpConnection?.Channels.Count == 0)
+                        {
+                            // Drop server connection
+                            try
+                            {
+                                TcpConnection?.Dispose(LogMessageType.DropChannel);
+                                TcpConnection = null;
+                            }
+                            catch
+                            {
+                            }
+                        }
+                    }
                 }
-                else
+                catch(Exception ex)
                 {
-                    // Drop the search information as well as it was certainly wrong
-                    gateway.SearchInformation.Remove(this.ChannelName);
+                    gateway.MessageLogger.Write(null, Services.LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex.ToString() + "\n" + ex.StackTrace } });
+                }
+            }
 
-                    List<Client> clients;
+            public bool ShouldRebuild
+            {
+                get
+                {
                     lock (connectedClients)
-                        clients = connectedClients.ToList();
-
-                    // Send channel disconnected
-                    var newPacket = DataPacket.Create(0);
-                    newPacket.Command = 27;
-                    foreach (var client in clients)
-                    {
-                        newPacket.Parameter1 = client.Id;
-                        client.Connection.Send(newPacket);
-                    }
-
-                    // Drop server connection
-                    try
-                    {
-                        TcpConnection?.Dispose(LogMessageType.DropChannel);
-                        TcpConnection = null;
-                    }
-                    catch
-                    {
-                    }
+                        return (this.ConnectionIsBuilding == true && (DateTime.UtcNow - this.StartBuilding).TotalSeconds > 20);
                 }
             }
 
@@ -162,8 +201,8 @@ namespace GatewayLogic.Services
             {
                 get
                 {
-                    lock(connectedClients)
-                       return (connectedClients.Count == 0 && (DateTime.UtcNow - this.LastUse).TotalMinutes > 30) || (this.ConnectionIsBuilding == true && (DateTime.UtcNow - this.StartBuilding).TotalSeconds > 2);
+                    lock (connectedClients)
+                        return (connectedClients.Count == 0 && (DateTime.UtcNow - this.LastUse).TotalMinutes > 30);
                 }
             }
 
@@ -171,7 +210,7 @@ namespace GatewayLogic.Services
             {
                 get
                 {
-                    lock(connectedClients)
+                    lock (connectedClients)
                         return connectedClients.Count;
                 }
             }
@@ -187,7 +226,7 @@ namespace GatewayLogic.Services
                     toDrop = connectedClients.ToList();
                 foreach (var i in toDrop)
                     i.Connection.Gateway.MonitorInformation.GetByClientId(i.Connection.RemoteEndPoint, i.Id)?.RemoveClient(i.Connection.Gateway, i.Connection.RemoteEndPoint, i.Id);
-                lock(connectedClients)
+                lock (connectedClients)
                     connectedClients.Clear();
                 this.LastUse = DateTime.UtcNow;
             }
@@ -237,8 +276,8 @@ namespace GatewayLogic.Services
             gateway.SearchInformation.Remove(channel.ChannelName);
 
             channel.Dispose();
-            if (dictionary.ContainsKey(channel.ChannelName))
-                uidDictionary.Remove(dictionary[channel.ChannelName].GatewayId);
+            ChannelInformationDetails res;
+            uidDictionary.Remove(dictionary[channel.ChannelName].GatewayId);
             dictionary.Remove(channel.ChannelName);
             gateway.MonitorInformation.Drop(channel.GatewayId);
         }
@@ -264,8 +303,9 @@ namespace GatewayLogic.Services
                 return;
             var channel = uidDictionary[gatewayId];
             clients = channel.GetClientConnections();
-            uidDictionary.Remove(gatewayId);
-            dictionary.Remove(channel.ChannelName);
+            ChannelInformationDetails res;
+            uidDictionary.TryRemove(gatewayId, out res);
+            dictionary.TryRemove(channel.ChannelName, out res);
 
             var newPacket = DataPacket.Create(0);
             newPacket.Command = 27;

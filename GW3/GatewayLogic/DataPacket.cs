@@ -27,12 +27,13 @@ namespace GatewayLogic
     {
         private static Dictionary<int, Queue<byte[]>> memoryPool = new Dictionary<int, Queue<byte[]>>();
         const int BufferPooledLimit = 1600;
-        public static long nbNewBlocks = 0;
-        public static long nbTotalBlocks = 0;
+        /*public static long nbNewBlocks = 0;
+        public static long nbTotalBlocks = 0;*/
 
         private static byte[] Allocate(int size)
         {
-            System.Threading.Interlocked.Increment(ref nbTotalBlocks);
+            return new byte[size];
+            /*System.Threading.Interlocked.Increment(ref nbTotalBlocks);
             if ((size > BufferPooledLimit))
             {
                 System.Threading.Interlocked.Increment(ref nbNewBlocks);
@@ -46,12 +47,12 @@ namespace GatewayLogic
                     return new byte[size];
                 }
                 return memoryPool[size].Dequeue();
-            }
+            }*/
         }
 
         ~DataPacket()
         {
-            if (this.Reuse)
+            /*if (this.Reuse)
                 return;
             if ((this.Data.Length > BufferPooledLimit))
                 return;
@@ -62,7 +63,7 @@ namespace GatewayLogic
                 for (var i = 0; i < this.Data.Length; i++)
                     this.Data[i] = 0;
                 memoryPool[this.Data.Length].Enqueue(this.Data);
-            }
+            }*/
         }
 
         public DataPacketKind Kind = DataPacketKind.RAW;

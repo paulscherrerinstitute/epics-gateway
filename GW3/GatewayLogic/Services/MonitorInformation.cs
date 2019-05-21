@@ -153,8 +153,11 @@ namespace GatewayLogic.Services
             /*using (dictionaryLock.Aquire())
             {*/
             //return monitors.FirstOrDefault(row => row.GatewayId == id);
-            if (monitorLookup.ContainsKey(id))
-                return monitorLookup[id];
+            /*if (monitorLookup.ContainsKey(id))
+                return monitorLookup[id];*/
+            MonitorInformationDetail result = null;
+            if (monitorLookup.TryGetValue(id, out result))
+                return result;
             return null;
             //}
         }
@@ -164,8 +167,9 @@ namespace GatewayLogic.Services
             var key = clientEndPoint.ToString() + ";" + clientId;
             /*using (dictionaryLock.Aquire())
             {*/
-            if (clientLookup.ContainsKey(key))
-                return clientLookup[key];
+            MonitorInformationDetail result = null;
+            if (clientLookup.TryGetValue(key, out result))
+                return result;
             return null;
             /*}*/
 

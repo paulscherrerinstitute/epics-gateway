@@ -9,7 +9,7 @@ namespace GatewayLogic.Commands
         public override void DoRequest(GatewayConnection connection, DataPacket packet)
         {
             var channel = connection.Gateway.ChannelInformation.Get(packet.Parameter1);
-            if (channel == null)
+            if (channel == null || channel.ConnectionIsBuilding)
             {
                 connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.ReadNotifyRequestWrongChannel, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.GWID, Value = packet.Parameter1.ToString() } });
                 connection.Dispose(Services.LogMessageType.ReadNotifyRequestWrongChannel);

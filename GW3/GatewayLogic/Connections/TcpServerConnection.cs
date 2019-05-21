@@ -190,6 +190,14 @@ namespace GatewayLogic.Connections
             }
         }
 
+        public void RemoveChannel(ChannelInformation.ChannelInformationDetails channel)
+        {
+            using (channelsLock.Aquire())
+            {
+                channels.Remove(channel);
+            }
+        }
+
         public override void Send(DataPacket packet)
         {
             Gateway.DiagnosticServer.NbNewData++;

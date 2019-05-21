@@ -17,7 +17,7 @@ namespace GatewayLogic
         private readonly CADoubleRecord channelCpu;
         private readonly CADoubleRecord channelMem;
         private readonly CADoubleRecord channelAverageCpu;
-        private readonly CADoubleRecord channelBlockReuses;
+        //private readonly CADoubleRecord channelBlockReuses;
         private readonly CAIntRecord channelNbClientConn;
         private readonly CAIntRecord channelNbServerConn;
         private readonly CAIntRecord channelKnownChannels;
@@ -25,7 +25,7 @@ namespace GatewayLogic
         private readonly CAIntRecord channelNbSearchPerSec;
         private readonly CAIntRecord channelNbMessagesPerSec;
         private readonly CAIntRecord channelNbCreatedPacketPerSec;
-        private readonly CAIntRecord channelNbPooledPacket;
+        //private readonly CAIntRecord channelNbPooledPacket;
         private readonly CAIntRecord channelNbTcpCreated;
         private readonly CAIntRecord channelNbCAGET;
         private readonly CAIntRecord channelNbCAPUT;
@@ -132,7 +132,7 @@ namespace GatewayLogic
             channelNbMessagesPerSec.PrepareRecord += new EventHandler(channelNbMessagesPerSec_PrepareRecord);
 
             // Nb Blocks
-            channelBlockReuses = diagServer.CreateRecord<CADoubleRecord>(gateway.Configuration.GatewayName + ":BLOCKS-REUSE");
+            /*channelBlockReuses = diagServer.CreateRecord<CADoubleRecord>(gateway.Configuration.GatewayName + ":BLOCKS-REUSE");
             channelBlockReuses.CanBeRemotlySet = false;
             channelBlockReuses.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC5;
             channelBlockReuses.DisplayPrecision = 3;
@@ -142,7 +142,7 @@ namespace GatewayLogic
                 channelBlockReuses.Value = ((double)(DataPacket.nbTotalBlocks - DataPacket.nbNewBlocks)) * 100.0 / ((double)DataPacket.nbTotalBlocks);
                 DataPacket.nbTotalBlocks = 0;
                 DataPacket.nbNewBlocks = 0;
-            };
+            };*/
 
             // DataPacket sent per sec
             channelNbCreatedPacketPerSec = diagServer.CreateRecord<CAIntRecord>(gateway.Configuration.GatewayName + ":NEWDATA-SEC");
@@ -151,10 +151,10 @@ namespace GatewayLogic
             channelNbCreatedPacketPerSec.PrepareRecord += new EventHandler(channelNbCreatedPacketPerSec_PrepareRecord);
 
             // Number of package ready to be re-used
-            channelNbPooledPacket = diagServer.CreateRecord<CAIntRecord>(gateway.Configuration.GatewayName + ":POOLED-DATA");
+            /*channelNbPooledPacket = diagServer.CreateRecord<CAIntRecord>(gateway.Configuration.GatewayName + ":POOLED-DATA");
             channelNbPooledPacket.CanBeRemotlySet = false;
             channelNbPooledPacket.Scan = EpicsSharp.ChannelAccess.Constants.ScanAlgorithm.SEC5;
-            channelNbPooledPacket.PrepareRecord += new EventHandler(channelNbPooledPacket_PrepareRecord);
+            channelNbPooledPacket.PrepareRecord += new EventHandler(channelNbPooledPacket_PrepareRecord);*/
 
             // TCP Created from startup
             channelNbTcpCreated = diagServer.CreateRecord<CAIntRecord>(gateway.Configuration.GatewayName + ":COUNT-TCP");
@@ -297,10 +297,10 @@ namespace GatewayLogic
             channelNbTcpCreated.Value = NbTcpCreated;
         }
 
-        private void channelNbPooledPacket_PrepareRecord(object sender, EventArgs e)
+        /*private void channelNbPooledPacket_PrepareRecord(object sender, EventArgs e)
         {
             channelNbPooledPacket.Value = NbPooledPacket;
-        }
+        }*/
 
         private void channelNbCreatedPacketPerSec_PrepareRecord(object sender, EventArgs e)
         {

@@ -143,7 +143,7 @@ namespace GatewayLogic.Commands
                 {
                     locked = false;
                     locker.Release();
-                    connection.Dispose(Services.LogMessageType.CreateChannelAnswerForUnknown);
+                    //connection.Dispose(Services.LogMessageType.CreateChannelAnswerForUnknown);
                     connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannelAnswerForUnknown);
                     return;
                 }
