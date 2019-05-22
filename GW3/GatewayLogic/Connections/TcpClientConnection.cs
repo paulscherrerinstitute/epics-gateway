@@ -46,7 +46,10 @@ namespace GatewayLogic.Connections
             {
                 socket = value;
                 socket.SendTimeout = 3000;
-                socket.SendBufferSize = 64 * 1024;
+                //socket.SendBufferSize = 64 * 1024;
+                //socket.SendBufferSize = Gateway.BUFFER_SIZE * 4;
+                socket.SendBufferSize = 1500;
+                socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
                 RemoteEndPoint = (IPEndPoint)socket.RemoteEndPoint;
                 //netStream = new NetworkStream(socket);
@@ -89,7 +92,8 @@ namespace GatewayLogic.Connections
             try
             {
                 //socketLock.Wait();
-                socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
+                //socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
+                socket.Send(packet.Data, packet.Offset, (int)packet.MessageSize, SocketFlags.None);
             }
             catch (Exception ex)
             {

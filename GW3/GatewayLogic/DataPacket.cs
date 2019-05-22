@@ -25,15 +25,15 @@ namespace GatewayLogic
     /// </summary>
     public class DataPacket : ICloneable// , IDisposable
     {
-        private static Dictionary<int, Queue<byte[]>> memoryPool = new Dictionary<int, Queue<byte[]>>();
-        const int BufferPooledLimit = 1200;
+        //private static Dictionary<int, Queue<byte[]>> memoryPool = new Dictionary<int, Queue<byte[]>>();
+        //const int BufferPooledLimit = 1200;
         /*public static long nbNewBlocks = 0;
         public static long nbTotalBlocks = 0;*/
 
         private static byte[] Allocate(int size)
         {
-            //return new byte[size];
-            //System.Threading.Interlocked.Increment(ref nbTotalBlocks);
+            return new byte[size];
+            /*//System.Threading.Interlocked.Increment(ref nbTotalBlocks);
             if ((size > BufferPooledLimit))
             {
                 //System.Threading.Interlocked.Increment(ref nbNewBlocks);
@@ -47,10 +47,10 @@ namespace GatewayLogic
                     return new byte[size];
                 }
                 return memoryPool[size].Dequeue();
-            }
+            }*/
         }
 
-        ~DataPacket()
+        /*~DataPacket()
         {
             if (this.Reuse)
                 return;
@@ -64,7 +64,7 @@ namespace GatewayLogic
                     this.Data[i] = 0;
                 memoryPool[this.Data.Length].Enqueue(this.Data);
             }
-        }
+        }*/
 
         public DataPacketKind Kind = DataPacketKind.RAW;
         public byte[] Data;
@@ -350,6 +350,7 @@ namespace GatewayLogic
                 p.Destination = this.Destination;
                 p.Kind = this.Kind;
                 p.bufferSize = BufferSize - (int)size;
+                p.payloadSize = null;
                 p.Offset = Offset + (int)size;
                 p.Data = Data;
                 p.Reuse = true;

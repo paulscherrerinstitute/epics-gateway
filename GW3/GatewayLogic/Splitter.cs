@@ -119,8 +119,8 @@ namespace GatewayLogic
                 {
                     //Log.Write("Complete packet...");
                     packet.Kind = DataPacketKind.COMPLETE;
-                    var result = (DataPacket)packet.Clone();
-                    //var result = packet;
+                    //var result = (DataPacket)packet.Clone();
+                    var result = packet;
                     lockSplitter.Release();
                     yield return result;
                     /*DataPacket p = DataPacket.Create(packet, (uint)packet.BufferSize);
@@ -132,7 +132,8 @@ namespace GatewayLogic
                 if (packet.MessageSize < packet.BufferSize)
                 {
                     //Log.Write("Splitting...");
-                    DataPacket p = DataPacket.Create(packet, packet.MessageSize, false);
+                    //DataPacket p = DataPacket.Create(packet, packet.MessageSize, false);
+                    DataPacket p = DataPacket.Create(packet, packet.MessageSize, true);
                     p.Kind = DataPacketKind.COMPLETE;
                     lockSplitter.Release();
                     yield return p;
@@ -145,6 +146,7 @@ namespace GatewayLogic
                         yield break;
                     }
                     DataPacket newPacket = packet.SkipSize(packet.MessageSize, false);
+                    //DataPacket newPacket = packet.SkipSize(packet.MessageSize, true);
                     //packet.Dispose();
                     packet = newPacket;
                 }

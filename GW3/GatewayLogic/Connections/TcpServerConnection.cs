@@ -33,6 +33,7 @@ namespace GatewayLogic.Connections
             RemoteEndPoint = destination;
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+            socket.ReceiveBufferSize = Gateway.BUFFER_SIZE * 4;
             socket.SendTimeout = 3000;
             var evt = new AutoResetEvent(false);
             IAsyncResult result = socket.BeginConnect(destination, (IAsyncResult ar) =>
@@ -59,10 +60,10 @@ namespace GatewayLogic.Connections
                         {
                             socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             //Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
-                            Dispose(LogMessageType.SocketCreationError,ex.ToString());
+                            Dispose(LogMessageType.SocketCreationError, ex.ToString());
                         }
                     }
                 }, null);
@@ -214,7 +215,8 @@ namespace GatewayLogic.Connections
             try
             {
                 //socketLock.Wait();
-                socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
+                //socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
+                socket.Send(packet.Data, packet.Offset, (int)packet.MessageSize, SocketFlags.None);
             }
             catch (Exception ex)
             {

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading;
 
 namespace GatewayLogic.Services
 {
@@ -35,7 +36,8 @@ namespace GatewayLogic.Services
             public ushort MonitorMask { get; internal set; }
             public MonitorInformation MonitorInformation { get; }
 
-            internal SafeLock clientsLock = new SafeLock();
+            //internal SafeLock clientsLock = new SafeLock();
+            SemaphoreSlim clientsLock = new SemaphoreSlim(1);
             public List<ClientId> clients = new List<ClientId>();
 
             public MonitorInformationDetail(uint id, ChannelInformation.ChannelInformationDetails channelInformation, ushort dataType, uint dataCount, UInt16 monitorMask, MonitorInformation monitorInformation)
@@ -55,10 +57,16 @@ namespace GatewayLogic.Services
 
             internal void AddClient(ClientId clientId)
             {
-                using (clientsLock.Aquire())
+                //using (clientsLock.Aquire())
+                try
                 {
+                    clientsLock.Wait();
                     if (!clients.Any(row => row.Client == clientId.Client && row.Id == clientId.Id))
                         clients.Add(clientId);
+                }
+                finally
+                {
+                    clientsLock.Release();
                 }
                 //using (MonitorInformation.dictionaryLock.Aquire())
                 MonitorInformation.clientLookup.TryAdd(clientId.Client.ToString() + ";" + clientId.Id.ToString(), this);
@@ -68,12 +76,18 @@ namespace GatewayLogic.Services
             {
                 var needToDeleteThis = false;
 
-                using (clientsLock.Aquire())
+                //using (clientsLock.Aquire())
+                try
                 {
+                    clientsLock.Wait();
                     clients.RemoveAll(row => row.Id == clientId && row.Client == endPoint);
                     // No more clients, we should cancel the monitor
                     if (clients.Count == 0)
                         needToDeleteThis = true;
+                }
+                finally
+                {
+                    clientsLock.Release();
                 }
 
                 //using (MonitorInformation.dictionaryLock.Aquire())
@@ -93,9 +107,15 @@ namespace GatewayLogic.Services
 
             internal IEnumerable<ClientId> GetClients()
             {
-                using (clientsLock.Aquire())
+                //using (clientsLock.Aquire())
+                try
                 {
+                    clientsLock.Wait();
                     return clients.ToList();
+                }
+                finally
+                {
+                    clientsLock.Release();
                 }
             }
 
@@ -123,8 +143,16 @@ namespace GatewayLogic.Services
 
             internal bool Any(Func<ClientId, bool> condition)
             {
-                using (clientsLock.Aquire())
+                //using (clientsLock.Aquire())
+                try
+                {
+                    clientsLock.Wait();
                     return clients.Any(condition);
+                }
+                finally
+                {
+                    clientsLock.Release();
+                }
             }
         }
 

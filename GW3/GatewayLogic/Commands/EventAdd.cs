@@ -128,7 +128,6 @@ namespace GatewayLogic.Commands
 
                 System.Threading.Interlocked.Increment(ref connection.Gateway.DiagnosticServer.NbCAMONAnswers);
 
-                //packet.Destination = ((TcpClientConnection)conn).RemoteEndPoint;
                 packet.Parameter2 = client.Id;
                 conn.Send(packet);
             }

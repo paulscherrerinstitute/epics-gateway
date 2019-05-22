@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GatewayLogic.Services
@@ -24,7 +25,8 @@ namespace GatewayLogic.Services
         //public event LogHandler Handler = TextLogger.DefaultHandler;
         public event LogHandler Handler;
         public LogFilter Filter = TextLogger.ShowAll;
-        private SafeLock lockObject = new SafeLock();
+        //private SafeLock lockObject = new SafeLock();
+        private SemaphoreSlim lockObject = new SemaphoreSlim(1);
 
         internal TextLogger()
         {
@@ -59,9 +61,15 @@ namespace GatewayLogic.Services
         {
             if (this.Filter != null && !this.Filter(level))
                 return;
-            using (lockObject.Aquire())
+            //using (lockObject.Aquire())
+            try
             {
+                lockObject.Wait();
                 Handler?.Invoke(level, sourceFilePath.Split(new char[] { '\\' }).Last().Split(new char[] { '.' }).First() + "." + memberName + ":" + sourceLineNumber, message);
+            }
+            finally
+            {
+                lockObject.Release();
             }
         }
 
