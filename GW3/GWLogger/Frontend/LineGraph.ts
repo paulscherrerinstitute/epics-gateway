@@ -297,9 +297,9 @@ class LineGraph
             var x = this.TransformX(i, this.xLabelWidth + 2);
 
             if (highlightSection) {
-
                 var comparer = point.Label instanceof Date ? (a, b) => this.AreDatesEqual(a, b) : (a, b) => a == b;
-
+                if (i == 0 && point.Label >= highlightSection.StartLabel)
+                    isHighlighted = true;
                 if (comparer(point.Label, highlightSection.StartLabel))
                     isHighlighted = true;
                 if (comparer(point.Label, highlightSection.EndLabel))
@@ -348,9 +348,10 @@ class LineGraph
             var x = this.TransformX(i, this.xLabelWidth + 2);
 
             if (highlightSection) {
-
                 var comparer = point.Label instanceof Date ? (a,b) => this.AreDatesEqual(a,b) : (a, b) => a == b;
 
+                if (i == 0 && point.Label >= highlightSection.StartLabel)
+                    isHighlighted = true;
                 if (comparer(point.Label, highlightSection.StartLabel))
                     isHighlighted = true;
                 if (comparer(point.Label, highlightSection.EndLabel))
@@ -388,7 +389,7 @@ class LineGraph
             a.getUTCHours() == b.getUTCHours() &&
             a.getUTCMinutes() == b.getUTCMinutes() &&
             a.getUTCSeconds() == b.getUTCSeconds();
-    } 
+    }
 
     // Transforms the X value in the screen coordinate
     private TransformX(x: number, xLabelWidth: number)
