@@ -125,7 +125,7 @@ namespace GwUnitTests
 
 
         [TestMethod]
-        [Timeout(5000)]
+        //[Timeout(5000)]
         public void CheckGet()
         {
             using (var gateway = new Gateway())
@@ -148,6 +148,7 @@ namespace GwUnitTests
                     using (var client = new CAClient())
                     {
                         client.Configuration.SearchAddress = "127.0.0.1:5432";
+                        client.Configuration.DebugTiming = true;
                         var clientChannel = client.CreateChannel<string>("TEST-DATE");
                         server.Start();
 

@@ -124,14 +124,26 @@ namespace GatewayLogic.Services
 
             internal void Rebuild(Gateway gateway)
             {
-                var size = this.ChannelName.Length + DataPacket.Padding(this.ChannelName.Length);
-                var newPacket = DataPacket.Create(size);
-                newPacket.Command = 18;
-                newPacket.PayloadSize = (uint)size;
-                newPacket.Parameter1 = this.GatewayId;
-                newPacket.Parameter2 = Gateway.CA_PROTO_VERSION;
-                newPacket.SetDataAsString(this.ChannelName);
-                TcpConnection.Send(newPacket);
+                try
+                {
+                    if (this.ChannelName == null)
+                        return;
+
+                    gateway.MessageLogger.Write("", LogMessageType.ChannelRebuild, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = this.ChannelName } });
+
+                    var size = this.ChannelName.Length + DataPacket.Padding(this.ChannelName.Length);
+                    var newPacket = DataPacket.Create(size);
+                    newPacket.Command = 18;
+                    newPacket.PayloadSize = (uint)size;
+                    newPacket.Parameter1 = this.GatewayId;
+                    newPacket.Parameter2 = Gateway.CA_PROTO_VERSION;
+                    newPacket.SetDataAsString(this.ChannelName);
+                    TcpConnection?.Send(newPacket);
+                }
+                catch (Exception ex)
+                {
+                    gateway.MessageLogger.Write("", LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex.ToString() + "\n" + ex.StackTrace } });
+                }
             }
 
             internal void Drop(Gateway gateway)
@@ -147,7 +159,7 @@ namespace GatewayLogic.Services
                         newPacket.Command = 12;
                         newPacket.Parameter1 = GatewayId;
                         newPacket.Parameter2 = ServerId.Value;
-                        TcpConnection.Send(newPacket);
+                        TcpConnection?.Send(newPacket);
                     }
                     else
                     {
@@ -193,7 +205,7 @@ namespace GatewayLogic.Services
                 get
                 {
                     lock (connectedClients)
-                        return (this.ConnectionIsBuilding == true && (DateTime.UtcNow - this.StartBuilding).TotalSeconds > 20);
+                        return (this.ConnectionIsBuilding == true && (DateTime.UtcNow - this.StartBuilding).TotalSeconds > 60 && this.TcpConnection != null && this.ChannelName != null);
                 }
             }
 
@@ -202,7 +214,7 @@ namespace GatewayLogic.Services
                 get
                 {
                     lock (connectedClients)
-                        return (connectedClients.Count == 0 && (DateTime.UtcNow - this.LastUse).TotalMinutes > 30);
+                        return ((connectedClients.Count == 0 || this.TcpConnection == null) && (DateTime.UtcNow - this.LastUse).TotalMinutes > 30);
                 }
             }
 

@@ -411,7 +411,7 @@ namespace GWLogger.Backend.DataContext
                 var group = select?.Group;
                 var orders = select?.Orders;
 
-                foreach (var entry in files[gatewayName].ReadLog(start, end, where, messageTypes, false, startFile, offset))
+                foreach (var entry in files[gatewayName].ReadLog(start, end, where, messageTypes, false, startFile, offset, cancellationToken))
                 {
                     if ((nbMaxEntries > 0 && result.Count >= nbMaxEntries) || cancellationToken.IsCancellationRequested)
                         break;
@@ -456,7 +456,7 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        public IEnumerable<LogEntry> GetLogs(string gatewayName, DateTime start, DateTime end, string query, List<int> messageTypes = null, bool onlyErrors = false)
+        public IEnumerable<LogEntry> GetLogs(string gatewayName, DateTime start, DateTime end, string query, List<int> messageTypes = null, bool onlyErrors = false, CancellationToken cancellationToken = default(CancellationToken))
         {
             lock (lockObject)
             {
@@ -471,7 +471,7 @@ namespace GWLogger.Backend.DataContext
                 catch
                 {
                 }
-                return files[gatewayName].ReadLog(start, end, node, messageTypes, onlyErrors);
+                return files[gatewayName].ReadLog(start, end, node, messageTypes, onlyErrors, null, 0, cancellationToken);
             }
         }
 

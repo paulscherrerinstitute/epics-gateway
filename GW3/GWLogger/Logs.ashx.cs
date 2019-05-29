@@ -115,14 +115,14 @@ namespace GWLogger
                     {
                         var end = long.Parse(path[2]).ToNetDate().Trim();
                         if (context.Request["levels"] == "3,4") // Show errors
-                            raw = Global.DataContext.GetLogs(gateway, start, end, query, null, true).Take(100);
+                            raw = Global.DataContext.GetLogs(gateway, start, end, query, null, true,cancel.Token).Take(100);
                         else
                             raw = Global.DataContext.ReadLog(gateway, start, end, query, limit, msgTypes, startFile, offset, cancel.Token).Take(100);
                     }
                     else
                     {
                         if (context.Request["levels"] == "3,4") // Show errors
-                            raw = Global.DataContext.GetLogs(gateway, start, start.AddMinutes(20), query, null, true);
+                            raw = Global.DataContext.GetLogs(gateway, start, start.AddMinutes(20), query, null, true, cancel.Token);
                         else
                             raw = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, limit, msgTypes, startFile, offset, cancel.Token);
                     }

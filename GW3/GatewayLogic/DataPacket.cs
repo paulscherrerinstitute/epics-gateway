@@ -374,12 +374,22 @@ namespace GatewayLogic
         /// <returns></returns>
         public object Clone()
         {
-            //DataPacket p = DataPacket.Create((int)this.BufferSize, false);
+            /*var p = new DataPacket();
+            //p.Data = new byte[(int)this.BufferSize];
+            p.Data = Allocate(this.Data.Length);
+            Buffer.BlockCopy(this.Data, 0, p.Data, 0, this.Data.Length);
+            p.Offset = this.Offset;
+            p.bufferSize = this.bufferSize;
+            p.Sender = this.Sender;
+            p.Destination = this.Destination;
+            p.Kind = this.Kind;
+            return p;*/
+
             var p = new DataPacket();
             //p.Data = new byte[(int)this.BufferSize];
             p.Data = Allocate(this.BufferSize);
             Buffer.BlockCopy(this.Data, this.Offset, p.Data, 0, this.BufferSize);
-            p.Offset = this.Offset;
+            p.Offset = 0;
             p.bufferSize = this.bufferSize;
             p.Sender = this.Sender;
             p.Destination = this.Destination;

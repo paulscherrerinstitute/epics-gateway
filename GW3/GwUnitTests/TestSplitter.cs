@@ -77,7 +77,7 @@ namespace GwUnitTests
         }
 
         [TestMethod]
-        [Timeout(1000)]
+        //[Timeout(1000)]
 
         public void CheckLongSplitting()
         {

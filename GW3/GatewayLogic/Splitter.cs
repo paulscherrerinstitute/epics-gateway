@@ -84,6 +84,7 @@ namespace GatewayLogic
                             }
 
                             remainingPacket = packet.SkipSize((uint)s, true);
+                            //remainingPacket = packet.SkipSize((uint)s, false);
                             //packet.Dispose();
                             packet = remainingPacket;
                             remainingPacket = null;
@@ -140,13 +141,13 @@ namespace GatewayLogic
                     if (lockSplitter.IsDisposed)
                         yield break;
                     lockSplitter.Wait();
-                    if (packet.Offset >= packet.BufferSize)
+                    if (packet.Offset >= packet.Data.Length)
                     {
                         lockSplitter.Release();
                         yield break;
                     }
-                    DataPacket newPacket = packet.SkipSize(packet.MessageSize, false);
-                    //DataPacket newPacket = packet.SkipSize(packet.MessageSize, true);
+                    //DataPacket newPacket = packet.SkipSize(packet.MessageSize, false);
+                    DataPacket newPacket = packet.SkipSize(packet.MessageSize, true);
                     //packet.Dispose();
                     packet = newPacket;
                 }

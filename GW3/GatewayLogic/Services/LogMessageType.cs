@@ -153,6 +153,8 @@
         [MessageDisplay("-- No display --", LogLevel.Error)]
         SocketConnectionTimeout,
         [MessageDisplay("-- No display --", LogLevel.Error)]
-        SocketCreationError
+        SocketCreationError,
+        [MessageDisplay("Try to rebuild {ChannelName}.", LogLevel.Detail)]
+        ChannelRebuild
     }
 }

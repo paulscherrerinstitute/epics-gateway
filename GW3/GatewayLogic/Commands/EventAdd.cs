@@ -126,6 +126,8 @@ namespace GatewayLogic.Commands
                 if (connection.Gateway.EventsOnHold.Contains(client.Client))
                     continue;
 
+                connection.Gateway.MessageLogger.Write(client.Client.ToString(), Services.LogMessageType.EventAddResponseSending, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = monitor.ChannelInformation.ChannelName }, new LogMessageDetail { TypeId = MessageDetail.PacketSize, Value = packet.MessageSize.ToString() }, new LogMessageDetail { TypeId = MessageDetail.CID, Value = client.Id.ToString() } });
+
                 System.Threading.Interlocked.Increment(ref connection.Gateway.DiagnosticServer.NbCAMONAnswers);
 
                 packet.Parameter2 = client.Id;

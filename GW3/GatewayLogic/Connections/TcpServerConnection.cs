@@ -15,7 +15,7 @@ namespace GatewayLogic.Connections
         private Socket socket;
         private SafeLock lockObject = new SafeLock();
 
-        //private SemaphoreSlim socketLock = new SemaphoreSlim(1);
+        private SemaphoreSlim socketLock = new SemaphoreSlim(1);
         private bool isConnected = false;
         private List<Action> toCallWhenReady = new List<Action>();
         private readonly byte[] buffer = new byte[Gateway.BUFFER_SIZE];
@@ -214,7 +214,7 @@ namespace GatewayLogic.Connections
 
             try
             {
-                //socketLock.Wait();
+                socketLock.Wait();
                 //socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
                 socket.Send(packet.Data, packet.Offset, (int)packet.MessageSize, SocketFlags.None);
             }
@@ -224,14 +224,14 @@ namespace GatewayLogic.Connections
             }
             finally
             {
-                //socketLock.Release();
+                socketLock.Release();
             }
         }
 
         ~TcpServerConnection()
         {
             lockObject.Dispose();
-            //socketLock.Dispose();
+            socketLock.Dispose();
             channelsLock.Dispose();
         }
 

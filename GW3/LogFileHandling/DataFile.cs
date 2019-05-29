@@ -227,7 +227,7 @@ namespace GWLogger.Backend.DataContext
             }
             catch
             {
-                if(file != null)
+                if (file != null)
                     CloseFiles();
                 file = null;
                 throw;
@@ -397,7 +397,7 @@ namespace GWLogger.Backend.DataContext
         public DateTime DateOfFile(string filename)
         {
             var dt = filename.Split(new char[] { '.' }).Reverse().Take(2).Last();
-            if(dt == "data")
+            if (dt == "data")
                 dt = filename.Split(new char[] { '.' }).Reverse().Take(3).Last();
             return new DateTime(int.Parse(dt.Substring(0, 4)), int.Parse(dt.Substring(4, 2)), int.Parse(dt.Substring(6, 2)));
 
@@ -553,13 +553,13 @@ namespace GWLogger.Backend.DataContext
             DataWriter.Flush();
         }
 
-        internal IEnumerable<LogEntry> ReadLog(DateTime start, DateTime end, Query.Statement.QueryNode query = null, List<int> messageTypes = null, bool onlyErrors = false, string startFile = null, long offset = 0)
+        internal IEnumerable<LogEntry> ReadLog(DateTime start, DateTime end, Query.Statement.QueryNode query = null, List<int> messageTypes = null, bool onlyErrors = false, string startFile = null, long offset = 0, CancellationToken cancellationToken = default(CancellationToken))
         {
             var currentDate = new DateTime(start.Year, start.Month, start.Day);
             var firstLoop = true;
             var firstItem = true;
 
-            while (currentDate < end)
+            while (currentDate < end && !cancellationToken.IsCancellationRequested)
             {
                 var fileToUse = FileName(currentDate);
                 if (onlyErrors && File.Exists(fileToUse + ".errs") && File.Exists(fileToUse))
@@ -570,7 +570,7 @@ namespace GWLogger.Backend.DataContext
                     var streamLength = DataReader.BaseStream.Length;
                     using (var errors = new BinaryReader(File.OpenRead(fileToUse + ".errs")))
                     {
-                        while (errors.BaseStream.Position < errors.BaseStream.Length)
+                        while (errors.BaseStream.Position < errors.BaseStream.Length && !cancellationToken.IsCancellationRequested)
                         {
                             Seek(errors.ReadInt64());
                             LogEntry entry = null;
@@ -622,7 +622,7 @@ namespace GWLogger.Backend.DataContext
                         Seek(0);
                     isAtEnd = false;
                     var streamLength = DataReader.BaseStream.Length;
-                    while (DataReader.BaseStream.Position < streamLength)
+                    while (DataReader.BaseStream.Position < streamLength && !cancellationToken.IsCancellationRequested)
                     {
                         var entry = ReadEntry(DataReader, start, streamLength);
                         if (firstItem && query != null)
