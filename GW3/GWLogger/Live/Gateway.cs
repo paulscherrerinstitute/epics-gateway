@@ -305,67 +305,90 @@ namespace GWLogger.Live
                     Name = Name,
                 };
 
-                // Collect data
-                var before = range.From.Add(-(range.To - range.From));
-
-                var typeQuery = "select count(*) nb, type group by type order by nb desc";
-                var beforeEventTypes = Global.DataContext.ReadLog(Name, before, range.From, typeQuery, cancellationToken: new CancellationTokenSource(queryMsTimeout).Token)?.Select(o => new QueryResultValue(o)).ToList();
-                var duringEventTypes = Global.DataContext.ReadLog(Name, range.From, range.To, typeQuery, cancellationToken: new CancellationTokenSource(queryMsTimeout).Token)?.Select(o => new QueryResultValue(o)).ToList();
-
-                // Don't try to analyze if there is no log data available
-                if (beforeEventTypes != null && duringEventTypes != null)
+                try
                 {
-                    var typeDifferences = beforeEventTypes
-                    .Concat(duringEventTypes)
-                    .GroupBy(g => g.Text)
-                    .Select(g => new QueryResultValue
+                    // Collect data
+                    var before = range.From.Add(-(range.To - range.From));
+
+                    var typeQuery = "select count(*) nb, type group by type order by nb desc";
+                    var beforeEventTypes = Global.DataContext.ReadLog(Name, before, range.From, typeQuery, cancellationToken: new CancellationTokenSource(queryMsTimeout).Token)?.Select(o => new QueryResultValue(o)).ToList();
+                    var duringEventTypes = Global.DataContext.ReadLog(Name, range.From, range.To, typeQuery, cancellationToken: new CancellationTokenSource(queryMsTimeout).Token)?.Select(o => new QueryResultValue(o)).ToList();
+
+                    // Don't try to analyze if there is no log data available
+                    if (beforeEventTypes != null && duringEventTypes != null)
                     {
-                        Text = g.Key,
-                        Value = g.Max(q => q.Value) - g.Min(q => q.Value)
-                    });
-
-                    var interestingEventTypes = typeDifferences
-                        .OrderByDescending(v => v.Value)
-                        .Take(5)
-                        .ToList();
-
-                    var interestingEventTypeRemotes = new List<InterestingEventType>();
-
-                    foreach (var interestingEventType in interestingEventTypes)
-                    {
-                        var interestingTypeQuery = $"select count(*) nb, remote where type=\"{interestingEventType.Text.Replace("\"", "")}\" group by remote order by nb desc";
-                        var groupedRemotes = new Dictionary<string, int>();
-
-                        foreach (var remote in Global.DataContext.ReadLog(Name, range.From, range.To, interestingTypeQuery, cancellationToken: new CancellationTokenSource(queryMsTimeout).Token).Select(o => new QueryResultValue(o)))
+                        var typeDifferences = beforeEventTypes
+                        .Concat(duringEventTypes)
+                        .GroupBy(g => g.Text)
+                        .Select(g => new QueryResultValue
                         {
-                            var host = remote.Text.Split(':').First();
-                            if (groupedRemotes.TryGetValue(host, out int prev))
-                                groupedRemotes[host] = prev + (int)remote.Value;
-                            else
-                                groupedRemotes.Add(host, (int)remote.Value);
+                            Text = g.Key,
+                            Value = g.Max(q => q.Value) - g.Min(q => q.Value)
+                        });
+
+                        var interestingEventTypes = typeDifferences
+                            .OrderByDescending(v => v.Value)
+                            .Take(5)
+                            .ToList();
+
+                        var interestingEventTypeRemotes = new List<InterestingEventType>();
+
+                        foreach (var interestingEventType in interestingEventTypes)
+                        {
+                            var interestingTypeQuery = $"select count(*) nb, remote where type=\"{interestingEventType.Text.Replace("\"", "")}\" group by remote order by nb desc";
+                            var groupedRemotes = new Dictionary<string, int>();
+
+                            foreach (var remote in Global.DataContext.ReadLog(Name, range.From, range.To, interestingTypeQuery, cancellationToken: new CancellationTokenSource(queryMsTimeout).Token).Select(o => new QueryResultValue(o)))
+                            {
+                                var host = remote.Text.Split(':').First();
+                                if (groupedRemotes.TryGetValue(host, out int prev))
+                                    groupedRemotes[host] = prev + (int)remote.Value;
+                                else
+                                    groupedRemotes.Add(host, (int)remote.Value);
+                            }
+
+                            interestingEventTypeRemotes.Add(new InterestingEventType
+                            {
+                                EventType = interestingEventType,
+                                TopRemotes = groupedRemotes
+                                    .OrderByDescending(g => g.Value)
+                                    .Take(3)
+                                    .Select(r => new QueryResultValue { Text = r.Key, Value = r.Value })
+                                    .Select(v => PerformDNSLookup(v, dnsCache))
+                                    .ToList()
+                            });
                         }
 
-                        interestingEventTypeRemotes.Add(new InterestingEventType
-                        {
-                            EventType = interestingEventType,
-                            TopRemotes = groupedRemotes
-                                .OrderByDescending(g => g.Value)
-                                .Take(3)
-                                .Select(r => new QueryResultValue { Text = r.Key, Value = r.Value })
-                                .Select(v => PerformDNSLookup(v, dnsCache))
-                                .ToList()
-                        });
+                        var remoteQuery = "select count(*) nb, remote group by remote order by nb desc";
+                        var beforeRemoteCounts = Global.DataContext.ReadLog(Name, before, range.From, remoteQuery, cancellationToken: new CancellationTokenSource(queryMsTimeout).Token).Select(o => new QueryResultValue(o)).ToList();
+                        var duringRemoteCounts = Global.DataContext.ReadLog(Name, range.From, range.To, remoteQuery, cancellationToken: new CancellationTokenSource(queryMsTimeout).Token).Select(o => new QueryResultValue(o)).ToList();
+
+                        anomaly.InterestingEventTypeRemotes = interestingEventTypeRemotes;
+                        anomaly.BeforeEventTypes = beforeEventTypes.Take(5).ToList();
+                        anomaly.DuringEventTypes = duringEventTypes.Take(5).ToList();
+                        anomaly.BeforeRemoteCounts = beforeRemoteCounts.Take(5).Select(v => PerformDNSLookup(v, dnsCache)).ToList();
+                        anomaly.DuringRemoteCounts = duringRemoteCounts.Take(5).Select(v => PerformDNSLookup(v, dnsCache)).ToList();
                     }
-
-                    var remoteQuery = "select count(*) nb, remote group by remote order by nb desc";
-                    var beforeRemoteCounts = Global.DataContext.ReadLog(Name, before, range.From, remoteQuery, cancellationToken: new CancellationTokenSource(queryMsTimeout).Token).Select(o => new QueryResultValue(o)).ToList();
-                    var duringRemoteCounts = Global.DataContext.ReadLog(Name, range.From, range.To, remoteQuery, cancellationToken: new CancellationTokenSource(queryMsTimeout).Token).Select(o => new QueryResultValue(o)).ToList();
-
-                    anomaly.InterestingEventTypeRemotes = interestingEventTypeRemotes;
-                    anomaly.BeforeEventTypes = beforeEventTypes.Take(5).ToList();
-                    anomaly.DuringEventTypes = duringEventTypes.Take(5).ToList();
-                    anomaly.BeforeRemoteCounts = beforeRemoteCounts.Take(5).Select(v => PerformDNSLookup(v, dnsCache)).ToList();
-                    anomaly.DuringRemoteCounts = duringRemoteCounts.Take(5).Select(v => PerformDNSLookup(v, dnsCache)).ToList();
+                }
+                catch(Exception ex)
+                {
+                    anomaly.InterestingEventTypeRemotes = new List<InterestingEventType>();
+                    anomaly.BeforeRemoteCounts = new List<QueryResultValue>();
+                    anomaly.DuringRemoteCounts = new List<QueryResultValue>();
+                    anomaly.DuringEventTypes = new List<QueryResultValue>();
+                    anomaly.BeforeEventTypes = new List<QueryResultValue>
+                    {
+                        new QueryResultValue
+                        {
+                            Value = 0d,
+                            Text = "Exception occured while querying data, see the event log for details: " + ex.Message,
+                        }
+                    };
+                    using (EventLog eventLog = new EventLog("Application"))
+                    {
+                        eventLog.Source = "Application";
+                        eventLog.WriteEntry($"Exception occured while querying data: {ex}", EventLogEntryType.Error);
+                    }
                 }
 
                 anomaly.History = new GatewayHistoricData();

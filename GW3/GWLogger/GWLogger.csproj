@@ -369,6 +369,7 @@
     <Content Include="Frontend\tsconfig.json" />
     <Content Include="graphtest.html" />
     <Content Include="gulpfile.js" />
+    <Content Include="Health.asmx" />
     <Content Include="help.html" />
     <Content Include="Images\all_green_map.png" />
     <Content Include="Images\bad_cycles.png" />
@@ -568,6 +569,10 @@
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Health.asmx.cs">
+      <DependentUpon>Health.asmx</DependentUpon>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Introspection.ashx.cs">
       <DependentUpon>Introspection.ashx</DependentUpon>

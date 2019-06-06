@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://gwlogger.psi.ch/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://gwlogger.psi.ch/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://gwlogger.psi.ch/">
+      <s:element name="IsHealthy">
+        <s:complexType />
+      </s:element>
+      <s:element name="IsHealthyResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="IsHealthyResult" type="tns:HealthResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="HealthResponse">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IsHealthy" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="Message" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="HealthResponse" nillable="true" type="tns:HealthResponse" />
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="IsHealthySoapIn">
+    <wsdl:part name="parameters" element="tns:IsHealthy" />
+  </wsdl:message>
+  <wsdl:message name="IsHealthySoapOut">
+    <wsdl:part name="parameters" element="tns:IsHealthyResponse" />
+  </wsdl:message>
+  <wsdl:message name="IsHealthyHttpGetIn" />
+  <wsdl:message name="IsHealthyHttpGetOut">
+    <wsdl:part name="Body" element="tns:HealthResponse" />
+  </wsdl:message>
+  <wsdl:message name="IsHealthyHttpPostIn" />
+  <wsdl:message name="IsHealthyHttpPostOut">
+    <wsdl:part name="Body" element="tns:HealthResponse" />
+  </wsdl:message>
+  <wsdl:portType name="HealthSoap">
+    <wsdl:operation name="IsHealthy">
+      <wsdl:input message="tns:IsHealthySoapIn" />
+      <wsdl:output message="tns:IsHealthySoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="HealthHttpGet">
+    <wsdl:operation name="IsHealthy">
+      <wsdl:input message="tns:IsHealthyHttpGetIn" />
+      <wsdl:output message="tns:IsHealthyHttpGetOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="HealthHttpPost">
+    <wsdl:operation name="IsHealthy">
+      <wsdl:input message="tns:IsHealthyHttpPostIn" />
+      <wsdl:output message="tns:IsHealthyHttpPostOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="HealthSoap" type="tns:HealthSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="IsHealthy">
+      <soap:operation soapAction="http://gwlogger.psi.ch/IsHealthy" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="HealthSoap12" type="tns:HealthSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="IsHealthy">
+      <soap12:operation soapAction="http://gwlogger.psi.ch/IsHealthy" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="HealthHttpGet" type="tns:HealthHttpGet">
+    <http:binding verb="GET" />
+    <wsdl:operation name="IsHealthy">
+      <http:operation location="/IsHealthy" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="HealthHttpPost" type="tns:HealthHttpPost">
+    <http:binding verb="POST" />
+    <wsdl:operation name="IsHealthy">
+      <http:operation location="/IsHealthy" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Health">
+    <wsdl:port name="HealthSoap" binding="tns:HealthSoap">
+      <soap:address location="http://localhost:60669/Health.asmx" />
+    </wsdl:port>
+    <wsdl:port name="HealthSoap12" binding="tns:HealthSoap12">
+      <soap12:address location="http://localhost:60669/Health.asmx" />
+    </wsdl:port>
+    <wsdl:port name="HealthHttpGet" binding="tns:HealthHttpGet">
+      <http:address location="http://localhost:60669/Health.asmx" />
+    </wsdl:port>
+    <wsdl:port name="HealthHttpPost" binding="tns:HealthHttpPost">
+      <http:address location="http://localhost:60669/Health.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
