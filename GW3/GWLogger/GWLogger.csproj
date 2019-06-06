@@ -390,8 +390,8 @@
     <None Include="Connected Services\Inventory\DataAccess.wsdl" />
     <None Include="packages.config" />
     <None Include="Properties\PublishProfiles\EPICSLOG.pubxml" />
-    <None Include="Properties\PublishProfiles\EPICSLOG02.pubxml" />
     <Content Include="main.js" />
+    <None Include="Properties\PublishProfiles\EPICSLOG02.pubxml" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.3.1.js" />
     <Content Include="Scripts\jquery-3.3.1.min.js" />

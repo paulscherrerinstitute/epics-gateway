@@ -81,7 +81,7 @@ namespace GWLoggerControlService
                 ReceiveTimeout = ConnectionTimeout,
                 Name = "Binding",
             };
-            var endpointUrl = $"http://{Environment.MachineName}/Health.asmx";
+            var endpointUrl = $"http://localhost/Health.asmx";
             var endpoint = new EndpointAddress(endpointUrl);
             EventLog.WriteEntry($"Using health check url: {endpointUrl}", EventLogEntryType.Information);
 
