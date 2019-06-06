@@ -203,8 +203,15 @@ namespace GatewayLogic.Services
                                 writer.Write(new byte[] { 0, 0, 0, 0, 0, 0 });
                             else
                             {
-                                writer.Write(System.Net.IPAddress.Parse(message.RemoteIpPoint.Split(':')[0]).GetAddressBytes());
-                                writer.Write(ushort.Parse(message.RemoteIpPoint.Split(':')[1]));
+                                try
+                                {
+                                    writer.Write(System.Net.IPAddress.Parse(message.RemoteIpPoint.Split(':')[0]).GetAddressBytes());
+                                    writer.Write(ushort.Parse(message.RemoteIpPoint.Split(':')[1]));
+                                }
+                                catch
+                                {
+                                    writer.Write(new byte[] { 0, 0, 0, 0, 0, 0 });
+                                }
                             }
                             writer.Write((ushort)message.MessageType);
                             writer.Write((byte)message.Details.Count());

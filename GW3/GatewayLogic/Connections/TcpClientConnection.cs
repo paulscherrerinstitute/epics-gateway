@@ -45,7 +45,7 @@ namespace GatewayLogic.Connections
             set
             {
                 socket = value;
-                socket.SendTimeout = 3000;
+                socket.SendTimeout = 30000;
                 //socket.SendBufferSize = 64 * 1024;
                 socket.SendBufferSize = Gateway.BUFFER_SIZE * 4;
                 socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
