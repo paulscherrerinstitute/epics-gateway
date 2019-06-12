@@ -12,11 +12,21 @@ class Main
     static CurrentTab: number = 0;
     static IsLast: boolean = true;
     static BaseTitle: string;
+    static CurrentUser: string = null;
 
     private static isLoading = false;
 
     public static Init(): void
     {
+        if (Utils.Preferences['LoggedAs'])
+        {
+            Main.LogIn();
+        }
+        else
+        {
+            $(".req-login").hide();
+        }
+
         Sections.Init();
         State.Init();
 
@@ -37,6 +47,39 @@ class Main
                 $("#loadingScreen").hide();
             });
         }, 1000);
+    }
+
+    public static async LogIn()
+    {
+        if (Main.CurrentUser)
+        {
+            $("#login").text("Not Logged In").removeClass("loggedIn");
+            Main.CurrentUser = null;
+            var prefs = Utils.Preferences;
+            delete prefs['LoggedAs'];
+            Utils.Preferences = prefs;
+        }
+        else
+        {
+            try
+            {
+                var user: string = (await Utils.Loader('/AuthAccess/AuthService.asmx/CurrentUser'))['d'];
+                $("#login").text(user).addClass("loggedIn");
+                var prefs = Utils.Preferences;
+                prefs['LoggedAs'] = user;
+                Utils.Preferences = prefs;
+                Main.CurrentUser = user;
+            }
+            catch (e)
+            {
+                $("#login").text("Not Logged In").removeClass("loggedIn");
+            }
+        }
+        if (Main.CurrentUser)
+            $(".req-login").show();
+        else
+            $(".req-login").hide();
+        State.Pop();
     }
 
     private static InitTooltips()

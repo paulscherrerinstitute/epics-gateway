@@ -27,6 +27,7 @@
         <li>Logs</li>
         <li>Map</li>
         <li>Anomalies</li>
+        <li id="login">Not Logged In</li>
         <li style="float: right;">Help</li>
         <li style="float: right;">Operator Help</li>
         <li id="searchLi" style="float: right;"><input id="searchInput"></li>
@@ -90,8 +91,8 @@
             <h2 id="currentGW"></h2>
             <table id="gwInfos"></table>
             <div id="detailsButtons">
-                <div class="button" onclick="DetailsCommands.Restart()">Restart Gateway</div>
-                <div class="button" onclick="DetailsCommands.Update()">Update Gateway</div>
+                <div class="button checkrights" onclick="DetailsCommands.Restart()">Restart Gateway</div>
+                <div class="button checkrights" onclick="DetailsCommands.Update()">Update Gateway</div>
                 <div id="logLink" class="button" onclick="DetailPage.JumpLogs()">Logs</div>
                 <a id="inventoryLink" class="button" target="_blank" href="">Check configuration</a>
                 <div class="button" onclick="StatusPage.Show()">Close</div>
@@ -181,7 +182,7 @@
         <div onclick="GatewayVersions.Show()">Gateway Versions</div>
         <div onclick="LogStatistics.Show()">Log Statistics</div>
         <!--<div onclick="Patterns.Show()">Check Patterns</div>-->
-        <div onclick="Subscription.Show()">Alert Subscription</div>
+        <div class="req-login" onclick="Subscription.Show()">Alert Subscription</div>
     </div>
     <div id="diaglog"></div>
     <span id="popupNotification"></span>

@@ -12,8 +12,11 @@
 
     private static TopMenu(): void
     {
+        $("#login").click(Main.LogIn);
         $("#mainTabs li").click((evt) =>
         {
+            if (evt.target.id == "login")
+                return;
             if (evt.target.tagName != "INPUT")
             {
                 var tab = evt.target.textContent;

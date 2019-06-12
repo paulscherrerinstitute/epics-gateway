@@ -257,7 +257,8 @@ class Utils
         return new Date(parseInt(source));
     }
 
-    public static DurationString(millis: number): string {
+    public static DurationString(millis: number): string
+    {
         var duration = "";
 
         var seconds = millis / 1000;
@@ -275,9 +276,9 @@ class Utils
         return duration;
     }
 
-/**
- * Save the preference object to local storage
- */
+    /**
+     * Save the preference object to local storage
+     */
     static set Preferences(preferences: object)
     {
         try
@@ -300,7 +301,7 @@ class Utils
     {
         return $.ajax({
             type: 'POST',
-            url: 'DataAccess.asmx/' + functionName,
+            url: functionName.indexOf('/') == -1 ? 'DataAccess.asmx/' + functionName : functionName,
             data: data ? JSON.stringify(data) : {},
             contentType: 'application/json; charset=utf-8',
             dataType: 'json'

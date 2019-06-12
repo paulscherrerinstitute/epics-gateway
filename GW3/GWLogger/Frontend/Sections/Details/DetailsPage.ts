@@ -124,6 +124,12 @@ class DetailPage
     {
         Main.CurrentGateway = gwName.toLowerCase();
         State.Set();
+
+        if (Main.CurrentUser)
+            $(".checkrights").show();
+        else
+            $(".checkrights").hide();
+
         $("#gatewayView").hide();
         $("#gatewayDetails").show();
         DetailPage.mustUpdate = 0;

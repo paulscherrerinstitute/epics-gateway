@@ -91,6 +91,7 @@
         {
             $("#gatewayView").hide();
             $("#gatewayDetails").show();
+            DetailPage.Show(Main.CurrentGateway);
         }
         else if (Main.Path == "Status")
         {
