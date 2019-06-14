@@ -24,13 +24,18 @@ namespace GWLogger
 
         protected void Application_Start(object sender, EventArgs e)
         {
+            /*using (var ctx = new Model.CaesarContext())
+            {
+                var g = ctx.Gateways.ToList();
+            }
+
             try
             {
                 Inventory.ServerName();
             }
             catch
             {
-            }
+            }*/
 
             Directory.CreateDirectory(AnomalyStorage);
             ApplicationStartUtc = DateTime.UtcNow.AddSeconds(1);
@@ -72,7 +77,7 @@ namespace GWLogger
 
             CPUUpdated = new Thread(() =>
               {
-                  while(true)
+                  while (true)
                   {
                       CPU = GetCPUUsagePercent();
                       Thread.Sleep(1000);
@@ -158,6 +163,6 @@ namespace GWLogger
             return cpu;
         }
 
-        public static double CPU { get; private set;}
+        public static double CPU { get; private set; }
     }
 }
