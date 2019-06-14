@@ -13,6 +13,7 @@ class Main
     static IsLast: boolean = true;
     static BaseTitle: string;
     static CurrentUser: string = null;
+    static Token: string = null;
 
     private static isLoading = false;
 
@@ -20,7 +21,9 @@ class Main
     {
         if (Utils.Preferences['LoggedAs'])
         {
-            Main.LogIn();
+            $("#frmUsername").val(Utils.Preferences['LoggedAs']);
+            $("#frmPassword").val(Utils.Preferences['Password']);
+            Main.Login();
         }
         else
         {
@@ -49,8 +52,14 @@ class Main
         }, 1000);
     }
 
-    public static async LogIn()
+    public static ShowLogin()
     {
+        if ($("#loginScreen").is(":visible"))
+        {
+            $("#loginScreen").hide();
+            return;
+        }
+
         if (Main.CurrentUser)
         {
             $("#login").text("Not Logged In").removeClass("loggedIn");
@@ -61,20 +70,36 @@ class Main
         }
         else
         {
-            try
-            {
-                var user: string = (await Utils.Loader('/AuthAccess/AuthService.asmx/CurrentUser'))['d'];
-                $("#login").text(user).addClass("loggedIn");
-                var prefs = Utils.Preferences;
-                prefs['LoggedAs'] = user;
-                Utils.Preferences = prefs;
-                Main.CurrentUser = user;
-            }
-            catch (e)
-            {
-                $("#login").text("Not Logged In").removeClass("loggedIn");
-            }
+            $("#loginScreen").show();
+            $("#frmUsername").focus();
         }
+    }
+
+    public static async Login()
+    {
+        try
+        {
+            var user = $("#frmUsername").val();
+            var token: string = (await Utils.Loader('/AuthAccess/AuthService.asmx/Login', {
+                username: user, password: $("#frmPassword").val()
+            }))['d'];
+            $("#login").text(user).addClass("loggedIn");
+            var prefs = Utils.Preferences;
+            prefs['LoggedAs'] = user;
+            prefs['Password'] = $("#frmPassword").val();
+            Utils.Preferences = prefs;
+            Main.CurrentUser = user;
+            Main.Token = token;
+        }
+        catch (e)
+        {
+            $("#login").text("Not Logged In").removeClass("loggedIn");
+            var prefs = Utils.Preferences;
+            delete prefs['LoggedAs'];
+            delete prefs['Password'];
+            Utils.Preferences = prefs;
+        }
+
         if (Main.CurrentUser)
             $(".req-login").show();
         else

@@ -536,6 +536,8 @@
       <DependentUpon>AuthService.asmx</DependentUpon>
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="AuthAccess\AuthToken.cs" />
+    <Compile Include="AuthAccess\TokenManager.cs" />
     <Compile Include="Backend\BootInfoAPI.cs" />
     <Compile Include="Backend\Controllers\AnalyzeController.cs" />
     <Compile Include="Backend\Controllers\DiskController.cs" />
@@ -582,6 +584,7 @@
     <Compile Include="Introspection.ashx.cs">
       <DependentUpon>Introspection.ashx</DependentUpon>
     </Compile>
+    <Compile Include="AuthAccess\LdapHelper.cs" />
     <Compile Include="Live\Gateway.cs" />
     <Compile Include="Live\GatewayInformation.cs" />
     <Compile Include="Live\GatewayShortInformation.cs" />

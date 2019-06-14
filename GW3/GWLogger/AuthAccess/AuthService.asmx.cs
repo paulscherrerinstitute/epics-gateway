@@ -81,48 +81,51 @@ namespace GWLogger.AuthAccess
         }
 
         [WebMethod]
-        public string CurrentUser()
+        public string Login(string username, string password)
         {
-            return HttpContext.Current.Request.LogonUserIdentity.Name;
+            var token = TokenManager.CreateToken(username, LdapHelper.GetUserEmail(username, password), Context.Request.UserHostAddress);
+            return token.Id;
         }
 
         [WebMethod]
-        public string CurrentUserEmail()
+        public void Logout(string tokenId)
         {
-            // get a DirectorySearcher object
-            using (var ldap = new LdapConnection(ConfigurationManager.AppSettings["ldapServer"]))
-            {
-                // specify the search filter
-                var filter = string.Format("(&(objectClass=user)(objectCategory=person)(samAccountName={0}))", CurrentUser().Split('\\').Last());
-                //var searchAttributes = new string[] { "samAccountName", "sn", "givenName", "mail", "telephoneNumber", "physicalDeliveryOfficeName" };
-                var searchAttributes = new string[] { "mail" };
-                var request = new SearchRequest(ConfigurationManager.AppSettings["ldapRoot"], filter, System.DirectoryServices.Protocols.SearchScope.Subtree, searchAttributes);
-                var response = (SearchResponse)ldap.SendRequest(request);
-                return (string)(response.Entries.Cast<SearchResultEntry>().First().Attributes["mail"][0]);
-            }
+            TokenManager.DestroyToken(tokenId);
         }
 
         [WebMethod]
-        public void Unsubscribe()
+        public string CurrentUser(string tokenId)
         {
-            AuthService.DeleteSubscription(CurrentUserEmail());
+            return TokenManager.GetToken(tokenId, Context.Request.UserHostAddress).Login;
         }
 
         [WebMethod]
-        public void Subscribe(List<string> gateways)
+        public string CurrentUserEmail(string tokenId)
         {
-            AuthService.DeleteSubscription(CurrentUserEmail());
+            return TokenManager.GetToken(tokenId, Context.Request.UserHostAddress).Email;
+        }
+
+        [WebMethod]
+        public void Unsubscribe(string tokenId)
+        {
+            AuthService.DeleteSubscription(CurrentUserEmail(tokenId));
+        }
+
+        [WebMethod]
+        public void Subscribe(List<string> gateways, string tokenId)
+        {
+            AuthService.DeleteSubscription(CurrentUserEmail(tokenId));
             AuthService.AddSubscription(new AlertSubscription
             {
-                EMail = CurrentUserEmail(),
+                EMail = CurrentUserEmail(tokenId),
                 Gateways = gateways
             });
         }
 
         [WebMethod]
-        public List<string> GetCurrentSubscription()
+        public List<string> GetCurrentSubscription(string tokenId)
         {
-            var subs = AuthService.GetAllSubscriptions().FirstOrDefault(row => row.EMail == CurrentUserEmail());
+            var subs = AuthService.GetAllSubscriptions().FirstOrDefault(row => row.EMail == CurrentUserEmail(tokenId));
             if (subs == null)
                 return new List<string>();
             return subs.Gateways;
@@ -135,14 +138,14 @@ namespace GWLogger.AuthAccess
         }
 
         [WebMethod]
-        public string GatewayCommand(string gatewayName, string command)
+        public string GatewayCommand(string gatewayName, string command, string tokenId)
         {
-            if (!Global.Inventory.GetRolesForUser(CurrentUser().Split('\\').Last()).Any(row => row.Access == "Administrator" || row.Access == "EPICS Gateway Manager"))
+            if (!Global.Inventory.GetRolesForUser(CurrentUser(tokenId).Split('\\').Last()).Any(row => row.Access == "Administrator" || row.Access == "EPICS Gateway Manager"))
                 throw new System.Security.SecurityException("You don't have the right to issue such commands.");
             var allowedCommands = new string[] { "UpdateGateway", "UpdateGateway3", "RestartGateway", "RestartGateway3" };
             if (!allowedCommands.Contains(command))
                 throw new System.Security.SecurityException("Command not allowed.");
-            return Global.DirectCommands.StartTask(gatewayName, CurrentUser(), command);
+            return Global.DirectCommands.StartTask(gatewayName, CurrentUser(tokenId), command);
         }
     }
 }

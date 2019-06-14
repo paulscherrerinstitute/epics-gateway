@@ -12,7 +12,7 @@
             $.ajax({
                 type: 'POST',
                 url: '/AuthAccess/AuthService.asmx/GatewayCommand',
-                data: JSON.stringify({ gatewayName: Main.CurrentGateway.toUpperCase(), command: command }),
+                data: JSON.stringify({ gatewayName: Main.CurrentGateway.toUpperCase(), command: command, tokenId: Main.Token }),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 success: function (msg)
@@ -39,7 +39,7 @@
             $.ajax({
                 type: 'POST',
                 url: '/AuthAccess/AuthService.asmx/GatewayCommand',
-                data: JSON.stringify({ gatewayName: Main.CurrentGateway.toUpperCase(), command: command }),
+                data: JSON.stringify({ gatewayName: Main.CurrentGateway.toUpperCase(), command: command, tokenId: Main.Token }),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 success: function (msg)

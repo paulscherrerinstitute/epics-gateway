@@ -25,7 +25,7 @@
         $.ajax({
             type: 'POST',
             url: '/AuthAccess/AuthService.asmx/CurrentUserEmail',
-            data: JSON.stringify({}),
+            data: JSON.stringify({tokenId: Main.Token}),
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             success: function (msg)
@@ -37,7 +37,7 @@
         $.ajax({
             type: 'POST',
             url: '/AuthAccess/AuthService.asmx/GetCurrentSubscription',
-            data: JSON.stringify({}),
+            data: JSON.stringify({tokenId: Main.Token}),
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             success: function (msg)
@@ -93,7 +93,7 @@
         $.ajax({
             type: 'POST',
             url: '/AuthAccess/AuthService.asmx/Subscribe',
-            data: JSON.stringify({ gateways: subscribed }),
+            data: JSON.stringify({ gateways: subscribed, tokenId: Main.Token }),
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             success: function (msg)
@@ -120,7 +120,7 @@
         $.ajax({
             type: 'POST',
             url: '/AuthAccess/AuthService.asmx/Unsubscribe',
-            data: JSON.stringify({}),
+            data: JSON.stringify({tokenId: Main.Token}),
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             success: function (msg)

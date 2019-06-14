@@ -12,7 +12,30 @@
 
     private static TopMenu(): void
     {
-        $("#login").click(Main.LogIn);
+        $("#login").click(Main.ShowLogin);
+
+        $("#btnLoginCancel").click(() =>
+        {
+            $("#loginScreen").hide();
+        });
+        $("#btnLogin").click(() =>
+        {
+            $("#loginScreen").hide();
+            Main.Login();
+        });
+        $("#frmUsername,#frmPassword").keydown((evt: JQueryKeyEventObject) =>
+        {
+            if (evt.keyCode == 27)
+            {
+                $("#loginScreen").hide();
+            }
+            else if (evt.keyCode == 13)
+            {
+                $("#loginScreen").hide();
+                Main.Login();
+            }
+        });
+
         $("#mainTabs li").click((evt) =>
         {
             if (evt.target.id == "login")
