@@ -483,6 +483,7 @@
     <None Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
+    <TypeScriptCompile Include="Frontend\Sections\Configuration\ConfigurationPage.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\kendo\kendo.all.d.ts" />
   </ItemGroup>
@@ -566,6 +567,9 @@
       <DependentUpon>DataAccess.asmx</DependentUpon>
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="DataAccess.Configuration.asmx.cs">
+      <DependentUpon>DataAccess.asmx</DependentUpon>
+    </Compile>
     <Compile Include="DataAccess.Live.asmx.cs">
       <DependentUpon>DataAccess.asmx</DependentUpon>
       <SubType>Component</SubType>
@@ -595,9 +599,9 @@
     <Compile Include="Logs.ashx.cs">
       <DependentUpon>Logs.ashx</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201906140732565_base.cs" />
-    <Compile Include="Migrations\201906140732565_base.Designer.cs">
-      <DependentUpon>201906140732565_base.cs</DependentUpon>
+    <Compile Include="Migrations\201906170627553_base.cs" />
+    <Compile Include="Migrations\201906170627553_base.Designer.cs">
+      <DependentUpon>201906170627553_base.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\CaesarContext.cs" />
@@ -605,6 +609,7 @@
     <Compile Include="Model\GatewayFilterType.cs" />
     <Compile Include="Model\GatewayGroup.cs" />
     <Compile Include="Model\GatewayGroupMember.cs" />
+    <Compile Include="Model\GatewayHistoryEntry.cs" />
     <Compile Include="Model\GatewayRule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -677,8 +682,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201906140732565_base.resx">
-      <DependentUpon>201906140732565_base.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201906170627553_base.resx">
+      <DependentUpon>201906170627553_base.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

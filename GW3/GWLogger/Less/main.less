@@ -1394,7 +1394,7 @@ select
 
     & > div
     {
-text-align: center;
+        text-align: center;
     }
 
     div > div
@@ -1402,5 +1402,91 @@ text-align: center;
         display: inline-block;
         margin: 2px;
         .button;
+    }
+}
+
+#configurationView
+{
+    .container;
+    position: absolute;
+    top: 35px;
+    right: calc(@errorPanel + 8px);
+    left: 5px;
+    bottom: 5px;
+    padding-top: 10px;
+    overflow: hidden;
+
+    &:before
+    {
+        .containterLabel;
+        content: "Gateway Configuration";
+        position: fixed;
+        top: 35px;
+        left: 5px;
+        right: calc(@errorPanel + 8px);
+        width: auto;
+    }
+}
+
+#configRulesAView
+{
+    border: 1px solid black;
+    width: calc(50vw - @errorPanel / 2 - 16px);
+    height: calc(100vh - 370px);
+    float: left;
+    margin-left: 5px;
+    margin-top: 10px;
+}
+
+#configRulesBView
+{
+    border: 1px solid black;
+    margin-left: 5px;
+    width: calc(50vw - @errorPanel / 2 - 16px);
+    float: left;
+    height: calc(100vh -  370px);
+    margin-top: 10px;
+}
+
+#configSettingsView
+{
+    padding: 5px;
+    display: inline-block;
+
+    .colLabels
+    {
+        display: inline-block;
+        font-size: 16px;
+        width: 150px;
+        vertical-align: top;
+        margin-top: 5px;
+
+        &:after
+        {
+            content: ":";
+        }
+    }
+
+    input
+    {
+        width: 100%;
+    }
+
+    textarea
+    {
+        width: 100%;
+        resize: none;
+        height: 80px;
+    }
+
+    .row
+    {
+        margin-top: 5px;
+    }
+
+    .colField
+    {
+        display: inline-block;
+        width: calc(100vw - @errorPanel - 180px);
     }
 }

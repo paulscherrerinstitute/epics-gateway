@@ -48,6 +48,7 @@
                     $("#gatewayView").hide();
                     $("#gatewayDetails").hide();
                     $("#anomalyView").hide();
+                    $("#configurationView").hide();
                     $("#logView").show();
                     break;
                 case "Map":
@@ -57,6 +58,7 @@
                     $("#gatewayView").hide();
                     $("#gatewayDetails").hide();
                     $("#anomalyView").hide();
+                    $("#configurationView").hide();
                     $("#logView").hide();
                     break;
                 case "Anomalies":
@@ -66,7 +68,18 @@
                     $("#gatewayView").hide();
                     $("#gatewayDetails").hide();
                     $("#anomalyView").show();
+                    $("#configurationView").hide();
                     $("#logView").hide();
+                    break;
+                case "Configuration":
+                    Main.Path = "Configuration";
+                    $("#mapView").hide();
+                    $("#gatewayView").hide();
+                    $("#gatewayDetails").hide();
+                    $("#anomalyView").show();
+                    $("#configurationView").show();
+                    $("#logView").hide();
+                    ConfigurationPage.Show(path[2]);
                     break;
                 default:
                     Main.Path = "Status";
@@ -75,6 +88,7 @@
                     $("#gatewayView").show();
                     $("#gatewayDetails").hide();
                     $("#logView").hide();
+                    $("#configurationView").hide();
                     $("#anomalyView").hide();
             }
         }

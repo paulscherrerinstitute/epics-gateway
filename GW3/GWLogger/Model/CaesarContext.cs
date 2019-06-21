@@ -18,5 +18,6 @@ namespace GWLogger.Model
         public virtual DbSet<GatewayGroupMember> GatewayGroupMembers { get; set; }
         public virtual DbSet<GatewayGroup> GatewayGroups { get; set; }
         public virtual DbSet<GatewayRule> GatewayRules { get; set; }
+        public virtual DbSet<GatewayHistoryEntry> GatewayHistories { get; set; }
     }
 }

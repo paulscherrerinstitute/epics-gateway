@@ -100,7 +100,7 @@ namespace GWLogger
 
             string fullOrigionalpath = Request.Url.AbsolutePath;
 
-            if (fullOrigionalpath.StartsWith("/GW/") || fullOrigionalpath.StartsWith("/Status/") || fullOrigionalpath.StartsWith("/Map/") || fullOrigionalpath.StartsWith("/Anomalies"))
+            if (fullOrigionalpath.StartsWith("/GW/") || fullOrigionalpath.StartsWith("/Status/") || fullOrigionalpath.StartsWith("/Map/") || fullOrigionalpath.StartsWith("/Anomalies") || fullOrigionalpath.StartsWith("/Configuration"))
             {
                 Context.RewritePath("/index.html");
             }

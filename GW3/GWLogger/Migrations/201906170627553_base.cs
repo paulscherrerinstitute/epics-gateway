@@ -52,6 +52,12 @@ namespace GWLogger.Migrations
                     {
                         Id = c.Int(nullable: false, identity: true),
                         GatewayName = c.String(),
+                        Directions = c.Int(nullable: false),
+                        LocalAddressA = c.String(),
+                        RemoteAddressA = c.String(),
+                        LocalAddressB = c.String(),
+                        RemoteAddressB = c.String(),
+                        Comment = c.String(unicode: false, storeType: "text"),
                     })
                 .PrimaryKey(t => t.Id);
             
@@ -75,6 +81,17 @@ namespace GWLogger.Migrations
                 .Index(t => t.GatewayId)
                 .Index(t => t.FilterType);
             
+            CreateTable(
+                "dbo.GatewayHistories",
+                c => new
+                    {
+                        Id = c.Int(nullable: false, identity: true),
+                        GatewayName = c.String(),
+                        EntryDate = c.DateTime(nullable: false),
+                        Configuration = c.String(unicode: false, storeType: "text"),
+                    })
+                .PrimaryKey(t => t.Id);
+            
         }
         
         public override void Down()
@@ -89,6 +106,7 @@ namespace GWLogger.Migrations
             DropIndex("dbo.GatewayGroups", new[] { "GatewayId" });
             DropIndex("dbo.GatewayGroupMembers", new[] { "FilterType" });
             DropIndex("dbo.GatewayGroupMembers", new[] { "GrpId" });
+            DropTable("dbo.GatewayHistories");
             DropTable("dbo.GatewayRules");
             DropTable("dbo.Gateways");
             DropTable("dbo.GatewayGroups");

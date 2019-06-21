@@ -13,7 +13,7 @@ namespace GWLogger.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201906140732565_base"; }
+            get { return "201906170627553_base"; }
         }
         
         string IMigrationMetadata.Source
