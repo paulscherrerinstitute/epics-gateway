@@ -9,7 +9,7 @@ namespace GWLogger.Model
     [ExcludeFromCodeCoverage]
     public class GatewayFilterType
     {
-        [Key, Column(Order = 0), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column(Order = 0), DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int FilterId { get; set; }
         public string Name { get; set; }
         public string Label1 { get; set; }

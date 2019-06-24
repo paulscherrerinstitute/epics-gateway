@@ -541,6 +541,7 @@
     <Compile Include="AuthAccess\TokenManager.cs" />
     <Compile Include="Backend\BootInfoAPI.cs" />
     <Compile Include="Backend\Controllers\AnalyzeController.cs" />
+    <Compile Include="Backend\Controllers\ConfigController.cs" />
     <Compile Include="Backend\Controllers\DiskController.cs" />
     <Compile Include="Backend\Controllers\LogController.cs" />
     <Compile Include="Backend\EqualityComparer.cs" />
@@ -569,6 +570,7 @@
     </Compile>
     <Compile Include="DataAccess.Configuration.asmx.cs">
       <DependentUpon>DataAccess.asmx</DependentUpon>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="DataAccess.Live.asmx.cs">
       <DependentUpon>DataAccess.asmx</DependentUpon>
@@ -599,9 +601,9 @@
     <Compile Include="Logs.ashx.cs">
       <DependentUpon>Logs.ashx</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201906170627553_base.cs" />
-    <Compile Include="Migrations\201906170627553_base.Designer.cs">
-      <DependentUpon>201906170627553_base.cs</DependentUpon>
+    <Compile Include="Migrations\201906211139391_base.cs" />
+    <Compile Include="Migrations\201906211139391_base.Designer.cs">
+      <DependentUpon>201906211139391_base.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\CaesarContext.cs" />
@@ -682,8 +684,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201906170627553_base.resx">
-      <DependentUpon>201906170627553_base.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201906211139391_base.resx">
+      <DependentUpon>201906211139391_base.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
