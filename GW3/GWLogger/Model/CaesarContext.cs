@@ -24,29 +24,39 @@ namespace GWLogger.Model
                 if (IsInit)
                     return;
                 IsInit = true;
-                if (this.GatewayFilterTypes.Count() != 5)
+                try
                 {
-                    this.GatewayFilterTypes.AddRange(new Model.GatewayFilterType[]
+                    if (this.GatewayFilterTypes.Count() != 5)
                     {
+                        this.GatewayFilterTypes.AddRange(new Model.GatewayFilterType[]
+                        {
                 new Model.GatewayFilterType { FilterId=1, Name = "Group", Label1 = "Group", ClassName = "GroupFilter", FieldName = "Name" },
                 new Model.GatewayFilterType { FilterId=2, Name = "All", Label1 = null, ClassName = "AllFilter", FieldName = null },
                 new Model.GatewayFilterType { FilterId=3, Name = "User", Label1 = "Username", ClassName = "UserFilter", FieldName = "Name" },
                 new Model.GatewayFilterType { FilterId=4, Name = "Host", Label1 = "Hostname", ClassName = "HostFilter", FieldName = "Name" },
                 new Model.GatewayFilterType { FilterId=5, Name = "IP", Label1 = "IP", ClassName = "IPFilter", FieldName = "IP" },
-                    });
-                    this.SaveChanges();
+                        });
+                        this.SaveChanges();
+                    }
+                }
+                catch
+                {
                 }
             }
         }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            //base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<GatewayGroup>()
+            /*modelBuilder.Entity<GatewayGroup>()
             .HasOptional(p => p.GatewayGroupMembers)
             .WithMany()
-            .WillCascadeOnDelete(true);
+            .WillCascadeOnDelete(true);*/
+            modelBuilder.Entity<GatewayGroupMember>()
+                .HasRequired(p => p.GatewayGroup)
+                .WithMany(p => p.GatewayGroupMembers)
+                .WillCascadeOnDelete();
         }
 
         public virtual DbSet<GatewayEntry> Gateways { get; set; }

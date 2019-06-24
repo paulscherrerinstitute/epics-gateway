@@ -127,7 +127,7 @@ function dtoClass(info, className, knownClasses)
         }
         else
         {
-            if (!knownClasses.inArray(info.Properties[i].Type.Type))
+            if (!knownClasses.inArray(info.Properties[i].Type.Type) || info.Properties[i].Type.Type == "class")
             {
                 classToDo.push({ Name: info.Properties[i].Type.Type, Info: info.Properties[i].Type });
                 knownClasses.push(info.Properties[i].Type.Type);
@@ -141,7 +141,7 @@ function dtoClass(info, className, knownClasses)
                 enums.push(info.Properties[i].Type);
             }
             else
-                code += ": " + info.Properties[i].Type.Type;
+                code += ": " + (info.Properties[i].Type.ClassName ? info.Properties[i].Type.ClassName : info.Properties[i].Type.Type);
         }
         code += ";\n";
     }

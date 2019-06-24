@@ -24,5 +24,11 @@ namespace GWLogger
         {
             ConfigController.ImportAllConfigurations();
         }
+
+        [WebMethod]
+        public XmlGatewayConfig GetGatewayConfiguration(string hostname)
+        {
+            return ConfigController.GetConfiguration(hostname);
+        }
     }
 }

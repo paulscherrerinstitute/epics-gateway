@@ -369,6 +369,7 @@
     <Content Include="favicon-16x16.png" />
     <Content Include="favicon-32x32.png" />
     <Content Include="favicon.ico" />
+    <TypeScriptCompile Include="Frontend\DTOs\GatewayConfiguration.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GraphAnomalyInfo.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewayHistoricData.ts" />
     <Content Include="Frontend\tsconfig.json" />
@@ -601,9 +602,9 @@
     <Compile Include="Logs.ashx.cs">
       <DependentUpon>Logs.ashx</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201906211139391_base.cs" />
-    <Compile Include="Migrations\201906211139391_base.Designer.cs">
-      <DependentUpon>201906211139391_base.cs</DependentUpon>
+    <Compile Include="Migrations\201906240946327_base.cs" />
+    <Compile Include="Migrations\201906240946327_base.Designer.cs">
+      <DependentUpon>201906240946327_base.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\CaesarContext.cs" />
@@ -684,8 +685,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201906211139391_base.resx">
-      <DependentUpon>201906211139391_base.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201906240946327_base.resx">
+      <DependentUpon>201906240946327_base.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

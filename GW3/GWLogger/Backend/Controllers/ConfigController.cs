@@ -162,7 +162,8 @@ namespace GWLogger.Backend.Controllers
             // Insert
             using (var ctx = new CaesarContext())
             {
-                ctx.Gateways.Add(ConfigToDb(config));
+                var item = ConfigToDb(config);
+                ctx.Gateways.Add(item);
                 ctx.SaveChanges();
             }
         }
