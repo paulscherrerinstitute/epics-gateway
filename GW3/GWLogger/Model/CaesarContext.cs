@@ -39,6 +39,16 @@ namespace GWLogger.Model
             }
         }
 
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<GatewayGroup>()
+            .HasOptional(p => p.GatewayGroupMembers)
+            .WithMany()
+            .WillCascadeOnDelete(true);
+        }
+
         public virtual DbSet<GatewayEntry> Gateways { get; set; }
         public virtual DbSet<GatewayFilterType> GatewayFilterTypes { get; set; }
         public virtual DbSet<GatewayGroupMember> GatewayGroupMembers { get; set; }

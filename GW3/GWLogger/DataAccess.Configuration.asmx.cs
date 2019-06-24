@@ -18,5 +18,11 @@ namespace GWLogger
         {
             ConfigController.ImportInventoryConfiguration(hostname);
         }
+
+        [WebMethod]
+        public void ImportAllInventoryConfiguration()
+        {
+            ConfigController.ImportAllConfigurations();
+        }
     }
 }

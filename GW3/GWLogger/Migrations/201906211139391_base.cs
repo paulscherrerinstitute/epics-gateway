@@ -30,7 +30,7 @@ namespace GWLogger.Migrations
                 })
                 .PrimaryKey(t => t.MbrId)
                 .ForeignKey("dbo.GatewayFilterTypes", t => t.FilterType)
-                .ForeignKey("dbo.GatewayGroups", t => t.GrpId)
+                .ForeignKey("dbo.GatewayGroups", t => t.GrpId, cascadeDelete: true)
                 .Index(t => t.GrpId)
                 .Index(t => t.FilterType);
 

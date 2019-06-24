@@ -122,6 +122,16 @@ namespace GWLogger.Backend.Controllers
             filterTypeClasses.Add("GroupFilter", typeof(GroupFilter).GetConstructor(new Type[] { }));
         }
 
+        public static void ImportAllConfigurations()
+        {
+            var doc = new HtmlAgilityPack.HtmlDocument();
+            doc.LoadHtml(File.ReadAllText(HttpContext.Current.Server.MapPath("/index.html")));
+            doc.DocumentNode.SelectNodes("//div")
+                .Where(row => row.Attributes["class"]?.Value == "GWDisplay")
+                .Select(row => row.Attributes["id"]?.Value).ToList()
+                .ForEach(row => ImportInventoryConfiguration(row));
+        }
+
         public static void ImportInventoryConfiguration(string hostname)
         {
             XmlGatewayConfig config;
@@ -129,11 +139,23 @@ namespace GWLogger.Backend.Controllers
             {
                 config = XmlToConfig(web.DownloadString("http://inventory.psi.ch/soap/gatewayConfig.aspx?gateway=" + System.Web.HttpUtility.UrlEncode(hostname)));
             }
+            SetConfiguration(config);
+        }
 
+        public static XmlGatewayConfig GetConfiguration(string hostname)
+        {
+            using (var ctx = new CaesarContext())
+            {
+                return DbToConfig(ctx.Gateways.First(row => row.GatewayName == hostname));
+            }
+        }
+
+        public static void SetConfiguration(XmlGatewayConfig config)
+        {
             // Cleanup
             using (var ctx = new CaesarContext())
             {
-                ctx.Gateways.RemoveRange(ctx.Gateways.Where(row => row.GatewayName == hostname));
+                ctx.Gateways.RemoveRange(ctx.Gateways.Where(row => row.GatewayName == config.Name));
                 ctx.SaveChanges();
             }
 
@@ -207,7 +229,7 @@ namespace GWLogger.Backend.Controllers
 
         private static GatewayEntry ConfigToDb(XmlGatewayConfig config)
         {
-            return new GatewayEntry
+            var result = new GatewayEntry
             {
                 GatewayName = config.Name,
                 Directions = (GatewayDirection)((int)config.Type),
@@ -224,6 +246,10 @@ namespace GWLogger.Backend.Controllers
                         .Union(config.Security.RulesSideB.Select(r2 => RuleToDb("B", r2)))
                         .ToList()
             };
+            var pos = 0;
+            foreach (var i in result.GatewayRules)
+                i.Position = pos++;
+            return result;
         }
 
         private static GatewayGroupMember SecurityFilterToDb(SecurityFilter filter)
