@@ -42,6 +42,9 @@ interface ConfigSecurityGroup
  */
 interface SecurityFilter
 {
+    $type: string;
+    Name?: string;
+    IP?: string;
 }
 
 /**

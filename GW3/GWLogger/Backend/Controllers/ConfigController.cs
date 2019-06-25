@@ -142,17 +142,22 @@ namespace GWLogger.Backend.Controllers
             SetConfiguration(config);
         }
 
-        public static XmlGatewayConfig GetConfiguration(string hostname)
+        public static string GetConfiguration(string hostname)
         {
             using (var ctx = new CaesarContext())
             {
-                return DbToConfig(ctx.Gateways.First(row => row.GatewayName == hostname));
+                return ConfigToJson(DbToConfig(ctx.Gateways.First(row => row.GatewayName == hostname)));
             }
+        }
+
+        public static void SetConfiguration(string configJson)
+        {
+            var config = JsonToConfig(configJson);
+            SetConfiguration(config);
         }
 
         public static void SetConfiguration(XmlGatewayConfig config)
         {
-            // Cleanup
             using (var ctx = new CaesarContext())
             {
                 ctx.Gateways.RemoveRange(ctx.Gateways.Where(row => row.GatewayName == config.Name));
@@ -186,6 +191,17 @@ namespace GWLogger.Backend.Controllers
                 return (XmlGatewayConfig)serializer.Deserialize(memStream);
             }
         }
+
+        private static string ConfigToJson(XmlGatewayConfig config)
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(config, new Newtonsoft.Json.JsonSerializerSettings { TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Auto });
+        }
+
+        private static XmlGatewayConfig JsonToConfig(string json)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<XmlGatewayConfig>(json);
+        }
+
 
         private static XmlGatewayConfig DbToConfig(GatewayEntry entry)
         {
@@ -224,7 +240,7 @@ namespace GWLogger.Backend.Controllers
             };
             result.Filter = (SecurityFilter)filterTypeClasses[rule.GwFilterType.ClassName].Invoke(new object[] { });
             if (!string.IsNullOrEmpty(rule.GwFilterType.FieldName))
-                result.GetType().GetProperty(rule.GwFilterType.FieldName).SetValue(result, rule.Value1);
+                result.Filter.GetType().GetProperty(rule.GwFilterType.FieldName).SetValue(result.Filter, rule.Value1);
             return result;
         }
 

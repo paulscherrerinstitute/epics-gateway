@@ -26,7 +26,7 @@ namespace GWLogger
         }
 
         [WebMethod]
-        public XmlGatewayConfig GetGatewayConfiguration(string hostname)
+        public string GetGatewayConfiguration(string hostname)
         {
             return ConfigController.GetConfiguration(hostname);
         }
