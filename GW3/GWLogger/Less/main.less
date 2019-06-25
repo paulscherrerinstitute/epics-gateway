@@ -1431,7 +1431,7 @@ select
 #configRulesView
 {
     border: 1px solid black;
-    width: calc(100vw - @errorPanel - 8px);
+    width: calc(100vw - @errorPanel - 28px);
     height: calc(100vh - 370px);
     float: left;
     margin-left: 5px;
@@ -1452,16 +1452,31 @@ select
             width: 50%;
         }
 
-            td > table
-            {
-                width: 100%;
-            }
+        .colChannel
+        {
+            width: calc(25vw - @errorPanel / 8 - 8px - 40px);
+            display: inline-block;
+        }
 
-                td > table > td
-                {
-                    //width: 25%;
-                    width: calc(12.5vw - @errorPanel / 8 - 8px);
-                }
+        .colAccess
+        {
+            width: 80px;
+            display: inline-block;
+        }
+
+
+        .colFilter
+        {
+            width: 80px;
+            display: inline-block;
+        }
+
+
+        .colFilterParam
+        {
+            width: calc(25vw - @errorPanel / 8 - 8px - 180px);
+            display: inline-block;
+        }
     }
 
     input

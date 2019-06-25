@@ -18,7 +18,14 @@
     public static ParseConfig(xmlConfig)
     {
         ConfigurationPage.Config = <XmlGatewayConfig>$.parseJSON(xmlConfig.d);
-
+        ConfigurationPage.Config.Security.Groups.sort((a, b) =>
+        {
+            if (a.Name > b.Name)
+                return 1;
+            if (a.Name < b.Name)
+                return -1;
+            return 0;
+        });
 
         $("#frmCfgHost").val(ConfigurationPage.Config.Name);
         $("#frmCfgDirection").val(ConfigurationPage.Config.Type);
@@ -38,45 +45,55 @@
 
         var sides = ["A", "B"];
 
-        html += "<table class='sideConfigTable'>";
-        for (var s = 0; s < sides.length; s++)
+        for (var g = 0; g <= ConfigurationPage.Config.Security.Groups.length; g++)
         {
-            var side = sides[s];
-            var rules = <ConfigSecurityRule[]>ConfigurationPage.Config.Security["RulesSide" + side];
-            if (s == 0)
-                html += "<tr>";
-            html += "<th>Side " + side + "</th>";
-            if (s != 0)
-                html += "</tr>";
+            var group = (g < ConfigurationPage.Config.Security.Groups.length ? ConfigurationPage.Config.Security.Groups[g] : null);
+
+            if(group)
+                html += "Group " + group.Name;
+
+            html += "<table class='sideConfigTable'>";
+            html += "<tr><th>Side A</th><th>Side B</th></tr>";
+
+            for (var s = 0; s < sides.length; s++)
+            {
+                var side = sides[s];
+                var rules = <ConfigSecurityRule[]>ConfigurationPage.Config.Security["RulesSide" + side];
+                if (s == 0)
+                    html += "<tr>";
+                html += "<td>";
+                for (var i = 0; i < rules.length; i++)
+                {
+                    if (group == null && ConfigurationPage.ClassName(rules[i].Filter.$type) == "Group")
+                        continue;
+                    else if (group != null && (ConfigurationPage.ClassName(rules[i].Filter.$type) != "Group" || rules[i].Filter.Name != group.Name))
+                        continue;
+                    html += "<div class='colChannel'><input type='text' class='k-textbox' value='" + rules[i].Channel + "' /></div>";
+                    html += "<div class='colAccess'><input type='text' class='k-textbox' value='" + rules[i].Access + "' /></div>";
+                    if (group)
+                    {
+                        html += "<div class='colFilter'>&nbsp;</div>";
+                        html += "<div class='colFilterParam'>&nbsp;</div>";
+                    }
+                    else
+                    {
+                        html += "<div class='colFilter'><input type='text' class='k-textbox' value='" + ConfigurationPage.ClassName(rules[i].Filter.$type) + "' /></div>";
+                        if (typeof rules[i].Filter.IP !== "undefined")
+                            html += "<div class='colFilterParam'><input type='text' class='k-textbox' value='" + rules[i].Filter.IP + "' /></div>";
+                        else if (typeof rules[i].Filter.Name !== "undefined")
+                            html += "<div class='colFilterParam'><input type='text' class='k-textbox' value='" + rules[i].Filter.Name + "' /></div>";
+                        else
+                            html += "<div class='colFilterParam'>&nbsp;</div>";
+                    }
+                }
+                html += "</td>";
+                if (s != 0)
+                    html += "</tr>";
+            }
+
+            html += "</table>";
         }
 
-        for (var s = 0; s < sides.length; s++)
-        {
-            var side = sides[s];
-            var rules = <ConfigSecurityRule[]>ConfigurationPage.Config.Security["RulesSide" + side];
-            if (s == 0)
-                html += "<tr>";
-            html += "<td><table>";
-            for (var i = 0; i < rules.length; i++)
-            {
-                if (ConfigurationPage.ClassName(rules[i].Filter.$type) == "Group")
-                    continue;
-                html += "<tr>";
-                html += "<td><input type='text' class='k-textbox' value='" + rules[i].Channel + "' /></td>";
-                html += "<td><input type='text' class='k-textbox' value='" + rules[i].Access + "' /></td>";
-                html += "<td><input type='text' class='k-textbox' value='" + ConfigurationPage.ClassName(rules[i].Filter.$type) + "' /></td>";
-                if (typeof rules[i].Filter.IP !== "undefined")
-                    html += "<td><input type='text' class='k-textbox' value='" + rules[i].Filter.IP + "' /></td>";
-                else if (typeof rules[i].Filter.Name !== "undefined")
-                    html += "<td><input type='text' class='k-textbox' value='" + rules[i].Filter.Name + "' /></td>";
-                else
-                    html += "<td>&nbsp;</td>";
-                html += "</tr>";
-            }
-            html += "</table></td>";
-            if (s != 0)
-                html += "</tr>";
-        }
         $("#configRulesView").html(html);
     }
 
