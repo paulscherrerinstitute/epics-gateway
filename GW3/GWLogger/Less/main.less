@@ -1430,13 +1430,29 @@ select
 
 #configRulesView
 {
-    border: 1px solid black;
     width: calc(100vw - @errorPanel - 28px);
     height: calc(100vh - 370px);
     float: left;
     margin-left: 5px;
     margin-top: 10px;
     overflow-y: scroll;
+
+    .groupTitle
+    {
+        background-color: @labelBackgroundColor;
+        color: @labelColor;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        cursor: pointer;
+        margin-top: 5px;
+    }
+
+    .groupRules
+    {
+        display: none;
+        margin-bottom: 10px;
+    }
 
     .sideConfigTable
     {

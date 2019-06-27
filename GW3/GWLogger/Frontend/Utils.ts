@@ -1,4 +1,19 @@
-﻿interface String
+﻿interface StringDictionary
+{
+    [key: string]: string;
+}
+
+interface DropdownOptions
+{
+    frmId: string,
+    values: string[] | StringDictionary,
+    currentValue?: string,
+    cssClass?: string,
+    cssStyle?: string
+    onchange?: string | any
+}
+
+interface String
 {
     /**
     * Escape the string for a "value" attribute.
@@ -323,5 +338,30 @@ class Utils
             contentType: 'application/json; charset=utf-8',
             dataType: 'json'
         });
+    }
+
+    static Dropdown(options: DropdownOptions): string
+    {
+        var result = "<select id='" + options.frmId + "'";
+        if (options.cssClass)
+            result += " class='" + options.cssClass + "'";
+        if (options.cssStyle)
+            result += " style='" + options.cssStyle + "'";
+        if (options.onchange)
+            result += " onchange='" + options.onchange + "'";
+        result += ">";
+        if ("length" in options.values) // string array
+        {
+            var strArray = options.values as string[];
+            for (var i = 0; i < strArray.length; i++)
+                result += "<option" + (options.currentValue === strArray[i] ? " selected" : "") + ">" + strArray[i] + "</option>";
+        }
+        else // dict
+        {
+            var dict = options.values as StringDictionary;
+            for (var key in dict)
+                result += "<option" + (options.currentValue === key ? " selected" : "") + " value='" + key + "'>" + dict[key] + "</option>";
+        }
+        return result + "</select>";
     }
 }
