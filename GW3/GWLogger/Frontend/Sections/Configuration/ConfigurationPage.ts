@@ -100,6 +100,28 @@
         }
     }
 
+    public static AddGrpFilter(evt: Event)
+    {
+        evt = evt || window.event;
+        var elemId = <string>(evt.target["id"]);
+        var p = elemId.split("_");
+        var val = $("#" + elemId).val();
+
+        var group = ConfigurationPage.Config.Security.Groups[parseInt(p[2])];
+        switch (val)
+        {
+            case "Host":
+                group.Filters.push({ $type: "GWLogger.Backend.Controllers." + val + "Filter, GWLogger", Name: "" });
+                break;
+            case "IP":
+                group.Filters.push({ $type: "GWLogger.Backend.Controllers." + val + "Filter, GWLogger", IP: "" });
+                break;
+            default:
+                break;
+        }
+        ConfigurationPage.ShowRules();
+    }
+
     public static ShowRules()
     {
         var html = "";
@@ -108,7 +130,6 @@
 
         for (var g = 0; g <= ConfigurationPage.Config.Security.Groups.length; g++)
         {
-            var side = "A";
             var group = (g < ConfigurationPage.Config.Security.Groups.length ? ConfigurationPage.Config.Security.Groups[g] : null);
 
             if (group)
@@ -124,6 +145,7 @@
                     else if (typeof group.Filters[i].Name !== "undefined")
                         html += "<input type='text' class='k-textbox' value='" + group.Filters[i].Name + "' id='frm_grpfltr_" + g + "_" + i + "_Name' onkeyup='ConfigurationPage.ChangeField(event);' />";
                 }
+                html += Utils.Dropdown({ frmId: "frm_newgrpfltr_" + g, values: ["-- Add new filter --", "IP", "Host"], onchange:"ConfigurationPage.AddGrpFilter(event)" })+"<br>";
                 html += "<b>Rules:</b><br>";
             }
             else
@@ -134,7 +156,7 @@
 
             for (var s = 0; s < sides.length; s++)
             {
-                side = sides[s];
+                var side = sides[s];
                 var rules = <ConfigSecurityRule[]>ConfigurationPage.Config.Security["RulesSide" + side];
                 if (s == 0)
                     html += "<tr>";
