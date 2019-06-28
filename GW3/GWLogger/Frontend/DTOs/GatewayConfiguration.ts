@@ -9,6 +9,7 @@ interface XmlGatewayConfig
     RemoteAddressSideA: string;
     LocalAddressSideB: string;
     RemoteAddressSideB: string;
+    Comment: string;
     Security: ConfigSecurity;
 }
 

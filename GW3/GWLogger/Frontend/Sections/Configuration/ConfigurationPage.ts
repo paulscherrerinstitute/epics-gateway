@@ -6,13 +6,13 @@
     public static Show(gatewayName: string)
     {
         $("#configOverlay").show();
-        $("#frmCfgHost").val("");
-        $("#frmCfgDirection").val("");
-        $("#frmCfgLocA").val("");
-        $("#frmCfgRemA").val("");
-        $("#frmCfgLocB").val("");
-        $("#frmCfgRemB").val("");
-        $("#frmCfgDesc").val("");
+        $("#frmCfg_Name").val("");
+        $("#frmCfg_Type").val(0);
+        $("#frmCfg_LocalAddressSideA").val("");
+        $("#frmCfg_RemoteAddressSideA").val("");
+        $("#frmCfg_LocalAddressSideB").val("");
+        $("#frmCfg_RemoteAddressSideB").val("");
+        $("#frmCfg_Comment").val("");
 
         Utils.Loader("GetGatewayConfiguration", { hostname: gatewayName }).then(ConfigurationPage.ParseConfig);
     }
@@ -29,9 +29,9 @@
         $("#frmCfg_RemoteAddressSideA").val(ConfigurationPage.Config.RemoteAddressSideA);
         $("#frmCfg_LocalAddressSideB").val(ConfigurationPage.Config.LocalAddressSideB);
         $("#frmCfg_RemoteAddressSideB").val(ConfigurationPage.Config.RemoteAddressSideB);
+        $("#frmCfg_Comment").val(ConfigurationPage.Config.Comment);
 
         ConfigurationPage.ShowRules();
-        //$("#frmCfgDesc").val(config.Comment);
     }
 
     public static Save()
@@ -206,13 +206,14 @@
                 if (s == 0)
                     html += "<tr>";
                 html += "<td>";
+                var currRow = 0;
                 for (var i = 0; i < rules.length; i++)
                 {
                     if (group == null && ConfigurationPage.ClassName(rules[i].Filter.$type) == "Group")
                         continue;
                     else if (group != null && (ConfigurationPage.ClassName(rules[i].Filter.$type) != "Group" || rules[i].Filter.Name != group.Name))
                         continue;
-                    html += "<div class='colCommands'><span class='arrow_up'></span><span class='arrow_down'></span><span class='fa_times' onclick='ConfigurationPage.DeleteRule(\"" + side + "\"," + i + ")'></span></div>";
+                    html += "<div class='colCommands'><span class='arrow_up' currow='" + i + "' onclick='ConfigurationPage.MoveUp(event)' id='mvt_" + side + "_" + g + "_" + currRow + "'></span><span class='arrow_down' currow='" + i + "' onclick='ConfigurationPage.MoveDown(event)' id='mvtd_" + side + "_" + g + "_" + currRow + "'></span><span class='fa_times' onclick='ConfigurationPage.DeleteRule(\"" + side + "\"," + i + ")'></span></div>";
                     html += "<div class='colChannel'><input type='text' id='frm_rule_" + side + "_channel_" + i + "' onkeyup='ConfigurationPage.ChangeField(event);' class='k-textbox' value='" + rules[i].Channel + "' /></div>";
                     html += "<div class='colAccess'>" + Utils.Dropdown({
                         frmId: "frm_rule_" + side + "_access_" + i, onchange: "ConfigurationPage.ChangeField(event)", values: { "READ": "Read", "ALL": "Read Write", "NONE": "None" }, cssClass: 'drpToConvert', currentValue: rules[i].Access
@@ -232,6 +233,7 @@
                         else
                             html += "<div class='colFilterParam'>&nbsp;</div>";
                     }
+                    currRow++;
                 }
 
                 html += "<div class='genCommands'>";
@@ -253,6 +255,51 @@
         html += "</div>";
 
         $("#configRulesView").html(html);
+    }
+
+    static MoveUp(evt: Event)
+    {
+        evt = evt || window.event;
+        var elemId = <string>evt.target["id"];
+        var p = elemId.split("_");
+        if (parseInt(p[3]) == 0)
+            return;
+
+        var side = p[1];
+
+        var prevElemId = "mvt_" + side + "_" + p[2] + "_" + (parseInt(p[3]) - 1);
+        var curId = parseInt((<any>evt.target).getAttribute("currow"));
+        var prevId = parseInt($("#" + prevElemId).attr("currow"));
+
+        var rules = <ConfigSecurityRule[]>ConfigurationPage.Config.Security["RulesSide" + side];
+
+        var temp = rules[curId];
+        rules[curId] = rules[prevId];
+        rules[prevId] = temp;
+        ConfigurationPage.ShowRules();
+    }
+
+    static MoveDown(evt: Event)
+    {
+        evt = evt || window.event;
+        var elemId = <string>evt.target["id"];
+        var p = elemId.split("_");
+
+        var side = p[1];
+
+        var nextElemId = "mvtd_" + side + "_" + p[2] + "_" + (parseInt(p[3]) + 1);
+        var curId = parseInt((<any>evt.target).getAttribute("currow"));
+        var nextId = parseInt($("#" + nextElemId).attr("currow"));
+
+        if (nextId === null || nextId === undefined || isNaN(nextId))
+            return;
+
+        var rules = <ConfigSecurityRule[]>ConfigurationPage.Config.Security["RulesSide" + side];
+
+        var temp = rules[curId];
+        rules[curId] = rules[nextId];
+        rules[nextId] = temp;
+        ConfigurationPage.ShowRules();
     }
 
     static DeleteGroup(evt: Event, groupId: number)
