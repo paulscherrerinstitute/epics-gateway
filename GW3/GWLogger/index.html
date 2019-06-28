@@ -11,11 +11,13 @@
     <link href="/styles/kendo.material.min.css" rel="stylesheet" />
     <link href="/Less/main.css" rel="stylesheet" />
     <style id="fullScreenMode" media="max-width: 1px">
-        body {
+        body
+        {
             cursor: none !important;
         }
 
-        * {
+        *
+        {
             cursor: none !important;
         }
     </style>
@@ -157,31 +159,34 @@
         <div id="configSettingsView">
             <div class="row">
                 <div class="colLabels">Hostname</div>
-                <div class="colField"><input type="text" id="frmCfgHost" class="k-textbox" /></div>
+                <div class="colField"><input type="text" id="frmCfg_Name" class="k-textbox" onkeyup="ConfigurationPage.ChangeConfigField(event)" /></div>
             </div>
             <div class="row">
                 <div class="colLabels">Directions</div>
-                <div class="colField"><input type="text" id="frmCfgDirection" class="k-textbox" /></div>
+                <div class="colField"><select id="frmCfg_Type" onchange="ConfigurationPage.ChangeConfigField(event)"><option value="0">Unidirectional</option><option value="1">Bidirectional</option></select></div>
             </div>
             <div class="row">
                 <div class="colLabels">Local Address A</div>
-                <div class="colField"><input type="text" id="frmCfgLocA" class="k-textbox" /></div>
+                <div class="colField"><input type="text" id="frmCfg_LocalAddressSideA" class="k-textbox" onkeyup="ConfigurationPage.ChangeConfigField(event)" /></div>
             </div>
             <div class="row">
                 <div class="colLabels">Remote Address A</div>
-                <div class="colField"><input type="text" id="frmCfgRemA" class="k-textbox" /></div>
+                <div class="colField"><input type="text" id="frmCfg_RemoteAddressSideA" class="k-textbox" onkeyup="ConfigurationPage.ChangeConfigField(event)" /></div>
             </div>
             <div class="row">
                 <div class="colLabels">Local Address B</div>
-                <div class="colField"><input type="text" id="frmCfgLocB" class="k-textbox" /></div>
+                <div class="colField"><input type="text" id="frmCfg_LocalAddressSideB" class="k-textbox" onkeyup="ConfigurationPage.ChangeConfigField(event)" /></div>
             </div>
             <div class="row">
                 <div class="colLabels">Remote Address B</div>
-                <div class="colField"><input type="text" id="frmCfgRemB" class="k-textbox" /></div>
+                <div class="colField"><input type="text" id="frmCfg_RemoteAddressSideB" class="k-textbox" onkeyup="ConfigurationPage.ChangeConfigField(event)" /></div>
             </div>
             <div class="row">
                 <div class="colLabels">Comment</div>
-                <div class="colField"><textarea id="frmCfgDesc" class="k-textbox"></textarea></div>
+                <div class="colField"><textarea id="frmCfgDesc" class="k-textbox" onkeyup="ConfigurationPage.ChangeConfigField(event)"></textarea></div>
+            </div>
+            <div class="genCommands">
+                <span class="button" onclick="ConfigurationPage.Save()">Save</span>
             </div>
         </div>
     </div>

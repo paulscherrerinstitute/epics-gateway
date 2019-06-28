@@ -372,6 +372,7 @@
     <TypeScriptCompile Include="Frontend\DTOs\GatewayConfiguration.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GraphAnomalyInfo.ts" />
     <TypeScriptCompile Include="Frontend\DTOs\GatewayHistoricData.ts" />
+    <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="Frontend\tsconfig.json" />
     <Content Include="graphtest.html" />
     <Content Include="gulpfile.js" />
@@ -394,6 +395,11 @@
     <Content Include="Logs.ashx" />
     <None Include="Connected Services\Inventory.Controller\DirectCommands.wsdl" />
     <None Include="Connected Services\Inventory\DataAccess.wsdl" />
+    <Content Include="fonts\fontawesome-webfont.eot" />
+    <Content Include="fonts\fontawesome-webfont.ttf" />
+    <Content Include="fonts\fontawesome-webfont.woff" />
+    <Content Include="fonts\fontawesome-webfont.woff2" />
+    <Content Include="fonts\FontAwesome.otf" />
     <None Include="packages.config" />
     <Content Include="main.js" />
     <None Include="Properties\PublishProfiles\CAESAR.pubxml" />

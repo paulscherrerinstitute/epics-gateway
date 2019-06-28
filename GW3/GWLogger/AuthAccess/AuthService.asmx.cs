@@ -147,5 +147,12 @@ namespace GWLogger.AuthAccess
                 throw new System.Security.SecurityException("Command not allowed.");
             return Global.DirectCommands.StartTask(gatewayName, CurrentUser(tokenId), command);
         }
+
+        [WebMethod]
+        public void SaveGatewayConfiguration(string json, string tokenId)
+        {
+            var user = CurrentUser(tokenId);
+            Backend.Controllers.ConfigController.SetConfiguration(json);
+        }
     }
 }

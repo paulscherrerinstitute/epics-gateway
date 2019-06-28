@@ -11,6 +11,16 @@
 @menuHoverBgColor: #707ece;
 @middleSidebar: (@leftSidebar+5)/2;
 @suggestionBackground: rgb(255, 253, 242);
+@buttonHover: #707ece;
+
+@font-face
+{
+    font-family: 'FontAwesome';
+    src: url('/fonts/fontawesome-webfont.eot?v=4.3.0');
+    src: url('/fonts/fontawesome-webfont.eot?#iefix&v=4.3.0') format('embedded-opentype'), url('/fonts/fontawesome-webfont.woff?v=4.3.0') format('woff'), url('/fonts/fontawesome-webfont.ttf?v=4.3.0') format('truetype'), url('/fonts/fontawesome-webfont.svg?v=4.3.0#fontawesomeregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
 
 body
 {
@@ -84,7 +94,7 @@ body
 
     &:hover
     {
-        background-color: #707ece;
+        background-color: @buttonHover;
     }
 }
 
@@ -1431,7 +1441,7 @@ select
 #configRulesView
 {
     width: calc(100vw - @errorPanel - 28px);
-    height: calc(100vh - 370px);
+    height: calc(100vh - 395px);
     float: left;
     margin-left: 5px;
     margin-top: 10px;
@@ -1446,6 +1456,14 @@ select
         text-align: center;
         cursor: pointer;
         margin-top: 5px;
+
+        span
+        {
+            cursor: pointer;
+            display: inline-block;
+            float: right;
+            margin-right: 10px;
+        }
     }
 
     .groupRules
@@ -1468,9 +1486,32 @@ select
             width: 50%;
         }
 
+        .colCommands
+        {
+            width: 60px;
+            display: inline-block;
+
+            span
+            {
+                display: inline-block;
+                width: 16px;
+                background-color: @labelBackgroundColor;
+                border-radius: 3px;
+                color: white;
+                text-align: center;
+                margin-right: 2px;
+                cursor: pointer;
+
+                &:hover
+                {
+                    background-color: @buttonHover;
+                }
+            }
+        }
+
         .colChannel
         {
-            width: calc(25vw - @errorPanel / 8 - 8px - 40px);
+            width: calc(25vw - @errorPanel / 8 - 8px - 100px);
             display: inline-block;
         }
 
@@ -1498,6 +1539,12 @@ select
     input, select
     {
         width: 100%;
+    }
+
+    .genCommands
+    {
+        margin-top: 5px;
+        text-align: center;
     }
 }
 
@@ -1542,4 +1589,34 @@ select
         display: inline-block;
         width: calc(100vw - @errorPanel - 180px);
     }
+
+    .genCommands
+    {
+        margin-top: 5px;
+        text-align: center;
+    }
+}
+
+.fa_times:after
+{
+    content: "\f00d";
+    font: normal normal normal 14px/1 FontAwesome;
+}
+
+.arrow_up:after
+{
+    content: "\f062";
+    font: normal normal normal 14px/1 FontAwesome;
+}
+
+.arrow_down:after
+{
+    content: "\f063";
+    font: normal normal normal 14px/1 FontAwesome;
+}
+
+.pencilIcon:after
+{
+    content: "\f040";
+    font: normal normal normal 14px/1 FontAwesome;
 }
