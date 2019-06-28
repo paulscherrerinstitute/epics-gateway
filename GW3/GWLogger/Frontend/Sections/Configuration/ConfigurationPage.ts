@@ -5,6 +5,7 @@
 
     public static Show(gatewayName: string)
     {
+        $("#configOverlay").show();
         $("#frmCfgHost").val("");
         $("#frmCfgDirection").val("");
         $("#frmCfgLocA").val("");
@@ -19,6 +20,7 @@
     public static ParseConfig(xmlConfig)
     {
         ConfigurationPage.Config = <XmlGatewayConfig>$.parseJSON(xmlConfig.d);
+        $("#configOverlay").hide();
         ConfigurationPage.SortGroups();
 
         $("#frmCfg_Name").val(ConfigurationPage.Config.Name);
@@ -34,8 +36,10 @@
 
     public static Save()
     {
+        $("#configOverlay").show();
         Utils.Loader("/AuthAccess/AuthService.asmx/SaveGatewayConfiguration", { json: JSON.stringify(ConfigurationPage.Config), tokenId: Main.Token }).then(() =>
         {
+            Notifications.Popup("Configuration saved", "info");
             Utils.Loader("GetGatewayConfiguration", { hostname: ConfigurationPage.Config.Name }).then(ConfigurationPage.ParseConfig);
         });
     }

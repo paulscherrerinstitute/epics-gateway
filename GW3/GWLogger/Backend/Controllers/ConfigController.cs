@@ -199,7 +199,7 @@ namespace GWLogger.Backend.Controllers
 
         private static XmlGatewayConfig JsonToConfig(string json)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<XmlGatewayConfig>(json);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<XmlGatewayConfig>(json, new Newtonsoft.Json.JsonSerializerSettings { TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Auto });
         }
 
 
@@ -211,6 +211,7 @@ namespace GWLogger.Backend.Controllers
                 LocalAddressSideB = entry.LocalAddressB,
                 RemoteAddressSideA = entry.RemoteAddressA,
                 RemoteAddressSideB = entry.RemoteAddressB,
+                Type = (GatewayConfigurationType)((int)entry.Directions),
                 Name = entry.GatewayName
             };
             result.Security.RulesSideA = entry.GatewayRules.Where(row => row.Side == "A").Select(row => DbToRule(row)).ToArray();
