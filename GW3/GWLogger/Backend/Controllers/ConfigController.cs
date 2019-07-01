@@ -152,6 +152,14 @@ namespace GWLogger.Backend.Controllers
             }
         }
 
+        public static string GetXmlConfiguration(string hostname)
+        {
+            using (var ctx = new CaesarContext())
+            {
+                return ConfigToXml(DbToConfig(ctx.Gateways.First(row => row.GatewayName == hostname)));
+            }
+        }
+
         public static void SetConfiguration(string configJson)
         {
             var config = JsonToConfig(configJson);

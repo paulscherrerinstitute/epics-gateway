@@ -107,6 +107,7 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Config.ashx" />
     <None Include="Connected Services\Inventory.Controller\DirectCommands.disco" />
     <None Include="Connected Services\Inventory.Controller\configuration91.svcinfo" />
     <None Include="Connected Services\Inventory.Controller\configuration.svcinfo" />
@@ -553,6 +554,9 @@
     <Compile Include="Backend\Controllers\LogController.cs" />
     <Compile Include="Backend\EqualityComparer.cs" />
     <Compile Include="Backend\Helpers.cs" />
+    <Compile Include="Config.ashx.cs">
+      <DependentUpon>Config.ashx</DependentUpon>
+    </Compile>
     <Compile Include="Connected Services\Inventory.Controller\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
