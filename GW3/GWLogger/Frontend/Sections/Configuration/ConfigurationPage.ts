@@ -1,10 +1,14 @@
 ﻿class ConfigurationPage
 {
+    static HasEditRole: boolean;
     static Config: XmlGatewayConfig;
     static Expanded: boolean[] = [];
 
     public static Show(gatewayName: string)
     {
+        if (!gatewayName)
+            return;
+        gatewayName = gatewayName.toUpperCase();
         $("#configOverlay").show();
         $("#frmCfg_Name").val("");
         $("#frmCfg_Type").val(0);
@@ -14,7 +18,19 @@
         $("#frmCfg_RemoteAddressSideB").val("");
         $("#frmCfg_Comment").val("");
 
-        Utils.Loader("GetGatewayConfiguration", { hostname: gatewayName }).then(ConfigurationPage.ParseConfig);
+        if (Main.Token)
+        {
+            Utils.Loader("/AuthAccess/AuthService.asmx/HasEditConfigRole", { tokenId: Main.Token, gatewayName: gatewayName }).then((hasEditRole) =>
+            {
+                ConfigurationPage.HasEditRole = hasEditRole;
+                Utils.Loader("GetGatewayConfiguration", { hostname: gatewayName }).then(ConfigurationPage.ParseConfig);
+            });
+        }
+        else
+        {
+            ConfigurationPage.HasEditRole = false;
+            Utils.Loader("GetGatewayConfiguration", { hostname: gatewayName }).then(ConfigurationPage.ParseConfig);
+        }
     }
 
     public static ParseConfig(xmlConfig)
@@ -32,6 +48,21 @@
         $("#frmCfg_Comment").val(ConfigurationPage.Config.Comment);
 
         ConfigurationPage.ShowRules();
+        if (ConfigurationPage.HasEditRole)
+        {
+            $(".genCommands").show();
+            $("#configurationView input").prop("disabled", false);
+            $("#configurationView select").prop("disabled", false);
+            $("#configurationView textarea").prop("disabled", false);
+        }
+        else
+        {
+            $(".genCommands").hide();
+            $("#configurationView input").prop("disabled", true);
+            $("#configurationView input").prop("disabled", true);
+            $("#configurationView select").prop("disabled", true);
+            $("#configurationView textarea").prop("disabled", true);
+        }
     }
 
     public static Save()
@@ -179,7 +210,10 @@
 
             if (group)
             {
-                html += "<div class='groupTitle' onclick='ConfigurationPage.ExpandGroup(" + g + ")'>Group " + group.Name + "<span class='fa_times' onclick='ConfigurationPage.DeleteGroup(event, " + g + ")'></span><span class='pencilIcon' onclick='ConfigurationPage.RenameGroup(event, " + g + ")'></span></div>";
+                html += "<div class='groupTitle' onclick='ConfigurationPage.ExpandGroup(" + g + ")'>Group " + group.Name;
+                if (ConfigurationPage.HasEditRole)
+                    html += "<span class='fa_times' onclick='ConfigurationPage.DeleteGroup(event, " + g + ")'></span><span class='pencilIcon' onclick='ConfigurationPage.RenameGroup(event, " + g + ")'></span>";
+                html += "</div>";
                 html += "<div class='groupRules' id='grp_" + g + "'" + (ConfigurationPage.Expanded[g] === true ? " style='display: block;'" : "") + ">";
                 html += "<b>Filters:</b><br>";
                 for (var i = 0; i < group.Filters.length; i++)
@@ -190,7 +224,8 @@
                     else if (typeof group.Filters[i].Name !== "undefined")
                         html += "<input type='text' class='k-textbox' value='" + group.Filters[i].Name + "' id='frm_grpfltr_" + g + "_" + i + "_Name' onkeyup='ConfigurationPage.ChangeField(event);' />";
                 }
-                html += Utils.Dropdown({ frmId: "frm_newgrpfltr_" + g, values: ["-- Add new filter --", "IP", "Host"], onchange: "ConfigurationPage.AddGrpFilter(event)" }) + "<br>";
+                if (ConfigurationPage.HasEditRole)
+                    html += Utils.Dropdown({ frmId: "frm_newgrpfltr_" + g, values: ["-- Add new filter --", "IP", "Host"], onchange: "ConfigurationPage.AddGrpFilter(event)" }) + "<br>";
                 html += "<b>Rules:</b><br>";
             }
             else
@@ -213,7 +248,10 @@
                         continue;
                     else if (group != null && (ConfigurationPage.ClassName(rules[i].Filter.$type) != "Group" || rules[i].Filter.Name != group.Name))
                         continue;
-                    html += "<div class='colCommands'><span class='arrow_up' currow='" + i + "' onclick='ConfigurationPage.MoveUp(event)' id='mvt_" + side + "_" + g + "_" + currRow + "'></span><span class='arrow_down' currow='" + i + "' onclick='ConfigurationPage.MoveDown(event)' id='mvtd_" + side + "_" + g + "_" + currRow + "'></span><span class='fa_times' onclick='ConfigurationPage.DeleteRule(\"" + side + "\"," + i + ")'></span></div>";
+                    if (ConfigurationPage.HasEditRole)
+                        html += "<div class='colCommands'><span class='arrow_up' currow='" + i + "' onclick='ConfigurationPage.MoveUp(event)' id='mvt_" + side + "_" + g + "_" + currRow + "'></span><span class='arrow_down' currow='" + i + "' onclick='ConfigurationPage.MoveDown(event)' id='mvtd_" + side + "_" + g + "_" + currRow + "'></span><span class='fa_times' onclick='ConfigurationPage.DeleteRule(\"" + side + "\"," + i + ")'></span></div>";
+                    else
+                        html += "<div class='colCommands'></div>";
                     html += "<div class='colChannel'><input type='text' id='frm_rule_" + side + "_channel_" + i + "' onkeyup='ConfigurationPage.ChangeField(event);' class='k-textbox' value='" + rules[i].Channel + "' /></div>";
                     html += "<div class='colAccess'>" + Utils.Dropdown({
                         frmId: "frm_rule_" + side + "_access_" + i, onchange: "ConfigurationPage.ChangeField(event)", values: { "READ": "Read", "ALL": "Read Write", "NONE": "None" }, cssClass: 'drpToConvert', currentValue: rules[i].Access
@@ -236,9 +274,12 @@
                     currRow++;
                 }
 
-                html += "<div class='genCommands'>";
-                html += "<span class='button' onclick='ConfigurationPage.AddRule(\"" + side + "\"," + (group ? "\"" + group.Name + "\"" : "null") + ")'>Add Rule</span>";
-                html += "</div>";
+                if (ConfigurationPage.HasEditRole)
+                {
+                    html += "<div class='genCommands'>";
+                    html += "<span class='button' onclick='ConfigurationPage.AddRule(\"" + side + "\"," + (group ? "\"" + group.Name + "\"" : "null") + ")'>Add Rule</span>";
+                    html += "</div>";
+                }
 
                 html += "</td>";
                 if (s != 0)
@@ -250,9 +291,12 @@
                 html += "</div>";
         }
 
-        html += "<div class='genCommands'>";
-        html += "<span class='button' onclick='ConfigurationPage.AddGroup()'>New Group</span>";
-        html += "</div>";
+        if (ConfigurationPage.HasEditRole)
+        {
+            html += "<div class='genCommands'>";
+            html += "<span class='button' onclick='ConfigurationPage.AddGroup()'>New Group</span>";
+            html += "</div>";
+        }
 
         $("#configRulesView").html(html);
     }

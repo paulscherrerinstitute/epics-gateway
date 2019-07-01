@@ -144,10 +144,19 @@ class DetailPage
         DetailPage.LoadDetails();
     }
 
+    public static ShowConfiguration()
+    {
+        Main.Path = "Configuration";
+        State.Set(true);
+        State.Pop();
+        return false;
+    }
+
     public static async LoadDetails()
     {
         //$("#inventoryLink").attr("href", "https://inventory.psi.ch/#action=Part&system=" + encodeURIComponent(Main.CurrentGateway.toUpperCase()));
-        $("#inventoryLink").attr("href", "/Configuration/" + encodeURIComponent(Main.CurrentGateway.toUpperCase()));
+        //$("#inventoryLink").attr("href", "/Configuration/" + encodeURIComponent(Main.CurrentGateway.toUpperCase()));
+        $("#inventoryLink").on("click", DetailPage.ShowConfiguration);
         $("#logLink").attr("href", "/GW/" + Main.CurrentGateway);
 
         await DetailPage.GetInformation();

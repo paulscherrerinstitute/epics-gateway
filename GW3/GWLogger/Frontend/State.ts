@@ -93,7 +93,7 @@
             }
         }
 
-        if (path.length > 2 && (path[1] == "GW" || path[1] == "Status"))
+        if (path.length > 2 && (path[1] == "GW" || path[1] == "Status" || path[1] == "Configuration"))
             Main.CurrentGateway = path[2];
         else if (path.length > 1 && path[1] == "GW")
             Main.CurrentGateway = null;

@@ -161,7 +161,7 @@ namespace GWLogger.AuthAccess
         }
 
         [WebMethod]
-        private bool HasEditConfigRole(string gatewayName, string tokenId)
+        public bool HasEditConfigRole(string gatewayName, string tokenId)
         {
             var username = TokenManager.GetToken(tokenId, Context.Request.UserHostAddress).Login;
             using (var ctx = new CaesarContext())
