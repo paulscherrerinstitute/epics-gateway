@@ -207,7 +207,7 @@ namespace GWLogger.Backend.Controllers
             return Newtonsoft.Json.JsonConvert.SerializeObject(config, new Newtonsoft.Json.JsonSerializerSettings { TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Auto });
         }
 
-        private static XmlGatewayConfig JsonToConfig(string json)
+        public static XmlGatewayConfig JsonToConfig(string json)
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<XmlGatewayConfig>(json, new Newtonsoft.Json.JsonSerializerSettings { TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Auto });
         }

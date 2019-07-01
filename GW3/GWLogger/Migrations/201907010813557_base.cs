@@ -88,7 +88,44 @@ namespace GWLogger.Migrations
                         Id = c.Int(nullable: false, identity: true),
                         GatewayName = c.String(),
                         EntryDate = c.DateTime(nullable: false),
+                        UserId = c.Int(nullable: false),
                         Configuration = c.String(unicode: false, storeType: "text"),
+                    })
+                .PrimaryKey(t => t.Id)
+                .ForeignKey("dbo.Users", t => t.UserId, cascadeDelete: true)
+                .Index(t => t.UserId);
+            
+            CreateTable(
+                "dbo.Users",
+                c => new
+                    {
+                        Id = c.Int(nullable: false, identity: true),
+                        Username = c.String(),
+                    })
+                .PrimaryKey(t => t.Id);
+            
+            CreateTable(
+                "dbo.UserRoles",
+                c => new
+                    {
+                        Id = c.Int(nullable: false, identity: true),
+                        UserId = c.Int(nullable: false),
+                        RoleTypeId = c.Int(nullable: false),
+                        ParamValue1 = c.String(),
+                    })
+                .PrimaryKey(t => t.Id)
+                .ForeignKey("dbo.RoleTypes", t => t.RoleTypeId, cascadeDelete: true)
+                .ForeignKey("dbo.Users", t => t.UserId, cascadeDelete: true)
+                .Index(t => t.UserId)
+                .Index(t => t.RoleTypeId);
+            
+            CreateTable(
+                "dbo.RoleTypes",
+                c => new
+                    {
+                        Id = c.Int(nullable: false),
+                        Name = c.String(),
+                        ParamLabel1 = c.String(),
                     })
                 .PrimaryKey(t => t.Id);
             
@@ -96,16 +133,25 @@ namespace GWLogger.Migrations
         
         public override void Down()
         {
+            DropForeignKey("dbo.UserRoles", "UserId", "dbo.Users");
+            DropForeignKey("dbo.UserRoles", "RoleTypeId", "dbo.RoleTypes");
+            DropForeignKey("dbo.GatewayHistories", "UserId", "dbo.Users");
             DropForeignKey("dbo.GatewayGroupMembers", "GrpId", "dbo.GatewayGroups");
             DropForeignKey("dbo.GatewayRules", "FilterType", "dbo.GatewayFilterTypes");
             DropForeignKey("dbo.GatewayRules", "GatewayId", "dbo.Gateways");
             DropForeignKey("dbo.GatewayGroups", "GatewayId", "dbo.Gateways");
             DropForeignKey("dbo.GatewayGroupMembers", "FilterType", "dbo.GatewayFilterTypes");
+            DropIndex("dbo.UserRoles", new[] { "RoleTypeId" });
+            DropIndex("dbo.UserRoles", new[] { "UserId" });
+            DropIndex("dbo.GatewayHistories", new[] { "UserId" });
             DropIndex("dbo.GatewayRules", new[] { "FilterType" });
             DropIndex("dbo.GatewayRules", new[] { "GatewayId" });
             DropIndex("dbo.GatewayGroups", new[] { "GatewayId" });
             DropIndex("dbo.GatewayGroupMembers", new[] { "FilterType" });
             DropIndex("dbo.GatewayGroupMembers", new[] { "GrpId" });
+            DropTable("dbo.RoleTypes");
+            DropTable("dbo.UserRoles");
+            DropTable("dbo.Users");
             DropTable("dbo.GatewayHistories");
             DropTable("dbo.GatewayRules");
             DropTable("dbo.Gateways");

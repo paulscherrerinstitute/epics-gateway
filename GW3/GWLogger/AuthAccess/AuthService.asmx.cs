@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.DirectoryServices.Protocols;
 using System.IO;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Services;
 using System.Xml.Serialization;
+using GWLogger.Model;
 
 namespace GWLogger.AuthAccess
 {
@@ -152,7 +154,23 @@ namespace GWLogger.AuthAccess
         public void SaveGatewayConfiguration(string json, string tokenId)
         {
             var user = CurrentUser(tokenId);
+            var config = Backend.Controllers.ConfigController.JsonToConfig(json);
+            if (!HasEditConfigRole(config.Name, tokenId))
+                throw new UnauthorizedAccessException();
             Backend.Controllers.ConfigController.SetConfiguration(json);
+        }
+
+        [WebMethod]
+        private bool HasEditConfigRole(string gatewayName, string tokenId)
+        {
+            var username = TokenManager.GetToken(tokenId, Context.Request.UserHostAddress).Login;
+            using (var ctx = new CaesarContext())
+            {
+                var user = ctx.Users.First(row => row.Username == username);
+                return (user.Roles.Any(row => row.RoleType.Name == "Administrator")
+                    || user.Roles.Any(row => row.RoleType.Name == "Super Configurator")
+                    || user.Roles.Any(row => row.RoleType.Name == "Configurator" && row.ParamValue1 == gatewayName));
+            }
         }
     }
 }

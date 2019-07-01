@@ -612,18 +612,21 @@
     <Compile Include="Logs.ashx.cs">
       <DependentUpon>Logs.ashx</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201906240946327_base.cs" />
-    <Compile Include="Migrations\201906240946327_base.Designer.cs">
-      <DependentUpon>201906240946327_base.cs</DependentUpon>
+    <Compile Include="Migrations\201907010813557_base.cs" />
+    <Compile Include="Migrations\201907010813557_base.Designer.cs">
+      <DependentUpon>201907010813557_base.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\CaesarContext.cs" />
+    <Compile Include="Model\CaesarUser.cs" />
     <Compile Include="Model\GatewayEntry.cs" />
     <Compile Include="Model\GatewayFilterType.cs" />
     <Compile Include="Model\GatewayGroup.cs" />
     <Compile Include="Model\GatewayGroupMember.cs" />
     <Compile Include="Model\GatewayHistoryEntry.cs" />
     <Compile Include="Model\GatewayRule.cs" />
+    <Compile Include="Model\RoleType.cs" />
+    <Compile Include="Model\UserRole.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -695,8 +698,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201906240946327_base.resx">
-      <DependentUpon>201906240946327_base.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201907010813557_base.resx">
+      <DependentUpon>201907010813557_base.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

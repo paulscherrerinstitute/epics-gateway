@@ -146,7 +146,8 @@ class DetailPage
 
     public static async LoadDetails()
     {
-        $("#inventoryLink").attr("href", "https://inventory.psi.ch/#action=Part&system=" + encodeURIComponent(Main.CurrentGateway.toUpperCase()));
+        //$("#inventoryLink").attr("href", "https://inventory.psi.ch/#action=Part&system=" + encodeURIComponent(Main.CurrentGateway.toUpperCase()));
+        $("#inventoryLink").attr("href", "/Configuration/" + encodeURIComponent(Main.CurrentGateway.toUpperCase()));
         $("#logLink").attr("href", "/GW/" + Main.CurrentGateway);
 
         await DetailPage.GetInformation();
