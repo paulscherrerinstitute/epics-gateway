@@ -17,6 +17,7 @@ namespace GWLogger.Model
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
+        [Index("UNK_Gateway", 1, IsUnique = true), MaxLength(64)]
         public string GatewayName { get; set; }
 
         public GatewayDirection Directions { get; set; }

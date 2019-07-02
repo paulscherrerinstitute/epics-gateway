@@ -11,6 +11,7 @@ namespace GWLogger.Model
     {
         [Key, Column(Order = 0), DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int FilterId { get; set; }
+        [Index("UNK_Filter", 1, IsUnique = true), MaxLength(64)]
         public string Name { get; set; }
         public string Label1 { get; set; }
         public string ClassName { get; set; }

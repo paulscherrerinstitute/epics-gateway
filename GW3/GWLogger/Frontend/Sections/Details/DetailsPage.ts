@@ -125,8 +125,17 @@ class DetailPage
         Main.CurrentGateway = gwName.toLowerCase();
         State.Set();
 
-        if (Main.CurrentUser)
-            $(".checkrights").show();
+        $(".checkrights").hide();
+        if (Main.Token)
+        {
+            Utils.Loader("/AuthAccess/AuthService.asmx/HasRestartRole", { tokenId: Main.Token, gatewayName: gwName }).then((hasRole) =>
+            {
+                if (hasRole)
+                    $(".checkrights").show();
+                else
+                    $(".checkrights").hide();
+            });
+        }
         else
             $(".checkrights").hide();
 

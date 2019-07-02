@@ -172,5 +172,20 @@ namespace GWLogger.AuthAccess
                     || user.Roles.Any(row => row.RoleType.Name == "Configurator" && row.ParamValue1 == gatewayName));
             }
         }
+
+        [WebMethod]
+        public bool HasRestartRole(string gatewayName, string tokenId)
+        {
+            var username = TokenManager.GetToken(tokenId, Context.Request.UserHostAddress).Login;
+            using (var ctx = new CaesarContext())
+            {
+                var user = ctx.Users.First(row => row.Username == username);
+                return (user.Roles.Any(row => row.RoleType.Name == "Administrator")
+                    || user.Roles.Any(row => row.RoleType.Name == "Super Configurator")
+                    || user.Roles.Any(row => row.RoleType.Name == "Piquet")
+                    || user.Roles.Any(row => row.RoleType.Name == "Restarter" && row.ParamValue1 == gatewayName)
+                    || user.Roles.Any(row => row.RoleType.Name == "Configurator" && row.ParamValue1 == gatewayName));
+            }
+        }
     }
 }

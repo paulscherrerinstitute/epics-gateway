@@ -12,12 +12,13 @@ namespace GWLogger.Migrations
                 c => new
                     {
                         FilterId = c.Int(nullable: false),
-                        Name = c.String(),
+                        Name = c.String(maxLength: 64),
                         Label1 = c.String(),
                         ClassName = c.String(),
                         FieldName = c.String(),
                     })
-                .PrimaryKey(t => t.FilterId);
+                .PrimaryKey(t => t.FilterId)
+                .Index(t => t.Name, unique: true, name: "UNK_Filter");
             
             CreateTable(
                 "dbo.GatewayGroupMembers",
@@ -51,7 +52,7 @@ namespace GWLogger.Migrations
                 c => new
                     {
                         Id = c.Int(nullable: false, identity: true),
-                        GatewayName = c.String(),
+                        GatewayName = c.String(maxLength: 64),
                         Directions = c.Int(nullable: false),
                         LocalAddressA = c.String(),
                         RemoteAddressA = c.String(),
@@ -59,7 +60,8 @@ namespace GWLogger.Migrations
                         RemoteAddressB = c.String(),
                         Comment = c.String(unicode: false, storeType: "text"),
                     })
-                .PrimaryKey(t => t.Id);
+                .PrimaryKey(t => t.Id)
+                .Index(t => t.GatewayName, unique: true, name: "UNK_Gateway");
             
             CreateTable(
                 "dbo.GatewayRules",
@@ -86,7 +88,7 @@ namespace GWLogger.Migrations
                 c => new
                     {
                         Id = c.Int(nullable: false, identity: true),
-                        GatewayName = c.String(),
+                        GatewayName = c.String(maxLength: 64),
                         EntryDate = c.DateTime(nullable: false),
                         UserId = c.Int(nullable: false),
                         Configuration = c.String(unicode: false, storeType: "text"),
@@ -100,9 +102,10 @@ namespace GWLogger.Migrations
                 c => new
                     {
                         Id = c.Int(nullable: false, identity: true),
-                        Username = c.String(),
+                        Username = c.String(maxLength: 64),
                     })
-                .PrimaryKey(t => t.Id);
+                .PrimaryKey(t => t.Id)
+                .Index(t => t.Username, unique: true, name: "UNK_Users");
             
             CreateTable(
                 "dbo.UserRoles",
@@ -133,9 +136,9 @@ namespace GWLogger.Migrations
         
         public override void Down()
         {
+            DropForeignKey("dbo.GatewayHistories", "UserId", "dbo.Users");
             DropForeignKey("dbo.UserRoles", "UserId", "dbo.Users");
             DropForeignKey("dbo.UserRoles", "RoleTypeId", "dbo.RoleTypes");
-            DropForeignKey("dbo.GatewayHistories", "UserId", "dbo.Users");
             DropForeignKey("dbo.GatewayGroupMembers", "GrpId", "dbo.GatewayGroups");
             DropForeignKey("dbo.GatewayRules", "FilterType", "dbo.GatewayFilterTypes");
             DropForeignKey("dbo.GatewayRules", "GatewayId", "dbo.Gateways");
@@ -143,12 +146,15 @@ namespace GWLogger.Migrations
             DropForeignKey("dbo.GatewayGroupMembers", "FilterType", "dbo.GatewayFilterTypes");
             DropIndex("dbo.UserRoles", new[] { "RoleTypeId" });
             DropIndex("dbo.UserRoles", new[] { "UserId" });
+            DropIndex("dbo.Users", "UNK_Users");
             DropIndex("dbo.GatewayHistories", new[] { "UserId" });
             DropIndex("dbo.GatewayRules", new[] { "FilterType" });
             DropIndex("dbo.GatewayRules", new[] { "GatewayId" });
+            DropIndex("dbo.Gateways", "UNK_Gateway");
             DropIndex("dbo.GatewayGroups", new[] { "GatewayId" });
             DropIndex("dbo.GatewayGroupMembers", new[] { "FilterType" });
             DropIndex("dbo.GatewayGroupMembers", new[] { "GrpId" });
+            DropIndex("dbo.GatewayFilterTypes", "UNK_Filter");
             DropTable("dbo.RoleTypes");
             DropTable("dbo.UserRoles");
             DropTable("dbo.Users");

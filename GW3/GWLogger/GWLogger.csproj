@@ -612,9 +612,9 @@
     <Compile Include="Logs.ashx.cs">
       <DependentUpon>Logs.ashx</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201907010813557_base.cs" />
-    <Compile Include="Migrations\201907010813557_base.Designer.cs">
-      <DependentUpon>201907010813557_base.cs</DependentUpon>
+    <Compile Include="Migrations\201907020556187_base.cs" />
+    <Compile Include="Migrations\201907020556187_base.Designer.cs">
+      <DependentUpon>201907020556187_base.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\CaesarContext.cs" />
@@ -698,8 +698,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201907010813557_base.resx">
-      <DependentUpon>201907010813557_base.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201907020556187_base.resx">
+      <DependentUpon>201907020556187_base.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

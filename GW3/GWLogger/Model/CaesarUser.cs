@@ -14,7 +14,7 @@ namespace GWLogger.Model
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-
+        [Index("UNK_Users", 1, IsUnique = true), MaxLength(64)]
         public string Username { get; set; }
 
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

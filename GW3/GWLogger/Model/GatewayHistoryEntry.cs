@@ -11,6 +11,7 @@ namespace GWLogger.Model
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
+        [MaxLength(64)]
         public string GatewayName { get; set; }
         public DateTime EntryDate { get; set; }
         public int UserId { get; set; }
