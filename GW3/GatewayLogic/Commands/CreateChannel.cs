@@ -31,6 +31,7 @@ namespace GatewayLogic.Commands
 
             if (!connection.Gateway.ChannelInformation.HasChannelInformation(channelName) && !connection.Gateway.SearchInformation.HasChannelServerInformation(channelName))
             {
+                connection.Gateway.SearchInformation.Remove(channelName);
                 connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.ChannelUnknown, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
                 connection.Dispose(Services.LogMessageType.ChannelUnknown);
                 return;

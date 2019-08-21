@@ -11,5 +11,6 @@ namespace GWLogger.AuthAccess
         public string Email { get; internal set; }
         public DateTime CreatedOn { get; internal set; }
         public DateTime ExpiresOn { get; internal set; }
+        public string Password { get; internal set; }
     }
 }

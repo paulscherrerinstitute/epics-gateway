@@ -130,7 +130,7 @@ namespace GatewayLogic.Services
                         return;
 
                     gateway.MessageLogger.Write("", LogMessageType.ChannelRebuild, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = this.ChannelName } });
-
+                    this.StartBuilding = DateTime.UtcNow;
                     var size = this.ChannelName.Length + DataPacket.Padding(this.ChannelName.Length);
                     var newPacket = DataPacket.Create(size);
                     newPacket.Command = 18;
@@ -205,7 +205,7 @@ namespace GatewayLogic.Services
                 get
                 {
                     lock (connectedClients)
-                        return (this.ConnectionIsBuilding == true && (DateTime.UtcNow - this.StartBuilding).TotalSeconds > 60 && this.TcpConnection != null && this.ChannelName != null);
+                        return (this.ConnectionIsBuilding == true && (DateTime.UtcNow - this.StartBuilding).TotalSeconds > 10 && this.TcpConnection != null && this.ChannelName != null);
                 }
             }
 

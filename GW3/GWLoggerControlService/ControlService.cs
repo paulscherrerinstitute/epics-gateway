@@ -10,9 +10,9 @@ namespace GWLoggerControlService
 {
     public partial class ControlService : ServiceBase
     {
-        private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(5);
-        private static readonly TimeSpan FirstTimeout = TimeSpan.FromMinutes(1);
-        private static readonly TimeSpan ConnectionTimeout = TimeSpan.FromMinutes(2);
+        private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(60);
+        private static readonly TimeSpan FirstTimeout = TimeSpan.FromMinutes(5);
+        private static readonly TimeSpan ConnectionTimeout = TimeSpan.FromMinutes(5);
         private readonly ManualResetEvent StopHealthCheckThread = new ManualResetEvent(false);
         private Thread HealthCheckThread;
 
@@ -91,30 +91,43 @@ namespace GWLoggerControlService
                 if (StopHealthCheckThread.WaitOne(DefaultTimeout))
                     break;
 
-                try
+                var isOk = false;
+                var exString = "";
+                for (var i = 0; i < 5; i++)
                 {
-                    using (var client = new HealthSoapClient(binding, endpoint))
+                    try
                     {
-                        client.Open();
-                        client.InnerChannel.OperationTimeout = DefaultTimeout;
-                        if (firstCheck)
+                        using (var client = new HealthSoapClient(binding, endpoint))
                         {
-                            client.InnerChannel.OperationTimeout = FirstTimeout;
-                            firstCheck = false;
-                        }
+                            client.Open();
+                            client.InnerChannel.OperationTimeout = DefaultTimeout;
+                            if (firstCheck)
+                            {
+                                client.InnerChannel.OperationTimeout = FirstTimeout;
+                                firstCheck = false;
+                            }
 
-                        var result = client.IsHealthy();
-                        if (!result.IsHealthy)
-                        {
-                            EventLog.WriteEntry($"Health check failed with reason: {result.Message}", EventLogEntryType.Error);
-                            ThreadPool.QueueUserWorkItem((s) => Stop());
-                            break;
+                            var result = client.IsHealthy();
+                            if (!result.IsHealthy)
+                            {
+                                exString = result.Message;
+                            }
+                            else
+                            {
+                                isOk = true;
+                                break;
+                            }
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        exString = ex.ToString();
+                    }
+                    Thread.Sleep(5000);
                 }
-                catch (Exception ex)
+                if(!isOk)
                 {
-                    EventLog.WriteEntry($"Health check failed because of exception: {ex}", EventLogEntryType.Error);
+                    EventLog.WriteEntry($"Health check failed because of exception: {exString}", EventLogEntryType.Error);
                     ThreadPool.QueueUserWorkItem((s) => Stop());
                     break;
                 }

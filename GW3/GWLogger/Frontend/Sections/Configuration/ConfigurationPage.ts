@@ -82,7 +82,8 @@
         var p = elemId.split("_");
         var val = $("#" + elemId).val();
 
-        ConfigurationPage.Config[p[1]] = val;
+        if (ConfigurationPage.Config)
+            ConfigurationPage.Config[p[1]] = val;
     }
 
     static SortGroups()

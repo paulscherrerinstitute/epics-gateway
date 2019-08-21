@@ -64,13 +64,14 @@ namespace GWLogger.AuthAccess
         /// <param name="email">The user's email address</param>
         /// <param name="remoteAddress">The remote IP / network address</param>
         /// <returns>The token</returns>
-        public static AuthToken CreateToken(string login,string email, string remoteAddress)
+        public static AuthToken CreateToken(string login, string password, string email, string remoteAddress)
         {
             remoteAddress = (remoteAddress == "::1" ? "127.0.0.1" : remoteAddress);
             var token = new AuthToken
             {
                 Id = System.Guid.NewGuid().ToString(),
                 Login = login,
+                Password = password,
                 Email = email,
                 RemoteAddress = remoteAddress,
                 CreatedOn = DateTime.Now,

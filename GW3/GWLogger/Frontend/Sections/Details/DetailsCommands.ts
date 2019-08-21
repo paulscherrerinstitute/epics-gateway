@@ -5,9 +5,9 @@
         Notifications.Confirm("Are you sure you want to restart " + Main.CurrentGateway).then(() =>
         {
             var version = StatusPage.Get(Main.CurrentGateway).Version;
-            var command = "RestartGateway3";
-            if (version && version.startsWith("1."))
-                command = "RestartGateway";
+            /*var command = "RestartGateway3";
+            if (version && version.startsWith("1."))*/
+            var command = "RestartGateway";
             Notifications.Popup("Restart sent...");
             $.ajax({
                 type: 'POST',
@@ -17,7 +17,7 @@
                 dataType: 'json',
                 success: function (msg)
                 {
-                    Notifications.Popup((<string>msg.d).replace(/\n/g,"<br>"), "info");
+                    Notifications.Popup((<string>msg.d).replace(/\n/g, "<br>"), "info");
                 },
                 error: function (msg, textStatus)
                 {
@@ -32,9 +32,9 @@
         Notifications.Confirm("Are you sure you want to update " + Main.CurrentGateway).then(() =>
         {
             var version = StatusPage.Get(Main.CurrentGateway).Version;
-            var command = "UpdateGateway3";
-            if (version && version.startsWith("1."))
-                command = "UpdateGateway";
+            /*var command = "UpdateGateway3";
+            if (version && version.startsWith("1."))*/
+            var command = "UpdateGateway";
             Notifications.Popup("Update sent...");
             $.ajax({
                 type: 'POST',

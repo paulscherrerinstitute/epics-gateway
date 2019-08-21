@@ -85,7 +85,7 @@ namespace GWLogger.AuthAccess
         [WebMethod]
         public string Login(string username, string password)
         {
-            var token = TokenManager.CreateToken(username, LdapHelper.GetUserEmail(username, password), Context.Request.UserHostAddress);
+            var token = TokenManager.CreateToken(username, password, LdapHelper.GetUserEmail(username, password), Context.Request.UserHostAddress);
             return token.Id;
         }
 
@@ -142,12 +142,18 @@ namespace GWLogger.AuthAccess
         [WebMethod]
         public string GatewayCommand(string gatewayName, string command, string tokenId)
         {
-            if (!Global.Inventory.GetRolesForUser(CurrentUser(tokenId).Split('\\').Last()).Any(row => row.Access == "Administrator" || row.Access == "EPICS Gateway Manager"))
+            /*if (!Global.Inventory.GetRolesForUser(CurrentUser(tokenId).Split('\\').Last()).Any(row => row.Access == "Administrator" || row.Access == "EPICS Gateway Manager"))
+                throw new System.Security.SecurityException("You don't have the right to issue such commands.");*/
+            //var serverMon = new ServerMon.CaesarApiSoapClient();
+            var token = TokenManager.GetToken(tokenId, Context.Request.UserHostAddress);
+            return string.Join("\n", Global.ServerMon.StartPackage(token.Login, token.Password, gatewayName, (ServerMon.CaesarPackage)Enum.Parse(typeof(ServerMon.CaesarPackage), command)));
+
+            /*if (!Global.Inventory.GetRolesForUser(CurrentUser(tokenId).Split('\\').Last()).Any(row => row.Access == "Administrator" || row.Access == "EPICS Gateway Manager"))
                 throw new System.Security.SecurityException("You don't have the right to issue such commands.");
             var allowedCommands = new string[] { "UpdateGateway", "UpdateGateway3", "RestartGateway", "RestartGateway3" };
             if (!allowedCommands.Contains(command))
                 throw new System.Security.SecurityException("Command not allowed.");
-            return Global.DirectCommands.StartTask(gatewayName, CurrentUser(tokenId), command);
+            return Global.DirectCommands.StartTask(gatewayName, CurrentUser(tokenId), command);*/
         }
 
         [WebMethod]

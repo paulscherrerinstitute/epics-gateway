@@ -18,9 +18,12 @@ namespace GWLogger
         public static Backend.DataContext.Context DataContext { get; } = new Backend.DataContext.Context(StorageDirectory);
         public static Live.LiveInformation LiveInformation { get; private set; }
 
-        public static Inventory.DataAccessSoapClient Inventory { get; } = new Inventory.DataAccessSoapClient();
+        //public static Inventory.DataAccessSoapClient Inventory { get; } = new Inventory.DataAccessSoapClient();
 
-        public static Inventory.Controller.DirectCommandsSoapClient DirectCommands { get; } = new Inventory.Controller.DirectCommandsSoapClient();
+        //public static Inventory.Controller.DirectCommandsSoapClient DirectCommands { get; } = new Inventory.Controller.DirectCommandsSoapClient();
+
+        public static ServerMon.CaesarApiSoapClient ServerMon { get; } = new ServerMon.CaesarApiSoapClient();
+
 
         protected void Application_Start(object sender, EventArgs e)
         {
@@ -100,7 +103,7 @@ namespace GWLogger
 
             string fullOrigionalpath = Request.Url.AbsolutePath;
 
-            if(fullOrigionalpath.StartsWith("/config/"))
+            if (fullOrigionalpath.StartsWith("/config/"))
             {
                 //Context.RewritePath("/config.ashx/" + Request.PathInfo.Split('/')[2]);
                 Context.RemapHandler(new Config());

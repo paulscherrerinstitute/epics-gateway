@@ -75,7 +75,11 @@ namespace GWLogger.Live
 
         private Dictionary<string, string> RecoverDirectionInventoryInformation()
         {
-            try
+            using (var ctx = new Model.CaesarContext())
+            {
+                return ctx.Gateways.ToDictionary(key => key.GatewayName, val => val.Directions.ToString().ToUpper());
+            }
+            /*try
             {
                 var result = Global.Inventory.FindObjects(new Inventory.SearchDefinition
                 {
@@ -87,7 +91,7 @@ namespace GWLogger.Live
             catch
             {
             }
-            return null;
+            return null;*/
         }
 
         private void UpdateGateways()
@@ -171,7 +175,8 @@ namespace GWLogger.Live
             return snapshot
                 .SelectMany(gateway => gateway.GetGatewayAnomalies())
                 .OrderByDescending(anomaly => anomaly.From)
-                .Select(anomaly => new GraphAnomalyInfo {
+                .Select(anomaly => new GraphAnomalyInfo
+                {
                     FileName = anomaly.FileName,
                     Name = anomaly.Name,
                     From = anomaly.From,

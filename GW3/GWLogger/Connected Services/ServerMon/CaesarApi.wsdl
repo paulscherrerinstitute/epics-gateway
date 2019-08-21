@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://server-mon.psi.ch/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://server-mon.psi.ch/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://server-mon.psi.ch/">
+      <s:element name="StartPackage">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="hostname" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="package" type="tns:CaesarPackage" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:simpleType name="CaesarPackage">
+        <s:restriction base="s:string">
+          <s:enumeration value="UpdateGateway" />
+          <s:enumeration value="RestartGateway" />
+        </s:restriction>
+      </s:simpleType>
+      <s:element name="StartPackageResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="StartPackageResult" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="RunEpicsDebugTest">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="hostname" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="channel" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="config" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RunEpicsDebugTestResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RunEpicsDebugTestResult" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="StartPackageSoapIn">
+    <wsdl:part name="parameters" element="tns:StartPackage" />
+  </wsdl:message>
+  <wsdl:message name="StartPackageSoapOut">
+    <wsdl:part name="parameters" element="tns:StartPackageResponse" />
+  </wsdl:message>
+  <wsdl:message name="RunEpicsDebugTestSoapIn">
+    <wsdl:part name="parameters" element="tns:RunEpicsDebugTest" />
+  </wsdl:message>
+  <wsdl:message name="RunEpicsDebugTestSoapOut">
+    <wsdl:part name="parameters" element="tns:RunEpicsDebugTestResponse" />
+  </wsdl:message>
+  <wsdl:portType name="CaesarApiSoap">
+    <wsdl:operation name="StartPackage">
+      <wsdl:input message="tns:StartPackageSoapIn" />
+      <wsdl:output message="tns:StartPackageSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RunEpicsDebugTest">
+      <wsdl:input message="tns:RunEpicsDebugTestSoapIn" />
+      <wsdl:output message="tns:RunEpicsDebugTestSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="CaesarApiSoap" type="tns:CaesarApiSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="StartPackage">
+      <soap:operation soapAction="http://server-mon.psi.ch/StartPackage" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RunEpicsDebugTest">
+      <soap:operation soapAction="http://server-mon.psi.ch/RunEpicsDebugTest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="CaesarApiSoap12" type="tns:CaesarApiSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="StartPackage">
+      <soap12:operation soapAction="http://server-mon.psi.ch/StartPackage" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RunEpicsDebugTest">
+      <soap12:operation soapAction="http://server-mon.psi.ch/RunEpicsDebugTest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="CaesarApi">
+    <wsdl:port name="CaesarApiSoap" binding="tns:CaesarApiSoap">
+      <soap:address location="http://server-mon.psi.ch/Backend/CaesarApi.asmx" />
+    </wsdl:port>
+    <wsdl:port name="CaesarApiSoap12" binding="tns:CaesarApiSoap12">
+      <soap12:address location="http://server-mon.psi.ch/Backend/CaesarApi.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
