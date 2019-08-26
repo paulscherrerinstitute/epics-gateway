@@ -115,9 +115,12 @@ namespace GatewayLogic.Commands
 
         public override void DoResponse(GatewayConnection connection, DataPacket packet)
         {
+            if (!(packet.PayloadSize == 8 && packet.DataCount == 0))
+                return;
+
             // Skip ourselves
             if (packet.Sender.ToString() == connection.Gateway.Configuration.SideAEndPoint?.ToString() ||
-                packet.Sender.ToString() == connection.Gateway.Configuration.SideBEndPoint?.ToString())
+            packet.Sender.ToString() == connection.Gateway.Configuration.SideBEndPoint?.ToString())
                 return;
 
             var search = connection.Gateway.SearchInformation.Get(packet.Parameter2);
@@ -129,13 +132,15 @@ namespace GatewayLogic.Commands
                 return;
             }
 
+            //Console.WriteLine("Search answer for " + search.Channel + " from " + packet.Sender);
+
             var version = packet.GetUInt16(0 + (int)packet.HeaderSize);
             connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.SearchAnswer, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = search.Channel } });
             //connection.Gateway.Log.Write(Services.LogLevel.Detail, "Search answer for " + search.Channel + " from " + packet.Sender + " version " + version);
             //if(packet.Parameter2 == 0xffffffff)
             search.Server = new IPEndPoint(packet.Sender.Address, packet.DataType);
-            if((connection == connection.Gateway.udpSideA))
-                search.FromSideA =  true;
+            if ((connection == connection.Gateway.udpSideA))
+                search.FromSideA = true;
             if ((connection == connection.Gateway.udpSideB))
                 search.FromSideB = true;
             search.Version = version;
