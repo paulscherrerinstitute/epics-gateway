@@ -9,7 +9,7 @@ namespace GatewayLogic.Services
     {
         private readonly List<ReadNotifyInformationDetail> reads = new List<ReadNotifyInformationDetail>();
 
-        private uint nextId = 1;
+        private int nextId = 1;
 
         public class ReadNotifyInformationDetail
         {
@@ -33,7 +33,8 @@ namespace GatewayLogic.Services
 
         public ReadNotifyInformationDetail Get(ChannelInformation.ChannelInformationDetails channelInformation, uint clientId, TcpClientConnection client)
         {
-            var result = new ReadNotifyInformationDetail(nextId++, channelInformation, clientId, client);
+            var uid = System.Threading.Interlocked.Increment(ref nextId);
+            var result = new ReadNotifyInformationDetail((uint)uid, channelInformation, clientId, client);
             lock (reads)
             {
                 reads.Add(result);

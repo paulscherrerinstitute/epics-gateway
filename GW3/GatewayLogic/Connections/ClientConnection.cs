@@ -30,14 +30,15 @@ namespace GatewayLogic.Connections
         public GatewayTcpConnection Get(IPEndPoint client)
         {
             //lockDictionary.Wait();
-            if (!dictionary.ContainsKey(client))
+            return dictionary.Get(client);
+            /*if (!dictionary.ContainsKey(client))
             {
                 //lockDictionary.Release();
                 return null;
             }
             var result = dictionary[client];
             //lockDictionary.Release();
-            return result;
+            return result;*/
         }
     }
 }

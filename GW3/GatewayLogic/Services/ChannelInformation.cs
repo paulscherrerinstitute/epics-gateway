@@ -11,7 +11,7 @@ namespace GatewayLogic.Services
         private readonly ConcurrentDictionary<string, ChannelInformationDetails> dictionary = new ConcurrentDictionary<string, ChannelInformationDetails>();
         private readonly ConcurrentDictionary<uint, ChannelInformationDetails> uidDictionary = new ConcurrentDictionary<uint, ChannelInformationDetails>();
 
-        private uint nextId = 1;
+        private int nextId = 1;
         private object counterLock = new object();
 
         public Gateway Gateway { get; }
@@ -22,8 +22,12 @@ namespace GatewayLogic.Services
             gateway.TenSecUpdate += (sender, evt) =>
               {
                   List<ChannelInformationDetails> toRebuild = dictionary.Select(row => row.Value).Where(row => row.ShouldRebuild).ToList();
+
+                  // Let's drop, and let's hope it rebuilds
+                  //toRebuild.ForEach(row => dictionary.Remove(row.ChannelName));
                   toRebuild.ForEach(row =>
                   {
+                      //Console.WriteLine("Rebuild create channel for " + row.ChannelName);
                       row.Rebuild(Gateway);
                   });
 
@@ -127,7 +131,10 @@ namespace GatewayLogic.Services
                 try
                 {
                     if (this.ChannelName == null)
+                    {
+                        shouldDropFlag = true;
                         return;
+                    }
 
                     gateway.MessageLogger.Write("", LogMessageType.ChannelRebuild, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = this.ChannelName } });
                     this.StartBuilding = DateTime.UtcNow;
@@ -143,6 +150,7 @@ namespace GatewayLogic.Services
                 catch (Exception ex)
                 {
                     gateway.MessageLogger.Write("", LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex.ToString() + "\n" + ex.StackTrace } });
+                    shouldDropFlag = true;
                 }
             }
 
@@ -209,12 +217,13 @@ namespace GatewayLogic.Services
                 }
             }
 
+            bool shouldDropFlag = false;
             public bool ShouldDrop
             {
                 get
                 {
                     lock (connectedClients)
-                        return ((connectedClients.Count == 0 || this.TcpConnection == null) && (DateTime.UtcNow - this.LastUse).TotalMinutes > 30);
+                        return (shouldDropFlag || ((connectedClients.Count == 0 || this.TcpConnection == null) && (DateTime.UtcNow - this.LastUse).TotalMinutes > 30));
                 }
             }
 
@@ -256,7 +265,8 @@ namespace GatewayLogic.Services
         {
             if (!dictionary.ContainsKey(channelName))
             {
-                var result = new ChannelInformationDetails(nextId++, channelName, search);
+                var uid = System.Threading.Interlocked.Increment(ref nextId);
+                var result = new ChannelInformationDetails((uint)uid, channelName, search);
                 dictionary.Add(channelName, result);
                 uidDictionary.Add(result.GatewayId, result);
             }

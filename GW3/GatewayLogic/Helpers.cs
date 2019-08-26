@@ -14,5 +14,12 @@ namespace GatewayLogic
         {
             return src.TryAdd(key, val);
         }
+
+        public static TB Get<TA, TB>(this ConcurrentDictionary<TA, TB> src, TA key)
+        {
+            TB result;
+            src.TryGetValue(key, out result);
+            return result;
+        }
     }
 }

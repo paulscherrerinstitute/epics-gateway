@@ -14,7 +14,8 @@ namespace GatewayLogic.Connections
         private readonly byte[] buffer = new byte[Gateway.BUFFER_SIZE];
         private object disposedLock = new object();
         private bool disposed = false;
-        private SemaphoreSlim socketLock = new SemaphoreSlim(1);
+        //private SemaphoreSlim socketLock = new SemaphoreSlim(1);
+        private Semaphore socketLock = new Semaphore(1,1);
 
         private Splitter splitter;
 
@@ -46,9 +47,9 @@ namespace GatewayLogic.Connections
             {
                 socket = value;
                 socket.SendTimeout = 30000;
-                //socket.SendBufferSize = 64 * 1024;
-                socket.SendBufferSize = Gateway.BUFFER_SIZE * 4;
-                socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+                socket.SendBufferSize = 16 * 1024;
+                //socket.SendBufferSize = Gateway.BUFFER_SIZE * 4;
+                //socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
                 RemoteEndPoint = (IPEndPoint)socket.RemoteEndPoint;
                 //netStream = new NetworkStream(socket);
@@ -90,7 +91,7 @@ namespace GatewayLogic.Connections
 
             try
             {
-                socketLock.Wait();
+                socketLock.WaitOne();
                 //socket.Send(packet.Data, packet.Offset, packet.BufferSize, SocketFlags.None);
                 socket.Send(packet.Data, packet.Offset, (int)packet.MessageSize, SocketFlags.None);
             }

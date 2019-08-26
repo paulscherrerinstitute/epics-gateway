@@ -14,7 +14,7 @@ namespace GatewayLogic.Services
         private readonly ConcurrentDictionary<uint, MonitorInformationDetail> monitorLookup = new ConcurrentDictionary<uint, MonitorInformationDetail>();
         private readonly ConcurrentDictionary<string, MonitorInformationDetail> clientLookup = new ConcurrentDictionary<string, MonitorInformationDetail>();
 
-        private uint nextId = 1;
+        private int nextId = 1;
 
         //object counterLock = new object();
 
@@ -168,7 +168,8 @@ namespace GatewayLogic.Services
                     && row.MonitorMask == monitorMask);
             if (monitor == null)
             {
-                monitor = new MonitorInformationDetail(nextId++, channelInformation, dataType, dataCount, monitorMask, this);
+                var uid = Interlocked.Increment(ref nextId);
+                monitor = new MonitorInformationDetail((uint)uid, channelInformation, dataType, dataCount, monitorMask, this);
                 //monitors.Add(monitor);
                 monitorLookup.TryAdd(monitor.GatewayId, monitor);
             }

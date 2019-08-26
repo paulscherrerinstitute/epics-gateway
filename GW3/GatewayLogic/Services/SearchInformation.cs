@@ -9,7 +9,7 @@ namespace GatewayLogic.Services
 {
     class SearchInformation : IDisposable
     {
-        private uint nextId = 1;
+        private int nextId = 1;
         SafeLock dictionaryLock = new SafeLock();
         Dictionary<string, SearchInformationDetail> dictionary = new Dictionary<string, SearchInformationDetail>();
         Dictionary<uint, SearchInformationDetail> gwIdDictionary = new Dictionary<uint, SearchInformationDetail>();
@@ -82,7 +82,8 @@ namespace GatewayLogic.Services
                 if (!dictionary.ContainsKey(channelName))
                 {
                     //gateway.MessageLogger.Write(null, LogMessageType.CreatedSearchInfo, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
-                    var result = new SearchInformationDetail(nextId++);
+                    var uid = System.Threading.Interlocked.Increment(ref nextId);
+                    var result = new SearchInformationDetail((uint)uid);
                     result.Channel = channelName;
                     dictionary.Add(channelName, result);
                     gwIdDictionary.Add(result.GatewayId, result);
