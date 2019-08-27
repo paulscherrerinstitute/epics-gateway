@@ -59,6 +59,8 @@ namespace GatewayLogic
         private long? lastBytesIn;
         private long? lastBytesOut;
 
+        public double Cpu { get; private set; }
+
         public DiagnosticServer(Gateway gateway, IPAddress address)
         {
             this.gateway = gateway;
@@ -379,7 +381,7 @@ namespace GatewayLogic
         {
             try
             {
-                channelCpu.Value = DiagnosticInfo.GetCPUUsage();
+                channelCpu.Value = Cpu = DiagnosticInfo.GetCPUUsage();
             }
             catch
             {
