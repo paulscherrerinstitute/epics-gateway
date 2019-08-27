@@ -94,26 +94,16 @@ namespace GatewayLogic.Commands
             if (monitor == null)
                 return;
 
-            monitor.ChannelInformation.ChannelTransferPerSecond += packet.MessageSize;
-            if (monitor.HasReceivedFirstResult)
-            {
-                if (monitor.ChannelInformation.ChannelMustThrottle && monitor.ChannelInformation.GotThrottledData)
-                    return;
-                monitor.ChannelInformation.GotThrottledData = true;
-            }
-            else
-            {
-                /*using (lockObject.Aquire())
-                {*/
-                monitor.HasReceivedFirstResult = true;
-                //}
-            }
+            /*using (lockObject.Aquire())
+            {*/
+            monitor.HasReceivedFirstResult = true;
 
             clients = monitor.GetClients();
             connection.Gateway.MessageLogger.Write(packet.Sender.ToString(),
                 Services.LogMessageType.EventAddResponse,
                 new LogMessageDetail[] {
-                    new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = monitor.ChannelInformation.ChannelName },
+                    new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = monitor.ChannelInformation.ChannelName
+    },
                     new LogMessageDetail { TypeId = MessageDetail.ClientCounts, Value = clients.Count().ToString() },
                     new LogMessageDetail { TypeId = MessageDetail.PacketSize, Value = packet.MessageSize.ToString() }
                 });

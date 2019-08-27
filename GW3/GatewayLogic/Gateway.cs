@@ -57,7 +57,6 @@ namespace GatewayLogic
         public event DropClientDelegate DropedClient;
         public event EventHandler UpdateSearch;
 
-        internal event EventHandler FastUpdate;
         internal event EventHandler OneSecUpdate;
         internal event EventHandler TenSecUpdate;
 
@@ -117,15 +116,11 @@ namespace GatewayLogic
             int count = 0;
             while (!isDiposed)
             {
-                Thread.Sleep(100);
+                Thread.Sleep(1000);
                 try
                 {
-                    FastUpdate?.Invoke(this, null);
-                    if (count % 10 == 0)
-                    {
-                        OneSecUpdate?.Invoke(this, null);
-                    }
-                    if (count >= 99)
+                    OneSecUpdate?.Invoke(this, null);
+                    if (count >= 9)
                     {
                         count = 0;
                         TenSecUpdate?.Invoke(this, null);
@@ -255,51 +250,6 @@ namespace GatewayLogic
                 udpSideA = new UdpReceiver(this, this.Configuration.SideAEndPoint);
                 udpSideB = new UdpReceiver(this, this.Configuration.SideBEndPoint);
             }
-
-            FastUpdate += ChannelThrottling;
-            OneSecUpdate += BigChannelsHandling;
-            //});
-        }
-
-        int throttleCounter = 0;
-        private void ChannelThrottling(object sender, EventArgs e)
-        {
-            throttleCounter++;
-            if (throttleCounter % 3 != 0)
-                return;
-            throttleCounter = 0;
-            var channels = ChannelInformation.GetChannelsInformation().Where(row => row.ChannelMustThrottle == true).ToList();
-            channels.ForEach(row => row.GotThrottledData = false);
-        }
-
-        private void BigChannelsHandling(object sender, EventArgs e)
-        {
-            var allChannels = ChannelInformation.GetChannelsInformation();
-            // Let's start to throttle
-            //Console.WriteLine(DiagnosticServer.Cpu);
-            if (DiagnosticServer.Cpu > 55)
-            {
-                var channels = allChannels.Where(row => row.ChannelMustThrottle == false).ToList();
-                var percentileNb = (int)Math.Floor(channels.Count * 5.0 / 100.0);
-
-                if (percentileNb > 0)
-                {
-                    channels.Sort((a, b) => { var d = a.ChannelTransferPerSecond - b.ChannelTransferPerSecond; if (d > 0) return -1; if (d < 0) return 1; return 0; });
-                    foreach (var c in channels.Take(percentileNb))
-                    {
-                        //Console.WriteLine("Throttling " + c.ChannelName);
-                        c.ChannelMustThrottle = true;
-                    }
-                }
-            }
-            else
-            {
-                //Console.WriteLine("Back to normal");
-                allChannels.ForEach(row => row.ChannelMustThrottle = false);
-            }
-
-            // Reset counter
-            allChannels.ForEach(row => row.ChannelTransferPerSecond = 0);
         }
 
         public void Cleanup()

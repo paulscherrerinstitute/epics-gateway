@@ -239,9 +239,6 @@ namespace GatewayLogic.Services
             public uint DataCount { get; set; }
             public ushort DataType { get; set; }
             public DateTime StartBuilding { get; internal set; }
-            public long ChannelTransferPerSecond { get; internal set; } = 0;
-            public bool ChannelMustThrottle { get; internal set; } = false;
-            public bool GotThrottledData { get; internal set; }
 
             public void Dispose()
             {
