@@ -57,6 +57,7 @@ namespace GatewayLogic
         public event DropClientDelegate DropedClient;
         public event EventHandler UpdateSearch;
 
+        internal event EventHandler TenHertzUpdate;
         internal event EventHandler OneSecUpdate;
         internal event EventHandler TenSecUpdate;
 
@@ -116,11 +117,13 @@ namespace GatewayLogic
             int count = 0;
             while (!isDiposed)
             {
-                Thread.Sleep(1000);
+                Thread.Sleep(100);
                 try
                 {
-                    OneSecUpdate?.Invoke(this, null);
-                    if (count >= 9)
+                    TenHertzUpdate?.Invoke(this, null);
+                    if (count%10 == 0)
+                        OneSecUpdate?.Invoke(this, null);
+                    if (count >= 99)
                     {
                         count = 0;
                         TenSecUpdate?.Invoke(this, null);
