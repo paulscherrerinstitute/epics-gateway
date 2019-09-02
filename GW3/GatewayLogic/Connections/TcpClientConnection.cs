@@ -17,7 +17,6 @@ namespace GatewayLogic.Connections
         private bool disposed = false;
         //private SemaphoreSlim socketLock = new SemaphoreSlim(1);
         private Semaphore socketLock = new Semaphore(1,1);
-        //Stream writer;
 
         private Splitter splitter;
 
