@@ -397,6 +397,16 @@ namespace GatewayLogic
             return p;
         }
 
+        public static DataPacket Create(byte[] buff, int offset, int dataCount)
+        {
+            //DataPacket p = DataPacket.Create(buff.Length, false);
+            var p = new DataPacket();
+            //p.Data = new byte[buff.Length];
+            p.Data = Allocate(dataCount);
+            Buffer.BlockCopy(buff, offset, p.Data, 0, dataCount);
+            return p;
+        }
+
         public static DataPacket Create(byte[] buff)
         {
             //DataPacket p = DataPacket.Create(buff.Length, false);

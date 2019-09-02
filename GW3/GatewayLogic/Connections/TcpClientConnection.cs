@@ -17,7 +17,7 @@ namespace GatewayLogic.Connections
         private bool disposed = false;
         //private SemaphoreSlim socketLock = new SemaphoreSlim(1);
         private Semaphore socketLock = new Semaphore(1,1);
-        Stream writer;
+        //Stream writer;
 
         private Splitter splitter;
 
@@ -50,7 +50,7 @@ namespace GatewayLogic.Connections
                 socket = value;
                 socket.SendTimeout = 30000;
                 socket.SendBufferSize = 16 * 1024;
-                writer = new BufferedStream(new NetworkStream(socket));
+                //writer = new BufferedStream(new NetworkStream(socket));
                 //socket.SendBufferSize = Gateway.BUFFER_SIZE * 4;
                 //socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
@@ -76,7 +76,7 @@ namespace GatewayLogic.Connections
             }
         }
 
-        internal void Flush()
+        /*internal void Flush()
         {
             try
             {
@@ -91,7 +91,7 @@ namespace GatewayLogic.Connections
             {
                 socketLock.Release();
             }
-        }
+        }*/
 
         public override string Name => this.RemoteEndPoint.ToString();
 
@@ -112,8 +112,8 @@ namespace GatewayLogic.Connections
             try
             {
                 socketLock.WaitOne();
-                //socket.Send(packet.Data, packet.Offset, (int)packet.MessageSize, SocketFlags.None);
-                writer.Write(packet.Data, packet.Offset, (int)packet.MessageSize);
+                socket.Send(packet.Data, packet.Offset, (int)packet.MessageSize, SocketFlags.None);
+                //writer.Write(packet.Data, packet.Offset, (int)packet.MessageSize);
             }
             catch (Exception ex)
             {
@@ -240,7 +240,7 @@ namespace GatewayLogic.Connections
                 return;
             disposed = true;
 
-            writer.Dispose();
+            //writer.Dispose();
             splitter.Dispose();
             //Gateway.Log.Write(LogLevel.Connection, "Client " + this.Name + " disconnect");
             Gateway.MessageLogger.Write(this.RemoteEndPoint.ToString(), LogMessageType.ClientDisconnect, new LogMessageDetail[] {

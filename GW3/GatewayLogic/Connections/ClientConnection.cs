@@ -11,16 +11,16 @@ namespace GatewayLogic.Connections
     {
         internal ClientConnection(Gateway gateway) : base(gateway)
         {
-            gateway.TenHertzUpdate += ClientFlusher;
+            //gateway.TenHertzUpdate += ClientFlusher;
         }
 
-        private void ClientFlusher(object sender, EventArgs e)
+        /*private void ClientFlusher(object sender, EventArgs e)
         {
             foreach (var conn in this)
             {
                 (conn as TcpClientConnection)?.Flush();
             }
-        }
+        }*/
 
         public void Add(GatewayTcpConnection client)
         {

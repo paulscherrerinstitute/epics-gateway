@@ -56,7 +56,7 @@ namespace GatewayLogic.Connections
                             action();
                         toCallWhenReady.Clear();
 
-                        try
+                        /*try
                         {
                             socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
                         }
@@ -64,7 +64,14 @@ namespace GatewayLogic.Connections
                         {
                             //Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
                             Dispose(LogMessageType.SocketCreationError, ex.ToString());
-                        }
+                        }*/
+
+
+                        var readEvent = Gateway.SocketAsyncPool.Pop();
+                        readEvent.Completed += Receive_Completed;
+                        ((AsyncUserToken)readEvent.UserToken).Socket = socket;
+                        if (!socket.ReceiveAsync(readEvent))
+                            ProcessReceive(readEvent);
                     }
                 }, null);
             ThreadPool.QueueUserWorkItem((obj) =>
@@ -91,7 +98,7 @@ namespace GatewayLogic.Connections
                     action();
                 toCallWhenReady.Clear();
 
-                try
+                /*try
                 {
                     socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
                 }
@@ -99,8 +106,19 @@ namespace GatewayLogic.Connections
                 {
                     //Gateway.Log.Write(Services.LogLevel.Error, "Exception: " + ex);
                     Dispose(LogMessageType.SocketErrorReceiving, ex.ToString());
-                }
+                }*/
+
+                var readEvent = Gateway.SocketAsyncPool.Pop();
+                readEvent.Completed += Receive_Completed;
+                ((AsyncUserToken)readEvent.UserToken).Socket = socket;
+                if (!socket.ReceiveAsync(readEvent))
+                    ProcessReceive(readEvent);
             }
+        }
+
+        private void Receive_Completed(object sender, SocketAsyncEventArgs e)
+        {
+            ProcessReceive(e);
         }
 
         internal void WhenConnected(Action whenDone)
@@ -165,10 +183,66 @@ namespace GatewayLogic.Connections
             }
             catch (Exception ex)
             {
-                //Gateway.Log.Write(Services.LogLevel.Critical, "Exception: " + ex);
                 Gateway.MessageLogger.Write(RemoteEndPoint.ToString(), LogMessageType.Exception, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.Exception, Value = ex.ToString() } });
                 this.Dispose(LogMessageType.SocketErrorReceiving, ex.ToString());
             }
+        }
+
+        /*private void StartAccept(SocketAsyncEventArgs e)
+        {
+            SocketAsyncEventArgs socketAsync;
+            if (e == null)
+            {
+                socketAsync = Gateway.SocketAsyncPool.Pop();
+                socketAsync.Completed += AsyncAccept_Completed;
+                socketAsync.UserToken = new AsyncUserToken();
+            }
+            else
+            {
+                socketAsync = e;
+                socketAsync.AcceptSocket = null;
+            }
+            if (!socket.AcceptAsync(socketAsync))
+                ProccesAccept(socketAsync);
+        }
+
+
+        private void AsyncAccept_Completed(object sender, SocketAsyncEventArgs e)
+        {
+            ProccesAccept(e);
+        }
+
+        private void ProccesAccept(SocketAsyncEventArgs e)
+        {
+            var readEvent = Gateway.SocketAsyncPool.Pop();
+            ((AsyncUserToken)readEvent.UserToken).Socket = e.AcceptSocket;
+            if (!e.AcceptSocket.ReceiveAsync(readEvent))
+                ProcessReceive(readEvent);
+            StartAccept(e);
+        }*/
+
+        private void ProcessReceive(SocketAsyncEventArgs readEvent)
+        {
+            AsyncUserToken token = (AsyncUserToken)readEvent.UserToken;
+            if (readEvent.BytesTransferred > 0 && readEvent.SocketError == SocketError.Success)
+            {
+                this.LastMessage = DateTime.UtcNow;
+                //var mainPacket = DataPacket.Create(buffer, size, false);
+                var mainPacket = DataPacket.Create(readEvent.Buffer, readEvent.Offset, readEvent.BytesTransferred);
+
+                foreach (var p in splitter.Split(mainPacket))
+                {
+                    Gateway.DiagnosticServer.NbMessages++;
+
+                    p.Sender = RemoteEndPoint;
+                    Commands.CommandHandler.ExecuteResponseHandler(p.Command, this, p);
+                }
+
+                if (!token.Socket.ReceiveAsync(readEvent))
+                    ProcessReceive(readEvent);
+            }
+            else
+                Dispose();
         }
 
         public void LinkChannel(ChannelInformation.ChannelInformationDetails channel)

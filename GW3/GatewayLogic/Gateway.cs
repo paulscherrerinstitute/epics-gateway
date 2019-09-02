@@ -15,14 +15,18 @@ namespace GatewayLogic
 
     public class Gateway : IDisposable
     {
-        public const int BUFFER_SIZE = 8192 * 30;
+        public const int BUFFER_SIZE = 8192 * 3;
         //public const int BUFFER_SIZE = 1500;
         //public const int BUFFER_SIZE = 1450;
         public const int MAX_UDP_PACKET_SIZE = 1400; // Discussion with Karel
+        public const int ParallelSocketOperations = 1024 * 2;
         public const UInt16 CA_PROTO_VERSION = 13;
         //public const UInt16 CA_PROTO_VERSION = 11;
 
         public Configuration.Configuration Configuration { get; set; } = new GatewayLogic.Configuration.Configuration();
+
+        internal BufferManager SharedBuffers;
+        internal SocketAsyncPool SocketAsyncPool;
 
         internal UdpReceiver udpSideA;
         internal UdpReceiver udpSideB;
@@ -76,6 +80,9 @@ namespace GatewayLogic
         {
             //Log = new TextLogger();
 
+            SharedBuffers = new BufferManager(BUFFER_SIZE * ParallelSocketOperations * 2, BUFFER_SIZE);
+            SocketAsyncPool = new SocketAsyncPool(ParallelSocketOperations, SharedBuffers);
+
             ChannelInformation = new ChannelInformation(this);
             SearchInformation = new SearchInformation(this);
 
@@ -121,7 +128,7 @@ namespace GatewayLogic
                 try
                 {
                     TenHertzUpdate?.Invoke(this, null);
-                    if (count%10 == 0)
+                    if (count % 10 == 0)
                         OneSecUpdate?.Invoke(this, null);
                     if (count >= 99)
                     {
