@@ -129,7 +129,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>rem IF DEFINED system_teamProject GOTO END
+    <PostBuildEvent>IF %25COMPUTERNAME%25==PC12209 GOTO CONTINUE
+GOTO END
+:CONTINUE
+rem IF DEFINED system_teamProject GOTO END
 rem copy /y "$(TargetDir)\*.exe" \\ait-iis\deploy\gw3
 rem copy /y "$(TargetDir)\*.pdb" \\ait-iis\deploy\gw3
 rem copy /y "$(TargetDir)\*.dll" \\ait-iis\deploy\gw3
