@@ -62,15 +62,15 @@ namespace GatewayLogic.Services
             if (this.Filter != null && !this.Filter(level))
                 return;
             //using (lockObject.Aquire())
-            try
+            /*try
             {
-                lockObject.Wait();
+                lockObject.Wait();*/
                 Handler?.Invoke(level, sourceFilePath.Split(new char[] { '\\' }).Last().Split(new char[] { '.' }).First() + "." + memberName + ":" + sourceLineNumber, message);
-            }
+            /*}
             finally
             {
                 lockObject.Release();
-            }
+            }*/
         }
 
         public void ClearHandlers()

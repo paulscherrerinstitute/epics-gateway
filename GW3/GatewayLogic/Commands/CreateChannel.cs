@@ -92,40 +92,29 @@ namespace GatewayLogic.Commands
                             {
                                 connection.Gateway.ServerConnection.CreateConnection(connection.Gateway, searchInfo.Server, (tcpConnection) =>
                                 {
-                                    try
-                                    {
-                                        locker.Wait();
-                                        connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannelConnectionMade, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
-                                        channelInfo.TcpConnection = tcpConnection;
-                                        tcpConnection.Version = searchInfo.Version;
+                                    connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannelConnectionMade, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
+                                    channelInfo.TcpConnection = tcpConnection;
+                                    tcpConnection.Version = searchInfo.Version;
 
-                                        // Send version
-                                        var newPacket = DataPacket.Create(0);
-                                        newPacket.Command = 0;
-                                        newPacket.PayloadSize = 0;
-                                        newPacket.DataType = 1;
-                                        newPacket.DataCount = Gateway.CA_PROTO_VERSION;
-                                        newPacket.Parameter1 = 0;
-                                        newPacket.Parameter2 = 0;
-                                        channelInfo.TcpConnection.Send(newPacket);
+                                    // Send version
+                                    var newPacket = DataPacket.Create(0);
+                                    newPacket.Command = 0;
+                                    newPacket.PayloadSize = 0;
+                                    newPacket.DataType = 1;
+                                    newPacket.DataCount = Gateway.CA_PROTO_VERSION;
+                                    newPacket.Parameter1 = 0;
+                                    newPacket.Parameter2 = 0;
+                                    channelInfo.TcpConnection.Send(newPacket);
 
-                                        connection.Gateway.GotNewIocChannel(tcpConnection.Name, channelInfo.ChannelName);
-                                        tcpConnection.LinkChannel(channelInfo);
-                                        newPacket = (DataPacket)packet.Clone();
+                                    connection.Gateway.GotNewIocChannel(tcpConnection.Name, channelInfo.ChannelName);
+                                    tcpConnection.LinkChannel(channelInfo);
+                                    newPacket = (DataPacket)packet.Clone();
 
-                                        // Old EPICS version
-                                        newPacket.Parameter1 = channelInfo.GatewayId;
-                                        newPacket.Parameter2 = Gateway.CA_PROTO_VERSION;
-                                        newPacket.Destination = searchInfo.Server;
-                                        channelInfo.TcpConnection.Send(newPacket);
-                                    }
-                                    catch
-                                    {
-                                    }
-                                    finally
-                                    {
-                                        locker.Release();
-                                    }
+                                    // Old EPICS version
+                                    newPacket.Parameter1 = channelInfo.GatewayId;
+                                    newPacket.Parameter2 = Gateway.CA_PROTO_VERSION;
+                                    newPacket.Destination = searchInfo.Server;
+                                    channelInfo.TcpConnection.Send(newPacket);
                                 });
                             });
                         }

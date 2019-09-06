@@ -33,7 +33,8 @@ namespace GatewayLogic.Connections
             RemoteEndPoint = destination;
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-            socket.ReceiveBufferSize = Gateway.BUFFER_SIZE * 4;
+            //socket.ReceiveBufferSize = Gateway.BUFFER_SIZE;
+            //socket.ReceiveBufferSize = 64000;
             socket.SendBufferSize = 128 * 1024;
             //socket.SendTimeout = 3000;
             var evt = new AutoResetEvent(false);
