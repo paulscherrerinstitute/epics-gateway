@@ -92,29 +92,40 @@ namespace GatewayLogic.Commands
                             {
                                 connection.Gateway.ServerConnection.CreateConnection(connection.Gateway, searchInfo.Server, (tcpConnection) =>
                                 {
-                                    connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannelConnectionMade, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
-                                    channelInfo.TcpConnection = tcpConnection;
-                                    tcpConnection.Version = searchInfo.Version;
+                                    try
+                                    {
+                                        locker.Wait();
+                                        connection.Gateway.MessageLogger.Write(packet.Sender.ToString(), Services.LogMessageType.CreateChannelConnectionMade, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelName } });
+                                        channelInfo.TcpConnection = tcpConnection;
+                                        tcpConnection.Version = searchInfo.Version;
 
-                                    // Send version
-                                    var newPacket = DataPacket.Create(0);
-                                    newPacket.Command = 0;
-                                    newPacket.PayloadSize = 0;
-                                    newPacket.DataType = 1;
-                                    newPacket.DataCount = Gateway.CA_PROTO_VERSION;
-                                    newPacket.Parameter1 = 0;
-                                    newPacket.Parameter2 = 0;
-                                    channelInfo.TcpConnection.Send(newPacket);
+                                        // Send version
+                                        var newPacket = DataPacket.Create(0);
+                                        newPacket.Command = 0;
+                                        newPacket.PayloadSize = 0;
+                                        newPacket.DataType = 1;
+                                        newPacket.DataCount = Gateway.CA_PROTO_VERSION;
+                                        newPacket.Parameter1 = 0;
+                                        newPacket.Parameter2 = 0;
+                                        channelInfo.TcpConnection.Send(newPacket);
 
-                                    connection.Gateway.GotNewIocChannel(tcpConnection.Name, channelInfo.ChannelName);
-                                    tcpConnection.LinkChannel(channelInfo);
-                                    newPacket = (DataPacket)packet.Clone();
+                                        connection.Gateway.GotNewIocChannel(tcpConnection.Name, channelInfo.ChannelName);
+                                        tcpConnection.LinkChannel(channelInfo);
+                                        newPacket = (DataPacket)packet.Clone();
 
-                                    // Old EPICS version
-                                    newPacket.Parameter1 = channelInfo.GatewayId;
-                                    newPacket.Parameter2 = Gateway.CA_PROTO_VERSION;
-                                    newPacket.Destination = searchInfo.Server;
-                                    channelInfo.TcpConnection.Send(newPacket);
+                                        // Old EPICS version
+                                        newPacket.Parameter1 = channelInfo.GatewayId;
+                                        newPacket.Parameter2 = Gateway.CA_PROTO_VERSION;
+                                        newPacket.Destination = searchInfo.Server;
+                                        channelInfo.TcpConnection.Send(newPacket);
+                                    }
+                                    catch
+                                    {
+                                    }
+                                    finally
+                                    {
+                                        locker.Release();
+                                    }
                                 });
                             });
                         }
@@ -166,7 +177,7 @@ namespace GatewayLogic.Commands
                     var destConn = connection.Gateway.ClientConnection.Get(client.Client);
                     if (destConn == null)
                         continue;
-                    connection.Gateway.MessageLogger.Write(client.Client.ToString(), Services.LogMessageType.CreateChannelSendingAnswer, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelInfo?.ChannelName }, new LogMessageDetail { TypeId=MessageDetail.GWID, Value= channelInfo.GatewayId.ToString() } });
+                    connection.Gateway.MessageLogger.Write(client.Client.ToString(), Services.LogMessageType.CreateChannelSendingAnswer, new LogMessageDetail[] { new LogMessageDetail { TypeId = MessageDetail.ChannelName, Value = channelInfo?.ChannelName }, new LogMessageDetail { TypeId = MessageDetail.GWID, Value = channelInfo.GatewayId.ToString() } });
 
                     Configuration.SecurityAccess access;
                     if (((TcpClientConnection)destConn).Listener == connection.Gateway.tcpSideA)

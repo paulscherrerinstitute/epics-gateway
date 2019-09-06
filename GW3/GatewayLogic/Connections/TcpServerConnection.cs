@@ -152,6 +152,7 @@ namespace GatewayLogic.Connections
                 Commands.CommandHandler.ExecuteResponseHandler(p.Command, this, p);
             }
 
+            Thread.Sleep(50);
             try
             {
                 socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);

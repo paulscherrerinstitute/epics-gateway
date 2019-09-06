@@ -51,7 +51,7 @@ namespace GatewayLogic.Connections
                   while (!disposed)
                   {
                       FlushBufferSend();
-                      Thread.Sleep(50);
+                      Thread.Sleep(100);
                   }
               });
             flusher.Start();

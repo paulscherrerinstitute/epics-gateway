@@ -205,6 +205,7 @@ namespace GatewayLogic.Connections
                 Dispose(LogMessageType.Exception, ex.ToString());
             }
 
+            Thread.Sleep(50);
             try
             {
                 Socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);

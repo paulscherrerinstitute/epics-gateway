@@ -82,7 +82,7 @@ namespace GatewayLogic.Services
             {
                 lock (clients)
                 {
-                    if (!clients.Any(row => row.Client == clientId.Client && row.Id == row.Id))
+                    if (!clients.Any(row => row.Client == clientId.Client && row.Id == clientId.Id))
                         clients.Add(clientId);
                 }
             }
@@ -213,7 +213,7 @@ namespace GatewayLogic.Services
                 get
                 {
                     lock (connectedClients)
-                        return (this.ConnectionIsBuilding == true && (DateTime.UtcNow - this.StartBuilding).TotalSeconds > 10 && this.TcpConnection != null && this.ChannelName != null);
+                        return (this.ConnectionIsBuilding == true && (DateTime.UtcNow - this.StartBuilding).TotalSeconds > 30 && this.TcpConnection != null && this.ChannelName != null);
                 }
             }
 
