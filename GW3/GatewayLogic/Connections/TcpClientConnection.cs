@@ -47,8 +47,9 @@ namespace GatewayLogic.Connections
             set
             {
                 socket = value;
-                socket.SendTimeout = 30000;
-                socket.SendBufferSize = 16 * 1024;
+                //socket.SendTimeout = 30000;
+                socket.SendTimeout = 0;
+                socket.SendBufferSize = 128 * 1024;
                 //writer = new BufferedStream(new NetworkStream(socket));
                 //socket.SendBufferSize = Gateway.BUFFER_SIZE * 4;
                 //socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);

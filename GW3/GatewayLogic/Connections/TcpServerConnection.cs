@@ -34,7 +34,8 @@ namespace GatewayLogic.Connections
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
             socket.ReceiveBufferSize = Gateway.BUFFER_SIZE * 4;
-            socket.SendTimeout = 3000;
+            socket.SendBufferSize = 128 * 1024;
+            //socket.SendTimeout = 3000;
             var evt = new AutoResetEvent(false);
             IAsyncResult result = socket.BeginConnect(destination, (IAsyncResult ar) =>
                 {
