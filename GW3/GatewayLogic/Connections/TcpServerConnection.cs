@@ -33,7 +33,7 @@ namespace GatewayLogic.Connections
             RemoteEndPoint = destination;
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-            //socket.ReceiveBufferSize = Gateway.BUFFER_SIZE;
+            socket.ReceiveBufferSize = Gateway.BUFFER_SIZE;
             //socket.ReceiveBufferSize = 64000;
             socket.SendBufferSize = 128 * 1024;
             //socket.SendTimeout = 3000;
@@ -153,7 +153,9 @@ namespace GatewayLogic.Connections
                 Commands.CommandHandler.ExecuteResponseHandler(p.Command, this, p);
             }
 
-            Thread.Sleep(50);
+            // If there is not enough data, then we shall sleep
+            if (size < Gateway.BUFFER_SIZE / 4)
+                Thread.Sleep(50);
             try
             {
                 socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);
