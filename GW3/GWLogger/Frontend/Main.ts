@@ -17,7 +17,7 @@ class Main
 
     private static isLoading = false;
 
-    public static Init(): void
+    public static async Init()
     {
         if (Utils.Preferences['LoggedAs'])
         {
@@ -28,6 +28,12 @@ class Main
         else
         {
             $(".req-login").hide();
+        }
+
+        var toDisplay: GatewayToDisplay[] = (await Utils.Loader("GatewaysToDisplay")).d;
+        for (var i = 0; i < toDisplay.length; i++)
+        {
+            $(toDisplay[i].IsMain ? "#gatewayMains" : "#gatewayBeamlines").append("<div class=\"GWDisplay\" id=\"" + toDisplay[i].Name + "\"></div>");
         }
 
         Sections.Init();
@@ -98,6 +104,13 @@ class Main
             Utils.Preferences = prefs;
             Main.CurrentUser = user;
             Main.Token = token;
+
+            if (await Utils.Loader('/AuthAccess/AuthService.asmx/HasAdminRole', {
+                tokenId: token
+            }))
+            {
+                $("#hamburgerMenu").append("<div onclick=\"Main.CreateNewGateway()\">Create Gateway</div>");
+            }
         }
         catch (e)
         {
@@ -113,6 +126,19 @@ class Main
         else
             $(".req-login").hide();
         State.Pop();
+    }
+
+    private static async CreateNewGateway()
+    {
+        var newGateway = await kendo.prompt("New gateway name", "");
+        if (newGateway)
+        {
+            await Utils.Loader('/AuthAccess/AuthService.asmx/CreateNewGateway', {
+                tokenId: Main.Token,
+                gatewayName: newGateway
+            });
+            document.location.reload();
+        }
     }
 
     private static InitTooltips()

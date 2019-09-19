@@ -26,6 +26,7 @@ namespace GWLogger.Model
         public string RemoteAddressA { get; set; }
         public string LocalAddressB { get; set; }
         public string RemoteAddressB { get; set; }
+        public bool IsMain { get; set; }
 
         [Column(TypeName = "text")]
         public string Comment { get; set; }

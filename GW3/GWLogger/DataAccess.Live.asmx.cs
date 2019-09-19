@@ -16,7 +16,27 @@ namespace GWLogger
         {
             using (HashAlgorithm algorithm = SHA256.Create())
             {
-                return string.Join("", algorithm.ComputeHash(Encoding.UTF8.GetBytes(File.ReadAllText(Context.Server.MapPath("~/main.js")) + File.ReadAllText(Context.Server.MapPath("~/index.html")) + File.ReadAllText(Context.Server.MapPath("~/Less/main.css")))).Select(c => c.ToString("X2")));
+                return string.Join("", algorithm.ComputeHash(Encoding.UTF8.GetBytes(File.ReadAllText(Context.Server.MapPath("~/main.js"))
+                    + File.ReadAllText(Context.Server.MapPath("~/index.html"))
+                    + File.ReadAllText(Context.Server.MapPath("~/Less/main.css"))
+                    + Newtonsoft.Json.JsonConvert.SerializeObject((new DataAccess()).GatewaysToDisplay())))
+                    .Select(c => c.ToString("X2")));
+            }
+        }
+
+        [WebMethod]
+        public List<GatewayToDisplay> GatewaysToDisplay()
+        {
+            using (var ctx = new Model.CaesarContext())
+            {
+                var inDebugger = (System.Diagnostics.Debugger.IsAttached);
+                return ctx.Gateways.Select(row => new GatewayToDisplay
+                {
+                    Name = row.GatewayName,
+                    IsMain = row.IsMain
+                }).OrderBy(row => row.Name)
+                .Where(row => inDebugger == true || row.Name != "PBGW")
+                .ToList();
             }
         }
 

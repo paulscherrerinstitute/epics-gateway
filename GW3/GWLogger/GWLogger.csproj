@@ -344,6 +344,7 @@
       <SubType>Component</SubType>
       <DependentUpon>DataAccess.asmx</DependentUpon>
     </Compile>
+    <TypeScriptCompile Include="Frontend\DTOs\GatewayToDisplay.ts" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -359,6 +360,7 @@
     <Compile Include="Live\GatewayInformation.cs" />
     <Compile Include="Live\GatewayShortInformation.cs" />
     <Compile Include="Live\GatewayNullableValue.cs" />
+    <Compile Include="Live\GatewayToDisplay.cs" />
     <Compile Include="Live\GatewayValue.cs" />
     <Compile Include="Live\GraphAnomalyInfo.cs" />
     <Compile Include="Live\LiveInformation.cs" />
@@ -368,6 +370,10 @@
     <Compile Include="Migrations\201907020556187_base.cs" />
     <Compile Include="Migrations\201907020556187_base.Designer.cs">
       <DependentUpon>201907020556187_base.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201909191151405_main-page.cs" />
+    <Compile Include="Migrations\201909191151405_main-page.Designer.cs">
+      <DependentUpon>201909191151405_main-page.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\CaesarContext.cs" />
@@ -452,6 +458,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201907020556187_base.resx">
       <DependentUpon>201907020556187_base.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201909191151405_main-page.resx">
+      <DependentUpon>201909191151405_main-page.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

@@ -46,14 +46,14 @@ namespace GWLogger
 
             LiveInformation = new Live.LiveInformation();
 
-            var doc = new HtmlAgilityPack.HtmlDocument();
-            doc.LoadHtml(File.ReadAllText(Server.MapPath("/index.html")));
-            doc.DocumentNode.SelectNodes("//div")
-                .Where(row => row.Attributes["class"]?.Value == "GWDisplay")
-                .Select(row => row.Attributes["id"]?.Value).ToList()
-                .ForEach(row => LiveInformation.Register(row));
-            if (Debugger.IsAttached) // Debug local
-                LiveInformation.Register("PBGW");
+            using (var ctx = new Model.CaesarContext())
+            {
+                if (Debugger.IsAttached)
+                    ctx.Gateways.Select(row => row.GatewayName).ToList().ForEach(row => LiveInformation.Register(row));
+                else
+                    ctx.Gateways.Select(row => row.GatewayName).Where(row => row != "PBGW").ToList().ForEach(row => LiveInformation.Register(row));
+            }
+
             Backend.Controllers.LogController.CleanLogs();
 
             DataContext.StoreHistory += (file) =>

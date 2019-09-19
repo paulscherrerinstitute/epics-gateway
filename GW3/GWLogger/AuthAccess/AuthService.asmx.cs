@@ -4,6 +4,7 @@ using System.Configuration;
 using System.DirectoryServices.Protocols;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Services;
 using System.Xml.Serialization;
@@ -173,6 +174,21 @@ namespace GWLogger.AuthAccess
         }
 
         [WebMethod]
+        public void CreateNewGateway(string gatewayName, string tokenId)
+        {
+            if (!HasAdminRole(tokenId))
+                throw new UnauthorizedAccessException();
+            var regExp = "^[A-Z\\-0-9]+$";
+            if (!Regex.IsMatch(gatewayName, regExp))
+                throw new Exception("Wrong gateway name");
+            using (var ctx = new Model.CaesarContext())
+            {
+                ctx.Gateways.Add(new GatewayEntry { GatewayName = gatewayName, IsMain = false });
+                ctx.SaveChanges();
+            }
+        }
+
+        [WebMethod]
         public bool HasEditConfigRole(string gatewayName, string tokenId)
         {
             var username = TokenManager.GetToken(tokenId, Context.Request.UserHostAddress).Login;
@@ -197,6 +213,17 @@ namespace GWLogger.AuthAccess
                     || user.Roles.Any(row => row.RoleType.Name == "Piquet")
                     || user.Roles.Any(row => row.RoleType.Name == "Restarter" && row.ParamValue1 == gatewayName)
                     || user.Roles.Any(row => row.RoleType.Name == "Configurator" && row.ParamValue1 == gatewayName));
+            }
+        }
+
+        [WebMethod]
+        public bool HasAdminRole(string tokenId)
+        {
+            var username = TokenManager.GetToken(tokenId, Context.Request.UserHostAddress).Login;
+            using (var ctx = new CaesarContext())
+            {
+                return ctx.Users.First(row => row.Username == username)
+                    .Roles.Any(row => row.RoleType.Name == "Administrator");
             }
         }
     }
