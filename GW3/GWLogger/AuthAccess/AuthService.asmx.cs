@@ -96,6 +96,12 @@ namespace GWLogger.AuthAccess
         }
 
         [WebMethod]
+        public void RenewToken(string tokenId)
+        {
+            TokenManager.RenewToken(tokenId, Context.Request.UserHostAddress);
+        }
+
+        [WebMethod]
         public string CurrentUser(string tokenId)
         {
             return TokenManager.GetToken(tokenId, Context.Request.UserHostAddress).Login;

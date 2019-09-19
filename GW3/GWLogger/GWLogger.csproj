@@ -161,8 +161,8 @@
     <None Include="Connected Services\ServerMon\CaesarApi.wsdl" />
     <None Include="packages.config" />
     <Content Include="main.js" />
+    <None Include="Properties\PublishProfiles\CAESAR Cluster Folder.pubxml" />
     <None Include="Properties\PublishProfiles\CAESAR.pubxml" />
-    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.3.1.js" />
     <Content Include="Scripts\jquery-3.3.1.min.js" />

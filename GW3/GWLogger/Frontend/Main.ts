@@ -50,6 +50,14 @@ class Main
                 $("#loadingScreen").hide();
             });
         }, 1000);
+
+        setInterval(Main.RenewToken, 10000);
+    }
+
+    public static RenewToken()
+    {
+        if (Main.Token)
+            Utils.Loader("/AuthAccess/AuthService.asmx/RenewToken", { tokenId: Main.Token });
     }
 
     public static ShowLogin()
