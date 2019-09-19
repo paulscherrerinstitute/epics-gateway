@@ -155,7 +155,7 @@ namespace GatewayLogic.Connections
 
             // If there is not enough data, then we shall sleep
             if (size < Gateway.BUFFER_SIZE / 4)
-                Thread.Sleep(50);
+                Thread.Sleep(10);
             try
             {
                 socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveTcpData, null);

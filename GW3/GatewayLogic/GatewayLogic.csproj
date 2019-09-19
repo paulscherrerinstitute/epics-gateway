@@ -3,7 +3,7 @@
     <Deterministic>false</Deterministic>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Configurations>Debug;Release;Debug Deadlock</Configurations>
-    <AssemblyVersion>3.5.0.*</AssemblyVersion>
+    <AssemblyVersion>3.6.0.*</AssemblyVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Deadlock|AnyCPU'">
     <OutputPath>bin\Debug Deadlock\</OutputPath>
