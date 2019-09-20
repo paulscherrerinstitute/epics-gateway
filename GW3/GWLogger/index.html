@@ -125,6 +125,10 @@
                 <div class="colField"><input type="text" id="frmCfg_Name" class="k-textbox" onkeyup="ConfigurationPage.ChangeConfigField(event)" /></div>
             </div>
             <div class="row">
+                <div class="colLabels">Main Gateway</div>
+                <div class="colField"><select id="frmCfg_IsMain" onchange="ConfigurationPage.ChangeConfigField(event)"><option value="true">Yes</option><option value="false">No</option></select></div>
+            </div>
+            <div class="row">
                 <div class="colLabels">Directions</div>
                 <div class="colField"><select id="frmCfg_Type" onchange="ConfigurationPage.ChangeConfigField(event)"><option value="0">Unidirectional</option><option value="1">Bidirectional</option></select></div>
             </div>

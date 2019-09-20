@@ -17,6 +17,7 @@
         $("#frmCfg_LocalAddressSideB").val("");
         $("#frmCfg_RemoteAddressSideB").val("");
         $("#frmCfg_Comment").val("");
+        $("#frmCfg_IsMain").val("false");
 
         if (Main.Token)
         {
@@ -46,6 +47,7 @@
         $("#frmCfg_LocalAddressSideB").val(ConfigurationPage.Config.LocalAddressSideB);
         $("#frmCfg_RemoteAddressSideB").val(ConfigurationPage.Config.RemoteAddressSideB);
         $("#frmCfg_Comment").val(ConfigurationPage.Config.Comment);
+        $("#frmCfg_IsMain").val("" + ConfigurationPage.Config.IsMain);
 
         ConfigurationPage.ShowRules();
         if (ConfigurationPage.HasEditRole)
@@ -81,6 +83,8 @@
         var elemId = <string>(evt.target["id"]);
         var p = elemId.split("_");
         var val = $("#" + elemId).val();
+        if (p[1] == "IsMain")
+            val = (val == "true");
 
         if (ConfigurationPage.Config)
             ConfigurationPage.Config[p[1]] = val;

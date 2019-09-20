@@ -186,6 +186,7 @@ namespace GWLogger.AuthAccess
                 ctx.Gateways.Add(new GatewayEntry { GatewayName = gatewayName, IsMain = false });
                 ctx.SaveChanges();
             }
+            Global.LiveInformation.Register(gatewayName);
         }
 
         [WebMethod]

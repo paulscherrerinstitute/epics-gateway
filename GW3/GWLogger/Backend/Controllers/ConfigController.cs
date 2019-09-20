@@ -28,6 +28,8 @@ namespace GWLogger.Backend.Controllers
         public string RemoteAddressSideB { get; set; }
         [XmlIgnore]
         public string Comment { get; set; }
+        [XmlIgnore]
+        public bool IsMain { get; set; }
         public ConfigSecurity Security { get; set; } = new ConfigSecurity();
     }
 
@@ -222,6 +224,7 @@ namespace GWLogger.Backend.Controllers
                 RemoteAddressSideA = entry.RemoteAddressA,
                 RemoteAddressSideB = entry.RemoteAddressB,
                 Type = (GatewayConfigurationType)((int)entry.Directions),
+                IsMain = entry.IsMain,
                 Name = entry.GatewayName,
                 Comment = entry.Comment
             };
@@ -266,6 +269,7 @@ namespace GWLogger.Backend.Controllers
                 LocalAddressB = config.LocalAddressSideB,
                 RemoteAddressA = config.RemoteAddressSideA,
                 RemoteAddressB = config.RemoteAddressSideB,
+                IsMain = config.IsMain,
                 Comment = config.Comment,
                 GatewayGroups = config.Security.Groups.Select(row => new GatewayGroup
                 {
