@@ -11,9 +11,9 @@ namespace LoadPerformance
         static public string ServerAddress = "127.0.0.1";
         static public string ClientSearchAddress = "127.0.0.1:5064";
         static public int NbServers = 40;
-        static public int NbClients = 1;
+        static public int NbClients = 30;
         static public int ServerPort = 5064;
-        static public int RefreshRate = 10;
+        static public int RefreshRate = 100;
         public const int CA_PROTO_VERSION = 13;
 
         private static void Main(string[] args)

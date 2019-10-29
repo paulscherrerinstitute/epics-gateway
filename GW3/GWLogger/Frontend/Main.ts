@@ -19,6 +19,7 @@ class Main
 
     public static async Init()
     {
+        $(".req-admin").hide();
         if (Utils.Preferences['LoggedAs'])
         {
             $("#frmUsername").val(Utils.Preferences['LoggedAs']);
@@ -60,10 +61,19 @@ class Main
         setInterval(Main.RenewToken, 10000);
     }
 
-    public static RenewToken()
+    public static async RenewToken()
     {
         if (Main.Token)
-            Utils.Loader("/AuthAccess/AuthService.asmx/RenewToken", { tokenId: Main.Token });
+        {
+            try
+            {
+                await Utils.Loader("/AuthAccess/AuthService.asmx/RenewToken", { tokenId: Main.Token });
+            }
+            catch (ex) // Token expired
+            {
+                Main.Login();
+            }
+        }
     }
 
     public static ShowLogin()
@@ -81,6 +91,10 @@ class Main
             var prefs = Utils.Preferences;
             delete prefs['LoggedAs'];
             Utils.Preferences = prefs;
+
+            $(".req-login").hide();
+            $(".req-admin").hide();
+            $(".checkrights").hide();
         }
         else
         {
@@ -109,7 +123,7 @@ class Main
                 tokenId: token
             }))
             {
-                $("#hamburgerMenu").append("<div onclick=\"Main.CreateNewGateway()\">Create Gateway</div>");
+                $(".req-admin").show();
             }
         }
         catch (e)
@@ -124,7 +138,10 @@ class Main
         if (Main.CurrentUser)
             $(".req-login").show();
         else
+        {
             $(".req-login").hide();
+            $(".req-admin").hide();
+        }
         State.Pop();
     }
 

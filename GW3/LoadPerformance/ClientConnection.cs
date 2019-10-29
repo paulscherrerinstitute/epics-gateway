@@ -118,6 +118,8 @@ namespace LoadPerformance
             }
             try
             {
+                if (n < receiveBuffer.Length * 20 / 100)
+                    Thread.Sleep(20);
                 tcpClient.Client.BeginReceive(receiveBuffer, 0, receiveBuffer.Length, SocketFlags.None, TcpReceive, null);
             }
             catch
