@@ -41,7 +41,7 @@ namespace GWLogger.Backend.DataContext
 
         public static List<string> Gateways(string storageDirectory)
         {
-            return Directory.GetFiles(storageDirectory, "*.data")
+            return Directory.GetFiles(storageDirectory, "*.data").Union(Directory.GetFiles(storageDirectory, "*.bdata"))
                 .Select(row => Path.GetFileName(row).Split(new char[] { '.' }).First())
                 .Distinct()
                 .OrderBy(row => row)
@@ -62,7 +62,8 @@ namespace GWLogger.Backend.DataContext
             {
                 ConvertSessionFile(Context.StorageDirectory + "\\" + gateway.ToLower() + ".sessions");
 
-                using (var reader = new BinaryReader(File.Open(Context.StorageDirectory + "\\" + gateway.ToLower() + ".sessions", FileMode.Open, FileAccess.Read)))
+                //using (var reader = new BinaryReader(File.Open(Context.StorageDirectory + "\\" + gateway.ToLower() + ".sessions", FileMode.Open, FileAccess.Read)))
+                using (var reader = new BinaryReader(new FileStream(Context.StorageDirectory + "\\" + gateway.ToLower() + ".sessions", FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan)))
                 {
                     if (reader.BaseStream.Length > sizeof(long) * 4 + sizeof(uint) + 257)
                     {
@@ -142,7 +143,7 @@ namespace GWLogger.Backend.DataContext
             {*/
             if (knownFiles.Contains(gatewayName.ToLower()))
                 return true;
-            var res = Directory.GetFiles(storageDirectory, gatewayName.ToLower() + ".*.data").Any();
+            var res = Directory.GetFiles(storageDirectory, gatewayName.ToLower() + ".*.data").Any() || Directory.GetFiles(storageDirectory, gatewayName.ToLower() + ".*.bdata").Any();
             if (res)
                 knownFiles.Add(gatewayName.ToLower());
             return res;
@@ -384,12 +385,42 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
+
+        int fileYear = -1;
+        int fileDay = -1;
+        string fileNameKnown = null;
         public string FileName(DateTime? forDate = null, string extention = ".data")
         {
             if (!forDate.HasValue)
                 forDate = DateTime.UtcNow;
+            if (fileYear == forDate.Value.Year && fileDay == forDate.Value.DayOfYear && extention == ".data")
+                return fileNameKnown;
 
-            return Context.StorageDirectory + "\\" + Gateway.ToLower() + "." + forDate.Value.Year + ("" + forDate.Value.Month).PadLeft(2, '0') + ("" + forDate.Value.Day).PadLeft(2, '0') + extention;
+            var fname = Context.StorageDirectory + "\\" + Gateway.ToLower() + "." + forDate.Value.Year + ("" + forDate.Value.Month).PadLeft(2, '0') + ("" + forDate.Value.Day).PadLeft(2, '0') + extention; ;
+            if (extention == ".data")
+            {
+                fileYear = forDate.Value.Year;
+                fileDay = forDate.Value.DayOfYear;
+
+                var fbname = Context.StorageDirectory + "\\" + Gateway.ToLower() + "." + forDate.Value.Year + ("" + forDate.Value.Month).PadLeft(2, '0') + ("" + forDate.Value.Day).PadLeft(2, '0') + ".bdata";
+                if (File.Exists(fbname))
+                {
+                    fileNameKnown = fbname;
+                    return fbname;
+                }
+                else if (File.Exists(fname))
+                {
+                    fileNameKnown = fname;
+                    return fname;
+                }
+                else
+                {
+                    fileNameKnown = fbname;
+                    return fbname;
+                }
+            }
+
+            return fname;
         }
 
         public DateTime CurrentDate => DateOfFile(currentFile);
@@ -697,6 +728,80 @@ namespace GWLogger.Backend.DataContext
 
         private void WriteEntry(BinaryWriter stream, LogEntry entry)
         {
+            if (currentFile.EndsWith(".data"))
+                WriteEntry2(stream, entry);
+            else
+                WriteEntry3(stream, entry);
+        }
+
+        private void WriteEntry3(BinaryWriter stream, LogEntry entry)
+        {
+            stream.Write((short)0xDAB); // Block signature
+
+            // Calculate block size
+            short size = 8 + 1 + 6 + 1;
+            foreach (var i in entry.LogEntryDetails)
+            {
+                size += 1;
+                if (i.DetailTypeId == sourceMemberNameId || i.DetailTypeId == sourceFilePathId)
+                    size += 2;
+                else
+                    size += (short)(2 + i.Value.Length);
+            }
+            stream.Write(size);
+
+            // Write the data
+            stream.Write(entry.EntryDate.ToBinary());
+            stream.Write((byte)entry.MessageTypeId);
+            if (string.IsNullOrWhiteSpace(entry.RemoteIpPoint))
+                stream.Write(new byte[] { 0, 0, 0, 0, 0, 0 });
+            else
+            {
+                var p = entry.RemoteIpPoint.Split(':');
+                stream.Write(System.Net.IPAddress.Parse(p[0]).GetAddressBytes());
+                stream.Write(ushort.Parse(p[1]));
+            }
+
+            stream.Write((byte)entry.LogEntryDetails.Count);
+            foreach (var i in entry.LogEntryDetails)
+            {
+                stream.Write((byte)i.DetailTypeId);
+                if (i.DetailTypeId == sourceMemberNameId)
+                {
+                    lock (Context.memberNames)
+                    {
+                        if (!Context.memberNames.ContainsKey(i.Value))
+                        {
+                            Context.memberNames.Add(i.Value, Context.memberNames.Count == 0 ? 1 : Context.memberNames.Values.Max() + 1);
+                            Context.reverseMemberNames.Add(Context.memberNames[i.Value], i.Value);
+                            Context.StoreMemberNames();
+                        }
+                        stream.Write((ushort)Context.memberNames[i.Value]);
+                    }
+                }
+                else if (i.DetailTypeId == sourceFilePathId)
+                {
+                    lock (Context.filePaths)
+                    {
+                        if (!Context.filePaths.ContainsKey(i.Value))
+                        {
+                            Context.filePaths.Add(i.Value, Context.filePaths.Count == 0 ? 1 : Context.filePaths.Values.Max() + 1);
+                            Context.reverseFilePaths.Add(Context.filePaths[i.Value], i.Value);
+                            Context.StoreFilePaths();
+                        }
+                        stream.Write((ushort)Context.filePaths[i.Value]);
+                    }
+                }
+                else
+                {
+                    stream.Write((ushort)i.Value.Length);
+                    stream.Write(System.Text.Encoding.ASCII.GetBytes(i.Value));
+                }
+            }
+        }
+
+        private void WriteEntry2(BinaryWriter stream, LogEntry entry)
+        {
             if (sourceMemberNameId == -1)
                 sourceMemberNameId = Context.MessageDetailTypes.First(row => row.Value == "SourceMemberName").Id;
             if (sourceFilePathId == -1)
@@ -766,14 +871,51 @@ namespace GWLogger.Backend.DataContext
 
         private LogEntry ReadEntry(BinaryReader stream, DateTime approxiateDay, long streamLength)
         {
+            if (currentFile.EndsWith(".data"))
+                return ReadEntry2(stream, approxiateDay, streamLength);
+            else
+                return ReadEntry3(stream, approxiateDay, streamLength);
+        }
+
+        private LogEntry ReadEntry3(BinaryReader stream, DateTime approxiateDay, long streamLength)
+        {
             if (sourceMemberNameId == -1)
                 sourceMemberNameId = Context.MessageDetailTypes.First(row => row.Value == "SourceMemberName").Id;
             if (sourceFilePathId == -1)
                 sourceFilePathId = Context.MessageDetailTypes.First(row => row.Value == "SourceFilePath").Id;
 
-            var max = DateTime.UtcNow.Ticks;
+            var pos = stream.BaseStream.Position;
+            var found = false;
+            var n = 0;
+            for (var i = 0; i < 250; i++)
+            {
+                if (stream.ReadInt16() == 0xDAB)
+                {
+                    n = stream.ReadInt16();
+                    if (n < 2048) // We do accept blocks up to 2048 bytes, afterward it's most likely a bug
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                stream.BaseStream.Seek(pos + i + 1, SeekOrigin.Begin);
+            }
+            if (!found)
+                throw new Exception("Record not found");
+            var buff = stream.ReadBytes(n);
+            return new LogEntry { Buff = buff, Context = this.Context };
+        }
+
+
+        private LogEntry ReadEntry2(BinaryReader stream, DateTime approxiateDay, long streamLength)
+        {
+            if (sourceMemberNameId == -1)
+                sourceMemberNameId = Context.MessageDetailTypes.First(row => row.Value == "SourceMemberName").Id;
+            if (sourceFilePathId == -1)
+                sourceFilePathId = Context.MessageDetailTypes.First(row => row.Value == "SourceFilePath").Id;
+
             int cmd = 0;
-            DateTime dt = DateTime.UtcNow;
+            DateTime dt = default(DateTime);
             bool found = false;
             var pos = stream.BaseStream.Position;
             for (var i = 0; i < 128 && pos + i < streamLength; i++)
@@ -820,8 +962,8 @@ namespace GWLogger.Backend.DataContext
             }
             else
             {
-                var ip = new System.Net.IPAddress(bytes);
-                result.RemoteIpPoint = ip.ToString() + ":" + stream.ReadUInt16();
+                result.Ip = new System.Net.IPAddress(bytes);
+                result.Port = stream.ReadUInt16();
             }
 
             var nbDetails = (int)stream.ReadByte();
@@ -838,7 +980,8 @@ namespace GWLogger.Backend.DataContext
                     var n = stream.ReadUInt16();
                     lock (Context.filePaths)
                     {
-                        detail.Value = Context.reverseFilePaths[n];
+                        if (Context.reverseFilePaths.ContainsKey(n))
+                            detail.Value = Context.reverseFilePaths[n];
                     }
                 }
                 else if (detail.DetailTypeId == sourceMemberNameId)
@@ -846,7 +989,8 @@ namespace GWLogger.Backend.DataContext
                     var n = stream.ReadUInt16();
                     lock (Context.filePaths)
                     {
-                        detail.Value = Context.reverseMemberNames[n];
+                        if (Context.reverseMemberNames.ContainsKey(n))
+                            detail.Value = Context.reverseMemberNames[n];
                     }
                 }
                 else

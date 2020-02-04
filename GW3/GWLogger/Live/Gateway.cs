@@ -16,6 +16,23 @@ using System.Xml.Serialization;
 
 namespace GWLogger.Live
 {
+
+    public class Rootobject
+    {
+        public Class1[] Property1 { get; set; }
+    }
+
+    public class Class1
+    {
+        public string ioc { get; set; }
+        public string name { get; set; }
+        public string type { get; set; }
+        public string description { get; set; }
+        public string facility { get; set; }
+        public object info { get; set; }
+    }
+
+
     [Serializable]
     public class GatewayHistory
     {
@@ -103,7 +120,8 @@ namespace GWLogger.Live
             var anomalySerializer = new XmlSerializer(typeof(GraphAnomaly));
             var dateMatcher = Regex.Replace(anomalyDateFormat, @"([^-\s])", "?");
             AllAnomalies = Directory.EnumerateFiles(anomalyStorage, $"{Name}_{dateMatcher}.xml", SearchOption.TopDirectoryOnly)
-                .Select(path => {
+                .Select(path =>
+                {
                     GraphAnomaly anomaly = null;
                     try
                     {
@@ -217,7 +235,7 @@ namespace GWLogger.Live
                 }
             }
 
-            lock(networkHistory)
+            lock (networkHistory)
             {
                 networkHistory.Clear();
                 networkHistory.AddRange(history.networkHistory);
@@ -291,7 +309,8 @@ namespace GWLogger.Live
 
         private void CPUAnomalyDetected(AnomalyRange range)
         {
-            ThreadPool.QueueUserWorkItem((state) => {
+            ThreadPool.QueueUserWorkItem((state) =>
+            {
                 var queryMsTimeout = 4000;
                 var anomalyDateFormat = "yyyy-MM-dd-HH-mm-ss";
                 var anomalyStorage = Global.AnomalyStorage;
@@ -370,7 +389,7 @@ namespace GWLogger.Live
                         anomaly.DuringRemoteCounts = duringRemoteCounts.Take(5).Select(v => PerformDNSLookup(v, dnsCache)).ToList();
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     anomaly.InterestingEventTypeRemotes = new List<InterestingEventType>();
                     anomaly.BeforeRemoteCounts = new List<QueryResultValue>();
@@ -415,7 +434,7 @@ namespace GWLogger.Live
                         }
                         writingFailed = false;
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         using (EventLog eventLog = new EventLog("Application"))
                         {
@@ -466,7 +485,7 @@ namespace GWLogger.Live
 
             if (cache.TryGetValue(ip, out string hostname))
             {
-                if(hostname != null)
+                if (hostname != null)
                     value.Text += $" ({hostname})";
                 return value;
             }

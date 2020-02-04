@@ -109,6 +109,7 @@
   <ItemGroup>
     <Content Include="Config.ashx" />
     <Content Include="AuthAccess\AuthService.asmx" />
+    <Content Include="caesar.pptx" />
     <None Include="Connected Services\ServerMon\CaesarApi.disco" />
     <None Include="Connected Services\ServerMon\configuration91.svcinfo" />
     <None Include="Connected Services\ServerMon\configuration.svcinfo" />
