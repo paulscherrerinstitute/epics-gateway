@@ -175,7 +175,9 @@ namespace GWLogger.Backend.DataContext
 
         public DataFileStats GetLogsStats()
         {
-            var totSize = Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.data").Sum(row => new FileInfo(row).Length);
+            var totSize = Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.data").
+                Union(Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.bdata"))
+                .Sum(row => new FileInfo(row).Length);
 
             var stats = new List<long>();
             var dataSize = 0L;
@@ -630,7 +632,7 @@ namespace GWLogger.Backend.DataContext
                             if (entry != null && entry.EntryDate >= start && entry.EntryDate <= end && (query == null || query.CheckCondition(Context, entry)) && (messageTypes == null || messageTypes.Contains(entry.MessageTypeId)))
                             {
                                 entry.Gateway = Gateway;
-                                entry.CurrentFile = Path.GetFileName(fileToUse).Replace(".data", "");
+                                entry.CurrentFile = Path.GetFileName(fileToUse).Replace(".data", "").Replace(".bdata", "");
                                 yield return entry;
                             }
                             firstItem = false;
@@ -671,7 +673,7 @@ namespace GWLogger.Backend.DataContext
                         if (entry != null && entry.EntryDate >= start && entry.EntryDate <= end && (query == null || query.CheckCondition(Context, entry)) && (messageTypes == null || messageTypes.Contains(entry.MessageTypeId)))
                         {
                             entry.Gateway = Gateway;
-                            entry.CurrentFile = Path.GetFileName(fileToUse).Replace(".data", "");
+                            entry.CurrentFile = Path.GetFileName(fileToUse).Replace(".data", "").Replace(".bdata", "");
                             yield return entry;
                         }
                         firstItem = false;
@@ -687,7 +689,9 @@ namespace GWLogger.Backend.DataContext
 
         internal List<LogEntry> ReadLastLogs(int nbEntries)
         {
-            var files = new Queue<string>(Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.data").OrderByDescending(row => row));
+            var files = new Queue<string>(Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.data")
+                .Union(Directory.GetFiles(Context.StorageDirectory, Gateway.ToLower() + ".*.bdata"))
+                .OrderByDescending(row => row));
 
             var result = new List<LogEntry>();
             while (result.Count < nbEntries && files.Count > 0)
