@@ -20,8 +20,18 @@ namespace GatewayLogic.Connections
         private Dictionary<IPEndPoint, MemoryStream> normalSendBuffer = new Dictionary<IPEndPoint, MemoryStream>();
         private Dictionary<IPEndPoint, MemoryStream> reverseSendBuffer = new Dictionary<IPEndPoint, MemoryStream>();
         private Thread flusher;
+        private static DataPacket version = DataPacket.Create(16);
 
         public IPEndPoint EndPoint { get; }
+
+        static UdpReceiver()
+        {
+            version.Command = 0;
+            version.DataType = 1;
+            version.DataCount = 13;
+            version.Parameter1 = 0;
+            version.Parameter2 = 0;
+        }
 
         // Found on http://stackoverflow.com/questions/5199026/c-sharp-async-udp-listener-socketexception
         // Allows to reset the socket in case of malformed UDP packet.
@@ -77,11 +87,16 @@ namespace GatewayLogic.Connections
                     sendBuffer.Add(packet.Destination, new MemoryStream());
 
                 var stream = sendBuffer[packet.Destination];
+
+                if (stream.Position == 0)
+                    stream.Write(version.Data, 0, version.BufferSize);
+
                 if (stream.Position + packet.BufferSize > Gateway.MAX_UDP_PACKET_SIZE && stream.Position > 0)
                 {
                     var bytes = stream.ToArray();
                     stream.Position = 0;
                     stream.SetLength(0); // Reset
+                    stream.Write(version.Data, 0, version.BufferSize);
 
                     try
                     {
@@ -121,6 +136,7 @@ namespace GatewayLogic.Connections
                     var bytes = i.Value.ToArray();
                     i.Value.Position = 0;
                     i.Value.SetLength(0); // Reset
+                    i.Value.Write(version.Data, 0, version.BufferSize);
 
                     try
                     {
@@ -142,6 +158,7 @@ namespace GatewayLogic.Connections
                     var bytes = i.Value.ToArray();
                     i.Value.Position = 0;
                     i.Value.SetLength(0); // Reset
+                    i.Value.Write(version.Data, 0, version.BufferSize);
 
                     try
                     {

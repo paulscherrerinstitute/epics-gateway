@@ -380,12 +380,12 @@ namespace GWLogger.Backend.DataContext
             }
         }
 
-        public List<TType> ReadLog<TType>(string gatewayName, DateTime start, DateTime end, string query, int nbMaxEntries = -1, List<int> messageTypes = null, string startFile = null, long offset = 0, CancellationToken cancellationToken = default(CancellationToken))
+        public List<TType> ReadLog<TType>(string gatewayName, DateTime start, DateTime end, string query, int nbMaxEntries = -1, List<int> messageTypes = null, string startFile = null, long offset = 0, CancellationToken cancellationToken = default(CancellationToken), LogPosition lastPosition = null)
         {
-            return ReadLog(gatewayName, start, end, query, nbMaxEntries, messageTypes, startFile, offset, cancellationToken).Cast<TType>().ToList();
+            return ReadLog(gatewayName, start, end, query, nbMaxEntries, messageTypes, startFile, offset, cancellationToken, lastPosition).Cast<TType>().ToList();
         }
 
-        public List<object> ReadLog(string gatewayName, DateTime start, DateTime end, string query, int nbMaxEntries = -1, List<int> messageTypes = null, string startFile = null, long offset = 0, CancellationToken cancellationToken = default(CancellationToken))
+        public List<object> ReadLog(string gatewayName, DateTime start, DateTime end, string query, int nbMaxEntries = -1, List<int> messageTypes = null, string startFile = null, long offset = 0, CancellationToken cancellationToken = default(CancellationToken), LogPosition lastPosition = null)
         {
             lock (lockObject)
             {
@@ -411,7 +411,7 @@ namespace GWLogger.Backend.DataContext
                 var group = select?.Group;
                 var orders = select?.Orders;
 
-                foreach (var entry in files[gatewayName].ReadLog(start, end, where, messageTypes, false, startFile, offset, cancellationToken))
+                foreach (var entry in files[gatewayName].ReadLog(start, end, where, messageTypes, false, startFile, offset, cancellationToken, lastPosition))
                 {
                     if ((nbMaxEntries > 0 && result.Count >= nbMaxEntries) || cancellationToken.IsCancellationRequested)
                         break;

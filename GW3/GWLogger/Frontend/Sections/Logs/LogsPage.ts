@@ -4,6 +4,7 @@
     static Logs: LogEntry[] = null;
     static Offset: number = null;
     static OffsetFile: string = null;
+    static Continue: boolean = false;
     static MessageTypes: string[] = [];
     static Stats: GatewayStats;
     private static loadingLogs: JQueryXHR = null;
@@ -209,6 +210,7 @@
                 LogsPage.Offset = null;
                 LogsPage.OffsetFile = null;
                 this.lastQuery = $("#queryField").val().trim();
+                LogsPage.Continue = false;
                 LogsPage.DelayedSearch(LogsPage.LoadTimeInfo);
             }
         });
@@ -464,6 +466,7 @@
 
             StatsBarGraph.DrawStats();
 
+            //LogsPage.Continue = false;
             if (refresh && (!params["c"] && !params["s"]))
                 LogsPage.LoadTimeInfo(refresh);
             else if (!refresh)
@@ -476,7 +479,8 @@
 
     static async LoadTimeInfo(refresh: boolean = false)
     {
-        StatsBarGraph.DrawStats();
+        if (LogsPage.Continue == false)
+            StatsBarGraph.DrawStats();
 
         if ($("#closeHelp, #closeOperation").css("display") == "none")
         {
@@ -489,7 +493,7 @@
         else if (LogsPage.loadingLogs)
             LogsPage.loadingLogs.abort();
 
-        if (!refresh)
+        if (!refresh && LogsPage.Continue == false)
         {
             $("#logsContent").html("Loading...");
         }
@@ -583,15 +587,19 @@
                 queryString += (queryString != "" ? "&" : "?") + "levels=" + LogsPage.Levels;
             if ($("#queryField").val())
                 queryString += (queryString != "" ? "&" : "?") + "query=" + $("#queryField").val();
-            if (LogsPage.Offset !== null)
-                queryString += (queryString != "" ? "&" : "?") + "offset=" + this.Offset;
-            if (LogsPage.OffsetFile !== null)
-                queryString += (queryString != "" ? "&" : "?") + "filename=" + this.OffsetFile;
+            if (LogsPage.Offset !== null && LogsPage.Offset !== undefined)
+                queryString += (queryString != "" ? "&" : "?") + "offset=" + LogsPage.Offset;
+            if (LogsPage.OffsetFile !== null && LogsPage.OffsetFile !== undefined)
+                queryString += (queryString != "" ? "&" : "?") + "filename=" + LogsPage.OffsetFile;
+            queryString += (queryString != "" ? "&" : "?") + "continue=" + true;
             url = '/Logs/' + Main.CurrentGateway + '/' + startDate.getTime() + '/' + endDate.getTime() + queryString;
+
+            LogsPage.Offset = null;
+            LogsPage.OffsetFile = null;
         }
 
 
-        if (!refresh)
+        if (!refresh && !LogsPage.Continue)
         {
             $("#logsContent").html("Loading...");
             $("#serversContent").html("Loading...");
@@ -601,7 +609,18 @@
         LogsPage.loadingLogs = Utils.LoaderXHR(url);
         try
         {
-            var data = <any[]>(await LogsPage.loadingLogs.promise());
+            var result = (await LogsPage.loadingLogs.promise());
+            if (result.rows)
+            {
+                data = result.rows;
+                if (result.lastPosition)
+                {
+                    LogsPage.Offset = result.lastPosition.position;
+                    LogsPage.OffsetFile = result.lastPosition.file;
+                }
+            }
+            else
+                data = result;
             await LogsPage.ShowStats(refresh);
 
             LogsPage.loadingLogs = null;
@@ -645,12 +664,20 @@
             }
             else
             {
-                var logs: LogEntry[] = data;
-                LogsPage.Logs = logs;
-                LogsPage.Logs.forEach((r) =>
+                data.forEach((r) =>
                 {
                     r.Date = new Date(<number>r.Date + tz);
                 });
+
+                if (LogsPage.Continue)
+                    LogsPage.Logs = LogsPage.Logs.concat(data);
+                else
+                    LogsPage.Logs = data;
+                LogsPage.Continue = !(LogsPage.Logs.length >= 100 || data.length == 0)
+                if (LogsPage.Continue)
+                    setTimeout(LogsPage.LoadTimeInfo, 10);
+
+
                 $("#logsContent").html("").kendoGrid({
                     columns: [
                         { title: "Date", field: "Date", format: "{0:MM/dd HH:mm:ss.fff}", width: "160px" },
@@ -822,6 +849,7 @@
 
         State.Set();
         LogsPage.Levels = evt.target.getAttribute("level");
+        LogsPage.Continue = false;
         LogsPage.LoadTimeInfo();
     }
 
@@ -835,6 +863,7 @@
                 State.Set();
             LogsPage.SearchTimeout = null;
             Main.IsLast = false;
+            LogsPage.Continue = false;
             if (cb)
                 cb();
         }, 500);

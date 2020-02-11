@@ -586,11 +586,19 @@ namespace GWLogger.Backend.DataContext
             DataWriter.Flush();
         }
 
-        internal IEnumerable<LogEntry> ReadLog(DateTime start, DateTime end, Query.Statement.QueryNode query = null, List<int> messageTypes = null, bool onlyErrors = false, string startFile = null, long offset = 0, CancellationToken cancellationToken = default(CancellationToken))
+        internal IEnumerable<LogEntry> ReadLog(DateTime start, DateTime end, Query.Statement.QueryNode query = null, List<int> messageTypes = null, bool onlyErrors = false, string startFile = null, long offset = 0, CancellationToken cancellationToken = default(CancellationToken), LogPosition lastPosition = null)
         {
             var currentDate = new DateTime(start.Year, start.Month, start.Day);
             var firstLoop = true;
             var firstItem = true;
+            long streamLength = 0;
+            var finished = false;
+
+            if (startFile != null)
+            {
+                var dt = startFile.Split(new char[] { '.' })[1];
+                currentDate = new DateTime(int.Parse(dt.Substring(0, 4)), int.Parse(dt.Substring(4, 2)), int.Parse(dt.Substring(6, 2)));
+            }
 
             while (currentDate < end && !cancellationToken.IsCancellationRequested)
             {
@@ -600,7 +608,7 @@ namespace GWLogger.Backend.DataContext
                     if (fileToUse != currentFile)
                         SetFile(fileToUse);
 
-                    var streamLength = DataReader.BaseStream.Length;
+                    streamLength = DataReader.BaseStream.Length;
                     using (var errors = new BinaryReader(File.OpenRead(fileToUse + ".errs")))
                     {
                         while (errors.BaseStream.Position < errors.BaseStream.Length && !cancellationToken.IsCancellationRequested)
@@ -637,7 +645,10 @@ namespace GWLogger.Backend.DataContext
                             }
                             firstItem = false;
                             if (entry != null && entry.EntryDate > end)
+                            {
+                                finished = true;
                                 yield break;
+                            }
                         }
                     }
                 }
@@ -649,15 +660,22 @@ namespace GWLogger.Backend.DataContext
                     if (fileToUse != currentFile)
                         SetFile(fileToUse);
 
-                    if (firstLoop && Index[IndexPosition(start)] != -1)
+                    if (firstLoop && startFile != null)
+                        Seek(offset);
+                    else if (firstLoop && Index[IndexPosition(start)] != -1)
                         Seek(Index[IndexPosition(start)]);
                     else
                         Seek(0);
                     isAtEnd = false;
-                    var streamLength = DataReader.BaseStream.Length;
+                    streamLength = DataReader.BaseStream.Length;
                     while (DataReader.BaseStream.Position < streamLength && !cancellationToken.IsCancellationRequested)
                     {
                         var entry = ReadEntry(DataReader, start, streamLength);
+                        if (lastPosition != null)
+                        {
+                            lastPosition.LogFile = currentFile.Substring(Context.StorageDirectory.Length + 1);
+                            lastPosition.Offset = DataReader.BaseStream.Position;
+                        }
                         if (firstItem && query != null)
                         {
                             try
@@ -678,12 +696,20 @@ namespace GWLogger.Backend.DataContext
                         }
                         firstItem = false;
                         if (entry != null && entry.EntryDate > end)
+                        {
+                            finished = true;
                             yield break;
+                        }
                     }
                 }
 
                 currentDate = currentDate.AddDays(1);
                 firstLoop = false;
+            }
+            if (!finished && lastPosition != null && DataReader.BaseStream.Position >= streamLength)
+            {
+                lastPosition.LogFile = null;
+                lastPosition.Offset = -1;
             }
         }
 

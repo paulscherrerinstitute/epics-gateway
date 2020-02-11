@@ -46,13 +46,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ChannelAccess, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ChannelAccess.2017.11.2.4\lib\net45\ChannelAccess.dll</HintPath>
+      <HintPath>..\packages\ChannelAccess.2019.9.24.1\lib\net45\ChannelAccess.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Management" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />

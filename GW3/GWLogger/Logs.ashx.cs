@@ -58,12 +58,14 @@ namespace GWLogger
 
         public void ProcessRequest(HttpContext context)
         {
+            var continueMode = (context.Request["continue"] == "true");
+            Backend.DataContext.LogPosition lastPosition = new Backend.DataContext.LogPosition();
             lock (changeLock)
             {
                 RefreshLookup();
 
                 var timeoutCancellation = new CancellationTokenSource();
-                timeoutCancellation.CancelAfter(3000);
+                timeoutCancellation.CancelAfter(1000);
                 var cancel = CancellationTokenSource.CreateLinkedTokenSource(context.Response.ClientDisconnectedToken, timeoutCancellation.Token);
 
                 var logLevels = Global.DataContext.MessageTypes.ToDictionary(key => key.Id, val => val.LogLevel);
@@ -115,16 +117,16 @@ namespace GWLogger
                     {
                         var end = long.Parse(path[2]).ToNetDate().Trim();
                         if (context.Request["levels"] == "3,4") // Show errors
-                            raw = Global.DataContext.GetLogs(gateway, start, end, query, null, true,cancel.Token).Take(100);
+                            raw = Global.DataContext.GetLogs(gateway, start, end, query, null, true, cancel.Token).Take(100);
                         else
-                            raw = Global.DataContext.ReadLog(gateway, start, end, query, limit, msgTypes, startFile, offset, cancel.Token).Take(100);
+                            raw = Global.DataContext.ReadLog(gateway, start, end, query, limit, msgTypes, startFile, offset, cancel.Token, lastPosition).Take(100);
                     }
                     else
                     {
                         if (context.Request["levels"] == "3,4") // Show errors
                             raw = Global.DataContext.GetLogs(gateway, start, start.AddMinutes(20), query, null, true, cancel.Token);
                         else
-                            raw = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, limit, msgTypes, startFile, offset, cancel.Token);
+                            raw = Global.DataContext.ReadLog(gateway, start, start.AddMinutes(20), query, limit, msgTypes, startFile, offset, cancel.Token, lastPosition);
                     }
                     if (raw == null)
                         logs = new List<object>();
@@ -137,11 +139,15 @@ namespace GWLogger
                 context.Response.ContentType = "application/json";
                 context.Response.CacheControl = "no-cache";
                 context.Response.Expires = 0;
+                if (continueMode)
+                    context.Response.Write("{\"rows\":");
                 context.Response.Write("[");
 
                 if (logs == null || logs.Count == 0)
                 {
                     context.Response.Write("]");
+                    if (continueMode)
+                        context.Response.Write("}");
                     return;
                 }
 
@@ -221,6 +227,12 @@ namespace GWLogger
                 }
             }
             context.Response.Write("]");
+            if (continueMode)
+            {
+                if(lastPosition.LogFile != null) // If we didn't reach the end yet
+                    context.Response.Write(",\"lastPosition\":{\"file\":\"" + lastPosition.LogFile + "\",\"position\":" + lastPosition.Offset + "}");
+                context.Response.Write("}");
+            }
         }
 
         private Dictionary<string, string> knownIps = new Dictionary<string, string>();

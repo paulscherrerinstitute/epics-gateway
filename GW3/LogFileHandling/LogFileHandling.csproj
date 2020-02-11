@@ -61,6 +61,7 @@
     <Compile Include="DTOs\SearchRequest.cs" />
     <Compile Include="LogEntry.cs" />
     <Compile Include="LogEntryDetail.cs" />
+    <Compile Include="LogPosition.cs" />
     <Compile Include="LogSession.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query\InvalidTokenException.cs" />
