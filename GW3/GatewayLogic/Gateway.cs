@@ -71,6 +71,7 @@ namespace GatewayLogic
 
         private bool isDiposed = false;
         private Thread updaterThread;
+        public const string CLIENT_NAME="cagateway";
 
         public Gateway()
         {

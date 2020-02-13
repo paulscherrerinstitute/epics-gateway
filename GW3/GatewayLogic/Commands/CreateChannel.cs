@@ -115,6 +115,27 @@ namespace GatewayLogic.Commands
                                     newPacket.Parameter2 = Gateway.CA_PROTO_VERSION;
                                     newPacket.Destination = searchInfo.Server;
                                     channelInfo.TcpConnection.Send(newPacket);
+
+                                    // Send Client Name
+                                    newPacket = DataPacket.Create(Gateway.CLIENT_NAME.Length + DataPacket.Padding(Gateway.CLIENT_NAME.Length));
+                                    newPacket.Command = 20;
+                                    newPacket.DataType = 0;
+                                    newPacket.DataCount = 0;
+                                    newPacket.Parameter1 = 0;
+                                    newPacket.Parameter2 = 0;
+                                    newPacket.SetDataAsString(Gateway.CLIENT_NAME);
+                                    channelInfo.TcpConnection.Send(newPacket);
+
+                                    // Send Host Name
+                                    newPacket = DataPacket.Create(connection.Gateway.Configuration.GatewayName.Length + DataPacket.Padding(connection.Gateway.Configuration.GatewayName.Length));
+                                    newPacket.Command = 21;
+                                    newPacket.DataType = 0;
+                                    newPacket.DataCount = 0;
+                                    newPacket.Parameter1 = 0;
+                                    newPacket.Parameter2 = 0;
+                                    newPacket.SetDataAsString(connection.Gateway.Configuration.GatewayName);
+                                    channelInfo.TcpConnection.Send(newPacket);
+
                                 });
                             });
                         }

@@ -25,7 +25,7 @@ namespace GatewayLogic.Configuration
         [XmlElement("Type")]
         public ConfigurationType ConfigurationType { get; set; }
         [XmlElement("Name")]
-        public string GatewayName { get; set; }
+        public string GatewayName { get; set; } = System.Environment.MachineName;
 
         public int SearchPreventionTimeout { get; set; } = 100;
 
