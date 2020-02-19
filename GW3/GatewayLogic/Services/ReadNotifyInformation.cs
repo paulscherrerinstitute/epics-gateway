@@ -11,6 +11,27 @@ namespace GatewayLogic.Services
 
         private int nextId = 1;
 
+        public Gateway Gateway { get; }
+
+        public ReadNotifyInformation(Gateway gateway)
+        {
+            this.Gateway = gateway;
+            gateway.TenSecUpdate += Gateway_TenSecUpdate;
+        }
+
+        private void Gateway_TenSecUpdate(object sender, EventArgs e)
+        {
+            List<TcpServerConnection> servers;
+            lock (reads)
+            {
+                var toRemove = reads.Where(row => (DateTime.UtcNow - row.When).TotalSeconds > Gateway.NOTIFY_TIMEOUT).ToList();
+                servers = toRemove.GroupBy(row => row.ChannelInformation.TcpConnection).Select(row => row.Key).ToList();
+                foreach (var row in toRemove)
+                    reads.Remove(row);
+            }
+            servers.ForEach(row => row.Dispose(LogMessageType.ReadNotifyRequestNoAnswer));
+        }
+
         public class ReadNotifyInformationDetail
         {
             public ChannelInformation.ChannelInformationDetails ChannelInformation { get; }
@@ -50,7 +71,6 @@ namespace GatewayLogic.Services
             {
                 result = reads.FirstOrDefault(row => row.GatewayId == id);
                 reads.Remove(result);
-                reads.RemoveAll(row => (DateTime.UtcNow - row.When).TotalSeconds > 3600);
             }
             return result;
         }

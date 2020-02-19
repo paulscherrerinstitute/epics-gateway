@@ -147,7 +147,11 @@ namespace GWLogger
                 {
                     context.Response.Write("]");
                     if (continueMode)
+                    {
+                        if (lastPosition.LogFile != null) // If we didn't reach the end yet
+                            context.Response.Write(",\"lastPosition\":{\"file\":\"" + lastPosition.LogFile + "\",\"position\":" + lastPosition.Offset + "}");
                         context.Response.Write("}");
+                    }
                     return;
                 }
 

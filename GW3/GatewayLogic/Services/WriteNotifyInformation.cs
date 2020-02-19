@@ -15,6 +15,27 @@ namespace GatewayLogic.Services
         private uint nextId = 1;
         object counterLock = new object();
 
+        public Gateway Gateway { get; }
+
+        public WriteNotifyInformation(Gateway gateway)
+        {
+            this.Gateway = gateway;
+            gateway.TenSecUpdate += Gateway_TenSecUpdate;
+        }
+
+        private void Gateway_TenSecUpdate(object sender, EventArgs e)
+        {
+            List<TcpServerConnection> servers;
+            lock (writes)
+            {
+                var toRemove = writes.Where(row => (DateTime.UtcNow - row.When).TotalSeconds > Gateway.NOTIFY_TIMEOUT).ToList();
+                servers = toRemove.GroupBy(row => row.ChannelInformation.TcpConnection).Select(row => row.Key).ToList();
+                foreach (var row in toRemove)
+                    writes.Remove(row);
+            }
+            servers.ForEach(row => row.Dispose(LogMessageType.WriteNotifyRequestNoAnswer));
+        }
+
         public class WriteNotifyInformationDetail
         {
             public ChannelInformation.ChannelInformationDetails ChannelInformation { get; }
@@ -48,8 +69,6 @@ namespace GatewayLogic.Services
             {
                 var result = writes.FirstOrDefault(row => row.GatewayId == id);
                 writes.Remove(result);
-
-                writes.RemoveAll(row => (DateTime.UtcNow - row.When).TotalSeconds > 3600);
 
                 return result;
             }

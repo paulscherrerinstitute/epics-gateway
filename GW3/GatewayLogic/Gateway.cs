@@ -21,6 +21,7 @@ namespace GatewayLogic
         public const int MAX_UDP_PACKET_SIZE = 1400; // Discussion with Karel
         public const UInt16 CA_PROTO_VERSION = 13;
         //public const UInt16 CA_PROTO_VERSION = 11;
+        public const int NOTIFY_TIMEOUT = 30;
 
         public Configuration.Configuration Configuration { get; set; } = new GatewayLogic.Configuration.Configuration();
 
@@ -31,8 +32,8 @@ namespace GatewayLogic
 
         internal ChannelInformation ChannelInformation { get; }
         internal MonitorInformation MonitorInformation { get; } = new MonitorInformation();
-        internal ReadNotifyInformation ReadNotifyInformation { get; } = new ReadNotifyInformation();
-        internal WriteNotifyInformation WriteNotifyInformation { get; } = new WriteNotifyInformation();
+        internal ReadNotifyInformation ReadNotifyInformation { get; }
+        internal WriteNotifyInformation WriteNotifyInformation { get; }
         internal EventsOnHold EventsOnHold { get; } = new EventsOnHold();
 
         internal SearchInformation SearchInformation { get; private set; }
@@ -71,7 +72,7 @@ namespace GatewayLogic
 
         private bool isDiposed = false;
         private Thread updaterThread;
-        public const string CLIENT_NAME="cagateway";
+        public const string CLIENT_NAME = "cagateway";
 
         public Gateway()
         {
@@ -82,6 +83,9 @@ namespace GatewayLogic
 
             ClientConnection = new ClientConnection(this);
             ServerConnection = new ServerConnection(this);
+
+            ReadNotifyInformation = new ReadNotifyInformation(this);
+            WriteNotifyInformation = new WriteNotifyInformation(this);
 
 #if SAFE_LOCK
             checkDeadLock = new Thread((obj) =>
@@ -345,6 +349,7 @@ namespace GatewayLogic
                 }
             }
         }
+
 
         public void GotNewIocChannel(string ioc, string channel)
         {

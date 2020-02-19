@@ -673,7 +673,7 @@
                     LogsPage.Logs = LogsPage.Logs.concat(data);
                 else
                     LogsPage.Logs = data;
-                LogsPage.Continue = !(LogsPage.Logs.length >= 100 || data.length == 0)
+                LogsPage.Continue = !(LogsPage.Logs.length >= 100 || !LogsPage.Offset || LogsPage.Offset == -1)
                 if (LogsPage.Continue)
                     setTimeout(LogsPage.LoadTimeInfo, 10);
 

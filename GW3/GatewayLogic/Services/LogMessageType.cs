@@ -155,6 +155,10 @@
         [MessageDisplay("-- No display --", LogLevel.Error)]
         SocketCreationError,
         [MessageDisplay("Try to rebuild {ChannelName}.", LogLevel.Detail)]
-        ChannelRebuild
+        ChannelRebuild,
+        [MessageDisplay("-- No display --", LogLevel.Error)]
+        ReadNotifyRequestNoAnswer,
+        [MessageDisplay("-- No display --", LogLevel.Error)]
+        WriteNotifyRequestNoAnswer
     }
 }
