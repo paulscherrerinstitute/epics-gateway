@@ -48,7 +48,7 @@ namespace GWLogger
                 if (details != null)
                 {
                     foreach (var i in details.Where(row => typesId.Contains(row.DetailTypeId)))
-                        line = Regex.Replace(line, "\\{" + (DetailTypes.ContainsKey(i.DetailTypeId) ? DetailTypes[i.DetailTypeId] : i.DetailTypeId.ToString()) + "\\}", i.Value, RegexOptions.IgnoreCase);
+                        line = Regex.Replace(line, "\\{" + (DetailTypes.ContainsKey(i.DetailTypeId) ? DetailTypes[i.DetailTypeId] : i.DetailTypeId.ToString()) + "\\}", i.Value ?? "", RegexOptions.IgnoreCase);
                 }
                 if (remoteIpPoint != null)
                     line = Regex.Replace(line, "\\{endpoint\\}", remoteIpPoint, RegexOptions.IgnoreCase);
@@ -233,7 +233,7 @@ namespace GWLogger
             context.Response.Write("]");
             if (continueMode)
             {
-                if(lastPosition.LogFile != null) // If we didn't reach the end yet
+                if (lastPosition.LogFile != null) // If we didn't reach the end yet
                     context.Response.Write(",\"lastPosition\":{\"file\":\"" + lastPosition.LogFile + "\",\"position\":" + lastPosition.Offset + "}");
                 context.Response.Write("}");
             }
